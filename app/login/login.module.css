@@ -1,0 +1,217 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap");
+
+/* 1. ส่วนพื้นหลัง (บังคับเต็มจอแบบ Fixed) */
+.loginContainer {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  /* ใส่ padding-top เพิ่มถ้าติด Navbar */
+  padding-top: 80px;
+  background-image: url("/assets/images/login-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* 2. ตัวการ์ดกระจก (Glassmorphism) */
+.loginCard {
+  display: flex;
+  width: 100%;
+  max-width: 950px;
+  min-height: 600px;
+
+  /* --- แก้ไขจุดนี้เพื่อให้ทึบ --- */
+  background: #1a1a1a; /* สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง */
+  /* backdrop-filter: blur(20px);  <-- ลบทิ้งหรือ Comment ไว้เพื่อไม่ให้เห็นภาพพื้นหลัง */
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); /* เพิ่มเงาให้ดูมีมิติ */
+  overflow: hidden;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .loginCard {
+    flex-direction: column;
+  }
+  .brandSide {
+    padding: 30px;
+  }
+}
+
+/* ส่วนของ Brand Side (ฝั่งซ้าย) */
+.brandSide {
+  flex: 1;
+  background: #252525; /* ปรับให้ทึบและตัดกับฝั่งขวาเล็กน้อย */
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.icon {
+  font-size: 32px;
+}
+
+.slogan h1 {
+  font-size: 48px;
+  line-height: 1.2;
+  color: #ffffff;
+  font-weight: 800;
+  margin: 0;
+
+  /* ไล่สีตัวอักษร */
+  background: linear-gradient(to right, #fff, #b3b3b3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.slogan h1 span {
+  display: block;
+  margin-top: 10px;
+  color: #cccccc;
+  font-size: 32px;
+  font-weight: 400;
+  -webkit-text-fill-color: #cccccc;
+}
+
+/* ส่วนของ Form Side (ฝั่งขวา) */
+.formSide {
+  flex: 1;
+  background: #1a1a1a; /* สีเดียวกับ Card */
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .formSide {
+    padding: 30px 20px;
+  }
+}
+
+.formContent h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-weight: 600;
+  font-size: 24px;
+  color: #ffffff;
+}
+
+.inputGroup {
+  margin-bottom: 20px;
+}
+
+.inputGroup label {
+  display: block;
+  color: #cccccc;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* ปรับ Input ให้ดูเด่นขึ้นบนพื้นหลังทึบ */
+.inputGroup input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: #2a2a2a; /* เข้มกว่าพื้นหลังการ์ดเล็กน้อย */
+  border: 1px solid #3d3d3d;
+  color: white;
+  margin-top: 8px;
+}
+
+.inputGroup input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.inputGroup input:focus {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btnLogin {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background-color: #ffffff;
+  color: #000000;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.btnLogin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: #cccccc;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+  padding: 0 10px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* ✅ ปุ่ม Google อ้างอิงผ่าน ID ตรงๆ ตามที่คุณตั้งไว้ */
+#google-btn-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+  min-height: 44px; /* จองพื้นที่ความสูงไว้กัน Layout ขยับตอนโหลด */
+
+  /* hack เล็กน้อย: ถ้า Google โหลดช้า ให้ซ่อน overflow */
+  overflow: hidden;
+}
+
+.footerLink {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+.footerLink a {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+  transition: 0.2s;
+}
+
+.footerLink a:hover {
+  color: #fff;
+  border-bottom-style: solid;
+}
