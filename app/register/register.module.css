@@ -1,0 +1,262 @@
+/* register.module.css */
+
+/* 1. นำเข้า Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap");
+
+/* 2. กำหนดตัวแปรแบบ CSS Variables (ใช้แทน $ ใน SCSS) */
+:root {
+  --text-light: #ffffff;
+  --text-dim: #cccccc;
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+.mainWrapper {
+  display: block;
+  font-family: "Roboto", sans-serif;
+}
+
+/* --- Layout Container --- */
+.registerContainer {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  top: 20px;
+  /* left: 0; */
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  background-image: url("/login-bg.png"); /* ตรวจสอบพาธรูปภาพใน public/images */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 100px 20px;
+  box-sizing: border-box;
+}
+
+.registerCard {
+  display: flex;
+  width: 100%;
+  max-width: 950px;
+  min-height: 600px;
+  /* --- แก้ไขจุดนี้เพื่อให้ทึบ --- */
+  background: #1a1a1a; /*สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง*/
+  /* backdrop-filter: blur(20px);  <-- ลบทิ้งหรือ Comment ไว้เพื่อไม่ให้เห็นภาพพื้นหลัง */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); /* เพิ่มเงาให้ดูมีมิติ */
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* --- Brand Side (Left) --- */
+.brandSide {
+  flex: 0.7;
+  background: #252525;
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--glass-border);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.logo {
+  padding-top: 0px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.slogan h1 {
+  font-size: 42px;
+  line-height: 1.2;
+  color: var(--text-light);
+  margin: 0;
+  padding-top: 12rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #fff, #a5a5a5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.slogan h1 span {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-dim);
+  font-size: 28px;
+  font-weight: 400;
+  -webkit-text-fill-color: var(--text-dim);
+}
+
+/* --- Form Side (Right) --- */
+.formSide {
+  flex: 1.2;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-light);
+}
+
+.userTypeSelector {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 5px;
+  border-radius: 14px;
+}
+
+.typeBtn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-dim);
+  transition: 0.3s;
+}
+
+.typeBtnActive {
+  background-color: var(--text-light);
+  color: black;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Input Groups --- */
+.formContent h2 {
+  margin-bottom: 25px;
+  font-weight: 600;
+  font-size: 22px;
+}
+
+.inputGroup {
+  margin-bottom: 15px;
+}
+
+.inputGroup label {
+  display: block;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: white;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+.inputGroup input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.inputGroup input:focus {
+  border-color: var(--text-light);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Buttons & Utilities --- */
+.btnRegister {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background-color: var(--text-light);
+  color: black;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: 0.3s;
+}
+
+.btnRegister:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(255, 255, 255, 0.2);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: #cccccc;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divider span {
+  padding: 0 10px;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* --- Animation --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInEffect {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* --- Media Queries --- */
+@media (max-width: 850px) {
+  .registerCard {
+    flex-direction: column;
+    height: auto;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .formSide {
+    padding: 30px 20px;
+  }
+}
+.footerLink {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+.footerLink a {
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+  transition: 0.2s;
+}
+
+.footerLink a:hover {
+  color: #fff;
+  border-bottom-style: solid;
+}

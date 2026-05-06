@@ -1,0 +1,91 @@
+.postContainer {
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 30px;
+  padding: 40px;
+  max-width: 1100px;
+  margin: 40px auto;
+  font-family: sans-serif;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.nextBtn {
+  background-color: #00ffff; /* สีฟ้า Cyan ตามรูป */
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 5px 30px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000; /* เงาแบบก้อนๆ สไตล์ Neubrutalism */
+}
+.nextBtn:hover {
+  background-color: #05dfdf;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.nextBtn:active {
+  transform: translateY(0);
+  box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.2);
+}
+
+.postForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* แบ่ง 2 ฝั่ง */
+  gap: 100px; /* ระยะห่างระหว่างฝั่งซ้าย-ขวา */
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* สำหรับช่องที่ Label อยู่ข้าง Input */
+.inputGroupInline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.inputGroupInline label {
+  width: 130px;
+  font-weight: bold;
+}
+
+.inputGroupInline input {
+  flex: 1;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: inset 0px 2px 4px rgba(0,0,0,0.1);
+}
+.inputGroupFull {
+ display: grid;
+  grid-template-columns: 1fr 1fr; /* แบ่ง 2 ฝั่ง */
+  gap: 10px;
+}
+.inputGroupFull label {
+  font-weight: bold;
+}
+.inputGroupFull textarea {
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  resize: none;
+  width: 300px;
+  box-shadow: inset 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+/* ปรับให้รองรับหน้าจอเล็กลง */
+@media (max-width: 768px) {
+  .postForm {
+    grid-template-columns: 1fr;
+  }
+}

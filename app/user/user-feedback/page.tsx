@@ -1,13 +1,10 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import UserHomeClient from "./userhome-client";
-export const dynamic = "force-dynamic"; // ✅ ต้องอยู่ที่นี่
 
-export default async function Page() {
+export default async function UserFeedbackPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let user = null;
-
   if (token) {
     try {
       const secret = process.env.JWT_SECRET || "fallback_secret";
@@ -16,6 +13,10 @@ export default async function Page() {
       console.error("Token invalid");
     }
   }
-
-  return <UserHomeClient initialUser={user} />;
+  return (
+    <div>
+      <h1>User Feedback</h1>
+      <p>This is the user feedback page.</p>
+    </div>
+  );
 }

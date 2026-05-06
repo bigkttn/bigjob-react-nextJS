@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import db from '@/lib/db';
-import { createSession } from '@/lib/session'; // 👈 Import ฟังก์ชันที่เราแยกไว้เข้ามา
+import { createSession } from '@/lib/session';
 
 export async function POST(request: Request) {
     try {
@@ -33,9 +33,25 @@ export async function POST(request: Request) {
             }
         }
 
+        // ถ้าไม่พบอีเมลในทั้งสองตาราง
         if (!user) {
             return NextResponse.json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }, { status: 401 });
         }
+
+        // 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) สำหรับทั้ง User และ Company --- 🚨
+        if (user.banned_until) {
+            const banEndDate = new Date(user.banned_until);
+            const currentDate = new Date();
+
+            // ถ้าเวลาปลดแบนยังมากกว่าเวลาปัจจุบัน แปลว่ายังติดแบนอยู่
+            if (banEndDate > currentDate) {
+                const formattedBanDate = banEndDate.toLocaleString('th-TH');
+                return NextResponse.json({
+                    message: `บัญชีของคุณถูกระงับการใช้งานจนถึง ${formattedBanDate}`
+                }, { status: 403 });
+            }
+        }
+        // ------------------------------------------------------------------
 
         // 3. ตรวจสอบรหัสผ่าน
         const dbPassword = role === 'company' ? user.company_password : user.password;
@@ -53,7 +69,7 @@ export async function POST(request: Request) {
         }
 
         // -----------------------------------------------------
-        // 🔐 เรียกใช้งานฟังก์ชันสร้าง Session ที่แยกไว้
+        // 🔐 เรียกใช้งานฟังก์ชันสร้าง Session
         // -----------------------------------------------------
         const sessionPayload = {
             id: role === 'company' ? user.company_id : user.uid,
@@ -61,7 +77,7 @@ export async function POST(request: Request) {
             role: role
         };
 
-        await createSession(sessionPayload); // 👈 โค้ดเหลือแค่นี้! สั้นลงมาก
+        await createSession(sessionPayload);
         // -----------------------------------------------------
 
         return NextResponse.json({

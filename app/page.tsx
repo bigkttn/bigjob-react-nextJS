@@ -1,4 +1,4 @@
-import Link from 'next/link'; // Import Link Component มาก่อน
+import Link from "next/link"; // Import Link Component มาก่อน
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

@@ -6,11 +6,11 @@
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 20px;
   /* ใส่ padding-top เพิ่มถ้าติด Navbar */
-  padding-top: 80px;
-  background-image: url("/assets/images/login-bg.png");
+  padding-top: 60px;
+  background-image: url("/login-bg.png");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -24,7 +24,7 @@
   min-height: 600px;
 
   /* --- แก้ไขจุดนี้เพื่อให้ทึบ --- */
-  background: #1a1a1a; /* สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง */
+  background: #1a1a1a; /* สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง*/
   /* backdrop-filter: blur(20px);  <-- ลบทิ้งหรือ Comment ไว้เพื่อไม่ให้เห็นภาพพื้นหลัง */
 
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -46,15 +46,16 @@
 /* ส่วนของ Brand Side (ฝั่งซ้าย) */
 .brandSide {
   flex: 1;
-  background: #252525; /* ปรับให้ทึบและตัดกับฝั่งขวาเล็กน้อย */
-  padding: 40px;
+  background: #252525; /* ปรับให้ทึบและตัดกับฝั่งขวาเล็กน้อย*/
+  padding: 30px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* justify-content: flex-start; */
   border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo {
+  padding-top: 0px;
   font-size: 28px;
   font-weight: 700;
   color: #ffffff;
@@ -69,12 +70,12 @@
 }
 
 .slogan h1 {
-  font-size: 48px;
+  font-size: 42px;
   line-height: 1.2;
   color: #ffffff;
   font-weight: 800;
   margin: 0;
-
+  padding-top: 12rem;
   /* ไล่สีตัวอักษร */
   background: linear-gradient(to right, #fff, #b3b3b3);
   -webkit-background-clip: text;

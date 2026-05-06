@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react'; // เอา useEffect ออก
+import React, { useState ,useEffect} from 'react'; // เอา useEffect ออก
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import Link from 'next/link';
@@ -38,6 +38,12 @@ export default function Login() {
       );
     }
   };
+  useEffect(() => {
+    // ถ้า script โหลดเสร็จไปแล้ว (จากหน้าอื่นหรือโหลดค้างไว้) ให้รันเลย
+    if (window.google) {
+      initGoogleButton();
+    }
+  }, []);
 
   // จัดการเมื่อ Login ด้วย Google สำเร็จ
   const handleGoogleLogin = async (response: any) => {
@@ -190,7 +196,7 @@ export default function Login() {
               <p>Don’t have an account? <Link href="/register">Sign up</Link></p>
             </div>
             <div className={styles.footerLink}>
-              <Link href="/forgot-password">ลืมรหัสผ่าน?</Link>
+              <Link href="/forgotPassword">ลืมรหัสผ่าน?</Link>
             </div>
             
           </div>

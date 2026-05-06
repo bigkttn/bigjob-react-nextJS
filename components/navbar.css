@@ -223,3 +223,11 @@
   background: red;
   color: #fff;
 }
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+}
