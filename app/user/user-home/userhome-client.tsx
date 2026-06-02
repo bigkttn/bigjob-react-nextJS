@@ -16,7 +16,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const router = useRouter();
 
   useEffect(() => {
-    router.refresh(); // รีเฟรชข้อมูลทุกครั้งที่เข้าหน้านี้ (ถ้ามีการเปลี่ยนแปลง Session)
+    // router.refresh(); // รีเฟรชข้อมูลทุกครั้งที่เข้าหน้านี้ (ถ้ามีการเปลี่ยนแปลง Session)
     fetchPosts();
   }, []);
 
@@ -38,7 +38,106 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>; // แสดงข้อความ Loading ขณะรอข้อมูล
+    return (
+      <div className={styles.skeletonWrapper}>
+        {/* Search Section */}
+        <header className={styles.searchSection}>
+          <div className={styles.searchBarWrapper}>
+            <div
+              className={styles.skeletonBlock}
+              style={{ width: "50%", height: "42px", borderRadius: "21px" }}
+            />
+            <div
+              className={styles.skeletonBlock}
+              style={{ width: "100px", height: "42px", borderRadius: "10px" }}
+            />
+          </div>
+          <div className={styles.filters}>
+            {[100, 100, 110, 100, 110].map((w, i) => (
+              <div
+                key={i}
+                className={styles.skeletonBlock}
+                style={{
+                  width: `${w}px`,
+                  height: "50px",
+                  borderRadius: "12px",
+                }}
+              />
+            ))}
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className={styles.content}>
+          {[0, 1].map((section) => (
+            <div
+              key={section}
+              style={{
+                background: "#d9d9d9",
+                borderRadius: "15px",
+                padding: "20px",
+              }}
+            >
+              <div
+                className={styles.skeletonBlock}
+                style={{ width: "160px", height: "20px", marginBottom: "16px" }}
+              />
+              <div className={styles.suggestSection}>
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className={styles.suggestMiniCard}>
+                    <div
+                      className={styles.skeletonBlock}
+                      style={{
+                        width: "120px",
+                        height: "100px",
+                        flexShrink: 0,
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        padding: "4px",
+                      }}
+                    >
+                      <div>
+                        <div
+                          className={styles.skeletonBlock}
+                          style={{
+                            width: "80%",
+                            height: "14px",
+                            marginBottom: "8px",
+                          }}
+                        />
+                        <div
+                          className={styles.skeletonBlock}
+                          style={{ width: "55%", height: "12px" }}
+                        />
+                      </div>
+                      <div
+                        style={{ display: "flex", justifyContent: "flex-end" }}
+                      >
+                        <div
+                          className={styles.skeletonBlock}
+                          style={{
+                            width: "64px",
+                            height: "26px",
+                            borderRadius: "10px",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </main>
+      </div>
+    );
   }
 
   const suggestedCompanys = [
@@ -221,7 +320,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
               <div style={{ height: "20px" }}></div>
               <div className={styles.suggestActive}>
                 <div className={styles.suggestContent}>
-                  <h3>Suggested Posts4</h3>
+                  <h3>Suggested Posts3</h3>
                   <div className={styles.suggestSection}>
                     {posts.length > 0 ? (
                       posts.map((post, index) => (
@@ -240,7 +339,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                             <Link
                               href={"/user/user-detail-job/" + post.post_id}
                             >
-                              <button className={styles.detailsBtn}>
+                              <button
+                                className={styles.detailsBtn}
+                                style={{ marginLeft: "30px" }}
+                              >
                                 Details
                               </button>
                             </Link>

@@ -3,12 +3,12 @@ import db from '@/lib/db'; // อ้างอิงไฟล์ db ของค�
 
 export async function GET() {
     try {
-        const sql = 'SELECT * FROM `company`';
-        const [companies]: any = await db.query(sql);
-        return NextResponse.json({ companies }, { status: 200 });
+        const sql = `SELECT * FROM User JOIN JobTitle ON User.uid= JobTitle.user_id`;
+        const [users]: any = await db.query(sql);
+        return NextResponse.json({ users }, { status: 200 });
 
     } catch (error) {
         // ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
-        return NextResponse.json({ user: null }, { status: 200 });
+        return NextResponse.json({ users: null }, { status: 200 });
     }
 }

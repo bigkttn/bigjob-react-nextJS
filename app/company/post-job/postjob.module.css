@@ -10,7 +10,7 @@
 
 .postHeader {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 10px;
 }
 
@@ -64,10 +64,10 @@
   border: 1px solid #333;
   border-radius: 8px;
   padding: 8px;
-  box-shadow: inset 0px 2px 4px rgba(0,0,0,0.1);
+  box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 .inputGroupFull {
- display: grid;
+  display: grid;
   grid-template-columns: 1fr 1fr; /* แบ่ง 2 ฝั่ง */
   gap: 10px;
 }
@@ -80,7 +80,7 @@
   padding: 12px;
   resize: none;
   width: 300px;
-  box-shadow: inset 0px 2px 5px rgba(0,0,0,0.1);
+  box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* ปรับให้รองรับหน้าจอเล็กลง */
@@ -88,4 +88,350 @@
   .postForm {
     grid-template-columns: 1fr;
   }
+}
+
+.selectInput {
+  width: 340px;
+  padding: 10px;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 0.9rem;
+  color: #000000;
+  outline: none;
+  cursor: pointer;
+  appearance: none; /* ลบลูกศรเดิมของ Browser บางตัว */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1em;
+}
+
+.selectInput:focus {
+  border-color: #0070f3; /* สี Highlight เวลาคลิก */
+}
+.dateInput {
+  width: 340px;
+  padding: 10px;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  background-color: #fff;
+  font-family: inherit; /* ใช้ font เดียวกับหน้าเว็บ */
+  font-size: 0.9rem;
+  color: #000000;
+  outline: none;
+  cursor: pointer;
+}
+
+.dateInput:focus {
+  border-color: #0070f3;
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1); /* เพิ่มแสงเงาจางๆ เวลาคลิก */
+}
+
+/* ปรับแต่งไอคอนปฏิทิน (สำหรับ Chrome/Edge) */
+.dateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.dateInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* ===== MY POSTS SECTION ===== */
+.myPostsSection {
+  padding: 24px 32px 8px 32px;
+}
+
+.myPostsTitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  color: #111;
+  position: relative;
+  display: inline-block;
+}
+
+/* เส้นขีดใต้ title */
+.myPostsTitle::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: #000;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  padding: 4px 2px 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #bbb transparent;
+  align-items: flex-start;
+}
+
+.item::-webkit-scrollbar {
+  height: 4px;
+}
+.item::-webkit-scrollbar-track {
+  background: transparent;
+}
+.item::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.postMiniCard {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 12px 16px;
+  min-width: 260px;
+  min-height: 120px; /* ← ใช้ min-height แทน height */
+  height: auto;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.postMiniCard:hover {
+  border-color: #000;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.postMiniCard img {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #f0f0f0;
+  border: 1px solid #eee;
+}
+
+.postMiniCardInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 3px;
+}
+
+.bold {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.subText {
+  font-size: 12px;
+  color: #777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.statusBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 2px 10px;
+  width: fit-content;
+  letter-spacing: 0.3px;
+}
+
+/* status สี */
+.open {
+  background: #2fff00;
+  color: #000000;
+}
+
+.closed {
+  background: #ff0000;
+  color: #ffffff;
+}
+
+.emptyText {
+  color: #aaa;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+.cardFooter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.detailBtn {
+  background: #000;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border: none;
+  border-radius: 20px;
+  padding: 3px 12px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.detailBtn:hover {
+  background: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.detailBtn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.DeleteBtn {
+  background: #ff4d4d;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border: none;
+  border-radius: 20px;
+  padding: 3px 12px;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  font-family: sans-serif;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.instruction {
+  font-weight: bold;
+  font-size: 18px;
+  max-width: 80%;
+}
+
+.postBtn {
+  background-color: #00ffff;
+  border: 2px solid #000;
+  border-radius: 8px;
+  padding: 5px 25px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.questionBlock {
+  margin-bottom: 40px;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.questionNumber {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.mainInput {
+  flex: 1;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #000;
+  font-size: 18px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); /* เงาใต้กล่อง */
+}
+
+.optionsBox {
+  margin-left: 45px;
+  padding: 20px;
+  border: 1px solid #000;
+  border-radius: 12px;
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.radioCircle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #000;
+  border-radius: 50%;
+}
+
+.radioCircleActive {
+  width: 20px;
+  height: 20px;
+  border: 5px solid #000; /* ให้ดูหนาเหมือนถูกเลือก */
+  border-radius: 50%;
+}
+
+.optionInput {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  outline: none;
+  font-size: 16px;
+  width: 100%;
+}
+
+.addWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.addBtn {
+  background: #f0f0f0;
+  border: 1px dashed #000;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.addBtn:hover {
+  background: #e0e0e0;
 }

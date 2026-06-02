@@ -1,23 +1,110 @@
 "use client";
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styles from "./detailjob.module.css";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+
 const DetailJob = () => {
   const params = useParams(); // 2. ดึงค่าจาก URL
   const postId = params.id; // 3. สมมติว่า URL เป็น /user/user-detail-job/123 จะได้ postId = 123
-  console.log("Post ID from URL:", postId); // 4. ตรวจสอบค่าที่ดึงมา
+  // console.log("Post ID from URL:", postId); // 4. ตรวจสอบค่าที่ดึงมา
+
+  const [job, setJob] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const fetchJobDetail = useCallback(async () => {
+    if (!postId) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/posts/getPostById/${postId}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setJob(data);
+        console.log("Fetched job data:", data); // ตรวจสอบข้อมูลที่ได้รับ
+      } else {
+        console.error("Failed to fetch job data");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [postId]);
+
+  useEffect(() => {
+    fetchJobDetail();
+  }, [fetchJobDetail]);
+
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.card}></div>
+      </div>
+    );
+  }
+
+  // กรณีไม่พบข้อมูล
+  if (!job) {
+    return <div className={styles.container}>ไม่พบข้อมูลงาน</div>;
+  }
+
+  // --- ฟังก์ชันกำหนดสีของ Status ---
+  const getStatusStyle = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === "open" || s === "เปิดรับสมัคร")
+      return { color: "#28a745", backgroundColor: "#eaffea" };
+    if (s === "closed" || s === "ปิดรับสมัคร")
+      return { color: "#dc3545", backgroundColor: "#ffebeb" };
+    return { color: "#6c757d", backgroundColor: "#f8f9fa" };
+  };
   return (
     <div className={styles.container}>
       <div className={styles.card}>
+        <button
+          onClick={() => router.back()}
+          style={{
+            marginBottom: "20px",
+            padding: "10px 18px",
+            borderRadius: "10px",
+            border: "none",
+            background: "#2563eb",
+            color: "#fff",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          ← ย้อนกลับ
+        </button>
         {/* --- ส่วนหัว (Header) --- */}
+        {/* {suggestedCompanys.map((company, index) => (
+                    
+          <div key={index} className={styles.header}>))} */}
         <button className={styles.applyBtn}>Apply Now</button>
         <div className={styles.header}>
           <img
-            src="/assets/images/suggestedCompanys.jpg"
+            src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
             alt="Chao Phraya United"
             className={styles.logo}
           />
-          <h1 className={styles.companyName}>Chao Phraya United</h1>
+          <h1 className={styles.companyName}>
+            {job.company_name || "Company Name"}
+          </h1>
+          <span
+            style={{
+              padding: "4px 12px",
+              borderRadius: "20px",
+              fontSize: "0.85rem",
+              fontWeight: "bold",
+              display: "inline-block",
+              marginTop: "5px",
+              border: "1px solid currentColor",
+              ...getStatusStyle(job.status),
+            }}
+          >
+            {job.status || "ไม่ระบุสถานะ"}
+          </span>
         </div>
 
         {/* --- ส่วนเนื้อหา (Grid) --- */}
@@ -28,30 +115,38 @@ const DetailJob = () => {
               <tbody>
                 <tr>
                   <td className={styles.label}>Job Title</td>
-                  <td>Soccer coach</td>
+                  <td>{job.job_position || "Job Title"}</td>
                 </tr>
                 <tr>
                   <td className={styles.label}>Work Location</td>
-                  <td>Pho Chai District, Roi Et Province</td>
+                  <td>{job.work_location || "Work Location"}</td>
                 </tr>
                 <tr>
                   <td className={styles.label}>Salary</td>
-                  <td>20,000 - 50,000</td>
+                  <td>
+                    {job.salary_min || "Salary"} - {job.salary_max || "Salary"}{" "}
+                    บาท
+                  </td>
                 </tr>
                 <tr>
-                  <td className={styles.label}>Rate</td>
-                  <td>1</td>
+                  <td className={styles.label}>Age</td>
+                  <td>
+                    {job.age_min || "Salary"} - {job.age_max || "Salary"} ปี
+                  </td>
+                </tr>
+                <tr>
+                  <td className={styles.label}>Job type</td>
+                  <td>{job.job_type || "Salary"} </td>
+                </tr>
+                <tr>
+                  <td className={styles.label}>Vacancy</td>
+                  <td>{job.vacancy || 1} </td>
                 </tr>
                 <tr>
                   <td className={styles.label}>Details</td>
                   <td>
                     <ul className={styles.list}>
-                      <li>
-                        Direct and manage all daily training programs for the
-                        first team.
-                      </li>
-                      <li>Lead and mentor the first-team's technical staff.</li>
-                      <li>Drive match-day strategy using performance data.</li>
+                      <li>{job.job_description || "No details specified"}</li>
                     </ul>
                   </td>
                 </tr>
@@ -62,10 +157,10 @@ const DetailJob = () => {
               <hr />
               <h3 className={styles.sectionTitle}>Qualifications</h3>
               <ol className={styles.list}>
-                <li>Male/Female, 23 years or older.</li>
-                <li>Education: Bachelor's degree.</li>
-                <li>Diligent, honest, and passionate about sports.</li>
-                <li>At least 2 years of experience.</li>
+                <li>
+                  {job.preferred_qualifications ||
+                    "No qualifications specified"}
+                </li>
               </ol>
             </div>
           </div>
@@ -73,24 +168,27 @@ const DetailJob = () => {
           {/* ฝั่งขวา: สวัสดิการและติดต่อ */}
           <div className={styles.rightCol}>
             <section>
-              <hr />
               <h3 className={styles.sectionTitle}>Benefits</h3>
               <ul className={styles.list}>
-                <li>Comprehensive health & medical insurance.</li>
-                <li>Furnished accommodation or housing allowance.</li>
-                <li>Company vehicle or transport allowance.</li>
-                <li>Professional development support.</li>
+                <li
+                  style={{
+                    maxWidth: "450px",
+                    whiteSpace: "pre-line",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {job.Benefits || "No benefits specified"}
+                </li>
               </ul>
             </section>
 
             <section style={{ marginTop: "30px" }}>
               <hr />
               <h3 className={styles.sectionTitle}>How to Apply</h3>
+
               <ul className={styles.list}>
-                <li>Email / Person / By Mail</li>
-                <li>BIGJOBs (Click Apply Now)</li>
-                <li style={{ color: "red", fontWeight: "bold" }}>
-                  Application Deadline: September 15, 2026
+                <li>
+                  {job.how_to_apply || "No application instructions specified"}
                 </li>
               </ul>
             </section>
@@ -98,18 +196,65 @@ const DetailJob = () => {
             <section style={{ marginTop: "30px" }}>
               <hr />
               <h3 className={styles.sectionTitle}>Contact</h3>
-              <div style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
-                <strong>Mr. Nolsak Toonhua</strong>
-                <br />
-                Chao Phraya United Football Club (Head Office)
-                <br />
-                888 Chaiyanurak Road, Nakhon Ratchasima, 30000
-                <br />
-                Tel: 0844444444
-                <br />
-                Email: careers@chaophrayaunited.com
-                <br />
-                Website: <a href="#">www.chaophrayaunitedfc.com</a>
+              <ul className={styles.list}>
+                <li>{job.contact || "No contact information specified"}</li>
+              </ul>
+              {/* <div style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
+                {job.contact || "No contact information specified"}
+              </div> */}
+            </section>
+
+            <section style={{ marginTop: "30px" }}>
+              {/* <hr
+                style={{
+                  border: "0",
+                  borderTop: "1px solid #eee",
+                  marginBottom: "20px",
+                }}
+              /> */}
+              <hr />
+
+              <h3 className={styles.sectionTitle}>Application Deadline</h3>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginTop: "10px",
+                }}
+              >
+                {/* จุดวงกลมเล็กๆ เพื่อเน้นสายตา */}
+                <div
+                  style={{
+                    width: "8px",
+                    height: "8px",
+                    borderRadius: "50%",
+                    backgroundColor: "#e67e22",
+                  }}
+                ></div>
+
+                <span
+                  style={{
+                    fontSize: "1.1rem",
+                    fontWeight: "500",
+                    color: "#333",
+                  }}
+                >
+                  {job.application_dates
+                    ? new Date(job.application_dates).toLocaleDateString(
+                        "th-TH",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        },
+                      ) + " น."
+                    : "No deadline specified"}
+                </span>
               </div>
             </section>
           </div>

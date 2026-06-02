@@ -9,6 +9,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userRole, setUserRole] = useState("guest");
   const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState("");
 
   const pathname = usePathname();
   const router = useRouter();
@@ -22,15 +23,18 @@ export default function Navbar() {
 
         if (data.user) {
           setUserRole(data.user.role);
+          setUserId(data.user.id);
           // ใช้ email แสดงผลไปก่อน (หากใน JWT คุณส่งชื่อมาด้วย สามารถเปลี่ยนเป็น data.user.name ได้)
           setUserName(data.user.email);
         } else {
           setUserRole("guest");
           setUserName("");
+          setUserId("");
         }
       } catch (error) {
         console.error("Failed to fetch session");
         setUserRole("guest");
+        setUserId("");
       }
     };
 
@@ -134,6 +138,12 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
+                  href="/company/company-feedback"
+                  className={`nav-item ${isActive("/company/company-feedback")}`}
+                >
+                  Feedback
+                </Link>
+                <Link
                   href="/company/post-job"
                   className={`nav-item ${isActive("/company/post-job")}`}
                 >
@@ -167,7 +177,7 @@ export default function Navbar() {
             )}
           </div>
         </div>
-        {/* ---------------- MOBILE SIDEBAR & OVERLAY ---------------- */}
+        {/* {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>} */}
         {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
 
         <div className={`sidebar-menu ${isMenuOpen ? "open" : ""}`}>
@@ -179,9 +189,27 @@ export default function Navbar() {
           </div>
 
           <div className="sidebar-links">
-            {userRole !== "guest" && (
+            {userRole == "seeker" && (
               <div className="user-info">
-                <span className="u-name">Hi, {userName}</span>
+                <span className="u-name">
+                  Hi seeker, {userName} ({userId})
+                </span>
+                <hr />
+              </div>
+            )}
+            {userRole == "guest" && (
+              <div className="user-info">
+                <span className="u-name">
+                  Hi guest, {userName} ({userId})
+                </span>
+                <hr />
+              </div>
+            )}
+            {userRole == "company" && (
+              <div className="user-info">
+                <span className="u-name">
+                  Hi company, {userName} ({userId})
+                </span>
                 <hr />
               </div>
             )}
@@ -191,109 +219,3 @@ export default function Navbar() {
     </>
   );
 }
-// {/* GUEST ROLE (Mobile) */}
-//             {userRole === "guest" && (
-//               <>
-//                 <Link href="/login" onClick={closeMenu} className="nav-item">
-//                   Login
-//                 </Link>
-//                 <Link href="/register" onClick={closeMenu} className="nav-item">
-//                   Sign Up
-//                 </Link>
-//               </>
-//             )}
-
-//             {/* SEEKER ROLE (Mobile) */}
-//             {userRole === "seeker" && (
-//               <>
-//                 <Link
-//                   href="/userhome"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/")}`}
-//                 >
-//                   Home
-//                 </Link>
-//                 <Link
-//                   href="/user/UserFeedback"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/")}`}
-//                 >
-//                   Feedback
-//                 </Link>
-//                 <Link
-//                   href="/user/profile"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/")}`}
-//                 >
-//                   My Profile
-//                 </Link>
-//                 <button
-//                   onClick={onLogout}
-//                   className="nav-btn-logout"
-//                   style={{ marginTop: "1rem" }}
-//                 >
-//                   Log out
-//                 </button>
-//               </>
-//             )}
-
-//             {/* COMPANY ROLE (Mobile) */}
-//             {userRole === "company" && (
-//               <>
-//                 <Link
-//                   href="/companyhome"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/companyhome")}`}
-//                 >
-//                   Home
-//                 </Link>
-//                 <Link
-//                   href="/company/post-job"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/company/post-job")}`}
-//                 >
-//                   Post a Job
-//                 </Link>
-//                 <Link
-//                   href="/company/profile"
-//                   onClick={closeMenu}
-//                   className={`nav-item ${isActive("/company/profile")}`}
-//                 >
-//                   Profile
-//                 </Link>
-//                 <button
-//                   onClick={onLogout}
-//                   className="nav-btn-logout"
-//                   style={{ marginTop: "1rem" }}
-//                 >
-//                   Log out
-//                 </button>
-//               </>
-//             )}
-
-//             {/* ADMIN ROLE (Mobile) */}
-//             {userRole === "admin" && (
-//               <>
-//                 <Link
-//                   href="/admin/Feedbacks"
-//                   onClick={closeMenu}
-//                   className="nav-item"
-//                 >
-//                   Feedbacks
-//                 </Link>
-//                 <Link
-//                   href="/admin/CompanyVerification"
-//                   onClick={closeMenu}
-//                   className="nav-item"
-//                 >
-//                   Verification
-//                 </Link>
-//                 <button
-//                   onClick={onLogout}
-//                   className="nav-btn-logout"
-//                   style={{ marginTop: "1rem" }}
-//                 >
-//                   Log out
-//                 </button>
-//               </>
-//             )}
