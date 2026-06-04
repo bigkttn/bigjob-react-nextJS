@@ -116,9 +116,10 @@ export default function Navbar() {
                 >
                   Feedback
                 </Link>
+
                 <Link
-                  href="/user/profile"
-                  className={`nav-item ${isActive("/user/profile")}`}
+                  href="/user/user-profile"
+                  className={`nav-item ${isActive("/user/user-profile")}`}
                 >
                   My Profile
                 </Link>

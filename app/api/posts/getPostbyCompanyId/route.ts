@@ -11,12 +11,17 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const decoded: any = jwt.decode(token);
+        // const decoded: any = jwt.decode(token);
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
         const company_id = decoded.id;
         console.log(company_id);
 
         const [rows] = await db.query(
-            `SELECT *
+            `SELECT *,
+                CASE 
+                    WHEN application_dates < NOW() THEN 'closed'
+                    ELSE 'Open'  
+                END AS status
              FROM posts
              WHERE company_id = ?
              ORDER BY created_at DESC`,

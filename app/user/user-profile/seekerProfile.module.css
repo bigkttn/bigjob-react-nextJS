@@ -1,0 +1,275 @@
+.container {
+  padding: 40px;
+  background-color: #f0f0f0;
+  min-height: 100vh;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.8fr; /* แบ่ง 4 คอลัมน์ */
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.column {
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  background-color: transparent;
+  padding: 20px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.personalInfoContent {
+  padding: 0 20px 20px 20px;
+  text-align: center;
+
+}
+.avatarWrapper{
+    width: 150px;
+  height: 150px;
+  margin-left: 50px;
+}
+
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #fff;
+}
+.titleinfoRow{
+  font-size: 1rem;
+}
+.infoRow{
+  font-size: 0.8rem;
+}
+
+.detailsBox {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 15px;
+  margin-top: 20px;
+  text-align: left;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.contentPadding {
+  padding: 0 25px 25px 25px;
+}
+
+.section {
+  margin-bottom: 25px;
+}
+
+.section h4 {
+  margin-bottom: 10px;
+  color:black;
+  font-size: 1rem;
+  font-weight:bold;
+}
+.setJobTitle{
+  font-size: 0.8rem;
+
+}
+.section ol {
+  padding-left: 0.3rem; /* ปรับค่านี้จนกว่าตัวเลขจะตรงกับหัวข้อ Job Title */
+}
+.section p{
+    padding-left: 0.3rem;
+}
+.setLiTitle{
+   padding-left: 0.3rem;
+}
+.setLi{
+    padding-left: 0.8rem;
+}
+.tagGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag, .tagActive {
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid #999;
+  font-size: 0.85rem;
+}
+
+.tagActive {
+  background-color: #000;
+  color: #fff;
+}
+
+.fileBox {
+  height: 40px;
+  background-color: #b0b0b0;
+  border-radius: 10px;
+  margin-top: 5px;
+}
+
+
+.contactBtn {
+  background-color: #000;
+  color: #fff;
+  padding: 10px 40px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+/* ........................................ */
+.Educontainer {
+  padding: 50px;
+    background-color: #d9d9d9;
+}
+
+.timeline {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #d9d9d9;
+}
+
+/* เส้นสีดำแกนกลาง */
+.centralLine {
+  position: absolute;
+  left: 50%;
+  margin-top: -20%;
+  width: 2px;
+  height: 100%;
+  background-color: #000;
+  transform: translateX(-50%);
+}
+
+.timelineItem {
+  padding: 0px 20px;
+  position: relative;
+  width: 70%; /* แบ่งครึ่งจอ */
+  box-sizing: border-box;
+}
+
+/* จัดฝั่งซ้าย */
+.left {
+  left: -50%;
+  text-align: right;
+}
+
+/* จัดฝั่งขวา */
+.right {
+  left: 65%;
+  text-align: left;
+}
+
+/* ขีดเชื่อมขนาดเล็ก */
+.connector {
+  position: absolute;
+  top: 30px;
+  width: 20px;
+  height: 2px;
+  background-color: #000000;
+}
+
+.left .connector { right: -40px; } /* ให้ขีดโผล่ออกไปทางขวาแตะเส้นกลาง */
+.right .connector { left: -20px; } /* ให้ขีดโผล่ออกไปทางซ้ายแตะเส้นกลาง */
+
+.degree {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.school {
+  font-size: 0.7rem;
+  color: #333;
+}
+/* ----------------------------------- */
+.columnTransparent {
+  background-color: #d1d1d1; /* สีเทาตามรูป */
+  padding: 30px;
+  border-radius: 30px;
+  width: fit-content;
+}
+
+.fileItem {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.fileItem label {
+  display: block;
+  font-weight: 800; /* ตัวหนาตามที่คุณต้องการ */
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.fileBox {
+  width: 200px;
+  height: 45px;
+  background-color: #b0b0b0; /* สีเทาเข้มกว่าพื้นหลัง */
+  border-radius: 25px; /* ความโค้งมน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #333;
+  transition: 0.2s;
+}
+
+.fileBox:hover {
+  background-color: #a0a0a0;
+}
+
+.hiddenInput {
+  display: none; /* ซ่อน input จริงของ browser */
+}
+
+.contactCard {
+  /* margin-top: 30px;
+  text-align: center; */
+  background-color: #d9d9d9;
+  border-radius: 30px;
+  padding: 30px;
+  margin-top: 40px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+
+}
+
+.sentBtn {
+  background-color: #000;
+  color: #fff;
+  padding: 10px 30px;
+  border-radius: 20px;
+  cursor: pointer;
+  border: none;
+}
+.sentBtn:hover {
+  background-color: #202020;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.sentBtn:active {
+  transform: translateY(0);
+  box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.2);
+}
+/* ----------------------------------- */
+
+/* ปรับให้ Responsive */
+@media (max-width: 1200px) {
+  .profileGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

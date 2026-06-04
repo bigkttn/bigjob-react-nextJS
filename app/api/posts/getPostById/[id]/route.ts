@@ -6,9 +6,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
         const { id } = await params; // ดึง post_id จาก URL
         const post_id = id; // ตัวอย่าง post_id ที่คุณต้องการดึงข้อมูล
 
-        const sql = `SELECT posts.*, company.company_name, company.logo_image
-                        FROM posts 
-                        JOIN company ON posts.company_id = company.company_id WHERE posts.post_id = ?`; // ตัวอย่าง SQL ที่คุณต้องการใช้
+        const sql = `SELECT 
+                        posts.*,
+                        CASE 
+                            WHEN posts.application_dates < NOW() THEN 'closed'
+                            ELSE 'Open' 
+                        END AS status,
+                        company.company_name, 
+                        company.logo_image
+                    FROM posts 
+                    JOIN company ON posts.company_id = company.company_id 
+                    WHERE posts.post_id = ?;`; // ตัวอย่าง SQL ที่คุณต้องการใช้
         const [posts]: any = await db.query(sql, [post_id]); // แทนที่ ? ด้วยค่า post_id ที่ต้องการ
 
         if (posts.length === 0) {

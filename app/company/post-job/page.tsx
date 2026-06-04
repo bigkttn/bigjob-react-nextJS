@@ -1,13 +1,22 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./postjob.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+interface Question {
+  id: string;
+  text: string;
+  options: string[];
+  correctIndex: number | null;
+}
+
 const PostJob = () => {
-  const [isNext, setIsNext] = useState(false);
   const router = useRouter();
-  const [forData, setFormData] = useState({
+  const [isNext, setIsNext] = useState(false);
+  const [postId, setPostId] = useState<number | null>(null);
+
+  const [formData, setFormData] = useState({
     jobPosition: "",
     workLocation: "",
     salary_min: "",
@@ -24,6 +33,13 @@ const PostJob = () => {
     contact: "",
   });
 
+  const [myPosts, setMyPosts] = useState<any[]>([]);
+
+  const [questions, setQuestions] = useState<Question[]>([
+    { id: "1", text: "", options: ["", ""], correctIndex: null },
+  ]);
+
+  // ── Form handlers ──────────────────────────────────────────────
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -33,27 +49,22 @@ const PostJob = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // console.log(forData);
-
-  const handLesubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!forData.jobPosition || !forData.workLocation || !forData.jobType) {
+  // Step 1: กด Next → บันทึก post ก่อน แล้วค่อยไปหน้าคำถาม
+  const handleNext = async () => {
+    if (!formData.jobPosition || !formData.workLocation || !formData.jobType) {
       alert("Please fill in all required fields.");
       return;
     }
     try {
       const response = await fetch("/api/posts/insertPost", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(forData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-
       if (response.ok) {
         const data = await response.json();
-        alert("Post created successfully!");
-        router.push(`/company/createTest/${data.postId}`);
+        setPostId(data.postId);
+        setIsNext(true);
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.message}`);
@@ -63,18 +74,69 @@ const PostJob = () => {
     }
   };
 
-  const [myPosts, setMyPosts] = useState<any[]>([]);
-  // ในหน้า page.tsx
+  // Step 2: กด Submit → บันทึกคำถาม
+  const handleSubmit = async () => {
+    const isValid = questions.every((q) => q.text && q.correctIndex !== null);
+    if (!isValid) {
+      alert(
+        "Please fill in all questions and select the correct answer for each.",
+      );
+      return;
+    }
+    try {
+      const response = await fetch("/api/question/createTest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId, questions }),
+      });
+      if (response.ok) {
+        alert("Post and test created successfully!");
+        // router.push("/company/post-job");
+        // reset form
+        setFormData({
+          jobPosition: "",
+          workLocation: "",
+          salary_min: "",
+          salary_max: "",
+          age_min: "",
+          age_max: "",
+          vacancy: "",
+          jobType: "",
+          deadline: "",
+          jobDescription: "",
+          qualifications: "",
+          benefits: "",
+          howToApply: "",
+          contact: "",
+        });
+
+        // reset questions
+        setQuestions([
+          { id: "1", text: "", options: ["", ""], correctIndex: null },
+        ]);
+
+        // reset postId
+        setPostId(null);
+        setIsNext(false);
+        fetchMyPosts();
+      } else {
+        alert("Failed to create test. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error posting test:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
+  // ── My Posts ───────────────────────────────────────────────────
   const fetchMyPosts = async () => {
     try {
       const response = await fetch("/api/posts/getPostbyCompanyId");
       const data = await response.json();
-
-      // ตรวจสอบว่าถ้ามาเป็น Array ตรงๆ ให้ set ได้เลย
       if (Array.isArray(data)) {
         setMyPosts(data);
+        console.log("Fetched posts:", data);
       } else if (data.posts && Array.isArray(data.posts)) {
-        // หรือถ้า API ส่งมาในรูป { posts: [] }
         setMyPosts(data.posts);
       }
     } catch (error) {
@@ -82,17 +144,15 @@ const PostJob = () => {
     }
   };
 
-  const handleDelete = async (postId: number) => {
-    if (!confirm("Are you sure you want to delete this post?")) {
-      return;
-    }
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      const response = await fetch(`/api/posts/deletePost/${postId}`, {
+      const response = await fetch(`/api/posts/deletePost/${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
         alert("Post deleted successfully!");
-        fetchMyPosts(); // ดึงข้อมูลงานใหม่หลังจากลบ
+        fetchMyPosts();
       }
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -101,26 +161,94 @@ const PostJob = () => {
 
   useEffect(() => {
     fetchMyPosts();
-  }, []); // ดึงข้อมูลงานเมื่อคอมโพเนนต์โหลดครั้งแรก
+  }, []);
 
+  // ── Question handlers ──────────────────────────────────────────
+  const addQuestion = () => {
+    setQuestions([
+      ...questions,
+      {
+        id: crypto.randomUUID(),
+        text: "",
+        options: ["", ""],
+        correctIndex: null,
+      },
+    ]);
+  };
+
+  const deleteQuestion = (qId: string) => {
+    if (questions.length > 1) {
+      setQuestions(questions.filter((q) => q.id !== qId));
+    }
+  };
+
+  const updateQuestionText = (qId: string, text: string) => {
+    setQuestions(questions.map((q) => (q.id === qId ? { ...q, text } : q)));
+  };
+
+  const addOption = (qId: string) => {
+    setQuestions(
+      questions.map((q) =>
+        q.id === qId ? { ...q, options: [...q.options, ""] } : q,
+      ),
+    );
+  };
+
+  const deleteOption = (qId: string, optIndex: number) => {
+    setQuestions(
+      questions.map((q) => {
+        if (q.id === qId && q.options.length > 2) {
+          const newOptions = q.options.filter((_, i) => i !== optIndex);
+          let newCorrect = q.correctIndex;
+          if (q.correctIndex === optIndex) {
+            newCorrect = null;
+          } else if (newCorrect !== null && newCorrect > optIndex) {
+            newCorrect -= 1;
+          }
+          return { ...q, options: newOptions, correctIndex: newCorrect };
+        }
+        return q;
+      }),
+    );
+  };
+
+  const updateOptionText = (qId: string, optIndex: number, text: string) => {
+    setQuestions(
+      questions.map((q) => {
+        if (q.id === qId) {
+          const newOptions = [...q.options];
+          newOptions[optIndex] = text;
+          return { ...q, options: newOptions };
+        }
+        return q;
+      }),
+    );
+  };
+
+  const setCorrectAnswer = (qId: string, optIndex: number) => {
+    setQuestions(
+      questions.map((q) =>
+        q.id === qId ? { ...q, correctIndex: optIndex } : q,
+      ),
+    );
+  };
+
+  // ── Render ─────────────────────────────────────────────────────
   return (
     <div>
+      {/* My Posts */}
       <div className={styles.myPostsSection}>
         <h2 className={styles.myPostsTitle}>My Posts</h2>
         <div className={styles.item}>
           {myPosts.length > 0 ? (
             myPosts.map((post: any) => (
               <div key={post.post_id}>
-                {/* <Link href={`/company/detail/${post.post_id}`}> */}
                 <div className={styles.postMiniCard}>
-                  {/* <img
-                  src={post.logo_image || "/placeholder.png"}
-                  alt={post.company_name}
-                /> */}
-
                   <div className={styles.postMiniCardInfo}>
                     <span
-                      className={`${styles.statusBadge} ${post.status === "Open" ? styles.open : styles.closed}`}
+                      className={`${styles.statusBadge} ${
+                        post.status === "Open" ? styles.open : styles.closed
+                      }`}
                     >
                       {post.status}
                     </span>
@@ -139,7 +267,6 @@ const PostJob = () => {
                     </div>
                   </div>
                 </div>
-                {/* </Link> */}
               </div>
             ))
           ) : (
@@ -147,199 +274,257 @@ const PostJob = () => {
           )}
         </div>
       </div>
+
+      {/* Create Post */}
       <div className={styles.postContainer}>
-        <form onSubmit={handLesubmit}>
-          {/* Header Area */}
-
-          <div className={styles.postHeader}>
-            {isNext ? (
-              <button
-                className={styles.nextBtn}
-                onClick={() => setIsNext(false)}
-              >
-                back
-              </button>
-            ) : (
-              <h2 className={styles.myPostsTitle}>Create Posts</h2>
-            )}
-
-            {/* <Link href={"/company/createTest/1"}> */}
-            {/* <Link href={"/company/post-job"}> */}
-            {isNext ? (
-              <button className={styles.nextBtn} type="submit">
-                submit
-              </button>
-            ) : (
-              <button
-                className={styles.nextBtn}
-                onClick={() => setIsNext(true)}
-              >
-                Next
-              </button>
-            )}
-
-            {/* </Link> */}
-          </div>
+        <div className={styles.postHeader}>
           {isNext ? (
-            <h1>submit</h1>
+            <button className={styles.nextBtn} onClick={() => setIsNext(false)}>
+              Back
+            </button>
           ) : (
-            <div className={styles.postForm}>
-              {/* --- Left Column --- */}
-              <div className={styles.formColumn}>
-                <div className={styles.inputGroupInline}>
-                  <label>Job Position</label>
-                  <input
-                    type="text"
-                    name="jobPosition"
-                    value={forData.jobPosition}
-                    onChange={handleChange}
-                  />
-                </div>
+            <h2 className={styles.myPostsTitle}>Create Posts</h2>
+          )}
 
-                <div className={styles.inputGroupInline}>
-                  <label>Work Location</label>
-                  <input
-                    type="text"
-                    name="workLocation"
-                    value={forData.workLocation}
-                    onChange={handleChange}
-                  />
-                </div>
+          {isNext ? (
+            <button className={styles.nextBtn} onClick={handleSubmit}>
+              Submit
+            </button>
+          ) : (
+            <button className={styles.nextBtn} onClick={handleNext}>
+              Next
+            </button>
+          )}
+        </div>
 
-                <div className={styles.inputGroupInline}>
-                  <label>Salary Range</label>
-                  <input
-                    type="number"
-                    name="salary_min"
-                    value={forData.salary_min}
-                    onChange={handleChange}
-                    style={{ width: "100%" }}
-                  />
-                  -
-                  <input
-                    type="number"
-                    name="salary_max"
-                    value={forData.salary_max}
-                    onChange={handleChange}
-                    style={{ width: "100%" }}
-                  />
-                </div>
+        {/* Step 2: Questions */}
+        {isNext ? (
+          <div className={styles.container}>
+            <div className={styles.headerRow}>
+              <p className={styles.instruction}>
+                Please ask at least 5 questions to gauge the applicant's
+                attitude.
+              </p>
+            </div>
 
-                <div className={styles.inputGroupInline}>
-                  <label>Age Range</label>
-                  <input
-                    type="number"
-                    name="age_min"
-                    value={forData.age_min}
-                    onChange={handleChange}
-                    style={{ width: "100%" }}
-                  />
-                  -
-                  <input
-                    type="number"
-                    name="age_max"
-                    value={forData.age_max}
-                    onChange={handleChange}
-                    style={{ width: "100%" }}
-                  />
-                </div>
+            <div className={styles.questionList}>
+              {questions.map((q, qIndex) => (
+                <div key={q.id} className={styles.questionBlock}>
+                  <div className={styles.inputWrapper}>
+                    <span className={styles.questionNumber}>{qIndex + 1}.</span>
+                    <input
+                      type="text"
+                      placeholder="Enter your question here..."
+                      className={styles.mainInput}
+                      value={q.text}
+                      onChange={(e) => updateQuestionText(q.id, e.target.value)}
+                    />
+                    <button
+                      className={styles.deleteQuestionBtn}
+                      onClick={() => deleteQuestion(q.id)}
+                      title="Delete Question"
+                    >
+                      🗑️
+                    </button>
+                  </div>
 
-                <div className={styles.inputGroupInline}>
-                  <label>Vacancy</label>
-                  <input
-                    type="number"
-                    name="vacancy"
-                    value={forData.vacancy}
-                    onChange={handleChange}
-                  />
+                  <div className={styles.optionsBox}>
+                    {q.options.map((opt, optIndex) => (
+                      <div key={optIndex} className={styles.optionRow}>
+                        <input
+                          type="radio"
+                          name={`correct-${q.id}`}
+                          checked={q.correctIndex === optIndex}
+                          onChange={() => setCorrectAnswer(q.id, optIndex)}
+                          className={styles.radioInput}
+                        />
+                        <input
+                          type="text"
+                          placeholder={`Option ${optIndex + 1}`}
+                          className={`${styles.optionInput} ${
+                            q.correctIndex === optIndex ? styles.correct : ""
+                          }`}
+                          value={opt}
+                          onChange={(e) =>
+                            updateOptionText(q.id, optIndex, e.target.value)
+                          }
+                        />
+                        {q.options.length > 2 && (
+                          <button
+                            onClick={() => deleteOption(q.id, optIndex)}
+                            className={styles.removeOptionBtn}
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => addOption(q.id)}
+                      className={styles.addOptionBtn}
+                    >
+                      + Add Option
+                    </button>
+                  </div>
                 </div>
+              ))}
+            </div>
 
-                <div className={styles.inputGroupInline}>
-                  <label>Job Type</label>
-                  <select
-                    name="jobType"
-                    value={forData.jobType}
-                    className={styles.selectInput}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>
-                      Select Job Type
-                    </option>
-                    <option value="Full-time">Full-time</option>
-                    <option value="Freelance">Freelance</option>
-                    <option value="Part-time">Part-time</option>
-                    <option value="Internship">Internship</option>
-                    <option value="Contract">Contract</option>
-                  </select>
-                </div>
-
-                <div className={styles.inputGroupFull}>
-                  <label>Deadline</label>
-                  <input
-                    type="datetime-local"
-                    className={styles.dateInput}
-                    name="deadline"
-                    value={forData.deadline}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className={styles.inputGroupFull}>
-                  <label>Job Description</label>
-                  <textarea
-                    name="jobDescription"
-                    value={forData.jobDescription}
-                    onChange={handleChange}
-                    rows={6}
-                  />
-                </div>
+            <div className={styles.addWrapper}>
+              <button onClick={addQuestion} className={styles.addBtn}>
+                + Add More Question
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Step 1: Job Form */
+          <div className={styles.postForm}>
+            {/* Left Column */}
+            <div className={styles.formColumn}>
+              <div className={styles.inputGroupInline}>
+                <label>Job Position</label>
+                <input
+                  type="text"
+                  name="jobPosition"
+                  value={formData.jobPosition}
+                  onChange={handleChange}
+                />
               </div>
-
-              {/* --- Right Column --- */}
-              <div className={styles.formColumn}>
-                <div className={styles.inputGroupFull}>
-                  <label>Qualifications</label>
-                  <textarea
-                    name="qualifications"
-                    value={forData.qualifications}
-                    onChange={handleChange}
-                    rows={6}
-                  />
-                </div>
-
-                <div className={styles.inputGroupFull}>
-                  <label>Benefits</label>
-                  <textarea
-                    name="benefits"
-                    value={forData.benefits}
-                    onChange={handleChange}
-                    rows={6}
-                  />
-                </div>
-
-                <div className={styles.inputGroupFull}>
-                  <label>How To Apply</label>
-                  <textarea
-                    name="howToApply"
-                    value={forData.howToApply}
-                    onChange={handleChange}
-                    rows={6}
-                  />
-                </div>
-
-                <div className={styles.inputGroupFull}>
-                  <label>Contact</label>
-                  <textarea
-                    name="contact"
-                    value={forData.contact}
-                    onChange={handleChange}
-                    rows={6}
-                  />
-                </div>
+              <div className={styles.inputGroupInline}>
+                <label>Work Location</label>
+                <input
+                  type="text"
+                  name="workLocation"
+                  value={formData.workLocation}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className={styles.inputGroupInline}>
+                <label>Salary Range</label>
+                <input
+                  type="number"
+                  name="salary_min"
+                  value={formData.salary_min}
+                  onChange={handleChange}
+                  style={{ width: "100%" }}
+                />
+                -
+                <input
+                  type="number"
+                  name="salary_max"
+                  value={formData.salary_max}
+                  onChange={handleChange}
+                  style={{ width: "100%" }}
+                />
+              </div>
+              <div className={styles.inputGroupInline}>
+                <label>Age Range</label>
+                <input
+                  type="number"
+                  name="age_min"
+                  value={formData.age_min}
+                  onChange={handleChange}
+                  style={{ width: "100%" }}
+                />
+                -
+                <input
+                  type="number"
+                  name="age_max"
+                  value={formData.age_max}
+                  onChange={handleChange}
+                  style={{ width: "100%" }}
+                />
+              </div>
+              <div className={styles.inputGroupInline}>
+                <label>Vacancy</label>
+                <input
+                  type="number"
+                  name="vacancy"
+                  value={formData.vacancy}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className={styles.inputGroupInline}>
+                <label>Job Type</label>
+                <select
+                  name="jobType"
+                  value={formData.jobType}
+                  className={styles.selectInput}
+                  onChange={handleChange}
+                >
+                  <option value="" disabled>
+                    Select Job Type
+                  </option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Freelance">Freelance</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Contract">Contract</option>
+                </select>
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>Deadline</label>
+                <input
+                  type="datetime-local"
+                  className={styles.dateInput}
+                  name="deadline"
+                  value={formData.deadline}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>Job Description</label>
+                <textarea
+                  name="jobDescription"
+                  value={formData.jobDescription}
+                  onChange={handleChange}
+                  rows={6}
+                />
               </div>
             </div>
-          )}
-        </form>
+
+            {/* Right Column */}
+            <div className={styles.formColumn}>
+              <div className={styles.inputGroupFull}>
+                <label>Qualifications</label>
+                <textarea
+                  name="qualifications"
+                  value={formData.qualifications}
+                  onChange={handleChange}
+                  rows={6}
+                />
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>Benefits</label>
+                <textarea
+                  name="benefits"
+                  value={formData.benefits}
+                  onChange={handleChange}
+                  rows={6}
+                />
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>How To Apply</label>
+                <textarea
+                  name="howToApply"
+                  value={formData.howToApply}
+                  onChange={handleChange}
+                  rows={6}
+                />
+              </div>
+              <div className={styles.inputGroupFull}>
+                <label>Contact</label>
+                <textarea
+                  name="contact"
+                  value={formData.contact}
+                  onChange={handleChange}
+                  rows={6}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
