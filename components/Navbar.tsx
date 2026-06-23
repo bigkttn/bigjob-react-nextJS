@@ -214,12 +214,16 @@ export default function Navbar() {
 
             {userRole === "admin" && (
               <>
+                <Link href="/admin/admin-report" className="nav-item">
+                  Report
+                </Link>
                 <Link href="/admin/Feedbacks" className="nav-item">
                   Feedbacks
                 </Link>
                 <Link href="/admin/home" className="nav-item">
                   Verification
                 </Link>
+
                 <button onClick={onLogout} className="nav-btn-logout">
                   Log out
                 </button>

@@ -1,0 +1,182 @@
+.adminReportContainer {
+  padding: 40px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.outerCard {
+  background-color: #d9d9d9;
+  border-radius: 40px;
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+.tableHeader {
+  background-color: #4dfc50; /* สีเขียวสว่างตามรูป */
+  height: 40px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+.reportList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reportRow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* สไตล์ป้ายกำกับต่างๆ (Badges) */
+.badgeID, .badgeUser, .badgeTarget, .badgeDate {
+  background-color: #ccc;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.detailsBox {
+  background-color: #ccc;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  flex: 1; /* ให้กล่องข้อความกว้างที่สุด */
+  min-width: 250px;
+  line-height: 1.4;
+}
+
+/* สไตล์ปุ่ม Status */
+.statusBtn {
+  border: none;
+  padding: 10px 25px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  min-width: 120px;
+  font-size: 16px;
+}
+
+.suspend {
+  background-color: #ff8c8c; /* สีแดงอ่อน */
+}
+
+.warn {
+  background-color: #fff031; /* สีเหลือง */
+}
+
+.review {
+  background-color: #ffd8b1; /* สีส้มอ่อน */
+}
+
+.container {
+  padding: 20px;
+  background-color: #f0f0f0;
+  min-height: 100vh;
+}
+
+.reportCard {
+  background-color: #d9d9d9; /* สีพื้นหลังการ์ดตามภาพ */
+  border-radius: 40px;
+  padding: 30px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+/* ตั้งค่า Grid 6 คอลัมน์ให้ตรงกันทั้งหัวและเนื้อหา */
+.tableHeader, .reportRow {
+  display: grid;
+  grid-template-columns: 0.5fr 0.8fr 2.5fr 1fr 0.8fr 0.8fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.tableHeader {
+  background-color: #4dfc50; /* สีเขียวสว่างตามดีไซน์ */
+  padding: 10px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.headerCell {
+  text-align: center;
+  border-right: 1px solid #000; /* เส้นแบ่งตามภาพ 75eb9a */
+}
+
+.headerCell:last-child {
+  border-right: none;
+}
+
+.reportRow {
+  margin-bottom: 15px;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  border-right: 1px solid #000; /* เส้นแบ่งแนวดิ่ง */
+  height: 100%;
+  align-items: center;
+  padding: 5px;
+}
+
+.cell:last-child {
+  border-right: none;
+}
+
+/* สไตล์ป้ายกำกับและข้อความ */
+.badgeGray {
+  background-color: #e0e0e0;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.detailBubble {
+  background-color: #e0e0e0;
+  padding: 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+/* สไตล์ปุ่มแยกตามสีในรูป */
+.statusBtn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 25px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.suspend { background-color: #ff8c8c; }
+.warn { background-color: #ffff00; }
+.review { background-color: #ffd8b1; }
+
+/* เพิ่ม Effect เมื่อเอาเมาส์วาง */
+.statusBtn:hover {
+  opacity: 0.7;
+  transform: translateY(-2px);
+  transition: all 0.2s;
+}

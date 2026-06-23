@@ -567,34 +567,112 @@ const SeekerProfile = () => {
                 <br />
                 <strong>Contact</strong>
               </div>
-              {[
-                "line_id",
-                "country",
-                "address",
-                "province",
-                "district",
-                "sub_district",
-                "postal_code",
-              ].map((field) => (
-                <div className={styles.infoRow} key={field}>
-                  {field}:{" "}
-                  {!editMode ? (
-                    fmt(profile[field])
-                  ) : (
-                    <input
-                      style={{
-                        minWidth: "120px",
-                        padding: "0.3rem",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                      type="text"
-                      value={editForm[field] ?? ""}
-                      onChange={(e) => handleFieldChange(field, e.target.value)}
-                    />
-                  )}
-                </div>
-              ))}
+              <div className={styles.infoRow}>
+                Line ID:{" "}
+                {!editMode ? (
+                  fmt(profile.line_id)
+                ) : (
+                  <input
+                    style={{
+                      minWidth: "120px",
+                      padding: "0.3rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                    type="text"
+                    value={editForm.line_id ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("line_id", e.target.value)
+                    }
+                  />
+                )}
+              </div>
+
+              <div className={styles.infoRow}>
+                Country:{" "}
+                {!editMode ? (
+                  fmt(profile.country)
+                ) : (
+                  <input
+                    style={{
+                      minWidth: "120px",
+                      padding: "0.3rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                    type="text"
+                    value={editForm.country ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("country", e.target.value)
+                    }
+                  />
+                )}
+              </div>
+
+              {/* เอา address กับ postal_code ออกตามที่คอมเมนต์ไว้ในลูปเดิม */}
+
+              <div className={styles.infoRow}>
+                Province:{" "}
+                {!editMode ? (
+                  fmt(profile.province)
+                ) : (
+                  <input
+                    style={{
+                      minWidth: "120px",
+                      padding: "0.3rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                    type="text"
+                    value={editForm.province ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("province", e.target.value)
+                    }
+                  />
+                )}
+              </div>
+
+              <div className={styles.infoRow}>
+                District:{" "}
+                {!editMode ? (
+                  fmt(profile.district)
+                ) : (
+                  <input
+                    style={{
+                      minWidth: "120px",
+                      padding: "0.3rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                    type="text"
+                    value={editForm.district ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("district", e.target.value)
+                    }
+                  />
+                )}
+              </div>
+
+              <div className={styles.infoRow}>
+                Sub District:{" "}
+                {!editMode ? (
+                  fmt(profile.sub_district)
+                ) : (
+                  <input
+                    style={{
+                      minWidth: "120px",
+                      padding: "0.3rem",
+                      borderRadius: "4px",
+                      border: "1px solid #ccc",
+                    }}
+                    type="text"
+                    value={editForm.sub_district ?? ""}
+                    onChange={(e) =>
+                      handleFieldChange("sub_district", e.target.value)
+                    }
+                  />
+                )}
+              </div>
             </div>
 
             {/* ── ปุ่ม Edit Profile / Save+Cancel (ย้ายมาไว้ด้านล่างสุดของคอลัมน์ Personal Information) ── */}
