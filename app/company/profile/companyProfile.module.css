@@ -1,0 +1,234 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* แบ่งครึ่งซ้าย-ขวา */
+  gap: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+.profileCard {
+  background: rgb(255, 255, 255);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.banner {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.logoWrapper {
+  position: relative;
+  margin-top: -60px; /* ให้โลโก้ลอยทับแบนเนอร์ */
+  padding-left: 30px;
+}
+
+.logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 5px solid white;
+  background: white;
+}
+
+.infoArea {
+  padding: 10px 30px;
+}
+
+.companyName {
+  display: flex; /* เปิดใช้งาน Flexbox */
+  align-items: flex-start; /* จัดให้ไอคอนกับชื่ออยู่กึ่งกลางบรรทัดเดียวกัน */
+  gap: 8px; /* เพิ่มระยะห่างระหว่างชื่อกับไอคอน */
+  font-size: 24px; /* ปรับขนาดตามต้องการ */
+  font-weight: bold;
+  /* background-color: darkcyan; */
+}
+.material-symbols-outlined {
+  /* ทำให้ไอคอนดูเป็นรูปภาพ ไม่ใช่ตัวหนังสือ */
+  font-family: "Material Symbols Outlined";
+  display: inline-block;
+  vertical-align: middle;
+
+  /* ตั้งค่าแกน (Axes) ของ Variable Font */
+  font-variation-settings:
+    "FILL" 1,
+    /* 0 = โปร่งใส, 1 = ระบายสีเต็ม */ "wght" 100,
+    /* ความหนาของเส้น (100 - 700) */ "GRAD" 0,
+    /* ความหนาพิเศษ (เฉดสี) */ "opsz" 18; /* ขนาดที่เหมาะสมกับสายตา */
+}
+
+.mapWrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  height: 300px;
+  border: 2px solid #ddd;
+}
+
+/* --- ฝั่งขวา (Right Column) --- */
+.rightSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.VerifiedConfirm {
+  display: flex;
+  flex-direction: column;
+  height: 80px;
+  /* background-color: darkgoldenrod; */
+}
+.dropzoneStyle {
+  border: 2px dashed #000000;
+  border-radius: 20px;
+  text-align: center;
+  width: 100wv;
+  padding: 20px;
+  transition: border 0.3s ease; /* เวลาเอาเมาส์วางแล้วจะสมูท */
+  width: 100%;
+  height: 70%;
+  background-color: #e5dcdc;
+}
+.dropzoneStyle:hover {
+  border-color: #1d9bf0; /* เปลี่ยนเป็นสีฟ้าเวลาเอาเมาส์มาชี้ */
+  background-color: #f0f9ff;
+}
+.jobScrollArea {
+  height: 500px; /* กำหนดความสูงเพื่อให้ Scroll ได้แบบในภาพ */
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-right: 10px;
+}
+
+.jobCard {
+  display: flex;
+  gap: 15px;
+  background: #e0e0e0;
+  padding: 15px;
+  border-radius: 20px;
+  position: relative;
+}
+
+.detailBtn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: black;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+.reviewSection {
+  background: #e0e0e0;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.reviewCard {
+  background: white;
+  padding: 10px;
+  border-radius: 15px;
+  margin-top: 10px;
+}
+/* คลุมส่วน Contact ทั้งหมด */
+.contactGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0px; /* ปรับระยะห่างระหว่างบรรทัดได้ตรงนี้ */
+  margin-top: 15px;
+}
+
+.contactGroup h3 {
+  margin: 0; /* ลบ Margin เริ่มต้นที่ทำให้มันดูเยื้องออก */
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.contactGroup p {
+  padding-left: 60px;
+  margin: 0; /* ลบ Margin ของ p ด้วยเพื่อให้ Gap คุมระยะห่างแทน */
+  font-size: 0.95rem;
+  color: #555;
+}
+/* ------------------------------------- */
+/* 🆕 Modal Preview Styles */
+/* ------------------------------------- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.55); /* พื้นหลังทึบ ๆ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modalContent {
+  background: #f4f4f4;
+  width: 85%;
+  height: 85%;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.3s ease;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.modalTitle {
+  font-weight: 600;
+  color: #333;
+}
+
+.closeModalBtn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.closeModalBtn:hover {
+  background: #b02a37;
+}
+
+.modalBody {
+  flex: 1;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9ecef;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

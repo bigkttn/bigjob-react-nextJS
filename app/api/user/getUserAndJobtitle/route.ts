@@ -3,7 +3,10 @@ import db from '@/lib/db'; // อ้างอิงไฟล์ db ของค�
 
 export async function GET() {
     try {
-        const sql = `SELECT * FROM User JOIN JobTitle ON User.uid= JobTitle.user_id`;
+        const sql = `SELECT * 
+                     FROM User 
+                     JOIN JobTitle ON User.uid= JobTitle.user_id
+                     WHERE is_visible = 1`;
         const [users]: any = await db.query(sql);
         return NextResponse.json({ users }, { status: 200 });
 

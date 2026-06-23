@@ -10,13 +10,13 @@ const DetailJob = () => {
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [isEditing, setIsEditing] = useState(false);
+
   const [editData, setEditData] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loadingTests, setLoadingTests] = useState(true);
   const [isSavingTest, setIsSavingTest] = useState(false);
-  const [isMode, setIsMode] = useState(true);
+  const [isMode, setIsMode] = useState(true); // true = แก้ไขงาน, false = แก้ไขข้อสอบ
 
   const fetchJobDetail = useCallback(async () => {
     if (!postId) return;
@@ -41,7 +41,7 @@ const DetailJob = () => {
       const res = await fetch(`/api/question/getTestByPostId/${postId}`);
       if (res.ok) {
         const data = await res.json();
-        setQuestions(data.questions);
+        setQuestions(data.questions || []);
       }
     } catch (error) {
       console.error("Fetch test error:", error);
@@ -53,9 +53,11 @@ const DetailJob = () => {
   useEffect(() => {
     fetchJobDetail();
   }, [fetchJobDetail]);
+
   useEffect(() => {
     if (job) setEditData({ ...job });
   }, [job]);
+
   useEffect(() => {
     fetchTestData();
   }, [fetchTestData]);
@@ -63,12 +65,16 @@ const DetailJob = () => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.card}></div>
+        <div className={styles.card}>
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            กำลังโหลดข้อมูล...
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (!job) {
+  if (!job || !editData) {
     return <div className={styles.container}>ไม่พบข้อมูลงาน</div>;
   }
 
@@ -104,7 +110,6 @@ const DetailJob = () => {
       });
       if (res.ok) {
         setJob(editData);
-        setIsEditing(false);
         alert("บันทึกสำเร็จ ✅");
         window.location.reload();
       } else {
@@ -201,134 +206,124 @@ const DetailJob = () => {
       return updated;
     });
   };
-  {
-    /* <div style={{ display: "flex", justifyContent: "center" }}>
-        {isMode ? (
-          <button onClick={() => setIsMode(false)} className={styles.btntoggle}>
-            Edit Questions
-          </button>
-        ) : (
-          <button onClick={() => setIsMode(true)} className={styles.btntoggle}>
-            Edit Post
-          </button>
-        )}
-      </div> */
-  }
+
   return (
-    <div>
-      <button
-        onClick={() => router.back()}
-        style={{
-          margin: "20px",
-          marginLeft: "80px",
-          position: "absolute",
-          padding: "10px 18px",
-          borderRadius: "10px",
-          border: "none",
-          background: "#2563eb",
-          color: "#fff",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        ← ย้อนกลับ
-      </button>
-      {/* ===== Job Detail Card ===== */}
-      {isMode ? (
-        <div className={styles.container}>
-          <div className={styles.card}>
-            <div className={styles.headerButton}>
-              {/* <button
-                onClick={() => router.back()}
-                style={{
-                  marginBottom: "20px",
-                  padding: "10px 18px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#2563eb",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                ← ย้อนกลับ
-              </button> */}
-              <div>
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  {isMode ? (
-                    <button
-                      onClick={() => setIsMode(false)}
-                      className={styles.btntoggle}
-                    >
-                      Edit Questions
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setIsMode(true)}
-                      className={styles.btntoggle}
-                    >
-                      Edit Post
-                    </button>
-                  )}
-                </div>
-              </div>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        {/* ===== Unified Header Row (แถวควบคุมบนสุดระดับสากล) ===== */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingBottom: "20px",
+            borderBottom: "1px solid #e5e7eb",
+            marginBottom: "30px",
+          }}
+        >
+          {/* ฝั่งซ้าย: ปุ่มย้อนกลับ */}
+          {/* <button
+            onClick={() => router.back()}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "10px",
+              border: "1px solid #d1d5db",
+              background: "#fff",
+              color: "#374151",
+              cursor: "pointer",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            ← ย้อนกลับ
+          </button> */}
 
-              <div>
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      style={{
-                        marginBottom: "20px",
-                        padding: "10px 18px",
-                        borderRadius: "10px",
-                        border: "none",
-                        background: "#ff0000",
-                        color: "#fff",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <div style={{ display: "inline-block", width: "12px" }} />
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      style={{
-                        marginBottom: "20px",
-                        padding: "10px 18px",
-                        borderRadius: "10px",
-                        border: "none",
-                        background: isSaving ? "#94a3b8" : "#2563eb",
-                        color: "#fff",
-                        cursor: isSaving ? "not-allowed" : "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {isSaving ? "กำลังบันทึก..." : "Save changes"}
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    style={{
-                      marginBottom: "20px",
-                      padding: "10px 18px",
-                      borderRadius: "10px",
-                      border: "none",
-                      background: "#047011",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Edit post
-                  </button>
-                )}
-              </div>
-            </div>
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            <span className={styles.spanMother}>
+              <span>{"<"}</span>
+              <span>&nbsp;</span>
+              <span>B</span>
+              <span>a</span>
+              <span>c</span>
+              <span>k</span>
+            </span>
 
+            <span className={styles.spanMother2}>
+              <span>{"<"}</span>
+              <span>&nbsp;</span>
+              <span>B</span>
+              <span>a</span>
+              <span>c</span>
+              <span>k</span>
+            </span>
+          </button>
+
+          {/* ตรงกลาง: แท็บสลับโหมดบอกสถานะชัดเจน */}
+          <div
+            style={{
+              display: "flex",
+              background: "#f3f4f6",
+              padding: "6px",
+              borderRadius: "12px",
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <button
+              onClick={() => setIsMode(true)}
+              style={{
+                padding: "8px 20px",
+                borderRadius: "8px",
+                border: "none",
+                background: isMode ? "#fff" : "transparent",
+                color: isMode ? "#2563eb" : "#4b5563",
+                fontWeight: "bold",
+                boxShadow: isMode ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              แก้ไขโพสต์งาน
+            </button>
+            <button
+              onClick={() => setIsMode(false)}
+              style={{
+                padding: "8px 20px",
+                borderRadius: "8px",
+                border: "none",
+                background: !isMode ? "#fff" : "transparent",
+                color: !isMode ? "#2563eb" : "#4b5563",
+                fontWeight: "bold",
+                boxShadow: !isMode ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              แก้ไขข้อสอบ ({questions.length} ข้อ)
+            </button>
+          </div>
+
+          {/* ฝั่งขวา: ปุ่มบันทึกตามโหมดที่เลือก */}
+          <button
+            onClick={isMode ? handleSave : handleSaveTest}
+            disabled={isMode ? isSaving : isSavingTest}
+            className={styles.postBtn}
+          >
+            {isMode
+              ? isSaving
+                ? "กำลังบันทึก..."
+                : "Save Post"
+              : isSavingTest
+                ? "กำลังบันทึก..."
+                : "Save Questions"}
+          </button>
+        </div>
+
+        {/* ===== เนื้อหาด้านล่างเปลี่ยนตามโหมด (Content Area) ===== */}
+        {isMode ? (
+          <div>
+            {/* ข้อมูลบริษัทพื้นฐาน */}
             <div className={styles.header}>
               <img
                 src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
@@ -354,6 +349,7 @@ const DetailJob = () => {
               </span>
             </div>
 
+            {/* รายละเอียดฟอร์มงาน */}
             <div className={styles.contentGrid}>
               <div className={styles.leftCol}>
                 <table className={styles.infoTable}>
@@ -361,186 +357,153 @@ const DetailJob = () => {
                     <tr>
                       <td className={styles.label}>Job Title</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <input
-                              className={styles.inputField}
-                              value={editData.job_position}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  job_position: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span>{job.job_position}</span>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <input
+                            className={styles.inputField}
+                            value={editData.job_position ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                job_position: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Work Location</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <input
-                              className={styles.inputField}
-                              value={editData.work_location}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  work_location: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span>{job.work_location || "Work Location"}</span>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <input
+                            className={styles.inputField}
+                            value={editData.work_location ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                work_location: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Salary</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <input
-                              className={styles.inputField}
-                              value={editData.salary_min ?? ""}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  salary_min: e.target.value,
-                                })
-                              }
-                            />{" "}
-                            -{" "}
-                            <input
-                              className={styles.inputField}
-                              value={editData.salary_max ?? ""}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  salary_max: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span>
-                            {job.salary_min || "Salary"} -{" "}
-                            {job.salary_max || "Salary"} บาท
-                          </span>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <input
+                            type="number"
+                            className={styles.inputField}
+                            value={editData.salary_min ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                salary_min: e.target.value,
+                              })
+                            }
+                          />{" "}
+                          -{" "}
+                          <input
+                            type="number"
+                            className={styles.inputField}
+                            value={editData.salary_max ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                salary_max: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Age</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <input
-                              className={styles.inputField}
-                              value={editData.age_min ?? ""}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  age_min: e.target.value,
-                                })
-                              }
-                            />{" "}
-                            -{" "}
-                            <input
-                              className={styles.inputField}
-                              value={editData.age_max ?? ""}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  age_max: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span>
-                            {job.age_min || "age"} - {job.age_max || "age"} ปี
-                          </span>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <input
+                            type="number"
+                            className={styles.inputField}
+                            value={editData.age_min ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                age_min: e.target.value,
+                              })
+                            }
+                          />{" "}
+                          -{" "}
+                          <input
+                            type="number"
+                            className={styles.inputField}
+                            value={editData.age_max ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                age_max: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Job type</td>
                       <td>
-                        {isEditing ? (
-                          <select
-                            className={styles.selectInput}
-                            value={editData.job_type}
-                            onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                job_type: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="" disabled>
-                              Select Job Type
-                            </option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Freelance">Freelance</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Internship">Internship</option>
-                            <option value="Contract">Contract</option>
-                          </select>
-                        ) : (
-                          <span>{job.job_type || "Salary"}</span>
-                        )}
+                        <select
+                          className={styles.selectInput}
+                          value={editData.job_type ?? ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              job_type: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="" disabled>
+                            Select Job Type
+                          </option>
+                          <option value="Full-time">Full-time</option>
+                          <option value="Freelance">Freelance</option>
+                          <option value="Part-time">Part-time</option>
+                          <option value="Internship">Internship</option>
+                          <option value="Contract">Contract</option>
+                        </select>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Vacancy</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <input
-                              className={styles.inputField}
-                              value={editData.vacancy}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  vacancy: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <span>{job.vacancy || 1}</span>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <input
+                            className={styles.inputField}
+                            value={editData.vacancy ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                vacancy: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                     <tr>
                       <td className={styles.label}>Details</td>
                       <td>
-                        {isEditing ? (
-                          <div className={styles.editInputWrapper}>
-                            <textarea
-                              className={styles.inputField}
-                              value={editData.job_description}
-                              onChange={(e) =>
-                                setEditData({
-                                  ...editData,
-                                  job_description: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        ) : (
-                          <ul className={styles.list}>
-                            <li>
-                              {job.job_description || "No details specified"}
-                            </li>
-                          </ul>
-                        )}
+                        <div className={styles.editInputWrapper}>
+                          <textarea
+                            className={styles.inputField}
+                            value={editData.job_description ?? ""}
+                            onChange={(e) =>
+                              setEditData({
+                                ...editData,
+                                job_description: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -549,332 +512,206 @@ const DetailJob = () => {
                 <div style={{ marginTop: "30px" }}>
                   <hr />
                   <h3 className={styles.sectionTitle}>Qualifications</h3>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <textarea
-                        className={styles.inputField}
-                        value={editData.preferred_qualifications}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            preferred_qualifications: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <ol className={styles.list}>
-                      <li>
-                        {job.preferred_qualifications ||
-                          "No qualifications specified"}
-                      </li>
-                    </ol>
-                  )}
+                  <div className={styles.editInputWrapper}>
+                    <textarea
+                      className={styles.inputField}
+                      value={editData.preferred_qualifications ?? ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          preferred_qualifications: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className={styles.rightCol}>
                 <section>
                   <h3 className={styles.sectionTitle}>Benefits</h3>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <textarea
-                        className={styles.inputField}
-                        value={editData.Benefits}
-                        onChange={(e) =>
-                          setEditData({ ...editData, Benefits: e.target.value })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <ul className={styles.list}>
-                      <li
-                        style={{
-                          maxWidth: "450px",
-                          whiteSpace: "pre-line",
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {job.Benefits || "No benefits specified"}
-                      </li>
-                    </ul>
-                  )}
+                  <div className={styles.editInputWrapper}>
+                    <textarea
+                      className={styles.inputField}
+                      value={editData.Benefits ?? ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, Benefits: e.target.value })
+                      }
+                    />
+                  </div>
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
                   <hr />
                   <h3 className={styles.sectionTitle}>How to Apply</h3>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <textarea
-                        className={styles.inputField}
-                        value={editData.how_to_apply}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            how_to_apply: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <ul className={styles.list}>
-                      <li>
-                        {job.how_to_apply ||
-                          "No application instructions specified"}
-                      </li>
-                    </ul>
-                  )}
+                  <div className={styles.editInputWrapper}>
+                    <textarea
+                      className={styles.inputField}
+                      value={editData.how_to_apply ?? ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          how_to_apply: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
                   <hr />
                   <h3 className={styles.sectionTitle}>Contact</h3>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <textarea
-                        className={styles.inputField}
-                        value={editData.contact}
-                        onChange={(e) =>
-                          setEditData({ ...editData, contact: e.target.value })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <ul className={styles.list}>
-                      <li>
-                        {job.contact || "No contact information specified"}
-                      </li>
-                    </ul>
-                  )}
+                  <div className={styles.editInputWrapper}>
+                    <textarea
+                      className={styles.inputField}
+                      value={editData.contact ?? ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, contact: e.target.value })
+                      }
+                    />
+                  </div>
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
                   <hr />
                   <h3 className={styles.sectionTitle}>Application Deadline</h3>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <input
-                        type="datetime-local"
-                        className={styles.inputField}
-                        value={formatDateTimeLocal(editData?.application_dates)}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            application_dates: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          backgroundColor: "#e67e22",
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: "1.1rem",
-                          fontWeight: "500",
-                          color: "#333",
-                        }}
-                      >
-                        {job.application_dates
-                          ? new Date(job.application_dates).toLocaleDateString(
-                              "th-TH",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
-                            ) + " น."
-                          : "No deadline specified"}
-                      </span>
-                    </div>
-                  )}
+                  <div className={styles.editInputWrapper}>
+                    <input
+                      type="datetime-local"
+                      className={styles.inputField}
+                      value={formatDateTimeLocal(editData?.application_dates)}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          application_dates: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
                 </section>
               </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className={styles.container}>
-          <div className={styles.card}>
-            <div className={styles.testEditorContainer}>
-              <div className={styles.headerRow}>
-                <div>
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    {isMode ? (
-                      <button
-                        onClick={() => setIsMode(false)}
-                        className={styles.btntoggle}
-                      >
-                        Edit Questions
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setIsMode(true)}
-                        className={styles.btntoggle}
-                      >
-                        Edit Post
-                      </button>
-                    )}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      color: "#6b7280",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {questions.length} ข้อ
-                  </div>
-                </div>
-                <button
-                  className={styles.postBtn}
-                  onClick={handleSaveTest}
-                  disabled={isSavingTest}
-                >
-                  {isSavingTest ? "กำลังบันทึก..." : "บันทึกข้อสอบ"}
-                </button>
+        ) : (
+          <div className={styles.testEditorContainer}>
+            {loadingTests ? (
+              <div style={{ textAlign: "center", padding: "20px" }}>
+                กำลังโหลดคำถาม...
               </div>
-
-              {loadingTests ? (
-                <div style={{ textAlign: "center", padding: "20px" }}>
-                  กำลังโหลดคำถาม...
-                </div>
-              ) : questions.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                    color: "#9ca3af",
-                  }}
-                >
-                  ยังไม่มีข้อสอบสำหรับงานนี้
-                </div>
-              ) : (
-                /* สร้าง Wrapper สำหรับครอบรายการคำถามทั้งหมด */
-                <div className={styles.questionsList}>
-                  {questions.map((q, qIndex) => (
-                    <div
-                      key={q.questionId || qIndex}
-                      className={styles.questionBlock}
-                    >
-                      {/* Question row */}
-                      <div className={styles.inputWrapper}>
-                        <span className={styles.questionNumber}>
-                          {qIndex + 1}
-                        </span>
-                        <input
-                          type="text"
-                          className={styles.mainInput}
-                          value={q.text}
-                          placeholder="กรอกคำถามที่นี่..."
-                          onChange={(e) =>
-                            handleQuestionChange(qIndex, e.target.value)
-                          }
-                        />
-                        <button
-                          className={styles.deleteQBtn}
-                          onClick={() => handleDeleteQuestion(qIndex)}
-                        >
-                          ลบ
-                        </button>
-                      </div>
-
-                      {/* Options box */}
-                      <div className={styles.optionsBox}>
-                        {q.options.map((optText: string, optIndex: number) => (
-                          <div key={optIndex} className={styles.optionRow}>
-                            <div
-                              className={
-                                q.correctIndex === optIndex
-                                  ? styles.radioCircleActive
-                                  : styles.radioCircle
-                              }
-                              onClick={() =>
-                                handleSelectCorrect(qIndex, optIndex)
-                              }
-                            />
-                            <input
-                              type="text"
-                              className={styles.optionInput}
-                              value={optText}
-                              placeholder={`ตัวเลือกที่ ${optIndex + 1}`}
-                              onChange={(e) =>
-                                handleOptionChange(
-                                  qIndex,
-                                  optIndex,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                            {q.options.length > 2 && (
-                              <button
-                                className={styles.deleteOptBtn}
-                                onClick={() =>
-                                  handleDeleteOption(qIndex, optIndex)
-                                }
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Footer ของแต่ละข้อสอบ */}
-                      <div className={styles.cardFooter}>
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            color: "#9ca3af",
-                            fontStyle: "italic",
-                          }}
-                        >
-                          คลิกวงกลมเพื่อเลือกคำตอบที่ถูก
-                        </span>
-                        {q.options.length < 6 && (
-                          <button
-                            className={styles.addOptBtn}
-                            onClick={() => handleAddOption(qIndex)}
-                          >
-                            + เพิ่มตัวเลือก
-                          </button>
-                        )}
-                      </div>
+            ) : questions.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px",
+                  color: "#9ca3af",
+                }}
+              >
+                ยังไม่มีข้อสอบสำหรับงานนี้
+              </div>
+            ) : (
+              <div className={styles.questionsList}>
+                {questions.map((q, qIndex) => (
+                  <div
+                    key={q.questionId || qIndex}
+                    className={styles.questionBlock}
+                  >
+                    <div className={styles.inputWrapper}>
+                      <span className={styles.questionNumber}>
+                        {qIndex + 1}
+                      </span>
+                      <input
+                        type="text"
+                        className={styles.mainInput}
+                        value={q.text}
+                        placeholder="กรอกคำถามที่นี่..."
+                        onChange={(e) =>
+                          handleQuestionChange(qIndex, e.target.value)
+                        }
+                      />
+                      <button
+                        className={styles.deleteQBtn}
+                        onClick={() => handleDeleteQuestion(qIndex)}
+                      >
+                        ลบ
+                      </button>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {!loadingTests && (
-                <button
-                  className={styles.addQuestionBtn}
-                  onClick={handleAddQuestion}
-                >
-                  + เพิ่มข้อสอบ
-                </button>
-              )}
-            </div>
+                    <div className={styles.optionsBox}>
+                      {q.options.map((optText: string, optIndex: number) => (
+                        <div key={optIndex} className={styles.optionRow}>
+                          <div
+                            className={
+                              q.correctIndex === optIndex
+                                ? styles.radioCircleActive
+                                : styles.radioCircle
+                            }
+                            onClick={() =>
+                              handleSelectCorrect(qIndex, optIndex)
+                            }
+                          />
+                          <input
+                            type="text"
+                            className={styles.optionInput}
+                            value={optText}
+                            placeholder={`ตัวเลือกที่ ${optIndex + 1}`}
+                            onChange={(e) =>
+                              handleOptionChange(
+                                qIndex,
+                                optIndex,
+                                e.target.value,
+                              )
+                            }
+                          />
+                          {q.options.length > 2 && (
+                            <button
+                              className={styles.deleteOptBtn}
+                              onClick={() =>
+                                handleDeleteOption(qIndex, optIndex)
+                              }
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className={styles.cardFooter}>
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#9ca3af",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        คลิกวงกลมเพื่อเลือกคำตอบที่ถูก
+                      </span>
+                      {q.options.length < 6 && (
+                        <button
+                          className={styles.addOptBtn}
+                          onClick={() => handleAddOption(qIndex)}
+                        >
+                          + เพิ่มตัวเลือก
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!loadingTests && (
+              <button
+                className={styles.addQuestionBtn}
+                onClick={handleAddQuestion}
+                style={{ marginTop: "20px" }}
+              >
+                + เพิ่มข้อสอบ
+              </button>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

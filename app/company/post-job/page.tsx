@@ -49,33 +49,26 @@ const PostJob = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Step 1: กด Next → บันทึก post ก่อน แล้วค่อยไปหน้าคำถาม
-  const handleNext = async () => {
+  // Step 1: กด Next → ตรวจสอบฟิลด์ที่จำเป็นเฉยๆ ยังไม่บันทึกลง DB
+  const handleNext = () => {
     if (!formData.jobPosition || !formData.workLocation || !formData.jobType) {
       alert("Please fill in all required fields.");
       return;
     }
-    try {
-      const response = await fetch("/api/posts/insertPost", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setPostId(data.postId);
-        setIsNext(true);
-      } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
+    // ผ่านการตรวจสอบแล้วให้เปลี่ยนไปหน้าทำข้อสอบได้เลย
+    setIsNext(true);
   };
 
-  // Step 2: กด Submit → บันทึกคำถาม
+  // Step 2: กด Submit → บันทึกทั้ง Post และ คำถามต่อเนื่องกัน
   const handleSubmit = async () => {
+    // 1. ตรวจสอบความถูกต้องของข้อมูลโพสต์งานอีกครั้งเพื่อความชัวร์
+    if (!formData.jobPosition || !formData.workLocation || !formData.jobType) {
+      alert("Please fill in all required fields in the job form.");
+      setIsNext(false); // เด้งกลับไปหน้าแรกให้กรอกใหม่
+      return;
+    }
+
+    // 2. ตรวจสอบความถูกต้องของข้อสอบ
     const isValid = questions.every((q) => q.text && q.correctIndex !== null);
     if (!isValid) {
       alert(
@@ -83,16 +76,35 @@ const PostJob = () => {
       );
       return;
     }
+
     try {
-      const response = await fetch("/api/question/createTest", {
+      // 🚀 จังหวะที่ 1: บันทึกข้อมูล Post ลง Database ก่อนเพื่อเอา postId
+      const postResponse = await fetch("/api/posts/insertPost", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postId, questions }),
+        body: JSON.stringify(formData),
       });
-      if (response.ok) {
-        alert("Post and test created successfully!");
-        // router.push("/company/post-job");
-        // reset form
+
+      if (!postResponse.ok) {
+        const errorData = await postResponse.json();
+        alert(`Failed to create post: ${errorData.message}`);
+        return;
+      }
+
+      const postData = await postResponse.json();
+      const insertedPostId = postData.postId; // ได้ postId มาใช้งานแล้ว
+
+      // 🚀 จังหวะที่ 2: นำ insertedPostId ที่ได้ไปบันทึกชุดข้อสอบต่อทันที
+      const questionResponse = await fetch("/api/question/createTest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: insertedPostId, questions }),
+      });
+
+      if (questionResponse.ok) {
+        alert("Post and test created successfully! 🎉");
+
+        // รีเซ็ตข้อมูล Form ทั้งหมดกลับเป็นค่าเริ่มต้น
         setFormData({
           jobPosition: "",
           workLocation: "",
@@ -110,20 +122,19 @@ const PostJob = () => {
           contact: "",
         });
 
-        // reset questions
+        // รีเซ็ตข้อสอบ
         setQuestions([
           { id: "1", text: "", options: ["", ""], correctIndex: null },
         ]);
 
-        // reset postId
         setPostId(null);
         setIsNext(false);
-        fetchMyPosts();
+        fetchMyPosts(); // อัปเดตรายการงานล่าสุด
       } else {
-        alert("Failed to create test. Please try again.");
+        alert("Post created, but failed to create test. Please contact admin.");
       }
     } catch (error) {
-      console.error("Error posting test:", error);
+      console.error("Error posting data:", error);
       alert("An error occurred. Please try again.");
     }
   };
@@ -340,7 +351,7 @@ const PostJob = () => {
                         />
                         <input
                           type="text"
-                          placeholder={`Option ${optIndex + 1}`}
+                          placeholder="Option"
                           className={`${styles.optionInput} ${
                             q.correctIndex === optIndex ? styles.correct : ""
                           }`}

@@ -15,13 +15,14 @@ export async function POST(request: Request) {
         let user = null;
         let role = '';
 
-        // 1. ค้นหาในตาราง User ก่อน
+        // 1. ค้นหาในตาราง User
         const userSql = 'SELECT * FROM `User` WHERE email = ?';
         const [users]: any = await db.query(userSql, [email]);
 
         if (users.length > 0) {
             user = users[0];
-            role = 'seeker';
+            // 🎯 แก้ไข: ดึงสิทธิ์จากคอลัมน์ role ใน DB จริง (เช่น admin, seeker) ไม่ฮาร์ดโค้ดเป็น seeker อย่างเดียว
+            role = user.role || 'seeker';
         } else {
             // 2. ค้นหาในตาราง company
             const companySql = 'SELECT * FROM `company` WHERE company_email = ?';
@@ -38,12 +39,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }, { status: 401 });
         }
 
-        // 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) สำหรับทั้ง User และ Company --- 🚨
+        // 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) ---
         if (user.banned_until) {
             const banEndDate = new Date(user.banned_until);
             const currentDate = new Date();
 
-            // ถ้าเวลาปลดแบนยังมากกว่าเวลาปัจจุบัน แปลว่ายังติดแบนอยู่
             if (banEndDate > currentDate) {
                 const formattedBanDate = banEndDate.toLocaleString('th-TH');
                 return NextResponse.json({
@@ -51,7 +51,6 @@ export async function POST(request: Request) {
                 }, { status: 403 });
             }
         }
-        // ------------------------------------------------------------------
 
         // 3. ตรวจสอบรหัสผ่าน
         const dbPassword = role === 'company' ? user.company_password : user.password;
@@ -61,16 +60,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }, { status: 401 });
         }
 
-        // ลบรหัสผ่านทิ้งก่อนส่งกลับ Frontend เพื่อความปลอดภัย
+        // ลบรหัสผ่านทิ้งก่อนส่งกลับเพื่อความปลอดภัย
         if (role === 'company') {
             delete user.company_password;
         } else {
             delete user.password;
         }
 
-        // -----------------------------------------------------
-        // 🔐 เรียกใช้งานฟังก์ชันสร้าง Session
-        // -----------------------------------------------------
+        // 🔐 สร้าง Session ให้ตรงกับ ID ของแต่ละตาราง
         const sessionPayload = {
             id: role === 'company' ? user.company_id : user.uid,
             email: role === 'company' ? user.company_email : user.email,
@@ -78,7 +75,6 @@ export async function POST(request: Request) {
         };
 
         await createSession(sessionPayload);
-        // -----------------------------------------------------
 
         return NextResponse.json({
             message: 'เข้าสู่ระบบสำเร็จ',

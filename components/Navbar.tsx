@@ -10,11 +10,12 @@ export default function Navbar() {
   const [userRole, setUserRole] = useState("guest");
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
+  const [unreadCount, setUnreadCount] = useState<number>(0); // 🔔 State สำหรับจำนวนแจ้งเตือน
 
   const pathname = usePathname();
   const router = useRouter();
 
-  // 🔄 ดึงข้อมูล Session จาก API แทน LocalStorage
+  // ดึงข้อมูล Session จาก API และยอดแจ้งเตือนเมื่อเปลี่ยนหน้า
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -24,31 +25,73 @@ export default function Navbar() {
         if (data.user) {
           setUserRole(data.user.role);
           setUserId(data.user.id);
-          // ใช้ email แสดงผลไปก่อน (หากใน JWT คุณส่งชื่อมาด้วย สามารถเปลี่ยนเป็น data.user.name ได้)
           setUserName(data.user.email);
+
+          // 🔔 ส่งทั้ง ID และ Role ไปเช็คจำนวนแจ้งเตือน
+          if (data.user.role !== "guest") {
+            fetchNotificationBadge(data.user.id, data.user.role);
+          }
         } else {
           setUserRole("guest");
           setUserName("");
           setUserId("");
+          setUnreadCount(0);
         }
       } catch (error) {
         console.error("Failed to fetch session");
         setUserRole("guest");
         setUserId("");
+        setUnreadCount(0);
       }
     };
 
     fetchSession();
-  }, [pathname]); // ดึงใหม่เมื่อเปลี่ยนหน้า
+  }, [pathname]);
+
+  // 🔔 ฟังก์ชันเรียกตรวจสอบยอดตกค้าง (แยก Path ตามสิทธิ์ผู้ใช้งาน)
+  const fetchNotificationBadge = async (uid: string, role: string) => {
+    try {
+      // เช็คสิทธิ์: ถ้าเป็นบริษัทให้ยิงไปที่ api ฝั่งบริษัท ถ้าเป็นบุคคลทั่วไปให้ยิงไปที่เดิม
+      const apiUrl =
+        role === "company"
+          ? `/api/company/notifications?companyId=${uid}`
+          : `/api/feedback/notifications?userId=${uid}`;
+
+      const res = await fetch(apiUrl);
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error("Notification pull failed", err);
+    }
+  };
+
+  // 🔔 จุดแก้ไขใหม่: รอรับสัญญาณสั่งรีเฟรชตัวเลขกระดิ่งแจ้งเตือนแบบ Real-time
+  useEffect(() => {
+    const handleRefreshNotifications = () => {
+      if (userId && userRole !== "guest") {
+        fetchNotificationBadge(userId, userRole);
+      }
+    };
+
+    window.addEventListener("refreshNotifications", handleRefreshNotifications);
+
+    return () => {
+      window.removeEventListener(
+        "refreshNotifications",
+        handleRefreshNotifications,
+      );
+    };
+  }, [userId, userRole]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  // 🚪 ฟังก์ชัน Logout ยิงไปที่ API
   const onLogout = async () => {
     if (confirm("Are you sure you want to logout?")) {
       try {
-        await fetch("/api/auth/logout", { method: "POST" }); // สั่งลบ Cookie
+        await fetch("/api/auth/logout", { method: "POST" });
         setUserRole("guest");
         closeMenu();
         router.push("/login");
@@ -65,7 +108,7 @@ export default function Navbar() {
       case "company":
         return "/company/company-home";
       case "admin":
-        return "/admin/Feedbacks";
+        return "/admin/home";
       default:
         return "/";
     }
@@ -76,7 +119,6 @@ export default function Navbar() {
   return (
     <>
       <nav className="navbar">
-        {/* ... (โค้ด HTML ส่วนการแสดงผล Navbar ของคุณเหมือนเดิมเป๊ะๆ ทุกบรรทัด ไม่ต้องแก้เลยครับ) ... */}
         <div className="nav-container">
           <div className="brand">
             <button className="menu-icon" onClick={toggleMenu}>
@@ -89,7 +131,6 @@ export default function Navbar() {
 
           {/* ---------------- DESKTOP MENU ---------------- */}
           <div className="nav-links desktop-menu">
-            {/* GUEST ROLE */}
             {userRole === "guest" && (
               <>
                 <Link href="/login" className="nav-btn-outline">
@@ -101,7 +142,6 @@ export default function Navbar() {
               </>
             )}
 
-            {/* SEEKER ROLE */}
             {userRole === "seeker" && (
               <>
                 <Link
@@ -110,11 +150,16 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
+
+                {/* 🔔 จุดแสดงแจ้งเตือนฝั่ง Seeker */}
                 <Link
                   href="/user/user-feedback"
-                  className={`nav-item ${isActive("/user/user-feedback")}`}
+                  className={`nav-item nav-feedback-link ${isActive("/user/user-feedback")}`}
                 >
                   Feedback
+                  {unreadCount > 0 && (
+                    <span className="shock-badge">! {unreadCount}</span>
+                  )}
                 </Link>
 
                 <Link
@@ -129,7 +174,6 @@ export default function Navbar() {
               </>
             )}
 
-            {/* COMPANY ROLE */}
             {userRole === "company" && (
               <>
                 <Link
@@ -138,12 +182,18 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
+
+                {/* 🔔 จุดแสดงแจ้งเตือนสำหรับฝั่ง Company */}
                 <Link
                   href="/company/company-feedback"
-                  className={`nav-item ${isActive("/company/company-feedback")}`}
+                  className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}
                 >
                   Feedback
+                  {unreadCount > 0 && (
+                    <span className="shock-badge">! {unreadCount}</span>
+                  )}
                 </Link>
+
                 <Link
                   href="/company/post-job"
                   className={`nav-item ${isActive("/company/post-job")}`}
@@ -162,13 +212,12 @@ export default function Navbar() {
               </>
             )}
 
-            {/* ADMIN ROLE */}
             {userRole === "admin" && (
               <>
                 <Link href="/admin/Feedbacks" className="nav-item">
                   Feedbacks
                 </Link>
-                <Link href="/admin/CompanyVerification" className="nav-item">
+                <Link href="/admin/home" className="nav-item">
                   Verification
                 </Link>
                 <button onClick={onLogout} className="nav-btn-logout">
@@ -178,7 +227,6 @@ export default function Navbar() {
             )}
           </div>
         </div>
-        {/* {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>} */}
         {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
 
         <div className={`sidebar-menu ${isMenuOpen ? "open" : ""}`}>
@@ -188,32 +236,13 @@ export default function Navbar() {
               ×
             </button>
           </div>
-
           <div className="sidebar-links">
-            {userRole == "seeker" && (
-              <div className="user-info">
-                <span className="u-name">
-                  Hi seeker, {userName} ({userId})
-                </span>
-                <hr />
-              </div>
-            )}
-            {userRole == "guest" && (
-              <div className="user-info">
-                <span className="u-name">
-                  Hi guest, {userName} ({userId})
-                </span>
-                <hr />
-              </div>
-            )}
-            {userRole == "company" && (
-              <div className="user-info">
-                <span className="u-name">
-                  Hi company, {userName} ({userId})
-                </span>
-                <hr />
-              </div>
-            )}
+            <div className="user-info">
+              <span className="u-name">
+                Hi {userRole}, {userName} ({userId})
+              </span>
+              <hr />
+            </div>
           </div>
         </div>
       </nav>

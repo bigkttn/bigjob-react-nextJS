@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import styles from "./Feedback.module.css";
+import styles from "./CompanyFeedback.module.css";
 
 interface FeedbackItem {
   feedback_id: number;
-  user_id: number;
+  company_id: number;
   message: string;
   created_at: string;
   admin_message: string | null;
@@ -13,10 +13,10 @@ interface FeedbackItem {
   replied_at: string | null;
 }
 
-export default function UserFeedbackPage() {
+export default function CompanyFeedbackPage() {
   const [message, setMessage] = useState("");
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>([]);
-  const [userId, setUserId] = useState<number | null>(null);
+  const [companyId, setCompanyId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const initFeedbackDashboard = async () => {
@@ -24,22 +24,14 @@ export default function UserFeedbackPage() {
       const resAuth = await fetch("/api/auth/me");
       const dataAuth = await resAuth.json();
       if (dataAuth.user?.id) {
-        const uid = Number(dataAuth.user.id);
-        setUserId(uid);
+        const cid = Number(dataAuth.user.id);
+        setCompanyId(cid);
 
-        // 📥 เช็ค URL ตรงนี้ให้มั่นใจว่าตรงกับโฟลเดอร์หลังบ้าน (มี s หรือไม่มี s)
-        const resFb = await fetch(`/api/feedback?userId=${uid}`);
-        // 🌟 ดักดึงข้อมูล: ถ้าหลังบ้านพัง (ไม่ใช่ status 200) ให้หยุดทำงานทันที จะได้ไม่เกิดบั๊ก SyntaxError
-        if (!resFb.ok) {
-          console.error(
-            `Backend returned status ${resFb.status} for feedbacks API`,
-          );
-          return;
-        }
-
+        const resFb = await fetch(`/api/company/feedbacks?companyId=${cid}`);
         const dataFb = await resFb.json();
         setFeedbacks(dataFb.feedbacks || []);
 
+        // แจ้งเตือน Navbar ให้คำนวณตัวเลขแจ้งเตือนใหม่
         window.dispatchEvent(new Event("refreshNotifications"));
       }
     } catch (error) {
@@ -47,7 +39,6 @@ export default function UserFeedbackPage() {
     }
   };
 
-  // 🌟 ฟังก์ชันจัดการเมื่อเกิดการคลิกอ่านที่กล่องข้อความ (เปลี่ยนเป็น read เฉพาะ ID นั้น)
   const handleMarkAsRead = async (
     feedbackId: number,
     currentStatus: string,
@@ -55,17 +46,14 @@ export default function UserFeedbackPage() {
     if (currentStatus !== "replied") return;
 
     try {
-      // 🌟 แก้ตรงนี้: เอาตัว s ออกให้ตรงกับเส้น GET
-      const res = await fetch("/api/feedback", {
+      const res = await fetch("/api/company/feedbacks", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ feedbackId }),
       });
 
       if (res.ok) {
-        await initFeedbackDashboard();
-      } else {
-        console.error("PATCH Error:", res.status); // เพิ่ม log ไว้ดูเผื่อพัง
+        await initFeedbackDashboard(); // รีเฟรชเพื่อเปลี่ยนสีส้มกลับเป็นสีปกติหลังกดอ่าน
       }
     } catch (error) {
       console.error("Failed to update status to read:", error);
@@ -74,15 +62,14 @@ export default function UserFeedbackPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !userId) return;
+    if (!message.trim() || !companyId) return;
 
     setIsLoading(true);
     try {
-      // 🌟 แก้ตรงนี้: เอาตัว s ออกด้วยเหมือนกันครับ
-      const res = await fetch("/api/feedback", {
+      const res = await fetch("/api/company/feedbacks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, message }),
+        body: JSON.stringify({ companyId, message }),
       });
 
       if (res.ok) {
@@ -104,9 +91,9 @@ export default function UserFeedbackPage() {
 
   return (
     <div className={styles.container}>
-      {/* ฝั่งซ้าย: ฟอร์มกรอกข้อความคำติชม */}
+      {/* ฝั่งซ้าย: ฟอร์มส่งข้อมูล */}
       <div className={styles.leftPanel}>
-        <h1 className={styles.title}>คำติชมระบบ</h1>
+        <h1 className={styles.title}>คำติชมระบบ (สำหรับบริษัท)</h1>
         <p className={styles.subtitle}>
           กรุณากรอกข้อมูลปัญหาหรือข้อเสนอแนะที่ต้องการส่งมอบให้ทีมผู้ดูแลระบบ
         </p>
@@ -131,7 +118,7 @@ export default function UserFeedbackPage() {
         </form>
       </div>
 
-      {/* ฝั่งขวา: แสดงลิสต์ประวัติพร้อมข้อความตอบกลับ */}
+      {/* ฝั่งขวา: ประวัติคำติชม */}
       <div className={styles.rightPanel}>
         <h2 className={styles.title}>ประวัติและคำตอบจากแอดมิน</h2>
         <div className={styles.historyList}>
@@ -144,18 +131,17 @@ export default function UserFeedbackPage() {
               <div
                 key={item.feedback_id}
                 className={styles.card}
-                // 🌟 ผูกเหตุการณ์คลิกอ่านแยกทีละกล่อง
                 onClick={() => handleMarkAsRead(item.feedback_id, item.status)}
-                // 🌟 ปรับแต่งสไตล์เพิ่มสีส้มพาสเทลนวลตาเมื่อมีคำตอบใหม่เข้ามา
+                // 🌟 ปรับแต่งสไตล์เพิ่มส้มพาสเทลเมื่อมีสถานะเป็น replied
                 style={{
                   cursor: item.status === "replied" ? "pointer" : "default",
                   backgroundColor:
-                    item.status === "replied" ? "#fff7ed" : undefined,
+                    item.status === "replied" ? "#fff7ed" : undefined, // สีส้มอ่อนนวลตา (Orange 50)
                   borderColor:
-                    item.status === "replied" ? "#ffedd5" : undefined,
+                    item.status === "replied" ? "#ffedd5" : undefined, // ขอบส้มจางๆ (Orange 100)
                   borderWidth: item.status === "replied" ? "1px" : undefined,
                   borderStyle: item.status === "replied" ? "solid" : undefined,
-                  transition: "all 0.2s ease",
+                  transition: "all 0.2s ease", // เพิ่ม Animation ตอนเปลี่ยนสีให้นุ่มนวลขึ้น
                 }}
               >
                 <div className={styles.cardHeader}>

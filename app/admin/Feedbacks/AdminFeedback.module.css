@@ -1,0 +1,273 @@
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: sans-serif;
+}
+
+.header h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.header p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* การ์ดหลัก */
+.card {
+  display: flex;
+  flex-direction: row;
+  background: #e9ecef;
+  border-radius: 20px;
+  padding: 25px;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+/* ด้านซ้าย (ป้ายกำกับ + เวลา) */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.badgeUser {
+  background-color: #a3c2fa;
+  color: #1d4ed8;
+}
+
+.badgeCompany {
+  background-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.date {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+}
+
+.emailText {
+  font-size: 12px;
+  color: #666;
+  word-break: break-all;
+}
+
+/* ส่วนกลางเนื้อหา */
+.messageContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.userMessage p {
+  margin: 0;
+  color: #222;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ช่องตอบกลับ */
+.replySection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.replyTextarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.replyTextarea:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.replyBtn {
+  align-self: flex-end;
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.replyBtn:hover {
+  background-color: #111;
+}
+
+/* กล่องเมื่อตอบแล้ว */
+.repliedBox {
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 15px;
+  border-radius: 12px;
+  border-left: 5px solid #10b981;
+}
+
+.repliedBox strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.repliedBox p {
+  margin: 0 0 10px 0;
+}
+
+.repliedBox small {
+  opacity: 0.8;
+}
+
+/* ปุ่มลบด้านขวา */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding-top: 10px;
+}
+
+.removeBtn {
+  background-color: #b91c1c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.removeBtn:hover {
+  background-color: #991b1b;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  margin-top: 40px;
+}
+.repliedBox {
+  background-color: #f4f6f8;
+  border-left: 4px solid #28a745; /* เส้นขอบข้างสีเขียวเด่นชัด */
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.repliedBox strong {
+  color: #1c7430; /* ตัวอักษร Admin Reply สีเขียวเข้ม */
+  font-size: 0.95rem;
+}
+.repliedBox p {
+  margin: 6px 0;
+  color: #333333;
+  font-weight: 500;
+}
+.repliedBox small {
+  color: #888888;
+  font-size: 0.8rem;
+}
+
+/* สไตล์พื้นฐานของสถานะ */
+.statusBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+}
+.statusPending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+.statusRead {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+.statusReplied {
+  background-color: #d4edda;
+  color: #155724;
+}
+/*  Filter & Sorting Controls                             */
+.filterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  background-color: #ffffff;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  align-items: center;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background-color: #fafafa;
+  cursor: pointer;
+  outline: none;
+  min-width: 150px;
+  transition: all 0.2s ease;
+}
+
+.filterSelect:focus {
+  border-color: #666;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}

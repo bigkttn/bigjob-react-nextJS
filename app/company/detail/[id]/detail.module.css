@@ -353,6 +353,96 @@
 .btntoggle:active {
   transform: scale(0.97);
 }
+
+.backBtn {
+  font-weight: bold;
+  color: white;
+  border-radius: 2rem;
+  cursor: pointer;
+  width: 95.02px;
+  height: 42.66px;
+  border: none;
+  background-color: #3653f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.backBtn .spanMother {
+  display: flex;
+  overflow: hidden;
+}
+
+.backBtn:hover .spanMother {
+  position: absolute;
+}
+
+.backBtn:hover .spanMother span {
+  transform: translateY(1.2em);
+}
+
+.backBtn .spanMother span:nth-child(1) {
+  transition: 0.2s;
+}
+
+.backBtn .spanMother span:nth-child(2) {
+  transition: 0.3s;
+}
+
+.backBtn .spanMother span:nth-child(3) {
+  transition: 0.4s;
+}
+
+.backBtn .spanMother span:nth-child(4) {
+  transition: 0.5s;
+}
+
+.backBtn .spanMother span:nth-child(5) {
+  transition: 0.6s;
+}
+
+.backBtn .spanMother span:nth-child(6) {
+  transition: 0.7s;
+}
+
+.backBtn .spanMother2 {
+  display: flex;
+  position: absolute;
+  overflow: hidden;
+}
+
+.backBtn .spanMother2 span {
+  transform: translateY(-1.2em);
+}
+
+.backBtn:hover .spanMother2 span {
+  transform: translateY(0);
+}
+
+.backBtn .spanMother2 span {
+  transition: 0.2s;
+}
+
+.backBtn .spanMother2 span:nth-child(2) {
+  transition: 0.3s;
+}
+
+.backBtn .spanMother2 span:nth-child(3) {
+  transition: 0.4s;
+}
+
+.backBtn .spanMother2 span:nth-child(4) {
+  transition: 0.5s;
+}
+
+.backBtn .spanMother2 span:nth-child(5) {
+  transition: 0.6s;
+}
+
+.backBtn .spanMother2 span:nth-child(6) {
+  transition: 0.7s;
+}
 /*                <td>
                     {isEditing ? (
                       <div className={styles.editInputWrapper}>

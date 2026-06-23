@@ -1,0 +1,166 @@
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 24px;
+  min-height: calc(100vh - 140px);
+}
+
+.leftPanel,
+.rightPanel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+}
+
+.rightPanel {
+  background: #f8f9fa;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #111;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.textarea {
+  width: 100%;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+  font-size: 15px;
+  resize: vertical;
+  outline: none;
+}
+
+.textarea:focus {
+  border-color: #000000;
+}
+
+.submitBtn {
+  background: #000000;
+  color: #ffffff;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitBtn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  max-height: 550px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.date {
+  color: #888;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.status.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status.replied {
+  background: #d4edda;
+  color: #155724;
+}
+.status.read {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.userMessage {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.adminReply {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #ddd;
+}
+.adminReply strong {
+  font-size: 13px;
+  color: #ff1744;
+  display: block;
+  margin-bottom: 4px;
+}
+.adminReply p {
+  background: #f1f3f5;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #444;
+}
+.replyDate {
+  display: block;
+  font-size: 11px;
+  color: #aaa;
+  text-align: right;
+  margin-top: 4px;
+}
+
+.emptyText {
+  color: #999;
+  text-align: center;
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}

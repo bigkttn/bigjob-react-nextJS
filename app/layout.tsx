@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/footer";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,18 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-     
       {/* นำตัวแปรฟอนต์ และ Class สำหรับตกแต่งพื้นหลังมารวมกันที่ tag body */}
-      <body 
+      <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50 font-sans flex flex-col`}
       >
         <Navbar /> {/* ใส่ Navbar ไว้ด้านบนสุด */}
-        
         {/* ให้ children (เนื้อหาของหน้าเว็บต่างๆ) อยู่ตรงนี้ */}
-        <main className="flex-grow">
-          {children}
-        </main>
-
+        <main className="flex-grow">{children}</main>
+        <Footer />
       </body>
     </html>
   );
