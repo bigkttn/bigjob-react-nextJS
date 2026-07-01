@@ -83,35 +83,57 @@ const DetailJob = () => {
                     
           <div key={index} className={styles.header}>))} */}
         <button className={styles.applyBtn}>Apply Now</button>
-        <Link
-          href={`/user/userProfileCompany/${job.company_id}`}
-          className={styles.companyLink}
-        >
-          {job.company_name}
-        </Link>
+
         <div className={styles.header}>
-          <img
-            src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
-            alt="Chao Phraya United"
-            className={styles.logo}
-          />
-          <h1 className={styles.companyName}>
-            {job.company_name || "Company Name"}
-          </h1>
-          <span
-            style={{
-              padding: "4px 12px",
-              borderRadius: "20px",
-              fontSize: "0.85rem",
-              fontWeight: "bold",
-              display: "inline-block",
-              marginTop: "5px",
-              border: "1px solid currentColor",
-              ...getStatusStyle(job.status),
-            }}
+          <div
+            // style={{
+            //   display: "flex",
+            //   flexDirection: "column",
+            //   alignItems: "center",
+            //   gap: "10px",
+            //   backgroundColor: "#056ed8",
+            //   borderRadius: "50px",
+            // }}
+            className={styles.linkCard1}
           >
-            {job.status || "ไม่ระบุสถานะ"}
-          </span>
+            <Link
+              href={`/user/userProfileCompany/${job.company_id}`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "15px",
+                textDecoration: "none",
+                color: "inherit",
+              }}
+            >
+              <img
+                src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
+                alt="Company Logo"
+                className={styles.logo}
+              />
+
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <h1 className={styles.companyName}>
+                  {job.company_name || "Company Name"}
+                </h1>
+
+                <span
+                  style={{
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    fontSize: "0.85rem",
+                    fontWeight: "bold",
+                    border: "1px solid currentColor",
+                    ...getStatusStyle(job.status),
+                  }}
+                >
+                  {job.status || "ไม่ระบุสถานะ"}
+                </span>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* --- ส่วนเนื้อหา (Grid) --- */}

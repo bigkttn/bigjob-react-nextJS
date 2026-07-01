@@ -1,189 +1,241 @@
+// 📂 app/(user-facing route)/company/[id]/ProfileCompany.tsx
 "use client";
 
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./userProfileCompany.module.css";
 import Link from "next/link";
 
+type LeafletMapProps = {
+  lat: number | string | null;
+  lng: number | string | null;
+  isEditMode: boolean;
+  onChangeLocation: (newLat: number, newLng: number) => void;
+};
+
 export default function ProfileCompany() {
   const { id } = useParams();
   const router = useRouter();
-  const [companyData, setCompanyData] = useState<{
-    company: any;
-    posts: any[];
-  } | null>(null);
+
+  // โหลดแผนที่แบบไม่ SSR เหมือนหน้า CompanyProfile (แต่ล็อกไว้เป็นโหมดดูอย่างเดียว)
+  const MapWithNoSSR = dynamic<LeafletMapProps>(
+    () => import("@/components/LeafletMap"),
+    {
+      ssr: false,
+      loading: () => (
+        <div
+          style={{
+            height: "300px",
+            background: "#eee",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p>Loading Map...</p>
+        </div>
+      ),
+    },
+  );
+
+  const [company, setCompany] = useState<any>(null);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchCompanyProfile() {
       try {
-        const response = await fetch(`/api/company/getCompanyById/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setCompanyData(data);
+        const res = await fetch(`/api/company/getCompanyById/${id}`);
+        const data = await res.json();
+        if (res.ok) {
+          setCompany(data.company);
+          setPosts(data.posts || []);
+        } else {
+          setError(data.error || "Failed to fetch company profile");
         }
-      } catch (error) {
-        console.error("Error fetching company profile:", error);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     }
 
-    if (id) {
-      fetchCompanyProfile();
-    }
+    if (id) fetchCompanyProfile();
   }, [id]);
 
-  if (!companyData) {
-    return <div className={styles.container}>กำลังโหลดข้อมูลบริษัท...</div>;
-  }
+  if (loading) return <p style={{ padding: 20 }}>กำลังโหลดข้อมูลบริษัท...</p>;
+  if (error) return <p style={{ padding: 20 }}>Error: {error}</p>;
+  if (!company) return <p style={{ padding: 20 }}>No company data</p>;
 
-  // ดึงข้อมูลบริษัท และอาเรย์ของโพสต์งานออกมาใช้งาน
-  const { company, posts } = companyData;
+  const fmt = (val: any) =>
+    val !== null && val !== undefined && val !== "" ? String(val) : "-";
+
+  const isVerified =
+    typeof company.verification_status === "string" &&
+    company.verification_status.toLowerCase() === "approved";
+  const isRejected =
+    typeof company.verification_status === "string" &&
+    company.verification_status.toLowerCase() === "rejected";
+
+  const statusColor = isVerified ? "#1a8a2a" : isRejected ? "#b50000" : "#888";
+  const statusLabel = isVerified
+    ? "ยืนยันตัวตนแล้ว"
+    : isRejected
+      ? "ถูกปฏิเสธ"
+      : "รอตรวจสอบ";
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      />
+
+      <div className={styles.backBtnWrapper}>
         <button
+          type="button"
           onClick={() => router.back()}
-          style={{
-            marginBottom: "20px",
-            padding: "10px 18px",
-            borderRadius: "10px",
-            border: "none",
-            background: "#2563eb",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className={styles.backBtn}
         >
           ← ย้อนกลับ
         </button>
+      </div>
 
-        {/* --- ส่วนหัวโปรไฟล์บริษัท (Company Header) --- */}
-        <div className={styles.header}>
+      {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
+      <div className={styles.leftSection}>
+        <div className={styles.profileCard}>
           <img
-            src={company.logo_image || "/assets/images/suggestedCompanys.jpg"}
-            alt={company.company_name}
-            className={styles.logo}
+            src={company.cover_image || "/assets/images/company_2.jpg"}
+            className={styles.banner}
+            alt="Banner"
           />
-          <h1 className={styles.companyName}>
-            {company.company_name || "Company Name"}
-          </h1>
-          <span
-            style={{
-              padding: "4px 12px",
-              borderRadius: "20px",
-              fontSize: "0.85rem",
-              fontWeight: "bold",
-              display: "inline-block",
-              marginTop: "5px",
-              border: "1px solid #22c55e",
-              color: "#22c55e",
-              backgroundColor: "#f0fdf4",
-            }}
-          >
-            {company.verification_status === "Approved"
-              ? "ยืนยันตัวตนแล้ว"
-              : "รอดำเนินการ"}
-          </span>
-        </div>
 
-        {/* --- ข้อมูลทั่วไปของบริษัท --- */}
-        <div style={{ marginTop: "20px", marginBottom: "30px" }}>
-          <h3 className={styles.sectionTitle}>เกี่ยวกับบริษัท</h3>
-          <p style={{ color: "#666", fontSize: "0.95rem", lineHeight: "1.6" }}>
-            {company.brief_history && company.brief_history !== "ดหกดหกด"
-              ? company.brief_history
-              : "ไม่มีข้อมูลประวัติบริษัท"}
-          </p>
-          <div style={{ marginTop: "15px", fontSize: "0.9rem", color: "#444" }}>
-            <strong>ประเภทธุรกิจ:</strong> {company.business_type} <br />
-            <strong>ที่อยู่:</strong> {company.full_address} จ.
-            {company.province} {company.postcode} <br />
-            <strong>ติดต่อ:</strong> {company.contact_information} (
-            {company.mobile_phone})
+          <div className={styles.logoWrapper}>
+            <img
+              src={company.logo_image || "/assets/images/suggestedCompanys.jpg"}
+              className={styles.logo}
+              alt="Logo"
+            />
+          </div>
+
+          <div className={styles.infoArea}>
+            <h1 className={styles.companyName}>
+              {fmt(company.company_name)}
+              {isVerified ? (
+                <span
+                  className="material-symbols-outlined"
+                  title="บริษัทนี้ผ่านการยืนยันตัวตนแล้ว"
+                  style={{ color: "#1d9bf0" }}
+                >
+                  verified
+                </span>
+              ) : (
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: statusColor,
+                    border: `1px solid ${statusColor}`,
+                    borderRadius: "999px",
+                    padding: "2px 10px",
+                    alignSelf: "center",
+                  }}
+                >
+                  {statusLabel}
+                </span>
+              )}
+            </h1>
+
+            <p>{fmt(company.brief_history)}</p>
+
+            <hr />
+            <div className={styles.contactGroup}>
+              <h3>Contact & Location</h3>
+              <p>{fmt(company.contact_information)}</p>
+              <p>{fmt(company.full_address)}</p>
+              <p>{fmt(company.province)}</p>
+              <p>{fmt(company.postcode)}</p>
+              <p>Tel: {fmt(company.mobile_phone)}</p>
+              <p>Email: {fmt(company.company_email)}</p>
+            </div>
           </div>
         </div>
 
-        <hr />
+        <div className={styles.mapWrapper}>
+          <MapWithNoSSR
+            lat={company.company_latitude}
+            lng={company.company_longitude}
+            isEditMode={false}
+            onChangeLocation={() => {}}
+          />
+        </div>
+      </div>
 
-        {/* --- รายการตำแหน่งงานที่เปิดรับ (Job Openings) --- */}
-        <div style={{ marginTop: "30px" }}>
-          <h2
+      {/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
+      <div className={styles.rightSection}>
+        <div className={styles.VerifiedConfirm}>
+          <div
             style={{
-              fontSize: "1.4rem",
-              marginBottom: "20px",
-              color: "#1e293b",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "10px",
             }}
           >
-            ตำแหน่งงานที่เปิดรับสมัคร ({posts ? posts.length : 0} ตำแหน่ง)
+            <h3 style={{ margin: 0 }}>Company Registration Certificate</h3>
+            <span
+              style={{
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                color: "#fff",
+                backgroundColor: statusColor,
+                borderRadius: "999px",
+                padding: "4px 12px",
+              }}
+            >
+              {statusLabel}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.jobScrollArea}>
+          <h2
+            style={{ margin: "0 0 4px", fontSize: "1.2rem", color: "#1e293b" }}
+          >
+            ตำแหน่งงานที่เปิดรับสมัคร ({posts.length})
           </h2>
 
-          {posts && posts.length > 0 ? (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-            >
-              {posts.map((job) => (
-                <div
-                  key={job.post_id}
-                  style={{
-                    border: "1px solid #e2e8f0",
-                    borderRadius: "12px",
-                    padding: "20px",
-                    backgroundColor: "#f8fafc",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ margin: "0 0 8px 0", color: "#2563eb" }}>
-                        {job.job_position}
-                      </h3>
-                      <p
-                        style={{
-                          margin: "0 0 12px 0",
-                          color: "#475569",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        <strong>รายละเอียดงาน:</strong> {job.job_description}
-                      </p>
-                      <p
-                        style={{
-                          margin: "0",
-                          color: "#475569",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        <strong>คุณสมบัติเด่น:</strong>{" "}
-                        {job.preferred_qualifications}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/jobs/${job.post_id}`} // เปลี่ยน Link ไปยังหน้ารายละเอียดของงานนั้นๆ
-                      style={{
-                        padding: "8px 16px",
-                        background: "#2563eb",
-                        color: "#fff",
-                        borderRadius: "6px",
-                        textDecoration: "none",
-                        fontSize: "0.85rem",
-                        fontWeight: "500",
-                      }}
-                    >
-                      ดูรายละเอียดงาน
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {posts.length === 0 ? (
+            <p style={{ color: "#888" }}>ยังไม่มีตำแหน่งงานที่เปิดรับ</p>
           ) : (
-            <p style={{ color: "#94a3b8" }}>
-              ขณะนี้ยังไม่มีตำแหน่งงานที่เปิดรับ
-            </p>
+            posts.map((job: any) => (
+              <div key={job.post_id} className={styles.jobCard}>
+                <img
+                  src={
+                    company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                  }
+                  width={80}
+                  height={80}
+                  alt="Job Logo"
+                />
+                <div>
+                  <h2>{fmt(job.job_position)}</h2>
+                  <p>
+                    <strong>Details:</strong> {fmt(job.job_description)}
+                  </p>
+                  <p>
+                    <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
+                    {fmt(job.salary_max)} / month
+                  </p>
+                  <Link href={`/user/user-detail-job/${job.post_id}`}>
+                    <button className={styles.detailBtn}>Detail</button>
+                  </Link>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

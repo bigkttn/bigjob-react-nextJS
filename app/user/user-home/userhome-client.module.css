@@ -310,7 +310,7 @@
   justify-content: space-around;
   gap: 10px;
   margin: 10px 10px 10px 10px;
-  height: 120px;
+  height: 150px;
   max-width: 360px;
 }
 .suggestMiniCard img {
@@ -340,13 +340,13 @@
 .detailsBtn {
   position: relative;
   top: 30px;
-  left: 130px;
+  left: 145px;
   background: #000;
   color: white;
-  font-size: 10px;
+  font-size: 14px;
   border-radius: 10px;
   padding: 4px 8px;
-  max-width: 50px;
+  max-width: 70px;
 }
 .detailsBtn:hover {
   background-color: #202020;

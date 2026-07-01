@@ -37,6 +37,15 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     }
   };
 
+  const getStatusStyle = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === "open" || s === "เปิดรับสมัคร")
+      return { color: "#28a745", backgroundColor: "#eaffea" };
+    if (s === "closed" || s === "ปิดรับสมัคร")
+      return { color: "#dc3545", backgroundColor: "#ffebeb" };
+    return { color: "#6c757d", backgroundColor: "#f8f9fa" };
+  };
+
   if (isLoading) {
     return (
       <div className={styles.skeletonWrapper}>
@@ -333,7 +342,29 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           </div>
                           <div className={styles.suggestMiniCardInfo}>
                             <div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  position: "relative",
+                                  gap: "10px",
+                                  marginLeft: "170px",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    padding: "4px 12px",
+                                    borderRadius: "20px",
+                                    fontSize: "0.85rem",
+                                    fontWeight: "bold",
+                                    border: "1px solid currentColor",
+                                    ...getStatusStyle(post.status),
+                                  }}
+                                >
+                                  {post.status || "ไม่ระบุสถานะ"}
+                                </span>
+                              </div>
                               <p className={styles.bold}>{post.company_name}</p>
+
                               <p>{post.job_position}</p>
                             </div>
                             <Link
