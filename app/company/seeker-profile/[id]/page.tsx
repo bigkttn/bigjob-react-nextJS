@@ -129,11 +129,11 @@ export default async function SeekerProfilePage({
               {[
                 { label: "Line ID", key: "line_id" },
                 { label: "Country", key: "country" },
-                { label: "Address", key: "address" },
+                // { label: "Address", key: "address" },
                 { label: "Province", key: "province" },
                 { label: "District", key: "district" },
                 { label: "Sub District", key: "sub_district" },
-                { label: "Postal Code", key: "postal_code" },
+                // { label: "Postal Code", key: "postal_code" },
               ].map((item) => (
                 <div className={styles.infoRow} key={item.key}>
                   <strong>{item.label}:</strong> {fmt(profile[item.key])}

@@ -1151,7 +1151,7 @@ const SeekerProfile = () => {
                               >
                                 <label
                                   style={{
-                                    fontWeight: "600",
+                                    fontWeight: "500",
                                     fontSize: "0.9rem",
                                     color: "#333",
                                   }}
@@ -1196,7 +1196,7 @@ const SeekerProfile = () => {
                               >
                                 <label
                                   style={{
-                                    fontWeight: "600",
+                                    fontWeight: "500",
                                     fontSize: "0.9rem",
                                     color: "#333",
                                   }}

@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./detailjob.module.css";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 
 const DetailJob = () => {
   const params = useParams(); // 2. ดึงค่าจาก URL
@@ -82,6 +83,12 @@ const DetailJob = () => {
                     
           <div key={index} className={styles.header}>))} */}
         <button className={styles.applyBtn}>Apply Now</button>
+        <Link
+          href={`/user/userProfileCompany/${job.company_id}`}
+          className={styles.companyLink}
+        >
+          {job.company_name}
+        </Link>
         <div className={styles.header}>
           <img
             src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
