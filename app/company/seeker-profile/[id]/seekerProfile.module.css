@@ -25,6 +25,7 @@
   padding: 20px;
   text-align: center;
   font-weight: bold;
+  justify-content: center;
   font-size: 1.2rem;
 }
 
@@ -426,4 +427,17 @@
 .backBtn:active {
   transform: translateX(0);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.bookmarkIcon:hover {
+  background-color: rgb(231, 245, 245);
+  color: darkcyan; /* 💡 ปรับให้เป็นสีเข้มขึ้น เพื่อให้ตัดกับพื้นหลังสีฟ้าอ่อน จะได้มองเห็นชัดเจนครับ */
+  cursor: pointer; /* แก้ไขตรงนี้ */
+}
+
+/* ตอนคลิกปุ่ม (ขณะกดเมาส์ค้างไว้) */
+.bookmarkIcon:active {
+  background-color: #005b5b;
+  color: white; /* 💡 ตอนปุ่มเข้มขึ้น ค่อยเปลี่ยนไอคอนเป็นสีขาวจะสวยกว่าครับ */
+  transform: scale(0.95);
+  cursor: pointer; /* แก้ไขตรงนี้ */
 }

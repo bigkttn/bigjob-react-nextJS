@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import styles from "./seekerProfile.module.css";
 import FilePreviewButton from "./FilePreviewButton";
 import BackButton from "./BackButton";
+import ProfileActionsButton from "./ProfileActionsButton";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -84,7 +85,36 @@ export default async function SeekerProfilePage({
       <div className={styles.profileGrid}>
         {/* ── Column 1: Personal Info ── */}
         <div className={styles.column}>
-          <div className={styles.cardHeader}>Personal Information</div>
+          <div
+            className={styles.cardHeader}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              position: "relative", // เพิ่มความปลอดภัยในการจัดตำแหน่ง
+            }}
+          >
+            {/* 1. สร้างกล่องว่างขึ้นมาฝั่งซ้าย เพื่อถ่วงน้ำหนักให้ข้อความอยู่ตรงกลางพอดี */}
+            <div style={{ width: "24px" }}></div>
+
+            {/* 2. ข้อความหัวข้อจะอยู่ตรงกลาง */}
+            <span style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
+              Personal Information
+            </span>
+
+            {/* 3. ปุ่มสามจุดจะถูกดันไปชิดขวาสุดพอดี */}
+            <div
+              style={{
+                width: "24px",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <ProfileActionsButton />
+            </div>
+          </div>
+
           <div className={styles.personalInfoContent}>
             <div className={styles.avatarWrapper}>
               <img
