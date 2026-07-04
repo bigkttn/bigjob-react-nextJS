@@ -347,7 +347,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                                   display: "flex",
                                   position: "relative",
                                   gap: "10px",
-                                  marginLeft: "170px",
+                                  marginLeft: "145px",
                                 }}
                               >
                                 <span
@@ -370,10 +370,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                             <Link
                               href={"/user/user-detail-job/" + post.post_id}
                             >
-                              <button
-                                className={styles.detailsBtn}
-                                style={{ marginLeft: "30px" }}
-                              >
+                              <button className={styles.detailsBtn}>
                                 Details
                               </button>
                             </Link>
