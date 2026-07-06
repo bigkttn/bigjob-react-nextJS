@@ -46,7 +46,7 @@ export async function GET(
             ),
             // Image 2: table = education, cols = education_id, user_id, level, institution, faculty, major, year_start, year_end
             db.query(
-                'SELECT education_id, level, institution, faculty, major, year_start, year_end FROM education WHERE user_id = ? ORDER BY year_start ASC',
+                'SELECT education_id, level, institution, faculty, major, year_start, year_end FROM education WHERE user_id = ? ORDER BY year_start DESC',
                 [id]
             ),
             // Image 5: table = skills, cols = skill_id, user_id, skill_name, skill_category, skill_detail

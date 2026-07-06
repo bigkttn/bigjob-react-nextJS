@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import "material-symbols";
 import styles from "./seekerProfile.module.css"; // หรือจะแยกไฟล์ css ก็ได้
 
-export default function ProfileActionsButton() {
+export default async function ProfileActionsButton() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -19,11 +19,26 @@ export default function ProfileActionsButton() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleBookmark = () => {
-    // โค้ดสำหรับเซฟ/บุ๊กมาร์ก เช่น เรียก API
+  // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
+  const handleBookmark = async () => {
     alert("Saved / Bookmarked!");
     setIsOpen(false);
   };
+
+  try {
+    const response = await fetch(
+      "http://localhost:3000/api/company/favour_user",
+      {
+        method: "",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Unable to connect to the server.");
+  }
 
   const handleReport = () => {
     // โค้ดสำหรับแจ้งรายงาน (Report)
