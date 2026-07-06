@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/footer";
+import { GoogleAnalytics } from "@next/third-parties/google"; // นำเข้า GoogleAnalytics component
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,6 +35,10 @@ export default function RootLayout({
         {/* ให้ children (เนื้อหาของหน้าเว็บต่างๆ) อยู่ตรงนี้ */}
         <main className="flex-grow">{children}</main>
         <Footer />
+        {process.env.GOOGLE_ANALYTICS_ID && (
+          <GoogleAnalytics gaId={process.env.GOOGLE_ANALYTICS_ID} />
+        )}{" "}
+        {/* ใส่ Google Analytics */}
       </body>
     </html>
   );
