@@ -111,7 +111,9 @@ export default async function SeekerProfilePage({
                 justifyContent: "flex-end",
               }}
             >
-              <ProfileActionsButton />
+              <ProfileActionsButton
+                userId={Number(id)}
+                companyId={Number(viewer?.id)}/>
             </div>
           </div>
 

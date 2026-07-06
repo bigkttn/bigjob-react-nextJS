@@ -4,7 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import "material-symbols";
 import styles from "./seekerProfile.module.css"; // หรือจะแยกไฟล์ css ก็ได้
 
-export default async function ProfileActionsButton() {
+// 1. กำหนด Type สำหรับ Props ที่จะรับเข้ามา
+interface ProfileActionsProps {
+  userId: number;
+  companyId: number;
+}
+export default  function ProfileActionsButton({userId, companyId}: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -21,24 +26,33 @@ export default async function ProfileActionsButton() {
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
-    alert("Saved / Bookmarked!");
-    setIsOpen(false);
-  };
-
+   
   try {
     const response = await fetch(
       "http://localhost:3000/api/company/favour_user",
       {
-        method: "",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          user_id:Number(userId),
+          company_id:Number(companyId)
+        })
+      });
+     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("API Error Status:", response.status);
+      console.error("API Error Details:", errorData);
+      alert(`Failed to Save (Status: ${response.status})`);
+      return;
+    }
+    alert("Saved Successfully!");
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Network Error:", error);
     alert("Unable to connect to the server.");
+  } finally {
+    setIsOpen(false);
   }
+};
 
   const handleReport = () => {
     // โค้ดสำหรับแจ้งรายงาน (Report)
@@ -51,7 +65,6 @@ export default async function ProfileActionsButton() {
       style={{ position: "relative", display: "inline-block" }}
       ref={menuRef}
     >
-      {/* ปุ่ม 3 จุด (More Vert) */}
       <span
         className="material-symbols-outlined"
         style={{
@@ -131,4 +144,4 @@ export default async function ProfileActionsButton() {
       )}
     </div>
   );
-}
+  }

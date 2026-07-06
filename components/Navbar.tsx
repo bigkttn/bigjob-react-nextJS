@@ -182,6 +182,7 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
+                <Link href="/company/saved_users" className={`nav-item ${isActive("/company/saved_users")}`}>Saved</Link>
 
                 {/* 🔔 จุดแสดงแจ้งเตือนสำหรับฝั่ง Company */}
                 <Link
