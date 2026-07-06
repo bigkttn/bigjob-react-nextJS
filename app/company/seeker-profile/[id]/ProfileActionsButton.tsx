@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
-import styles from "./seekerProfile.module.css"; // หรือจะแยกไฟล์ css ก็ได้
+import styles from "./profile.module.css";
 
-// 1. กำหนด Type สำหรับ Props ที่จะรับเข้ามา
 interface ProfileActionsProps {
   userId: number;
   companyId: number;
@@ -12,6 +11,7 @@ interface ProfileActionsProps {
 export default  function ProfileActionsButton({userId, companyId}: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   // ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
   useEffect(() => {
@@ -40,11 +40,13 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
       });
      if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("API Error Status:", response.status);
+      // console.error("API Error Status:", response.status);
       console.error("API Error Details:", errorData);
       alert(`Failed to Save (Status: ${response.status})`);
       return;
     }
+    
+    setIsSaved(true);
     alert("Saved Successfully!");
   } catch (error) {
     console.error("Network Error:", error);
@@ -95,6 +97,8 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
         >
           <button
             onClick={handleBookmark}
+
+        className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
             style={{
               padding: "8px 12px",
               background: "none",
@@ -104,16 +108,17 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              color: "#333",
               fontSize: "14px",
+              color: isSaved ? "#f4b400" : "#333", 
             }}
           >
             <span
-              className="material-symbols-outlined  sav"
-              style={{ fontSize: "18px" }}
+              className="material-symbols-outlined"
+              style={{ fontSize: "18px",fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}
             >
               bookmark
             </span>
+            {isSaved ? "Saved" : "Save"} {/* เปลี่ยนข้อความตามสถานะ */}
             Save
           </button>
 
