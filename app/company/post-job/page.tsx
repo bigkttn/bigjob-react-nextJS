@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import styles from "./postjob.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -115,6 +115,40 @@ const PostJob = () => {
 
   const handleSubmit = async () => {
     if (!isApproved) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/posts/insertPost", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Post created successfully:", data);
+        setPostId(data.postId);
+        const testResponse = await fetch("/api/question/createTest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ postId: data.postId, questions }),
+        });
+        if (!testResponse.ok) {
+          const errorData = await testResponse.json();
+          console.error("Error creating test:", errorData);
+        }
+        // รีเฟรชรายการโพสต์หลังจากสร้างเสร็จ
+        // setIsNext(false);
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        console.error("Error creating post:", errorData);
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("เกิดข้อผิดพลาดในการสร้างประกาศงาน กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
+    }
     // โค้ดส่งข้อมูลไปหลังบ้านของคุณ
     console.log("Submitting...", formData, questions);
   };
@@ -123,6 +157,28 @@ const PostJob = () => {
     if (!isApproved) {
       alert("ไม่สามารถลบได้เนื่องจากบัญชียังไม่ได้รับการอนุมัติ");
       return;
+    }
+    const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบประกาศงานนี้?");
+    if (!confirmDelete) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/posts/deletePost/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        console.log("Post deleted successfully");
+        // อัปเดตรายการโพสต์หลังจากลบ
+        setMyPosts((prev) => prev.filter((post) => post.post_id !== id));
+      } else {
+        const errorData = await response.json();
+        console.error("Error deleting post:", errorData);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
     }
     // โค้ดลบประกาศงานของคุณ
   };

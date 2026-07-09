@@ -8,7 +8,10 @@ interface ProfileActionsProps {
   userId: number;
   companyId: number;
 }
-export default  function ProfileActionsButton({userId, companyId}: ProfileActionsProps) {
+export default function ProfileActionsButton({
+  userId,
+  companyId,
+}: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -26,35 +29,35 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
-   
-  try {
-    const response = await fetch(
-      "http://localhost:3000/api/company/favour_user",
-      {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          user_id:Number(userId),
-          company_id:Number(companyId)
-        })
-      });
-     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      // console.error("API Error Status:", response.status);
-      console.error("API Error Details:", errorData);
-      alert(`Failed to Save (Status: ${response.status})`);
-      return;
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/company/favour_user",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: Number(userId),
+            company_id: Number(companyId),
+          }),
+        },
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        // console.error("API Error Status:", response.status);
+        console.error("API Error Details:", errorData);
+        alert(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
+        return;
+      }
+
+      setIsSaved(true);
+      alert("Saved Successfully!");
+    } catch (error) {
+      console.error("Network Error:", error);
+      alert("Unable to connect to the server.");
+    } finally {
+      setIsOpen(false);
     }
-    
-    setIsSaved(true);
-    alert("Saved Successfully!");
-  } catch (error) {
-    console.error("Network Error:", error);
-    alert("Unable to connect to the server.");
-  } finally {
-    setIsOpen(false);
-  }
-};
+  };
 
   const handleReport = () => {
     // โค้ดสำหรับแจ้งรายงาน (Report)
@@ -97,8 +100,7 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
         >
           <button
             onClick={handleBookmark}
-
-        className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
+            className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
             style={{
               padding: "8px 12px",
               background: "none",
@@ -109,12 +111,15 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
               alignItems: "center",
               gap: "8px",
               fontSize: "14px",
-              color: isSaved ? "#f4b400" : "#333", 
+              color: isSaved ? "#f4b400" : "#333",
             }}
           >
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: "18px",fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}
+              style={{
+                fontSize: "18px",
+                fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0",
+              }}
             >
               bookmark
             </span>
@@ -149,4 +154,4 @@ export default  function ProfileActionsButton({userId, companyId}: ProfileAction
       )}
     </div>
   );
-  }
+}
