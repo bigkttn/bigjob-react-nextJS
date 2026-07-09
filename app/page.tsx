@@ -21,6 +21,9 @@ const Home = ({ initialUser }: { initialUser: any }) => {
   useEffect(() => {
     // router.refresh(); // รีเฟรชข้อมูลทุกครั้งที่เข้าหน้านี้ (ถ้ามีการเปลี่ยนแปลง Session)
     fetchPosts();
+    fetch("/api/visitor", { method: "POST" }).catch((err) =>
+      console.error(err),
+    );
   }, []);
 
   const fetchPosts = async () => {
