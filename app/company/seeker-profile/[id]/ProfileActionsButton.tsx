@@ -8,6 +8,7 @@ interface ProfileActionsProps {
   userId: number;
   companyId: number;
 }
+
 export default function ProfileActionsButton({
   userId,
   companyId,
@@ -21,11 +22,18 @@ export default function ProfileActionsButton({
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+ useEffect(() => {
+  console.log("check it")
+    checkSaved();
+  }, []);
+
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
@@ -43,21 +51,47 @@ export default function ProfileActionsButton({
       );
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        // console.error("API Error Status:", response.status);
         console.error("API Error Details:", errorData);
         alert(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
         return;
       }
-
       setIsSaved(true);
       alert("Saved Successfully!");
     } catch (error) {
       console.error("Network Error:", error);
       alert("Unable to connect to the server.");
-    } finally {
-      setIsOpen(false);
     }
   };
+
+  const checkSaved = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/company/check_favour_user",
+        {
+          method:"POST",
+          headers:{"Content-Type": "application/json"},
+          body: JSON.stringify({
+            user_id: Number(userId),
+            company_id: Number(companyId),
+          }),
+        }
+        
+      );
+      const data = await response.json();
+    if (data && data.rows && data.rows.length > 0){
+        console.log("have data")
+        console.log("->",data)
+        setIsSaved(true)
+      }
+      else{
+        console.log("No have data")
+         console.log("->",data)
+         setIsSaved(false)
+      }
+    } catch (error) {
+      
+    }
+  }
 
   const handleReport = () => {
     // โค้ดสำหรับแจ้งรายงาน (Report)
@@ -83,7 +117,7 @@ export default function ProfileActionsButton({
 
       {/* Dropdown เมนูย่อย */}
       {isOpen && (
-        <div
+        <div 
           style={{
             position: "absolute",
             top: "100%",
@@ -99,9 +133,11 @@ export default function ProfileActionsButton({
           }}
         >
           <button
+          
             onClick={handleBookmark}
             className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
             style={{
+              color: isSaved ? "#f4b400" : "#333", // เปลี่ยนสีตัวอักษรปุ่ม
               padding: "8px 12px",
               background: "none",
               border: "none",
@@ -111,20 +147,20 @@ export default function ProfileActionsButton({
               alignItems: "center",
               gap: "8px",
               fontSize: "14px",
-              color: isSaved ? "#f4b400" : "#333",
             }}
           >
+            
             <span
               className="material-symbols-outlined"
               style={{
                 fontSize: "18px",
+                color: isSaved ? "#f4b400" : "#333", //  บังคับใส่สีที่ตัวไอคอนโดยตรงเพื่อป้องกัน CSS ตัวอื่นสืบทอดมาทับ
                 fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0",
               }}
             >
               bookmark
             </span>
-            {isSaved ? "Saved" : "Save"} {/* เปลี่ยนข้อความตามสถานะ */}
-            Save
+            {isSaved ? "Saved" : "Save"}
           </button>
 
           <button
