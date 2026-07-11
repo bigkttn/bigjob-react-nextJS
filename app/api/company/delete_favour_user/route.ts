@@ -22,12 +22,12 @@ export async function DELETE(request: Request) {
         await db.execute(query, [user_id, company_id]);
         return NextResponse.json(
             { message: 'ลบข้อมูลใน favour_user เรียบร้อยแล้ว' },
-            { status: 201 }
+            { status: 200 }
         )
         }else {
             return  NextResponse.json(
             { message: 'เคยลบรายการโปรดนี้ไว้แล้ว' },
-            { status: 409 }
+            { status: 404 }
             )
 
         }
