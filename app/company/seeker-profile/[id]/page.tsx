@@ -125,8 +125,8 @@ export default async function SeekerProfilePage({
                 className={styles.avatar}
               />
             </div>
-            <h2 className={styles.name}>{fmt(profile.fullname)}</h2>
-            <p className={styles.email}>{fmt(profile.email)}</p>
+            <strong><h2 className={styles.name}>{fmt(profile.fullname)}</h2></strong>
+            <strong><p className={styles.email}>{fmt(profile.email)}</p></strong>
 
             <div className={styles.detailsBox}>
               <div className={styles.titleinfoRow}>
