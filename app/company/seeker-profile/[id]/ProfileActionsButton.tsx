@@ -20,12 +20,10 @@ export default function ProfileActionsButton({
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSaved, setIsSaved] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false); // ✅ ควบคุมการเปิด/ปิด Modal ป็อปอัพ
-  // ✅ State สำหรับเก็บค่าข้อมูลในฟอร์มรายงาน
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const [selectedType, setSelectedType] = useState<ReportType | "">("");
   const [description, setDescription] = useState("");
   
-  //  แก้ไขชื่อฟังก์ชัน Set State ให้ถูกต้องตรงกัน
   const [isReported, setIsReported] = useState(false); 
 
   // ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
@@ -41,6 +39,7 @@ export default function ProfileActionsButton({
 
   useEffect(() => {
     checkSaved();
+    checkReport();
   }, []);
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
@@ -128,16 +127,18 @@ export default function ProfileActionsButton({
     }
   };
 
-  // ✅ ฟังก์ชันเปิด Modal และเคลียร์ค่าเก่าออกก่อน
+  
   const openReportModal = () => {
-    setSelectedType("");
+    if (isReported) {
+      alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
+      setIsModalOpen(false);
+    }else{setSelectedType("");
     setDescription("");
     setIsModalOpen(true);
     setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
+    }
+    
   };
-
-  // ✅ ฟังก์ชันส่งข้อมูลรายงานจากใน Modal
- 
 
   const handleReport = async (reportType: ReportType, description: string) => {
      if (!selectedType || !description.trim()) {
@@ -177,6 +178,32 @@ export default function ProfileActionsButton({
       alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
     setIsOpen(false);
+  };
+
+   const checkReport = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/company/check_report_user",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: Number(userId),
+            company_id: Number(companyId),
+          }),
+        }
+      );
+      const data = await response.json();
+      if (data && data.rows && data.rows.length > 0) {
+        // alert("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
+        setIsReported(true);
+      } else {
+        
+        setIsReported(false);
+      }
+    } catch (error) {
+      console.error("Error in checkSaved:", error);
+    }
   };
 
   return (
@@ -229,11 +256,9 @@ export default function ProfileActionsButton({
             }}
           >
             <span
-              className={`material-symbols-outlined ${styles.savedButton}`}
+              className={`material-symbols-outlined `}
               style={{
                 fontSize: "18px",
-                color: isSaved ? "#f4b400" : "#333",
-                fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0",
               }}
             >
               bookmark
@@ -253,9 +278,11 @@ export default function ProfileActionsButton({
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              color: "#d93025",
+              color: isReported ? "#d93025" : "#333",
               fontSize: "14px",
             }}
+
+            // disabled={isReported}
           >
             <span
               className="material-symbols-outlined"
@@ -267,9 +294,8 @@ export default function ProfileActionsButton({
           </button>
         </div>
       )}
-      {/* ========================================================= */}
-      {/* ✅ หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
-      {/* ========================================================= */}
+      
+      {/* หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
       {isModalOpen && (
         <div
           style={{
@@ -328,7 +354,7 @@ export default function ProfileActionsButton({
                   backgroundColor: "#fff"
                 }}
               >
-                <option value="">-- โปรดเลือกหัวข้อรายงาน --</option>
+                <option value="">โปรดเลือกหัวข้อรายงาน</option>
                 <option value="identity_fraud">ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน</option>
                 <option value="job_no_show">ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)</option>
                 <option value="harassment_to_staff">ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่</option>
