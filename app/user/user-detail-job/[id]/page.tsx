@@ -3,12 +3,37 @@ import React, { useCallback, useEffect, useState } from "react";
 import styles from "./detailjob.module.css";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import ProfileActionsButton from "../ProfileActionsButton";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-const DetailJob = () => {
+interface CustomJwtPayload extends JwtPayload {
+  id: number;
+}
+const DetailJob = async() => {
   const params = useParams(); // 2. ดึงค่าจาก URL
   const postId = params.id; // 3. สมมติว่า URL เป็น /user/user-detail-job/123 จะได้ postId = 123
-  // console.log("Post ID from URL:", postId); // 4. ตรวจสอบค่าที่ดึงมา
 
+ const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  let viewer: CustomJwtPayload | null = null;
+
+  if (token) {
+    try {
+      const secret = process.env.JWT_SECRET || "fallback_secret";
+      viewer = jwt.verify(token, secret) as CustomJwtPayload;
+    } catch {
+      console.error("Token invalid");
+    }
+  }
+
+  if (!viewer) {
+    return (
+      <div className={styles.centerMsg}>
+        <p>Please log in to view this profile.</p>
+      </div>
+    );
+  }
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -65,17 +90,7 @@ const DetailJob = () => {
       <div className={styles.card}>
         <button
           onClick={() => router.back()}
-          style={{
-            marginBottom: "20px",
-            padding: "10px 18px",
-            borderRadius: "10px",
-            border: "none",
-            background: "#2563eb",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
+          className={styles.backBtn}>
           ← ย้อนกลับ
         </button>
         {/* --- ส่วนหัว (Header) --- */}
@@ -118,7 +133,12 @@ const DetailJob = () => {
                 <h1 className={styles.companyName}>
                   {job.company_name || "Company Name"}
                 </h1>
-
+              
+         {/* มาแก้ตรงนี้ด้วย */}
+              {/* <ProfileActionsButton
+                userId={Number(id)}
+                companyId={Number(viewer?.id)}
+              /> */}
                 <span
                   style={{
                     padding: "4px 12px",
