@@ -1,19 +1,23 @@
-"use client";
-import React, { useCallback, useEffect, useState } from "react";
+
 import styles from "./detailjob.module.css";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import ProfileActionsButton from "../ProfileActionsButton";
+import CompanyButtn from "../CompanyButtn"
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import BackButton from "./backBttn";
+
+
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
 }
-const DetailJob = async() => {
-  const params = useParams(); // 2. ดึงค่าจาก URL
-  const postId = params.id; // 3. สมมติว่า URL เป็น /user/user-detail-job/123 จะได้ postId = 123
-
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+export default async  function DetailJob ({params}: PageProps) {
+   const resolvedParams = await params;
+   const postId = resolvedParams.id;
+  
  const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let viewer: CustomJwtPayload | null = null;
@@ -34,46 +38,48 @@ const DetailJob = async() => {
       </div>
     );
   }
-  const [job, setJob] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+ 
+  
+  // Fetch job data
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  let job: any = null;
+  const jobResponse = await fetch(`${apiUrl}/api/posts/getPostById/${postId}`, {
+    cache: "no-store", // เพื่อให้ได้ข้อมูลที่อัปเดตใหม่เสมอเหมือน useEffect
+  });
 
-  const fetchJobDetail = useCallback(async () => {
-    if (!postId) return;
-
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/posts/getPostById/${postId}`);
-
-      if (response.ok) {
-        const data = await response.json();
-        setJob(data);
-        console.log("Fetched job data:", data); // ตรวจสอบข้อมูลที่ได้รับ
+  try {
+    // 1. เช็กว่า response status ok หรือไม่ (เช่น 200-299)
+    if (jobResponse.ok) {
+      const contentType = jobResponse.headers.get("content-type");
+      
+      // 2. เช็กว่าสิ่งที่ส่งกลับมาคือ JSON จริงๆ ไม่ใช่ HTML
+      if (contentType && contentType.includes("application/json")) {
+        job = await jobResponse.json();
       } else {
-        console.error("Failed to fetch job data");
+        const textError = await jobResponse.text();
+        console.error("API did not return JSON. Received:", textError.substring(0, 200));
       }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      setLoading(false);
+    } else {
+      console.error(`Failed to fetch job. Status: ${jobResponse.status}`);
     }
-  }, [postId]);
-
-  useEffect(() => {
-    fetchJobDetail();
-  }, [fetchJobDetail]);
-
-  if (loading) {
+  } catch (error) {
+    console.error("Fetch error:", error);
+  }
+  // กรณีไม่พบข้อมูล
+if (!job) {
     return (
       <div className={styles.container}>
-        <div className={styles.card}></div>
+        <div className={styles.card}>
+          <BackButton />
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}>
+            <h3>ไม่พบข้อมูลงาน หรือเกิดข้อผิดพลาดในการเชื่อมต่อระบบ</h3>
+            <p style={{ color: "#666", fontSize: "0.9rem", marginTop: "8px" }}>
+              โปรดตรวจสอบความถูกต้องของ URL หรือสถานะของเซิร์ฟเวอร์ API
+            </p>
+          </div>
+        </div>
       </div>
     );
-  }
-
-  // กรณีไม่พบข้อมูล
-  if (!job) {
-    return <div className={styles.container}>ไม่พบข้อมูลงาน</div>;
   }
 
   // --- ฟังก์ชันกำหนดสีของ Status ---
@@ -88,11 +94,7 @@ const DetailJob = async() => {
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <button
-          onClick={() => router.back()}
-          className={styles.backBtn}>
-          ← ย้อนกลับ
-        </button>
+        <BackButton/>
         {/* --- ส่วนหัว (Header) --- */}
         {/* {suggestedCompanys.map((company, index) => (
                     
@@ -100,17 +102,7 @@ const DetailJob = async() => {
         <button className={styles.applyBtn}>Apply Now</button>
 
         <div className={styles.header}>
-          <div
-            // style={{
-            //   display: "flex",
-            //   flexDirection: "column",
-            //   alignItems: "center",
-            //   gap: "10px",
-            //   backgroundColor: "#056ed8",
-            //   borderRadius: "50px",
-            // }}
-            className={styles.linkCard1}
-          >
+          <div className={styles.linkCard1} >
             <Link
               href={`/user/userProfileCompany/${job.company_id}`}
               style={{
@@ -133,12 +125,8 @@ const DetailJob = async() => {
                 <h1 className={styles.companyName}>
                   {job.company_name || "Company Name"}
                 </h1>
-              
-         {/* มาแก้ตรงนี้ด้วย */}
-              {/* <ProfileActionsButton
-                userId={Number(id)}
-                companyId={Number(viewer?.id)}
-              /> */}
+            
+           
                 <span
                   style={{
                     padding: "4px 12px",
@@ -154,6 +142,12 @@ const DetailJob = async() => {
               </div>
             </Link>
           </div>
+          
+           
+<CompanyButtn
+  userId={Number(viewer?.id)}
+  postId={Number(postId)} 
+/>
         </div>
 
         {/* --- ส่วนเนื้อหา (Grid) --- */}
@@ -312,4 +306,3 @@ const DetailJob = async() => {
     </div>
   );
 };
-export default DetailJob;

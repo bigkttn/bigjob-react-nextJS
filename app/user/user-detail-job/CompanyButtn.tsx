@@ -2,19 +2,20 @@
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
-import styles from "./profile.module.css";
+import styles from "./companybttn.module.css";
+import { useRouter } from "next/navigation";
 
 //  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ 
 interface ProfileActionsProps {
   userId: number;
-  companyId: number;
+  postId: number;
 }
 
 type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
 
 export default function ProfileActionsButton({
   userId,
-  companyId,
+  postId,
 }: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -24,7 +25,7 @@ export default function ProfileActionsButton({
   const [selectedType, setSelectedType] = useState<ReportType | "">("");
   const [description, setDescription] = useState("");
   
-  const [isReported, setIsReported] = useState(false); 
+  const [isReported, setIsReported] = useState(false);
 
   // ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
   useEffect(() => {
@@ -45,14 +46,13 @@ export default function ProfileActionsButton({
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/favour_user",
+      const response = await fetch("/api/seeker/favour_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: Number(userId),
-            company_id: Number(companyId),
+            post_id: Number(postId),
           }),
         },
       );
@@ -72,7 +72,7 @@ export default function ProfileActionsButton({
 
   const handleDeleteBookmark = async () => {
     if (isSaved) {
-      await handleDeleteSaved(Number(userId), Number(companyId));
+      await handleDeleteSaved(Number(userId), Number(postId));
     } else {
       await handleBookmark(); 
     }
@@ -80,14 +80,13 @@ export default function ProfileActionsButton({
 
   const checkSaved = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/check_favour_user",
+      const response = await fetch("/api/seeker/check_favour_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: Number(userId),
-            company_id: Number(companyId),
+            post_id: Number(postId),
           }),
         }
       );
@@ -106,12 +105,12 @@ export default function ProfileActionsButton({
     const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
     if (!confirmDelete) return;
     try {
-      const response = await fetch("/api/company/delete_favour_user", {
+      const response = await fetch("/api/seeker/delete_favour_post", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: Number(userId),
-          company_id: Number(companyId),
+          post_id: Number(postId),
         }),
       });
       if (response.ok) {
@@ -132,7 +131,8 @@ export default function ProfileActionsButton({
     if (isReported) {
       alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
       setIsModalOpen(false);
-    }else{setSelectedType("");
+    }else{
+    setSelectedType("");
     setDescription("");
     setIsModalOpen(true);
     setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
@@ -146,12 +146,12 @@ export default function ProfileActionsButton({
       return;
     }
     try {
-      const response = await fetch("/api/company/report_user", {
+      const response = await fetch("/api/seeker/report_post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: Number(userId),
-          company_id: Number(companyId),
+          post_id: Number(postId),
           report_type: reportType,
           description: String(description).trim(),
         })
@@ -182,14 +182,13 @@ export default function ProfileActionsButton({
 
    const checkReport = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/check_report_user",
+      const response = await fetch("/api/seeker/check_report_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: Number(userId),
-            company_id: Number(companyId),
+            post_id: Number(postId),
           }),
         }
       );
@@ -282,7 +281,7 @@ export default function ProfileActionsButton({
               fontSize: "14px",
             }}
 
-            // disabled={isReported}
+          
           >
             <span
               className="material-symbols-outlined"
