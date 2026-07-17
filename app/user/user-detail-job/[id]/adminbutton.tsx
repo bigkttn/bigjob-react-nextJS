@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface AdminButtonProps {
   id: string;
@@ -17,12 +18,33 @@ export default function AdminButton({
   const [isOpen, setIsOpen] = useState(false);
   const [banDuration, setBanDuration] = useState("3"); // ค่าเริ่มต้นเป็น 3 วัน
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     const isConfirm = confirm(
       `Are you sure you want to delete Post ID: ${post_id} ? This action cannot be undone.`,
     );
     if (!isConfirm) return;
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/posts/deletePost/${post_id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        console.log("Post deleted successfully");
+        router.back();
+        // อัปเดตรายการโพสต์หลังจากลบ
+      } else {
+        const errorData = await response.json();
+        console.error("Error deleting post:", errorData);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsLoading(false);
+    }
+    // โค้ดลบประกาศงานของคุณ
   };
 
   const handleBan = async () => {
@@ -34,16 +56,24 @@ export default function AdminButton({
 
     setIsLoading(true);
     try {
-      // 📝 เปลี่ยนบรรทัดนี้เป็น API แบนจริง โดยส่งระยะเวลา banDuration ไปที่ Backend ของคุณ
-      // ตัวอย่าง:
-      // const res = await fetch(`/api/admin/ban`, {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ target: Target, durationDays: banDuration }),
-      // });
+      const res = await fetch(`/api/admin/post/Ban`, {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({
+          post_id,
+          durationDays: parseInt(banDuration),
+        }),
+      });
 
-      alert(`แบนผู้ใช้นี้เป็นเวลา ${durationText} สำเร็จ!`);
-      setIsOpen(false);
+      const result = await res.json();
+
+      if (res.ok) {
+        alert(`แบนโพสต์สำเร็จ! (ระยะเวลา: ${durationText})`);
+        setIsOpen(false);
+        router.back();
+      } else {
+        alert(`เกิดข้อผิดพลาด: ${result.message || "ไม่สามารถแบนโพสต์ได้"}`);
+      }
     } catch (error) {
       console.error("Ban error:", error);
       alert("เกิดข้อผิดพลาดในการแบนผู้ใช้");
