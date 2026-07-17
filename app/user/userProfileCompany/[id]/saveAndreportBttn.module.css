@@ -1,0 +1,33 @@
+.savedButton {
+  /* สไตล์ตั้งต้น (ถ้าไม่ใส่ ในอินไลน์สไตล์ที่คุณเขียนไว้ก็ทำงานได้ครับ) */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Action 1: ตอนเมาส์ชี้ (Hover) ให้ปุ่มเปลี่ยนสีไฮไลท์ */
+.savedButton:hover {
+  background-color: #f5f5f5 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อน */
+  color: #0070f3 !important;            /* เปลี่ยนสีข้อความ/ไอคอนเป็นสีฟ้า */
+}
+
+/* Action 2: ตอนกดคลิกค้าง (Active) ให้ปุ่มยุบลงไปนิดหน่อย */
+.savedButton:active {
+  background-color: #e8e8e8 !important;
+  transform: scale(0.98);
+}
+
+.reportedButton {
+  /* สไตล์ตั้งต้น (ถ้าไม่ใส่ ในอินไลน์สไตล์ที่คุณเขียนไว้ก็ทำงานได้ครับ) */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Action 1: ตอนเมาส์ชี้ (Hover) ให้ปุ่มเปลี่ยนสีไฮไลท์ */
+.reportedButton:hover {
+  background-color: #f5f5f5 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อน */
+  color: #0070f3 !important;            /* เปลี่ยนสีข้อความ/ไอคอนเป็นสีฟ้า */
+}
+
+/* Action 2: ตอนกดคลิกค้าง (Active) ให้ปุ่มยุบลงไปนิดหน่อย */
+.reportedButton:active {
+  background-color: #e8e8e8 !important;
+  transform: scale(0.98);
+}

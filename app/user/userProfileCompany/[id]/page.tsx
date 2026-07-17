@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./userProfileCompany.module.css";
 import Link from "next/link";
+import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 type LeafletMapProps = {
   lat: number | string | null;
@@ -15,9 +17,44 @@ type LeafletMapProps = {
 };
 
 export default function ProfileCompany() {
-  const { id } = useParams();
+  const { id } = useParams();  //company id
   const router = useRouter();
 
+ const [company, setCompany] = useState<any>(null);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // สร้าง State ไว้เก็บข้อมูล User ที่ Login อยู่แทนการใช้ cookies ด้านบน
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    // จำลองหรือดึงข้อมูลผู้ใช้จาก Session/API หรือแปลงจาก Token ฝั่ง Client
+    // (หรือถ้าคุณมี API ดึงข้อมูลส่วนตัว สามารถเรียกใช้ตรงนี้ได้ครับ)
+    // ตัวอย่างสมมุติ:
+    setCurrentUserId(1); // เปลี่ยนเป็นระบบดึง user_id จริงของคุณ หรือ decode token บน client
+  }, []);
+
+  useEffect(() => {
+    async function fetchCompanyProfile() {
+      try {
+        const res = await fetch(`/api/company/getCompanyById/${id}`);
+        const data = await res.json();
+        if (res.ok) {
+          setCompany(data.company);
+          setPosts(data.posts || []);
+        } else {
+          setError(data.error || "Failed to fetch company profile");
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) fetchCompanyProfile();
+  }, [id]);
   // โหลดแผนที่แบบไม่ SSR เหมือนหน้า CompanyProfile (แต่ล็อกไว้เป็นโหมดดูอย่างเดียว)
   const MapWithNoSSR = dynamic<LeafletMapProps>(
     () => import("@/components/LeafletMap"),
@@ -39,10 +76,9 @@ export default function ProfileCompany() {
     },
   );
 
-  const [company, setCompany] = useState<any>(null);
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  if (loading) return <p style={{ padding: 20 }}>กำลังโหลดข้อมูลบริษัท...</p>;
+  if (error) return <p style={{ padding: 20 }}>Error: {error}</p>;
+  if (!company) return <p style={{ padding: 20 }}>No company data</p>;
 
   useEffect(() => {
     async function fetchCompanyProfile() {
@@ -118,6 +154,7 @@ export default function ProfileCompany() {
               className={styles.logo}
               alt="Logo"
             />
+            
           </div>
 
           <div className={styles.infoArea}>
@@ -144,8 +181,14 @@ export default function ProfileCompany() {
                   }}
                 >
                   {statusLabel}
+                  
                 </span>
+                
               )}
+              {/*  */}
+              <SaveAndReportCompany
+                  userId={Number(currentUserId)}
+                  companyId={Number(id)}/>
             </h1>
 
             <p>{fmt(company.brief_history)}</p>

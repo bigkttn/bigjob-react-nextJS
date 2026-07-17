@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
-import styles from "./companybttn.module.css";
-import { useRouter } from "next/navigation";
+import styles from "./saveAndreportBttn.module.css";
 
 //  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ 
 interface ProfileActionsProps {
@@ -326,7 +325,7 @@ export default function ProfileActionsButton({
           >
             {/* หัวข้อโมดอล */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>รายงานพฤติกรรมผู้สมัครงาน</h3>
+              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>รายงานรายละเอียดงาน</h3>
               <span
                 className="material-symbols-outlined"
                 style={{ cursor: "pointer", color: "#666" }}
@@ -340,7 +339,7 @@ export default function ProfileActionsButton({
 
             {/* ฟอร์มเลือกประเภท */}
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>ประเภทความผิดปกติ</label>
+              <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>ประเภทรายงาน</label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as ReportType)}
@@ -354,9 +353,11 @@ export default function ProfileActionsButton({
                 }}
               >
                 <option value="">โปรดเลือกหัวข้อรายงาน</option>
-                <option value="identity_fraud">ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน</option>
-                <option value="job_no_show">ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)</option>
-                <option value="harassment_to_staff">ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่</option>
+                <option value="identity_fraud">ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง</option>
+                <option value="job_no_show">งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์</option>
+                <option value="harassment_to_staff">ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง</option>
+                <option value="harassment_to_staff">อื่นๆ (ระบุในรายละเอียด)</option>
+
               </select>
             </div>
 

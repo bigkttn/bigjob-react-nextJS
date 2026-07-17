@@ -1,7 +1,7 @@
 
 import styles from "./detailjob.module.css";
 import Link from "next/link";
-import CompanyButtn from "../CompanyButtn"
+import SaveAndReportBttn from "../saveAndreportBttn"
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
@@ -144,7 +144,7 @@ if (!job) {
           </div>
           
            
-<CompanyButtn
+<SaveAndReportBttn
   userId={Number(viewer?.id)}
   postId={Number(postId)} 
 />
