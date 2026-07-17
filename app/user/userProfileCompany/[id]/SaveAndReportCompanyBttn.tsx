@@ -18,7 +18,6 @@ export default function ProfileActionsButton({
 }: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [isSaved, setIsSaved] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [selectedType, setSelectedType] = useState<ReportType | "">("");
@@ -38,94 +37,10 @@ export default function ProfileActionsButton({
   }, []);
 
   useEffect(() => {
-    checkSaved();
     checkReport();
   }, []);
 
-  // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
-  const handleBookmark = async () => {
-    try {
-      const response = await fetch("/api/seeker/favour_post",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: Number(userId),
-            company_id: Number(companyId),
-          }),
-        },
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("API Error Details:", errorData);
-        alert(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
-        return;
-      }
-      setIsSaved(true);
-      alert("Saved Successfully!");
-    } catch (error) {
-      console.error("Network Error:", error);
-      alert("Unable to connect to the server.");
-    }
-  };
-
-  const handleDeleteBookmark = async () => {
-    if (isSaved) {
-      await handleDeleteSaved(Number(userId), Number(companyId));
-    } else {
-      await handleBookmark(); 
-    }
-  };
-
-  const checkSaved = async () => {
-    try {
-      const response = await fetch("/api/seeker/check_favour_post",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: Number(userId),
-            company_id: Number(companyId),
-          }),
-        }
-      );
-      const data = await response.json();
-      if (data && data.rows && data.rows.length > 0) {
-        setIsSaved(true);
-      } else {
-        setIsSaved(false);
-      }
-    } catch (error) {
-      console.error("Error in checkSaved:", error);
-    }
-  };
-
-  const handleDeleteSaved = async (userId: number, companyId: number) => {
-    const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
-    if (!confirmDelete) return;
-    try {
-      const response = await fetch("/api/seeker/delete_favour_post", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: Number(userId),
-          company_id: Number(companyId),
-        }),
-      });
-      if (response.ok) {
-        setIsSaved(false);
-        alert("ลบออกจากรายการบันทึกแล้ว");
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        alert(`ไม่สามารถลบได้: ${errorData.message || 'เกิดข้อผิดพลาด'}`);
-      }
-    } catch (error) {
-      console.error("Error in handleDeleteSaved:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
-    }
-  };
-
-  
+ 
   const openReportModal = () => {
     if (isReported) {
       alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
@@ -145,7 +60,7 @@ export default function ProfileActionsButton({
       return;
     }
     try {
-      const response = await fetch("/api/seeker/report_post", {
+      const response = await fetch("/api/seeker/report_company", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -181,7 +96,7 @@ export default function ProfileActionsButton({
 
    const checkReport = async () => {
     try {
-      const response = await fetch("/api/seeker/check_report_post",
+      const response = await fetch("/api/seeker/check_report_company",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -237,33 +152,7 @@ export default function ProfileActionsButton({
             flexDirection: "column",
           }}
         >
-          <button
-            onClick={handleDeleteBookmark}
-            className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
-            style={{
-              color: isSaved ? "#f4b400" : "#333",
-              padding: "8px 12px",
-              background: "none",
-              border: "none",
-              textAlign: "left",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
-            }}
-          >
-            <span
-              className={`material-symbols-outlined `}
-              style={{
-                fontSize: "18px",
-              }}
-            >
-              bookmark
-            </span>
-            {isSaved ? "Saved" : "Save"}
-          </button>
-
+         
           <button
             onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
          className={`${styles.reportedButton} ${isReported ? styles.active : ""}`}
