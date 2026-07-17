@@ -1,155 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { IFeedback, ApiResponse } from "@/app/api/admin/feedbacks/route";
 import styles from "./AdminFeedback.module.css";
 
-// ============================================================================
-// 📦 Sub-Component: FeedbackCard
-// ============================================================================
-interface FeedbackCardProps {
-  item: IFeedback;
-  onSubmitReply: (
-    id: number,
-    message: string,
-    source_type: string,
-  ) => Promise<boolean>;
-  onDelete: (id: number, source_type: string) => Promise<void>;
-}
-
-const FeedbackCard: React.FC<FeedbackCardProps> = ({
-  item,
-  onSubmitReply,
-  onDelete,
-}) => {
-  const [replyText, setReplyText] = useState(item.admin_message || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    setReplyText(item.admin_message || "");
-  }, [item.admin_message]);
-
-  const handleSend = async () => {
-    if (!replyText.trim()) {
-      alert("กรุณาพิมพ์ข้อความก่อนทำการส่งคำตอบกลับ");
-      return;
-    }
-    setIsSubmitting(true);
-    // 📌 ส่ง item.source_type กลับไปด้วย
-    await onSubmitReply(item.feedback_id, replyText, item.source_type);
-    setIsSubmitting(false);
-  };
-
-  const renderStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending":
-        return (
-          <span className={`${styles.statusBadge} ${styles.statusPending}`}>
-            รอตรวจรับ
-          </span>
-        );
-      case "read":
-        return (
-          <span className={`${styles.statusBadge} ${styles.statusRead}`}>
-            อ่านแล้ว
-          </span>
-        );
-      case "replied":
-        return (
-          <span className={`${styles.statusBadge} ${styles.statusReplied}`}>
-            ตอบกลับแล้ว
-          </span>
-        );
-      default:
-        return <span className={`${styles.statusBadge}`}>{status}</span>;
-    }
-  };
-
-  const hasAdminMessage =
-    item.admin_message && item.admin_message.trim() !== "";
-
-  // จัดกลุ่มประเภทผู้ใช้งานให้แสดงป้ายสีถูกต้อง
-  const displayRole = item.role?.toLowerCase() || item.source_type;
-  const isCompany = displayRole === "company";
-
-  return (
-    <div className={styles.card}>
-      <div className={styles.userInfo}>
-        {/* เปลี่ยนสี Badge ตามประเภท Company หรือ User */}
-        <span
-          className={`${styles.badge} ${isCompany ? styles.badgeCompany : styles.badgeUser}`}
-        >
-          {isCompany ? "Company" : "User"}
-        </span>
-        <span className={styles.date}>
-          {new Date(item.created_at).toLocaleString("th-TH")}
-        </span>
-        <div style={{ marginTop: "6px" }}>{renderStatusBadge(item.status)}</div>
-        <span className={styles.emailText}>{item.email || "ไม่มีอีเมล"}</span>
-      </div>
-
-      <div className={styles.messageContent}>
-        <div className={styles.userMessage}>
-          <p>{item.message}</p>
-        </div>
-
-        {hasAdminMessage && (
-          <div className={styles.repliedBox}>
-            <strong>Admin Reply (ประวัติคำตอบเดิม):</strong>
-            <p>{item.admin_message}</p>
-            {item.replied_at && (
-              <small>
-                ตอบเมื่อ: {new Date(item.replied_at).toLocaleString("th-TH")}
-              </small>
-            )}
-          </div>
-        )}
-
-        <div className={styles.replySection}>
-          <textarea
-            placeholder="พิมพ์ข้อความตอบกลับ..."
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            className={styles.replyTextarea}
-            disabled={isSubmitting}
-          />
-          <button
-            onClick={handleSend}
-            className={styles.replyBtn}
-            disabled={isSubmitting}
-          >
-            {hasAdminMessage ? "Update Reply" : "Send Reply"}
-          </button>
-        </div>
-      </div>
-
-      <div className={styles.actions}>
-        <button
-          className={styles.removeBtn}
-          onClick={() => onDelete(item.feedback_id, item.source_type)}
-        >
-          remove
-        </button>
-      </div>
-    </div>
-  );
+// แผนผังแสดงประเภทสถานะ (Status Badge Config)
+const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
+  pending: { label: "รอตรวจรับ", class: styles.statusPending },
+  read: { label: "อ่านแล้ว", class: styles.statusRead },
+  replied: { label: "ตอบกลับแล้ว", class: styles.statusReplied },
 };
 
-// ============================================================================
-// 🖥️ Main Component Dashboard
-// ============================================================================
 export default function AdminFeedbackPage() {
   const [feedbacks, setFeedbacks] = useState<IFeedback[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // 📌 State สำหรับเก็บคำตอบของแต่ละการ์ดแยกกัน (เช่น {"user-1": "ข้อความตอบกลับ"})
+  const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
+  // 📌 State สำหรับเก็บสถานะกำลังส่งของแต่ละการ์ดแยกกัน (เช่น {"user-1": true})
+  const [submittingStates, setSubmittingStates] = useState<
+    Record<string, boolean>
+  >({});
+
+  // ตัวกรอง (Filters)
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<string>("desc");
 
+  // ดึงข้อมูลเมื่อโหลดหน้าเว็บ
   useEffect(() => {
     fetchFeedbacks();
   }, []);
 
+  // ซิงค์ข้อความตอบกลับดั้งเดิมเข้าสู่ State เมื่อได้ข้อมูลมาใหม่
+  useEffect(() => {
+    const initialReplies: Record<string, string> = {};
+    feedbacks.forEach((item) => {
+      const key = `${item.source_type}-${item.feedback_id}`;
+      initialReplies[key] = item.admin_message || "";
+    });
+    setReplyTexts(initialReplies);
+  }, [feedbacks]);
+
+  // ดึงข้อมูล Feedbacks จาก API
   const fetchFeedbacks = async () => {
     try {
       setIsLoading(true);
@@ -159,44 +52,52 @@ export default function AdminFeedbackPage() {
         setFeedbacks(result.data);
       }
     } catch (err) {
-      console.error("Failed to fetch feedbacks", err);
+      console.error("Failed to fetch feedbacks:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleReplySubmit = async (
-    feedback_id: number,
-    message: string,
-    source_type: string,
-  ): Promise<boolean> => {
+  // ดำเนินการส่งคำตอบกลับ
+  const handleReplySubmit = async (item: IFeedback) => {
+    const key = `${item.source_type}-${item.feedback_id}`;
+    const text = replyTexts[key]?.trim() || "";
+
+    if (!text) {
+      alert("กรุณาพิมพ์ข้อความก่อนทำการส่งคำตอบกลับ");
+      return;
+    }
+
     try {
+      // เปิด Loading เฉพาะการ์ดใบนี้
+      setSubmittingStates((prev) => ({ ...prev, [key]: true }));
+
       const res = await fetch("/api/admin/feedbacks", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        // 📌 ส่ง source_type ไปด้วย
         body: JSON.stringify({
-          feedback_id,
-          admin_message: message,
-          source_type,
+          feedback_id: item.feedback_id,
+          admin_message: text,
+          source_type: item.source_type,
         }),
       });
 
       if (res.ok) {
         alert("บันทึกคำตอบสำเร็จ!");
         fetchFeedbacks();
-        return true;
       } else {
         alert("เกิดข้อผิดพลาดในการบันทึกคำตอบกลับ");
-        return false;
       }
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-      return false;
+    } finally {
+      // ปิด Loading เฉพาะการ์ดใบนี้
+      setSubmittingStates((prev) => ({ ...prev, [key]: false }));
     }
   };
 
+  // ดำเนินการลบ Feedback
   const handleDeleteFeedback = async (
     feedback_id: number,
     source_type: string,
@@ -204,16 +105,12 @@ export default function AdminFeedbackPage() {
     if (!confirm("คุณต้องการลบ Feedback นี้ใช่หรือไม่?")) return;
 
     try {
-      // 📌 แนบ type เป็น Query Param
       const res = await fetch(
         `/api/admin/feedbacks?id=${feedback_id}&type=${source_type}`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
 
       if (res.ok) {
-        // ใช้ 2 เงื่อนไขคัดออก เพราะ ID ของ 2 ตารางอาจซ้ำกัน (เช่นมี ID 1 ทั้งใน user และ company)
         setFeedbacks((prev) =>
           prev.filter(
             (f) =>
@@ -228,33 +125,36 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  // ประมวลผลตัวกรองข้อมูล
-  const processedFeedbacks = feedbacks
-    .filter((item) => {
-      // 📌 กรองจาก source_type แทน จะแม่นยำกว่า เพราะแยกตารางกันชัดเจน
-      const matchRole =
-        filterRole === "all" ||
-        item.source_type === filterRole ||
-        (filterRole === "seeker" && item.source_type === "user");
+  // กรองข้อมูลและเรียงลำดับ
+  const processedFeedbacks = useMemo(() => {
+    return feedbacks
+      .filter((item) => {
+        const matchRole =
+          filterRole === "all" ||
+          item.source_type === filterRole ||
+          (filterRole === "seeker" && item.source_type === "user");
 
-      const matchStatus =
-        filterStatus === "all" || item.status === filterStatus;
+        const matchStatus =
+          filterStatus === "all" || item.status === filterStatus;
 
-      return matchRole && matchStatus;
-    })
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-    });
+        return matchRole && matchStatus;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+      });
+  }, [feedbacks, filterRole, filterStatus, sortOrder]);
 
   return (
     <div className={styles.container}>
+      {/* ส่วนหัวเว็บบอร์ด */}
       <div className={styles.header}>
         <h2>Admin Feedback Dashboard</h2>
         <p>จัดการและตอบกลับข้อเสนอแนะจากผู้ใช้งาน</p>
       </div>
 
+      {/* ส่วนตัวกรอง (Filters) */}
       <div className={styles.filterContainer}>
         <div className={styles.filterGroup}>
           <label>ประเภทบัญชี:</label>
@@ -296,6 +196,7 @@ export default function AdminFeedbackPage() {
         </div>
       </div>
 
+      {/* ส่วนแสดงรายการ Feedbacks */}
       <div className={styles.listContainer}>
         {isLoading ? (
           <p className={styles.loading}>Loading feedbacks...</p>
@@ -304,15 +205,101 @@ export default function AdminFeedbackPage() {
             ไม่มีข้อมูล Feedback ที่ตรงกับเงื่อนไขการค้นหา
           </p>
         ) : (
-          processedFeedbacks.map((item, index) => (
-            <FeedbackCard
-              // ใช้ index หรือการผสม id+type เป็น key เพื่อป้องกันบั๊กเวลา id ของ 2 ตารางซ้ำกัน
-              key={`${item.source_type}-${item.feedback_id}-${index}`}
-              item={item}
-              onSubmitReply={handleReplySubmit}
-              onDelete={handleDeleteFeedback}
-            />
-          ))
+          processedFeedbacks.map((item, index) => {
+            const cardKey = `${item.source_type}-${item.feedback_id}`;
+            const replyText = replyTexts[cardKey] || "";
+            const isSubmitting = submittingStates[cardKey] || false;
+
+            const statusInfo = STATUS_CONFIG[item.status] || {
+              label: item.status,
+              class: "",
+            };
+            const isCompany =
+              (item.role?.toLowerCase() || item.source_type) === "company";
+            const hasAdminMessage = Boolean(item.admin_message?.trim());
+
+            return (
+              <div key={`${cardKey}-${index}`} className={styles.card}>
+                {/* 1. ส่วนข้อมูลผู้ใช้ (User Info) */}
+                <div className={styles.userInfo}>
+                  <span
+                    className={`${styles.badge} ${isCompany ? styles.badgeCompany : styles.badgeUser}`}
+                  >
+                    {isCompany ? "Company" : "User"}
+                  </span>
+                  <span className={styles.date}>
+                    {new Date(item.created_at).toLocaleString("th-TH")}
+                  </span>
+                  <div style={{ marginTop: "6px" }}>
+                    <span
+                      className={`${styles.statusBadge} ${statusInfo.class}`}
+                    >
+                      {statusInfo.label}
+                    </span>
+                  </div>
+                  <span className={styles.emailText}>
+                    {item.email || "ไม่มีอีเมล"}
+                  </span>
+                </div>
+
+                {/* 2. ส่วนข้อความ Feedback */}
+                <div className={styles.messageContent}>
+                  <div className={styles.userMessage}>
+                    <p>{item.message}</p>
+                  </div>
+
+                  {/* ประวัติ Admin Message เดิม */}
+                  {hasAdminMessage && (
+                    <div className={styles.repliedBox}>
+                      <strong>Admin Reply (ประวัติคำตอบเดิม):</strong>
+                      <p>{item.admin_message}</p>
+                      {item.replied_at && (
+                        <small>
+                          ตอบเมื่อ:{" "}
+                          {new Date(item.replied_at).toLocaleString("th-TH")}
+                        </small>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ฟอร์มพิมพ์คำตอบใหม่/แก้ไขคำตอบ */}
+                  <div className={styles.replySection}>
+                    <textarea
+                      placeholder="พิมพ์ข้อความตอบกลับ..."
+                      value={replyText}
+                      onChange={(e) =>
+                        setReplyTexts((prev) => ({
+                          ...prev,
+                          [cardKey]: e.target.value,
+                        }))
+                      }
+                      className={styles.replyTextarea}
+                      disabled={isSubmitting}
+                    />
+                    <button
+                      onClick={() => handleReplySubmit(item)}
+                      className={styles.replyBtn}
+                      disabled={isSubmitting}
+                    >
+                      {hasAdminMessage ? "Update Reply" : "Send Reply"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. ปุ่มลบรายการ */}
+                <div className={styles.actions}>
+                  <button
+                    className={styles.removeBtn}
+                    onClick={() =>
+                      handleDeleteFeedback(item.feedback_id, item.source_type)
+                    }
+                  >
+                    remove
+                  </button>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
