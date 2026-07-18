@@ -1,59 +1,53 @@
+// 📂 app/(user-facing route)/company/[id]/ProfileCompany.tsx
+"use client";
+
+import dynamic from "next/dynamic";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import styles from "./userProfileCompany.module.css";
 import Link from "next/link";
-import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
-import CompanyMapSection from "./map";
-import { JwtPayload } from "jsonwebtoken";
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
-import BackButton from "./backBttn";
 
-interface CustomJwtPayload extends JwtPayload {
-  id: number;
-}
+type LeafletMapProps = {
+  lat: number | string | null;
+  lng: number | string | null;
+  isEditMode: boolean;
+  onChangeLocation: (newLat: number, newLng: number) => void;
+};
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
+export default function ProfileCompany() {
+  const { id } = useParams();
+  const router = useRouter();
 
-export default async function ProfileCompany({ params }: PageProps) {
-  const resolvedParams = await params;
-  const companyId = resolvedParams.id;
+  // โหลดแผนที่แบบไม่ SSR เหมือนหน้า CompanyProfile (แต่ล็อกไว้เป็นโหมดดูอย่างเดียว)
+  const MapWithNoSSR = dynamic<LeafletMapProps>(
+    () => import("@/components/LeafletMap"),
+    {
+      ssr: false,
+      loading: () => (
+        <div
+          style={{
+            height: "300px",
+            background: "#eee",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p>Loading Map...</p>
+        </div>
+      ),
+    },
+  );
 
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  let viewer: CustomJwtPayload | null = null;
+  const [company, setCompany] = useState<any>(null);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (token) {
-    try {
-      const secret = process.env.JWT_SECRET || "fallback_secret";
-      viewer = jwt.verify(token, secret) as CustomJwtPayload;
-    } catch {
-      console.error("Token invalid");
-    }
-  }
-
-  if (!viewer) {
-    return (
-      <div className={styles.centerMsg}>
-        <p>Please log in to view this profile.</p>
-      </div>
-    );
-  }
-
-  // --- ดึงข้อมูลโปรไฟล์บริษัทจาก API หลังบ้าน ---
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-  let company: any = null;
-  let posts: any[] = [];
-
-  try {
-    const res = await fetch(`${apiUrl}/api/company/getCompanyById/${companyId}`, {
-      cache: "no-store",
-    });
-
-    if (res.ok) {
-      const contentType = res.headers.get("content-type");
-
-      if (contentType && contentType.includes("application/json")) {
+  useEffect(() => {
+    async function fetchCompanyProfile() {
+      try {
+        const res = await fetch(`/api/company/getCompanyById/${id}`);
         const data = await res.json();
         // ดึงข้อมูลบริษัทและรายการโพสต์งานที่ส่งมาจากหลังบ้าน
         company = data.company;
@@ -176,6 +170,23 @@ export default async function ProfileCompany({ params }: PageProps) {
               </div>
 
             </h1>
+            {isAdmin && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "end",
+                }}
+              >
+                <AdminButton
+                  id={String(viewer?.id)}
+                  role={viewer?.role || ""}
+                  company_id={
+                    company.company_id ? String(company.company_id) : ""
+                  }
+                />
+              </div>
+            )}
 
             <p>{fmt(company.brief_history)}</p>
 

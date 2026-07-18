@@ -4,7 +4,7 @@ import styles from "./seekerProfile.module.css";
 import FilePreviewButton from "./FilePreviewButton";
 import BackButton from "./BackButton";
 import ProfileActionsButton from "./ProfileActionsButton";
-
+import AdminButton from "./adminbutton";
 interface CustomJwtPayload extends JwtPayload {
   id: number;
   email: string;
@@ -61,6 +61,10 @@ export default async function SeekerProfilePage({
     );
   }
 
+  // console.log(viewer);
+  // if (viewer.role === "admin") {
+  //   console.log(1);
+  // }
   const profile = await getSeekerProfile(id);
 
   if (!profile) {
@@ -81,7 +85,19 @@ export default async function SeekerProfilePage({
       <div className={styles.backRow}>
         <BackButton />
       </div>
-
+      <div
+        style={{
+          position: "absolute",
+        }}
+      >
+        {viewer.role === "admin" && (
+          <AdminButton
+            user_id={id}
+            role={viewer.role}
+            id={viewer.id.toString()}
+          />
+        )}
+      </div>
       <div className={styles.profileGrid}>
         {/* ── Column 1: Personal Info ── */}
         <div className={styles.column}>
@@ -113,10 +129,10 @@ export default async function SeekerProfilePage({
             >
               <ProfileActionsButton
                 userId={Number(id)}
-                companyId={Number(viewer?.id)}/>
+                companyId={Number(viewer?.id)}
+              />
             </div>
           </div>
-
           <div className={styles.personalInfoContent}>
             <div className={styles.avatarWrapper}>
               <img
@@ -125,8 +141,12 @@ export default async function SeekerProfilePage({
                 className={styles.avatar}
               />
             </div>
-            <strong><h2 className={styles.name}>{fmt(profile.fullname)}</h2></strong>
-            <strong><p className={styles.email}>{fmt(profile.email)}</p></strong>
+            <strong>
+              <h2 className={styles.name}>{fmt(profile.fullname)}</h2>
+            </strong>
+            <strong>
+              <p className={styles.email}>{fmt(profile.email)}</p>
+            </strong>
 
             <div className={styles.detailsBox}>
               <div className={styles.titleinfoRow}>

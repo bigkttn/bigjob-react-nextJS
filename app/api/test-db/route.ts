@@ -3,19 +3,19 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const [rows] = await db.query("SELECT 1");
+        const [rows] = await db.query("SELECT * FROM User");
 
         return NextResponse.json({
             success: true,
-            rows,
+            data: rows,
         });
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error("Get users error:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                error: String(err),
+                message: "Failed to fetch users",
             },
             { status: 500 }
         );

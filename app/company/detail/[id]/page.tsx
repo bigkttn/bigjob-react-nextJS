@@ -18,6 +18,59 @@ const DetailJob = () => {
   const [isSavingTest, setIsSavingTest] = useState(false);
   const [isMode, setIsMode] = useState(true); // true = แก้ไขงาน, false = แก้ไขข้อสอบ
 
+  const [showBanPopup, setShowBanPopup] = useState(false);
+
+  // ประกาศตัวแปรเตรียมไว้ก่อน
+  let formattedBanDate = "";
+  let remainingText = "";
+  let isBanned = false;
+
+  // เช็คว่าโหลดข้อมูล job มาเสร็จแล้ว และมี ban_until ค่อยเริ่มคำนวณ
+  if (job && job.ban_until) {
+    const banDate = new Date(job.ban_until.replace(" ", "T"));
+    const now = new Date();
+    const diffMs = banDate.getTime() - now.getTime();
+
+    // ฟอร์แมตวันที่เป็น ค.ศ.
+    const monthNames = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+    formattedBanDate = `${banDate.getDate()} ${monthNames[banDate.getMonth()]} ค.ศ. ${banDate.getFullYear()} เวลา ${banDate.getHours().toString().padStart(2, "0")}:${banDate.getMinutes().toString().padStart(2, "0")} น.`;
+
+    // คำนวณเวลาที่เหลือ (วัน / ชั่วโมง / นาที)
+    if (diffMs > 0) {
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const hours = Math.floor(
+        (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+      const dayText = days > 0 ? `${days} วัน ` : "";
+      const hourText = hours > 0 ? `${hours} ชั่วโมง ` : "";
+      const minText = minutes > 0 ? `${minutes} นาที` : "";
+
+      remainingText = `(เหลือเวลาอีก ${dayText}${hourText}${minText})`;
+      isBanned = true; // ตั้งสถานะว่าโดนแบนอยู่
+    } else {
+      remainingText = "(ครบกำหนดเวลาแบนแล้ว)";
+      isBanned = false; // หมดเวลาแบนแล้ว
+    }
+  }
+  // คำนวณสถานะการแบน (replace " " เป็น "T" เพื่อป้องกัน Invalid Date ในบาง Browser)
+  // const isBanned =
+  //   job?.ban_until && new Date(job.ban_until.replace(" ", "T")) > new Date();
+
   const fetchJobDetail = useCallback(async () => {
     if (!postId) return;
     try {
@@ -56,7 +109,10 @@ const DetailJob = () => {
 
   useEffect(() => {
     if (job) setEditData({ ...job });
-  }, [job]);
+    if (isBanned) {
+      setShowBanPopup(true);
+    }
+  }, [job, isBanned]);
 
   useEffect(() => {
     fetchTestData();
@@ -209,6 +265,99 @@ const DetailJob = () => {
 
   return (
     <div className={styles.container}>
+      {/* แบนเนอร์แจ้งเตือนการแบน (เปลี่ยนเป็นแบบ Popup กลางจอ) */}
+      {showBanPopup && isBanned && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.5)", // ฉากหลังมืด
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999, // ให้อยู่บนสุดของหน้าจอ
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderTop: "6px solid #ef4444",
+              borderRadius: "12px",
+              padding: "30px",
+              width: "90%",
+              maxWidth: "400px",
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              textAlign: "center",
+              position: "relative",
+            }}
+          >
+            <div style={{ fontSize: "40px", marginBottom: "10px" }}>⚠️</div>
+            <h2
+              style={{
+                color: "#b91c1c",
+                margin: "0 0 15px 0",
+                fontSize: "1.25rem",
+              }}
+            >
+              โพสต์นี้ถูกระงับการใช้งาน
+            </h2>
+            <p
+              style={{
+                color: "#4b5563",
+                fontSize: "0.95rem",
+                lineHeight: "1.5",
+                marginBottom: "25px",
+              }}
+            >
+              ไม่สามารถแก้ไขข้อมูลและข้อสอบได้
+              <br />
+              จนกว่าจะถึงเวลา:{" "}
+              <strong style={{ color: "#111" }}>{formattedBanDate}</strong>
+              <br />
+              <span
+                style={{
+                  color: "#ef4444",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                  display: "inline-block",
+                  marginTop: "5px",
+                }}
+              >
+                {remainingText}
+              </span>
+            </p>
+            <button
+              onClick={() => {
+                setShowBanPopup(false);
+                router.back();
+              }}
+              style={{
+                backgroundColor: "#ef4444",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                width: "100%",
+                transition: "background-color 0.2s",
+              }}
+              onMouseOver={(e) =>
+                (e.currentTarget.style.backgroundColor = "#dc2626")
+              }
+              onMouseOut={(e) =>
+                (e.currentTarget.style.backgroundColor = "#ef4444")
+              }
+            >
+              รับทราบ
+            </button>
+          </div>
+        </div>
+      )}
       <div className={styles.card}>
         {/* ===== Unified Header Row (แถวควบคุมบนสุดระดับสากล) ===== */}
         <div
@@ -305,10 +454,17 @@ const DetailJob = () => {
           </div>
 
           {/* ฝั่งขวา: ปุ่มบันทึกตามโหมดที่เลือก */}
+          {/* ฝั่งขวา: ปุ่มบันทึกตามโหมดที่เลือก */}
           <button
             onClick={isMode ? handleSave : handleSaveTest}
-            disabled={isMode ? isSaving : isSavingTest}
+            // 4. เพิ่ม isBanned เข้าไปในเงื่อนไข disabled
+            disabled={isMode ? isSaving || isBanned : isSavingTest || isBanned}
             className={styles.postBtn}
+            style={{
+              // ปรับสีให้จางลงเมื่อถูกล็อก
+              opacity: isBanned ? 0.5 : 1,
+              cursor: isBanned ? "not-allowed" : "pointer",
+            }}
           >
             {isMode
               ? isSaving
