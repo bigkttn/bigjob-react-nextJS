@@ -1,6 +1,6 @@
 import styles from "./detailjob.module.css";
 import Link from "next/link";
-import CompanyButtn from "../CompanyButtn";
+import SaveAndReport from "../saveAndreportBttn"
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
@@ -146,6 +146,7 @@ export default async function DetailJob({ params }: PageProps) {
                     {job.company_name || "Company Name"}
                   </h1>
 
+
                   <span
                     style={{
                       padding: "4px 12px",
@@ -161,15 +162,12 @@ export default async function DetailJob({ params }: PageProps) {
                 </div>
               </Link>
             </div>
-            <CompanyButtn userId={Number(viewer?.id)} postId={Number(postId)} />
-            {isAdmin && (
-              <AdminButton
-                id={String(viewer?.id)}
-                role={viewer?.role || ""}
-                post_id={job.post_id ? String(job.post_id) : ""}
-                company_id={job.company_id ? String(job.company_id) : ""}
-              />
-            )}
+
+
+            <SaveAndReport
+              userId={Number(viewer?.id)}
+              postId={Number(postId)}
+            />
           </div>
 
           {/* --- ส่วนเนื้อหา (Grid) --- */}
@@ -309,16 +307,16 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {job.application_dates
                       ? new Date(job.application_dates).toLocaleDateString(
-                          "th-TH",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          },
-                        ) + " น."
+                        "th-TH",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        },
+                      ) + " น."
                       : "No deadline specified"}
                   </span>
                 </div>

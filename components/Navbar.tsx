@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./navbar.css";
+import { styles } from "next/dist/client/components/styles/access-error-styles";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -357,12 +358,9 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                <Link
-                  href="/company/saved_users"
-                  className={`nav-item ${isActive("/company/saved_users")}`}
-                >
-                  Saved
-                </Link>
+                <Link href="/company/saved_users" className={`nav-item ${isActive("/company/saved_users")}`}>Saved</Link>
+
+                {/* 🔔 จุดแสดงแจ้งเตือนสำหรับฝั่ง Company */}
                 <Link
                   href="/company/company-feedback"
                   className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}

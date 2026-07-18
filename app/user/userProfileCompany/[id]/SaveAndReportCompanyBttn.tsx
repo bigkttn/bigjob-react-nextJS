@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
-import styles from "./profile.module.css";
+import styles from "./saveAndreportBttn.module.css";
 
 //  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ 
 interface ProfileActionsProps {
@@ -18,13 +18,12 @@ export default function ProfileActionsButton({
 }: ProfileActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [isSaved, setIsSaved] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [selectedType, setSelectedType] = useState<ReportType | "">("");
   const [description, setDescription] = useState("");
   
-  const [isReported, setIsReported] = useState(false); 
+  const [isReported, setIsReported] = useState(false);
 
   // ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
   useEffect(() => {
@@ -38,101 +37,16 @@ export default function ProfileActionsButton({
   }, []);
 
   useEffect(() => {
-    checkSaved();
     checkReport();
   }, []);
 
-  // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
-  const handleBookmark = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/favour_user",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: Number(userId),
-            company_id: Number(companyId),
-          }),
-        },
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("API Error Details:", errorData);
-        alert(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
-        return;
-      }
-      setIsSaved(true);
-      alert("Saved Successfully!");
-    } catch (error) {
-      console.error("Network Error:", error);
-      alert("Unable to connect to the server.");
-    }
-  };
-
-  const handleDeleteBookmark = async () => {
-    if (isSaved) {
-      await handleDeleteSaved(Number(userId), Number(companyId));
-    } else {
-      await handleBookmark(); 
-    }
-  };
-
-  const checkSaved = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/check_favour_user",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: Number(userId),
-            company_id: Number(companyId),
-          }),
-        }
-      );
-      const data = await response.json();
-      if (data && data.rows && data.rows.length > 0) {
-        setIsSaved(true);
-      } else {
-        setIsSaved(false);
-      }
-    } catch (error) {
-      console.error("Error in checkSaved:", error);
-    }
-  };
-
-  const handleDeleteSaved = async (userId: number, companyId: number) => {
-    const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
-    if (!confirmDelete) return;
-    try {
-      const response = await fetch("/api/company/delete_favour_user", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: Number(userId),
-          company_id: Number(companyId),
-        }),
-      });
-      if (response.ok) {
-        setIsSaved(false);
-        alert("ลบออกจากรายการบันทึกแล้ว");
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        alert(`ไม่สามารถลบได้: ${errorData.message || 'เกิดข้อผิดพลาด'}`);
-      }
-    } catch (error) {
-      console.error("Error in handleDeleteSaved:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
-    }
-  };
-
-  
+ 
   const openReportModal = () => {
     if (isReported) {
       alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
       setIsModalOpen(false);
-    }else{setSelectedType("");
+    }else{
+    setSelectedType("");
     setDescription("");
     setIsModalOpen(true);
     setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
@@ -146,7 +60,7 @@ export default function ProfileActionsButton({
       return;
     }
     try {
-      const response = await fetch("/api/company/report_user", {
+      const response = await fetch("/api/seeker/report_company", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,14 +96,13 @@ export default function ProfileActionsButton({
 
    const checkReport = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/company/check_report_user",
+      const response = await fetch("/api/seeker/check_report_company",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: Number(userId),
-            company_id: Number(companyId),
+            post_id: Number(companyId),
           }),
         }
       );
@@ -239,33 +152,7 @@ export default function ProfileActionsButton({
             flexDirection: "column",
           }}
         >
-          <button
-            onClick={handleDeleteBookmark}
-            className={`${styles.savedButton} ${isSaved ? styles.active : ""}`}
-            style={{
-              color: isSaved ? "#f4b400" : "#333",
-              padding: "8px 12px",
-              background: "none",
-              border: "none",
-              textAlign: "left",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              fontSize: "14px",
-            }}
-          >
-            <span
-              className={`material-symbols-outlined `}
-              style={{
-                fontSize: "18px",
-              }}
-            >
-              bookmark
-            </span>
-            {isSaved ? "Saved" : "Save"}
-          </button>
-
+         
           <button
             onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
          className={`${styles.reportedButton} ${isReported ? styles.active : ""}`}
@@ -282,7 +169,7 @@ export default function ProfileActionsButton({
               fontSize: "14px",
             }}
 
-            // disabled={isReported}
+          
           >
             <span
               className="material-symbols-outlined"
@@ -327,7 +214,7 @@ export default function ProfileActionsButton({
           >
             {/* หัวข้อโมดอล */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>รายงานพฤติกรรมผู้สมัครงาน</h3>
+              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>รายงานรายละเอียดงาน</h3>
               <span
                 className="material-symbols-outlined"
                 style={{ cursor: "pointer", color: "#666" }}
@@ -355,10 +242,11 @@ export default function ProfileActionsButton({
                 }}
               >
                 <option value="">โปรดเลือกหัวข้อรายงาน</option>
-                <option value="identity_fraud">ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน</option>
-                <option value="job_no_show">ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)</option>
-                <option value="harassment_to_staff">ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่</option>
+                <option value="identity_fraud">ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง</option>
+                <option value="job_no_show">งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์</option>
+                <option value="harassment_to_staff">ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง</option>
                 <option value="harassment_to_staff">อื่นๆ (ระบุในรายละเอียด)</option>
+
               </select>
             </div>
 
