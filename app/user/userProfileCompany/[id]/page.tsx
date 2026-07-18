@@ -1,4 +1,3 @@
-// 📂 app/(user-facing route)/company/[id]/ProfileCompany.tsx
 "use client";
 
 import dynamic from "next/dynamic";
@@ -6,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./userProfileCompany.module.css";
 import Link from "next/link";
+import AdminButton from "./adminbutton";
+import { getSession } from "./getSession";
 
 type LeafletMapProps = {
   lat: number | string | null;
@@ -17,6 +18,20 @@ type LeafletMapProps = {
 export default function ProfileCompany() {
   const { id } = useParams();
   const router = useRouter();
+
+  const [viewer, setViewer] = useState<any>(null);
+  const [isAdmin, setisAdmin] = useState(false);
+
+  useEffect(() => {
+    async function fetchSession() {
+      const userData = await getSession();
+      if (userData) {
+        setViewer(userData);
+        setisAdmin(userData.role === "admin" || userData.role === "superadmin");
+      }
+    }
+    fetchSession();
+  }, []);
 
   // โหลดแผนที่แบบไม่ SSR เหมือนหน้า CompanyProfile (แต่ล็อกไว้เป็นโหมดดูอย่างเดียว)
   const MapWithNoSSR = dynamic<LeafletMapProps>(
@@ -147,6 +162,23 @@ export default function ProfileCompany() {
                 </span>
               )}
             </h1>
+            {isAdmin && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "end",
+                }}
+              >
+                <AdminButton
+                  id={String(viewer?.id)}
+                  role={viewer?.role || ""}
+                  company_id={
+                    company.company_id ? String(company.company_id) : ""
+                  }
+                />
+              </div>
+            )}
 
             <p>{fmt(company.brief_history)}</p>
 

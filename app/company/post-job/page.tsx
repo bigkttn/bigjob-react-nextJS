@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useState } from "react";
 import styles from "./postjob.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getSession } from "./getSession";
 
 interface Question {
   id: string;
@@ -19,6 +20,7 @@ const PostJob = () => {
   // 🔑 เพิ่ม State สำหรับเก็บสถานะการยืนยันตัวตน (ค่าเริ่มต้นเป็นเท็จก่อนโหลดข้อมูลเสร็จ)
   const [isApproved, setIsApproved] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [viewer, setViewer] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     jobPosition: "",
@@ -61,10 +63,20 @@ const PostJob = () => {
       // 2. ดึงข้อมูลสถานะของบริษัท
       // ⚠️ ระบุ ID ให้ตรงกับ Route ที่คุณมี (เช่น ดึงจาก Session/Context หรือ LocalStorage)
       // สมมติว่าบริษัทที่ล็อกอินอยู่คือ ID: 1
-      const companyId = 1;
+      // const companyId = 1;
+
+      const userData = await getSession();
+
+      // หากไม่มีข้อมูล Session ให้หยุดการทำงานและล็อกฟอร์ม
+      if (!userData || !userData.id) {
+        setIsApproved(false);
+        setIsLoading(false);
+        return;
+      }
       const companyResponse = await fetch(
-        `/api/company/getCompanyById/${companyId}`,
+        `/api/company/getCompanyById/${userData.id}`,
       );
+      console.log(userData.id);
 
       // 🛡️ เช็คก่อนแปลงเป็น JSON ว่าไม่ได้ส่ง HTML Error กลับมา
       if (companyResponse.ok) {

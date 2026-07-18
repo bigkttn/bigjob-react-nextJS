@@ -3,11 +3,12 @@ import db from "@/lib/db";
 
 export async function POST(request: Request) {
     try {
-        const { post_id, durationDays } = await request.json();
+        const { company_id, durationDays } = await request.json();
 
-        if (!post_id || durationDays === undefined) {
+        // 1. แก้ข้อความแจ้งเตือนให้ตรงกับ company_id
+        if (!company_id || durationDays === undefined) {
             return NextResponse.json(
-                { error: "Please provide both postId and durationDays" },
+                { error: "Please provide both company_id and durationDays" },
                 { status: 400 }
             );
         }
@@ -19,39 +20,38 @@ export async function POST(request: Request) {
             banUntilDate = "9999-12-31 23:59:59";
         } else {
             now.setDate(now.getDate() + Number(durationDays));
-
             const thaiTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-
             banUntilDate = thaiTime.toISOString().slice(0, 19).replace("T", " ");
         }
-        const query = `
-                        UPDATE posts
-                        SET status = 'banned', ban_until = ?
-                        WHERE post_id = ?`;
 
-        const [result]: any = await db.query(query, [banUntilDate, post_id]);
+        const query = `
+            UPDATE company
+            SET banned_until = ?
+            WHERE company_id = ?
+        `;
+
+        const [result]: any = await db.query(query, [banUntilDate, company_id]);
 
         if (result.affectedRows === 0) {
+            // 2. แก้ erro เป็น error และปรับข้อความให้เป็น Company
             return NextResponse.json(
-                { erro: "The post to be banned was not found in the system." },
+                { error: "The company to be banned was not found in the system." },
                 { status: 404 }
             );
         }
 
         const queryUpdateReport = `
-            UPDATE report_post
+            UPDATE report_company
             SET status = 1
-            WHERE post_id = ?
+            WHERE company_id = ?
         `;
 
-        await db.query(queryUpdateReport, [post_id])
+        await db.query(queryUpdateReport, [company_id]);
 
         return NextResponse.json({
             message: "banned successfully",
             banUntil: banUntilDate
-        },
-            { status: 200 }
-        );
+        }, { status: 200 });
 
     } catch (error: any) {
         console.error("Database Error:", error);

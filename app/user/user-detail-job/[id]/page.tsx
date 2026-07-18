@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
 import AdminButton from "./adminbutton";
-
+import BanPopup from "./BanPopup";
 interface CustomJwtPayload extends JwtPayload {
   id: number;
   role?: string;
@@ -20,6 +20,7 @@ export default async function DetailJob({ params }: PageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let viewer: CustomJwtPayload | null = null;
+
   if (token) {
     try {
       const secret = process.env.JWT_SECRET || "fallback_secret";
@@ -98,6 +99,7 @@ export default async function DetailJob({ params }: PageProps) {
 
   return (
     <div>
+      <BanPopup job={job} />
       {isAdmin && (
         <h1
           style={{

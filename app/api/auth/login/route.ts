@@ -40,17 +40,17 @@ export async function POST(request: Request) {
         }
 
         // 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) ---
-        if (user.banned_until) {
-            const banEndDate = new Date(user.banned_until);
-            const currentDate = new Date();
+        // if (user.banned_until) {
+        //     const banEndDate = new Date(user.banned_until);
+        //     const currentDate = new Date();
 
-            if (banEndDate > currentDate) {
-                const formattedBanDate = banEndDate.toLocaleString('th-TH');
-                return NextResponse.json({
-                    message: `บัญชีของคุณถูกระงับการใช้งานจนถึง ${formattedBanDate}`
-                }, { status: 403 });
-            }
-        }
+        //     if (banEndDate > currentDate) {
+        //         const formattedBanDate = banEndDate.toLocaleString('th-TH');
+        //         return NextResponse.json({
+        //             message: `บัญชีของคุณถูกระงับการใช้งานจนถึง ${formattedBanDate}`
+        //         }, { status: 403 });
+        //     }
+        // }
 
         // 3. ตรวจสอบรหัสผ่าน
         const dbPassword = role === 'company' ? user.company_password : user.password;
