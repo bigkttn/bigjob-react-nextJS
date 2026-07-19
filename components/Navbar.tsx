@@ -338,6 +338,12 @@ export default function Navbar() {
                     <span className="shock-badge">! {unreadCount}</span>
                   )}
                 </Link>
+                     <Link
+                  href="/user/saveCompany"
+                  className={`nav-item ${isActive("/user/saveCompany")}`}
+                >
+                  Saved
+                </Link>
                 <Link
                   href="/user/user-profile"
                   className={`nav-item ${isActive("/user/user-profile")}`}
@@ -371,7 +377,7 @@ export default function Navbar() {
                   className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}
                 >
                   Feedback
-                  {unreadCount > 0 && (
+                   {unreadCount > 0 && (
                     <span className="shock-badge">! {unreadCount}</span>
                   )}
                 </Link>
