@@ -20,7 +20,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // 1. ดึงข้อมูล Session
+  // ดึงข้อมูล Session
   useEffect(() => {
     const fetchSession = async () => {
       try {
@@ -34,7 +34,7 @@ export default function Navbar() {
 
           if (data.user.role !== "guest") {
             fetchNotificationBadge(data.user.id, data.user.role);
-            // 🔴 เรียกใช้ฟังก์ชันเช็กสถานะแบนหลังจากรู้ Role และ ID
+            //เรียกใช้ฟังก์ชันเช็กสถานะแบนหลังจากรู้ Role และ ID
             checkBanStatus(data.user.id, data.user.role);
           }
         } else {
@@ -57,7 +57,7 @@ export default function Navbar() {
     setIsBanned(false);
   };
 
-  // 🔴 2. ฟังก์ชันตรวจสอบการแบน
+  // . ฟังก์ชันตรวจสอบการแบน
   const checkBanStatus = async (uid: string, role: string) => {
     try {
       // ⚠️ เปลี่ยน URL API ให้ตรงกับที่คุณใช้ดึงข้อมูล Profile ของ User หรือ Company
@@ -83,7 +83,7 @@ export default function Navbar() {
     }
   };
 
-  // 🔴 3. คำนวณวันหมดอายุการแบน
+  //  คำนวณวันหมดอายุการแบน
   const calculateBan = (bannedUntil: string) => {
     const banDate = new Date(bannedUntil.replace(" ", "T"));
     const now = new Date();

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       `SELECT 
         fu.favour_id,
         fu.company_id,
-        u.uid AS id,
+        u.uid,
         u.fullname AS name,
         u.profile_image AS image,
         jobU.job_name AS jobtitle, 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     // จัดโครงสร้างข้อมูลให้อยู่ในรูปแบบ Object ตามโครงสร้าง Interface ที่เราออกแบบไว้ก่อนหน้านี้
     const formattedData = rows.map((row: any) => ({
-      id: row.id,
+      uid: row.uid,
       name: row.name,
       jobtitle: row.jobtitle || "General Seeker", //   -- 4. เปลี่ยนจากคำว่า "Seeker" มาใช้ค่าจริงที่ดึงจาก SQL
       image: row.image,

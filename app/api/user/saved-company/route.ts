@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     
     const formattedData = rows.map((row: any) => ({
       cid: row.cid,
-      post_id: row.post_id,
+      post_id: row.post_idz,
       name: row.name,
       job_title: row.job_title || "General Company",
       logo: row.logo || null }));
