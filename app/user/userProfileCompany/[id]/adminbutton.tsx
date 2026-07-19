@@ -137,7 +137,7 @@ export default function AdminButton({
                 color: "#222",
               }}
             >
-              Admin Post Management
+              Admin Company Management
             </h3>
             <p
               style={{

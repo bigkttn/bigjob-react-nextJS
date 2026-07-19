@@ -56,7 +56,7 @@ export default function AdminButton({
 
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/admin/companies/Ban`, {
+      const res = await fetch(`/api/admin/user/ban`, {
         method: "POST",
         headers: { "Content-type": "application/json" },
         body: JSON.stringify({
@@ -137,7 +137,7 @@ export default function AdminButton({
                 color: "#222",
               }}
             >
-              Admin Post Management
+              Admin User Management
             </h3>
             <p
               style={{

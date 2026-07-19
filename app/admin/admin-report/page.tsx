@@ -11,7 +11,7 @@ const AdminReportPage = () => {
   const getStatusText = (statusCode: any) => {
     switch (statusCode) {
       case 1:
-        return "Suspend"; //ระงับ
+        return "Suspend"; // ระงับ
       case 2:
         return "Warn"; // เตือน
       case 0:
@@ -20,16 +20,19 @@ const AdminReportPage = () => {
     }
   };
 
-  const getIdPrefix = (source: string) => {
-    switch (source) {
-      case "user":
-        return "U";
-      case "post":
-        return "P";
-      case "company":
-        return "C";
+  // แปลง report_type ให้เป็นข้อความตรงกับ Dropdown (อ้างอิงจาก image_872d63.png)
+  const getReportTypeText = (type: string) => {
+    switch (type) {
+      case "identity_fraud":
+        return "ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง";
+      case "job_no_show":
+        return "งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์";
+      case "harassment_to_staff":
+        return "ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง";
+      case "other":
+        return "อื่นๆ (ระบุในรายละเอียด)";
       default:
-        return "R";
+        return type || "-";
     }
   };
 
@@ -66,11 +69,13 @@ const AdminReportPage = () => {
         const result = await response.json();
 
         if (response.ok) {
-          const formattedData = result.data.map((item: any) => ({
-            id: `${getIdPrefix(item.source)}${String(item.report_id).padStart(3, "0")}`,
+          // ใช้ index + 1 ในการสร้าง ID เรียงลำดับ 1, 2, 3...
+          const formattedData = result.data.map((item: any, index: number) => ({
+            id: index + 1,
             reporter: item.reporter_name || "ไม่ทราบชื่อ",
             reporterId: item.reporter_id,
             reporterRole: item.reporter_role,
+            reportType: getReportTypeText(item.report_type),
             details: item.description,
             target: item.target_name || "ไม่ทราบข้อมูล",
             targetId: item.target_id,
@@ -128,6 +133,11 @@ const AdminReportPage = () => {
                   </span>
                 </Link>
               </div>
+
+              <div className={styles.cell}>
+                <span className={styles.badgeGray}>{report.reportType}</span>
+              </div>
+
               <div className={styles.cell}>
                 <div className={styles.detailBubble}>{report.details}</div>
               </div>

@@ -8,7 +8,7 @@
   background-color: #d9d9d9;
   border-radius: 40px;
   padding: 30px;
-  max-width: 1300px;
+  max-width: 1500px;
   margin: 0 auto;
 }
 
@@ -17,42 +17,51 @@
   font-size: 20px;
 }
 
+/* 1. เปลี่ยน align-items เป็น stretch เพื่อให้เส้นแบ่งคอลัมน์ยาวเต็มบรรทัด */
 .tableHeader,
 .reportRow {
   display: grid;
-  grid-template-columns: 0.5fr 0.8fr 2.5fr 1fr 0.8fr 0.8fr;
-  align-items: center;
+  grid-template-columns: 0.5fr 1.5fr 2fr 2fr 1.5fr 0.8fr 0.7fr;
+  align-items: stretch;
   gap: 10px;
 }
 
 .tableHeader {
   background-color: #4dfc50;
-  padding: 10px;
+  /* 2. กำหนด padding บน-ล่าง 10px ซ้าย-ขวา 15px */
+  padding: 10px 15px;
   border-radius: 15px;
   margin-bottom: 20px;
   font-weight: bold;
 }
 
+.reportRow {
+  margin-bottom: 15px;
+  /* 3. เพิ่ม padding ซ้าย-ขวา 15px ให้เท่ากับ Header เพื่อให้เส้นแบ่งคอลัมน์ตรงกัน */
+  padding: 0 15px;
+}
+
+/* 4. จัดให้อยู่กึ่งกลางทั้งแนวตั้งและแนวนอน (Flex) */
 .headerCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   border-right: 1px solid #000;
+  padding: 5px;
 }
 
 .headerCell:last-child {
   border-right: none;
 }
 
-.reportRow {
-  margin-bottom: 15px;
-}
-
 .cell {
   display: flex;
   justify-content: center;
+  align-items: center;
   border-right: 1px solid #000;
   height: 100%;
-  align-items: center;
-  padding: 5px;
+  padding: 10px 5px; /* เพิ่ม padding บน-ล่าง ให้ดูมีพื้นที่หายใจ */
 }
 
 .cell:last-child {
@@ -65,6 +74,8 @@
   border-radius: 20px;
   font-weight: bold;
   font-size: 14px;
+  text-align: center;
+  word-break: break-word; /* ป้องกันข้อความทะลุกรอบ */
 }
 
 .nextLink {
@@ -73,9 +84,13 @@
   border-radius: 20px;
   font-weight: bold;
   font-size: 14px;
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  text-align: center;
 }
+
 .nextLink:hover {
-  /* transform: translateY(-3px); */
   color: #3653f8;
 }
 
@@ -86,6 +101,11 @@
   font-size: 13px;
   line-height: 1.4;
   text-align: left;
+  width: 100%; /* ให้กว้างเต็มช่อง */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .statusBtn {
@@ -100,9 +120,11 @@
 .suspend {
   background-color: #ff8c8c;
 }
+
 .warn {
   background-color: #ffff00;
 }
+
 .review {
   background-color: #ffd8b1;
 }

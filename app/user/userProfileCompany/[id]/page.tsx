@@ -1,75 +1,106 @@
-// 📂 app/(user-facing route)/company/[id]/ProfileCompany.tsx
 "use client";
 
-import dynamic from "next/dynamic";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import styles from "./userProfileCompany.module.css";
 import Link from "next/link";
+import styles from "./userProfileCompany.module.css";
 
-type LeafletMapProps = {
-  lat: number | string | null;
-  lng: number | string | null;
-  isEditMode: boolean;
-  onChangeLocation: (newLat: number, newLng: number) => void;
-};
+import BackButton from "./backBttn";
+import AdminButton from "./adminbutton";
+import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
+import CompanyMapSection from "./map";
+import { getSession, CustomJwtPayload } from "./getSession";
 
 export default function ProfileCompany() {
   const { id } = useParams();
-  const router = useRouter();
-
-  // โหลดแผนที่แบบไม่ SSR เหมือนหน้า CompanyProfile (แต่ล็อกไว้เป็นโหมดดูอย่างเดียว)
-  const MapWithNoSSR = dynamic<LeafletMapProps>(
-    () => import("@/components/LeafletMap"),
-    {
-      ssr: false,
-      loading: () => (
-        <div
-          style={{
-            height: "300px",
-            background: "#eee",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <p>Loading Map...</p>
-        </div>
-      ),
-    },
-  );
 
   const [company, setCompany] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [viewer, setViewer] = useState<CustomJwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // โหลด session ของผู้ใช้ที่กำลังดูหน้านี้ (เพื่อเช็คสิทธิ์ admin / ผู้รายงาน)
   useEffect(() => {
+    async function fetchSession() {
+      try {
+        const session = await getSession();
+        setViewer(session);
+      } catch (err) {
+        console.error("Session fetch error:", err);
+        setViewer(null);
+      }
+    }
+    fetchSession();
+  }, []);
+
+  // โหลดข้อมูลบริษัทและรายการตำแหน่งงาน
+  useEffect(() => {
+    if (!id) return;
+
     async function fetchCompanyProfile() {
+      setLoading(true);
+      setError(null);
       try {
         const res = await fetch(`/api/company/getCompanyById/${id}`);
-        const data = await res.json();
-        // ดึงข้อมูลบริษัทและรายการโพสต์งานที่ส่งมาจากหลังบ้าน
-        company = data.company;
-        posts = data.posts || [];
-      } else {
-        const textError = await res.text();
-        console.error("API did not return JSON. Received:", textError.substring(0, 200));
-      }
-    } else {
-      console.error(`Failed to fetch company profile. Status: ${res.status}`);
-    }
-  } catch (error) {
-    console.error("Fetch error:", error);
-  }
+        const contentType = res.headers.get("content-type") || "";
 
-  // กรณีไม่พบข้อมูลบริษัท
-  if (!company) {
+        if (!contentType.includes("application/json")) {
+          const textError = await res.text();
+          console.error(
+            "API did not return JSON. Received:",
+            textError.substring(0, 200),
+          );
+          setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+          return;
+        }
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setCompany(data.company);
+          setPosts(data.posts || []);
+        } else {
+          console.error(
+            `Failed to fetch company profile. Status: ${res.status}`,
+            data,
+          );
+          setError("ไม่สามารถโหลดข้อมูลบริษัทได้");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setError("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCompanyProfile();
+  }, [id]);
+
+  const fmt = (val: any) =>
+    val !== null && val !== undefined && val !== "" ? String(val) : "-";
+
+  // สถานะกำลังโหลด
+  if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.card || ""}>
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <p>กำลังโหลดข้อมูล...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // กรณีไม่พบข้อมูลบริษัท หรือเกิด error
+  if (error || !company) {
+    return (
+      <div className={styles.container}>
+        <div>
           <BackButton />
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}>
+          <div
+            style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}
+          >
             <h3>ไม่พบข้อมูลบริษัท หรือเกิดข้อผิดพลาดในการเชื่อมต่อระบบ</h3>
             <p style={{ color: "#666", fontSize: "0.9rem", marginTop: "8px" }}>
               โปรดตรวจสอบความถูกต้องของ URL หรือสถานะของเซิร์ฟเวอร์ API
@@ -79,9 +110,6 @@ export default function ProfileCompany() {
       </div>
     );
   }
-
-  const fmt = (val: any) =>
-    val !== null && val !== undefined && val !== "" ? String(val) : "-";
 
   const isVerified =
     typeof company.verification_status === "string" &&
@@ -97,6 +125,11 @@ export default function ProfileCompany() {
       ? "ถูกปฏิเสธ"
       : "รอตรวจสอบ";
 
+  const isAdmin = viewer?.role === "admin";
+  const companyId = company.company_id
+    ? String(company.company_id)
+    : String(id);
+
   return (
     <div className={styles.container}>
       <link
@@ -106,12 +139,7 @@ export default function ProfileCompany() {
 
       {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
       <div className={styles.leftSection}>
-        <div
-          style={{
-            width: "100px",
-            height: "25px",
-
-          }}>
+        <div style={{ width: "100px", height: "25px" }}>
           <BackButton />
         </div>
         <div className={styles.profileCard}>
@@ -155,20 +183,21 @@ export default function ProfileCompany() {
                   {statusLabel}
                 </span>
               )}
-              <div
-                style={{
-                  marginLeft: "auto",      // ดันปุ่มไปทางขวาจนสุด
-                  marginRight: "20px",     // ระยะห่างจากขอบขวาสุด 20px (ปรับเพิ่ม-ลดได้)
-                  display: "flex",
-                  alignItems: "center"
-                }}
-              >
-                <SaveAndReportCompany
-                  userId={Number(viewer.id)}
-                  companyId={Number(companyId)}
-                />
-              </div>
-
+              {viewer && (
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    marginRight: "20px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <SaveAndReportCompany
+                    userId={Number(viewer.id)}
+                    companyId={Number(companyId)}
+                  />
+                </div>
+              )}
             </h1>
             {isAdmin && (
               <div
@@ -181,9 +210,7 @@ export default function ProfileCompany() {
                 <AdminButton
                   id={String(viewer?.id)}
                   role={viewer?.role || ""}
-                  company_id={
-                    company.company_id ? String(company.company_id) : ""
-                  }
+                  company_id={companyId}
                 />
               </div>
             )}
@@ -239,7 +266,9 @@ export default function ProfileCompany() {
         </div>
 
         <div className={styles.jobScrollArea}>
-          <h2 style={{ margin: "0 0 4px", fontSize: "1.2rem", color: "#1e293b" }}>
+          <h2
+            style={{ margin: "0 0 4px", fontSize: "1.2rem", color: "#1e293b" }}
+          >
             ตำแหน่งงานที่เปิดรับสมัคร ({posts.length})
           </h2>
 
@@ -249,15 +278,22 @@ export default function ProfileCompany() {
             posts.map((job: any) => (
               <div key={job.post_id} className={styles.jobCard}>
                 <img
-                  src={company.logo_image || "/assets/images/suggestedCompanys.jpg"}
+                  src={
+                    company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                  }
                   width={80}
                   height={80}
                   alt="Job Logo"
                 />
                 <div>
                   <h2>{fmt(job.job_position)}</h2>
-                  <p><strong>Details:</strong> {fmt(job.job_description)}</p>
-                  <p><strong>Salary:</strong> THB {fmt(job.salary_min)} - {fmt(job.salary_max)} / month</p>
+                  <p>
+                    <strong>Details:</strong> {fmt(job.job_description)}
+                  </p>
+                  <p>
+                    <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
+                    {fmt(job.salary_max)} / month
+                  </p>
                   <Link href={`/user/user-detail-job/${job.post_id}`}>
                     <button className={styles.detailBtn}>Detail</button>
                   </Link>

@@ -82,14 +82,18 @@ export default async function SeekerProfilePage({
   return (
     <div className={styles.container}>
       {/* ── ปุ่มย้อนกลับ ── */}
-      <div className={styles.backRow}>
-        <BackButton />
-      </div>
+      {/* ── ปุ่มย้อนกลับ และ ปุ่ม Admin ── */}
       <div
+        className={styles.backRow}
         style={{
-          position: "absolute",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "15px", // ปรับระยะห่างด้านล่างตามความเหมาะสม
         }}
       >
+        <BackButton />
+
         {viewer.role === "admin" && (
           <AdminButton
             user_id={id}

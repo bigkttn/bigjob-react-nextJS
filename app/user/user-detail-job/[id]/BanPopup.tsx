@@ -105,7 +105,7 @@ export default function YourComponent({ job }: any) {
                 marginBottom: "25px",
               }}
             >
-              ไม่สามารถแก้ไขข้อมูลและข้อสอบได้
+              ไม่สามารถกระทำการข้อมูลและข้อสอบได้
               <br />
               จนกว่าจะถึงเวลา:{" "}
               <strong style={{ color: "#111" }}>{formattedBanDate}</strong>

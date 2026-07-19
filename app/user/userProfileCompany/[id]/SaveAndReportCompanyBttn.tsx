@@ -4,13 +4,17 @@ import { useState, useRef, useEffect } from "react";
 import "material-symbols";
 import styles from "./saveAndreportBttn.module.css";
 
-//  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ 
+//  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ
 interface ProfileActionsProps {
   userId: number;
   companyId: number;
 }
 
-type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
+type ReportType =
+  | "identity_fraud"
+  | "job_no_show"
+  | "harassment_to_staff"
+  | "other";
 
 export default function ProfileActionsButton({
   userId,
@@ -19,10 +23,10 @@ export default function ProfileActionsButton({
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<ReportType | "">("");
   const [description, setDescription] = useState("");
-  
+
   const [isReported, setIsReported] = useState(false);
 
   // ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
@@ -40,22 +44,20 @@ export default function ProfileActionsButton({
     checkReport();
   }, []);
 
- 
   const openReportModal = () => {
     if (isReported) {
-      alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
+      alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว");
       setIsModalOpen(false);
-    }else{
-    setSelectedType("");
-    setDescription("");
-    setIsModalOpen(true);
-    setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
+    } else {
+      setSelectedType("");
+      setDescription("");
+      setIsModalOpen(true);
+      setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
     }
-    
   };
 
   const handleReport = async (reportType: ReportType, description: string) => {
-     if (!selectedType || !description.trim()) {
+    if (!selectedType || !description.trim()) {
       alert("กรุณาเลือกประเภทการรายงานและกรอกรายละเอียดให้ครบถ้วน");
       return;
     }
@@ -68,19 +70,21 @@ export default function ProfileActionsButton({
           company_id: Number(companyId),
           report_type: reportType,
           description: String(description).trim(),
-        })
+        }),
       });
 
       if (response.status === 409) {
-        alert("คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ");
+        alert(
+          "คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ",
+        );
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
-        setIsOpen(false);      // ปิดเมนูสามจุด
+        setIsOpen(false); // ปิดเมนูสามจุด
         return;
       }
-      
+
       if (response.ok) {
         console.log("reported!!");
-        setIsReported(true); //  แก้ไขชื่อตัวแปรให้ตรงกับ State
+        setIsReported(true);
         alert("Reported Successfully!");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
       } else {
@@ -94,24 +98,20 @@ export default function ProfileActionsButton({
     setIsOpen(false);
   };
 
-   const checkReport = async () => {
+  const checkReport = async () => {
     try {
-      const response = await fetch("/api/seeker/check_report_company",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: Number(userId),
-            post_id: Number(companyId),
-          }),
-        }
-      );
+      const response = await fetch("/api/seeker/check_report_company", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: Number(userId),
+          company_id: Number(companyId),
+        }),
+      });
       const data = await response.json();
       if (data && data.rows && data.rows.length > 0) {
-        // alert("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
         setIsReported(true);
       } else {
-        
         setIsReported(false);
       }
     } catch (error) {
@@ -137,7 +137,7 @@ export default function ProfileActionsButton({
 
       {/* Dropdown เมนูย่อย */}
       {isOpen && (
-        <div 
+        <div
           style={{
             position: "absolute",
             top: "100%",
@@ -152,10 +152,9 @@ export default function ProfileActionsButton({
             flexDirection: "column",
           }}
         >
-         
           <button
             onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
-         className={`${styles.reportedButton} ${isReported ? styles.active : ""}`}
+            className={`${styles.reportedButton} ${isReported ? styles.active : ""}`}
             style={{
               padding: "8px 12px",
               background: "none",
@@ -168,8 +167,6 @@ export default function ProfileActionsButton({
               color: isReported ? "#d93025" : "#333",
               fontSize: "14px",
             }}
-
-          
           >
             <span
               className="material-symbols-outlined"
@@ -181,7 +178,7 @@ export default function ProfileActionsButton({
           </button>
         </div>
       )}
-      
+
       {/* หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
       {isModalOpen && (
         <div
@@ -213,8 +210,16 @@ export default function ProfileActionsButton({
             }}
           >
             {/* หัวข้อโมดอล */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>รายงานรายละเอียดงาน</h3>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>
+                รายงานรายละเอียดงาน
+              </h3>
               <span
                 className="material-symbols-outlined"
                 style={{ cursor: "pointer", color: "#666" }}
@@ -227,8 +232,14 @@ export default function ProfileActionsButton({
             <hr style={{ border: "0.5px solid #eee", margin: 0 }} />
 
             {/* ฟอร์มเลือกประเภท */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>ประเภทรายงาน</label>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <label
+                style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}
+              >
+                ประเภทรายงาน
+              </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as ReportType)}
@@ -238,21 +249,32 @@ export default function ProfileActionsButton({
                   border: "1px solid #ccc",
                   fontSize: "14px",
                   outline: "none",
-                  backgroundColor: "#fff"
+                  backgroundColor: "#fff",
                 }}
               >
                 <option value="">โปรดเลือกหัวข้อรายงาน</option>
-                <option value="identity_fraud">ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง</option>
-                <option value="job_no_show">งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์</option>
-                <option value="harassment_to_staff">ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง</option>
-                <option value="harassment_to_staff">อื่นๆ (ระบุในรายละเอียด)</option>
-
+                <option value="identity_fraud">
+                  ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง
+                </option>
+                <option value="job_no_show">
+                  งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์
+                </option>
+                <option value="harassment_to_staff">
+                  ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง
+                </option>
+                <option value="other">อื่นๆ (ระบุในรายละเอียด)</option>
               </select>
             </div>
 
             {/* ฟอร์มพิมพ์รายละเอียด */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <label style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}>รายละเอียดเพิ่มเติม</label>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+            >
+              <label
+                style={{ fontSize: "14px", fontWeight: "bold", color: "#555" }}
+              >
+                รายละเอียดเพิ่มเติม
+              </label>
               <textarea
                 placeholder="กรุณาระบุรายละเอียด เช่น วันนัดหมาย พฤติกรรม หรือหลักฐานประกอบเบื้องต้น..."
                 value={description}
@@ -265,13 +287,20 @@ export default function ProfileActionsButton({
                   fontSize: "14px",
                   fontFamily: "inherit",
                   resize: "none",
-                  outline: "none"
+                  outline: "none",
                 }}
               />
             </div>
 
             {/* ปุ่มกดยืนยันหรือยกเลิก */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "10px",
+              }}
+            >
               <button
                 onClick={() => setIsModalOpen(false)}
                 style={{
@@ -280,13 +309,15 @@ export default function ProfileActionsButton({
                   border: "1px solid #ccc",
                   backgroundColor: "#fff",
                   cursor: "pointer",
-                  fontSize: "14px"
+                  fontSize: "14px",
                 }}
               >
                 ยกเลิก
               </button>
               <button
-                onClick={() => handleReport(selectedType as ReportType, description)}
+                onClick={() =>
+                  handleReport(selectedType as ReportType, description)
+                }
                 style={{
                   padding: "8px 16px",
                   borderRadius: "6px",
@@ -295,19 +326,15 @@ export default function ProfileActionsButton({
                   color: "#fff",
                   cursor: "pointer",
                   fontSize: "14px",
-                  fontWeight: "bold"
+                  fontWeight: "bold",
                 }}
               >
                 ส่งรายงาน
               </button>
             </div>
-
           </div>
         </div>
       )}
     </div>
   );
 }
-  
-  
-
