@@ -72,6 +72,7 @@ export default function Navbar() {
         // ดึงฟิลด์ banned_until ออกมา (แก้ชื่อตัวแปรให้ตรงกับผลลัพธ์ของ API)
         const targetData = role === "company" ? data.company : data.user;
         const bannedUntil = targetData?.banned_until || targetData?.ban_until;
+        console.log(bannedUntil);
 
         if (bannedUntil) {
           calculateBan(bannedUntil);

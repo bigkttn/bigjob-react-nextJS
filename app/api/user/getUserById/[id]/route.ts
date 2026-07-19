@@ -20,7 +20,7 @@ export async function GET(
               disability_status, marital_status, mobile_phone, line_id,
               country, address, province, district, sub_district, postal_code,
               type_of_work, desired_salary, desired_work_location,
-              available_start_date, role, is_visible
+              available_start_date, role, is_visible,banned_until
        FROM User WHERE uid = ?`,
             [id]
         );
