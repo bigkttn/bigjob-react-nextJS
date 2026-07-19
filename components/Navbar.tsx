@@ -340,8 +340,8 @@ export default function Navbar() {
                   )}
                 </Link>
                      <Link
-                  href="/user/saveCompany"
-                  className={`nav-item ${isActive("/user/saveCompany")}`}
+                  href="/user/savedCompany"
+                  className={`nav-item ${isActive("/user/savedCompany")}`}
                 >
                   Saved
                 </Link>

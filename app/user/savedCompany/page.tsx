@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import SaveCompanyClient from "./savedCompanyClient"; // นำเข้าไฟล์ Client
-import styles from "./savedSeeker.module.css";
+import SaveCompanyClient from "./savedCompanyClient";
+import styles from "./savedCompany.module.css";
 
 interface CustomJwtPayload {
   id: number;
@@ -9,14 +9,8 @@ interface CustomJwtPayload {
   role: string;
 }
 
-interface PageProps {
-  params: Promise<{ cid: string }>;
-}
 
-export default async function Page({ params }: PageProps) {
-  const resolvedParams = await params;
-  const companyId = Number(resolvedParams.cid);
-
+export default async function Page() {
   
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -30,7 +24,7 @@ export default async function Page({ params }: PageProps) {
       console.error("Token invalid");
     }
   }
-  console.log("1111111111111111111111",viewer);
+  console.log("user id",viewer);
 
   
   if (!viewer) {
@@ -40,5 +34,5 @@ export default async function Page({ params }: PageProps) {
       </div>
     );
   }
-  return <SaveCompanyClient companyId={viewer.id} />;
+  return <SaveCompanyClient userId={viewer.id} />;
 }
