@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
-export default function YourComponent({ job }: any) {
+export default function YourComponent({ job, isAdmin }: any) {
   // อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
   const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
   const router = useRouter();
@@ -12,7 +12,8 @@ export default function YourComponent({ job }: any) {
   let isBanned = false;
 
   // 2. คำนวณตรรกะต่างๆ ก่อนแสดงผล
-  if (job && job.ban_until) {
+  if (job && job.ban_until && !isAdmin) {
+    console.log(isAdmin);
     const banDate = new Date(job.ban_until.replace(" ", "T"));
     const now = new Date();
     const diffMs = banDate.getTime() - now.getTime();

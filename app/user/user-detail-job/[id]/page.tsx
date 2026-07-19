@@ -1,6 +1,6 @@
 import styles from "./detailjob.module.css";
 import Link from "next/link";
-import SaveAndReport from "../saveAndreportBttn"
+import SaveAndReport from "../saveAndreportBttn";
 import { cookies } from "next/headers";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
@@ -99,7 +99,7 @@ export default async function DetailJob({ params }: PageProps) {
 
   return (
     <div>
-      <BanPopup job={job} />
+      <BanPopup job={job} isAdmin={isAdmin} />
       {isAdmin && (
         <h1
           style={{
@@ -146,7 +146,6 @@ export default async function DetailJob({ params }: PageProps) {
                     {job.company_name || "Company Name"}
                   </h1>
 
-
                   <span
                     style={{
                       padding: "4px 12px",
@@ -162,7 +161,6 @@ export default async function DetailJob({ params }: PageProps) {
                 </div>
               </Link>
             </div>
-
 
             <SaveAndReport
               userId={Number(viewer?.id)}
@@ -307,16 +305,16 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {job.application_dates
                       ? new Date(job.application_dates).toLocaleDateString(
-                        "th-TH",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        },
-                      ) + " น."
+                          "th-TH",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          },
+                        ) + " น."
                       : "No deadline specified"}
                   </span>
                 </div>
