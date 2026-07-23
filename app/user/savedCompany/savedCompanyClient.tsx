@@ -3,31 +3,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./savedCompany.module.css";
 
-interface SeekerDetails {
-  gender: string;
-  age: number;
-  militaryStatus: string;
-  dateOfBirth: string;
-  nationality: string;
-  religion: string;
-  weight: string;
-  height: string;
-}
-
-interface Seeker {
-  uid: number;
+interface Company {
+  cid: number;
+  post_id: number;
   name: string;
-  jobtitle: string;
-  image: string;
-  details: SeekerDetails | null;
+  job_title: string;
+  logo: string;
 }
 
 interface ClientProps {
-  companyId: number;
+  userId: number;
 }
 
-export default function SavedSeekerClient({ companyId }: ClientProps) {
-  const [seekerData, setSeekersData] = useState<Seeker[]>([]);
+export default function SavedSeekerClient({ userId }: ClientProps) {
+  const [compayData, setCompanyData] = useState<Company[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +31,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ company_id: companyId }),
+          body: JSON.stringify({ user_id: userId }),
         });
 
         if (!res.ok) {
@@ -50,7 +39,8 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
         }
 
         const data = await res.json();
-        setSeekersData(data);
+        // console.log("data in page:",data);
+        setCompanyData(data);
       } catch (err: any) {
         console.error("Fetch Error:", err);
         setError(err.message || "Something went wrong");
@@ -59,10 +49,10 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
       }
     };
 
-    if (companyId) {
+    if (userId) {
       fetchSeekers();
     }
-  }, [companyId]);
+  }, [userId]);
 
   if (loading)
     return <div className={styles.centerMessage}>กำลังโหลดข้อมูล...</div>;
@@ -82,9 +72,8 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {seekerData.map((seeker, index) => (
-          // 🌟 ป้องกัน Key ซ้ำโดยนำ index มาร่วมต่อ String ด้วยตามข้อผิดพลาดก่อนหน้า
-          <div key={`${seeker.uid}-${index}`} className={styles.card}>
+        {compayData.map((company, index) => (
+          <div key={`${company.cid}-${index}`} className={styles.card}>
             <div className={styles.cardFlex}>
               {/* Image Section */}
               <div className={styles.imageWrapper}>
@@ -135,7 +124,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
 
               {/* Button Section */}
               <div className={styles.buttonWrapper}>
-                <Link href={`/company/seeker-profile/${seeker.uid}`}>
+                <Link href={`/user/user-detail-job/${company.post_id}`}>
                   <button className={styles.infoButton}>See Info</button>
                 </Link>
               </div>

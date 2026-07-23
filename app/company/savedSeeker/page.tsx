@@ -10,12 +10,12 @@ interface CustomJwtPayload {
 }
 
 interface PageProps {
-  params: Promise<{ cid: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
   const resolvedParams = await params;
-  const companyId = Number(resolvedParams.cid);
+  const companyId = Number(resolvedParams.id);
 
   
   const cookieStore = await cookies();
@@ -30,7 +30,9 @@ export default async function Page({ params }: PageProps) {
       console.error("Token invalid");
     }
   }
-  console.log("1111111111111111111111",viewer);
+  console.log("company_id:",viewer);
+  console.log(":",viewer);
+
 
   
   if (!viewer) {

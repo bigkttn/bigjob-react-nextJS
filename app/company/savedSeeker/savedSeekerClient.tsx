@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./savedSeeker.module.css";
 
@@ -43,7 +42,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ company_id: companyId }),
+          body: JSON.stringify({company_id: companyId }),
         });
 
         if (!res.ok) {
@@ -51,6 +50,8 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
         }
 
         const data = await res.json();
+        console.log("data of savedSeekerClient:",data)
+
         setSeekersData(data);
       } catch (err: any) {
         console.error("Fetch Error:", err);
@@ -138,6 +139,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
               <div className={styles.buttonWrapper}>
                 <Link href={`/company/seeker-profile/${seeker.uid}`}>
                   <button className={styles.infoButton}>See Info</button>
+
                 </Link>
               </div>
             </div>

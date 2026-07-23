@@ -1,16 +1,12 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import SaveCompanyClient from "./savedCompanyClient"; // นำเข้าไฟล์ Client
-import styles from "./savedCompany.module.css";
+import styles from "./savedSeeker.module.css";
 
 interface CustomJwtPayload {
   id: number;
   email: string;
   role: string;
-}
-
-interface PageProps {
-  params: Promise<{ cid: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
@@ -38,5 +34,5 @@ export default async function Page({ params }: PageProps) {
       </div>
     );
   }
-  return <SaveCompanyClient companyId={viewer.id} />;
+  return <SaveCompanyClient userId={viewer.id} />;
 }
