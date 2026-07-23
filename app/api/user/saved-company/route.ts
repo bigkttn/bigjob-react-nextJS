@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       `SELECT 
         fav_post.favour_id,
         fav_post.post_id,
-         posts.post_id,
+        posts.post_id,
         co.company_id AS cid,
         co.company_name AS name,
         co.logo_image AS logo,
@@ -28,13 +28,14 @@ export async function POST(request: Request) {
       [user_id],
     );
 
-    
+
     const formattedData = rows.map((row: any) => ({
       cid: row.cid,
-      post_id: row.post_idz,
+      post_id: row.post_id,
       name: row.name,
       job_title: row.job_title || "General Company",
-      logo: row.logo || null }));
+      logo: row.logo || null
+    }));
 
     return NextResponse.json(
       formattedData,
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Database Error:", error);
     return NextResponse.json(
-      { message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์",error },
+      { message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์", error },
       { status: 500 },
     );
   }

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import SaveCompanyClient from "./savedCompanyClient"; // นำเข้าไฟล์ Client
-import styles from "./savedSeeker.module.css";
+import styles from "./savedCompany.module.css";
 
 interface CustomJwtPayload {
   id: number;
@@ -9,7 +9,11 @@ interface CustomJwtPayload {
   role: string;
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ cid: string }>;
+}) {
   const resolvedParams = await params;
   const companyId = Number(resolvedParams.cid);
 

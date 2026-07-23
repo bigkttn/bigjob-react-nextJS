@@ -72,7 +72,7 @@ export default function Navbar() {
         // ดึงฟิลด์ banned_until ออกมา (แก้ชื่อตัวแปรให้ตรงกับผลลัพธ์ของ API)
         const targetData = role === "company" ? data.company : data.user;
         const bannedUntil = targetData?.banned_until || targetData?.ban_until;
-        console.log(bannedUntil);
+        console.log("banned_until = ", bannedUntil);
 
         if (bannedUntil) {
           calculateBan(bannedUntil);
@@ -340,7 +340,7 @@ export default function Navbar() {
                   )}
                 </Link>
                 <Link
-                  href="/user/saveCompany"
+                  href="/user/savedCompany"
                   className={`nav-item ${isActive("/user/saveCompany")}`}
                 >
                   Saved

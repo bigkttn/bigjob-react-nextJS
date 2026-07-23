@@ -26,7 +26,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         setLoading(true);
         setError(null);
 
-        const res = await fetch("/api/company/saved-seekers", {
+        const res = await fetch("/api/user/saved-company", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -39,7 +39,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         }
 
         const data = await res.json();
-        // console.log("data in page:",data);
+        // console.log("data in page:", data);
         setCompanyData(data);
       } catch (err: any) {
         console.error("Fetch Error:", err);
@@ -62,7 +62,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         ข้อผิดพลาด: {error}
       </div>
     );
-  if (seekerData.length === 0)
+  if (compayData.length === 0)
     return (
       <div className={styles.centerMessage}>
         ไม่พบข้อมูลผู้สมัครที่บันทึกไว้
@@ -78,8 +78,8 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
               {/* Image Section */}
               <div className={styles.imageWrapper}>
                 <img
-                  src={seeker.image || "/images/default-avatar.jpg"}
-                  alt={seeker.name}
+                  src={company.logo || "/images/default-avatar.jpg"}
+                  alt={company.name}
                   width={240}
                   height={160}
                   className={styles.seekerImage}
@@ -88,43 +88,16 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
 
               {/* Info Section */}
               <div className={styles.infoWrapper}>
-                <h2 className={styles.seekerName}>{seeker.name}</h2>
-                <h3 className={styles.seekerPosition}>{seeker.jobtitle}</h3>
-
-                {seeker.details && (
-                  <div className={styles.detailsGrid}>
-                    <p>
-                      <span>Gender:</span> {seeker.details.gender}
-                    </p>
-                    <p>
-                      <span>Age:</span> {seeker.details.age}
-                    </p>
-                    <p className={styles.fullWidth}>
-                      <span>Military Status:</span>{" "}
-                      {seeker.details.militaryStatus}
-                    </p>
-                    <p className={styles.fullWidth}>
-                      <span>Date of Birth:</span> {seeker.details.dateOfBirth}
-                    </p>
-                    <p>
-                      <span>Nationality:</span> {seeker.details.nationality}
-                    </p>
-                    <p>
-                      <span>Religion:</span> {seeker.details.religion}
-                    </p>
-                    <p>
-                      <span>Weight:</span> {seeker.details.weight}
-                    </p>
-                    <p>
-                      <span>Height:</span> {seeker.details.height}
-                    </p>
-                  </div>
-                )}
+                <h2 className={styles.seekerName}>{company.name}</h2>
+                <h3 className={styles.seekerPosition}>{company.job_title}</h3>
               </div>
 
               {/* Button Section */}
-              <div className={styles.buttonWrapper}>
-                <Link href={`/user/user-detail-job/${company.post_id}`}>
+              <div
+                className={styles.buttonWrapper}
+                // onClick={() => console.log("text = ", company.post_id)}
+              >
+                <Link href={"/user/user-detail-job/" + company.post_id}>
                   <button className={styles.infoButton}>See Info</button>
                 </Link>
               </div>
