@@ -17,7 +17,45 @@
   font-size: 20px;
 }
 
-/* 1. เปลี่ยน align-items เป็น stretch เพื่อให้เส้นแบ่งคอลัมน์ยาวเต็มบรรทัด */
+/* --- เพิ่มส่วน Filter ตรงนี้ --- */
+.filterContainer {
+  background-color: #ffffff;
+  padding: 15px 25px;
+  border-radius: 15px;
+  display: flex;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterLabel {
+  font-weight: bold;
+  font-size: 15px;
+  color: #333;
+}
+
+.filterSelect {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  background-color: #f9f9f9;
+}
+
+.filterSelect:focus {
+  border-color: #3653f8;
+}
+/* -------------------------- */
+
 .tableHeader,
 .reportRow {
   display: grid;
@@ -28,7 +66,6 @@
 
 .tableHeader {
   background-color: #4dfc50;
-  /* 2. กำหนด padding บน-ล่าง 10px ซ้าย-ขวา 15px */
   padding: 10px 15px;
   border-radius: 15px;
   margin-bottom: 20px;
@@ -37,11 +74,9 @@
 
 .reportRow {
   margin-bottom: 15px;
-  /* 3. เพิ่ม padding ซ้าย-ขวา 15px ให้เท่ากับ Header เพื่อให้เส้นแบ่งคอลัมน์ตรงกัน */
   padding: 0 15px;
 }
 
-/* 4. จัดให้อยู่กึ่งกลางทั้งแนวตั้งและแนวนอน (Flex) */
 .headerCell {
   display: flex;
   align-items: center;
@@ -61,7 +96,7 @@
   align-items: center;
   border-right: 1px solid #000;
   height: 100%;
-  padding: 10px 5px; /* เพิ่ม padding บน-ล่าง ให้ดูมีพื้นที่หายใจ */
+  padding: 10px 5px;
 }
 
 .cell:last-child {
@@ -75,7 +110,7 @@
   font-weight: bold;
   font-size: 14px;
   text-align: center;
-  word-break: break-word; /* ป้องกันข้อความทะลุกรอบ */
+  word-break: break-word;
 }
 
 .nextLink {
@@ -101,7 +136,7 @@
   font-size: 13px;
   line-height: 1.4;
   text-align: left;
-  width: 100%; /* ให้กว้างเต็มช่อง */
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   align-items: center;

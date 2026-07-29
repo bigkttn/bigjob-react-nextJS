@@ -7,18 +7,21 @@
 }
 
 .backBtn {
-    margin-bottom: 20px;
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: none;
-    background: #ffffff;
-    color: #232222;
-    cursor: pointer;
-    font-weight: bold;
-    
-    /* เพิ่มตรงนี้เพื่อให้ตอนเด้งดูสมูท ไม่กระตุก */
-    transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05); /* เงาบางๆ ตอนปกติ */
+  margin-bottom: 20px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #ffffff;
+  color: #232222;
+  cursor: pointer;
+  font-weight: bold;
+
+  /* เพิ่มตรงนี้เพื่อให้ตอนเด้งดูสมูท ไม่กระตุก */
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05); /* เงาบางๆ ตอนปกติ */
 }
 
 .backBtn:hover {
@@ -28,7 +31,6 @@
 .backBtn:hover {
   color: #f34747;
 }
-
 
 .card {
   background: white;

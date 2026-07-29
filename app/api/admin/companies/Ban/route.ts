@@ -61,3 +61,45 @@ export async function POST(request: Request) {
         );
     }
 }
+
+// ระบบปลดแบนบริษัท (DELETE) -> ล้างค่า banned_until ให้เป็น NULL
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const company_id = searchParams.get("company_id");
+
+        if (!company_id) {
+            return NextResponse.json(
+                { error: "Please provide company_id" },
+                { status: 400 }
+            );
+        }
+
+        // ล้างค่า banned_until ให้เป็น NULL
+        const query = `
+      UPDATE company
+      SET banned_until = NULL
+      WHERE company_id = ?
+    `;
+
+        const [result]: any = await db.query(query, [company_id]);
+
+        if (result.affectedRows === 0) {
+            return NextResponse.json(
+                { error: "Company not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            { message: "Unbanned company successfully" },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error("Database Error:", error);
+        return NextResponse.json(
+            { error: "Server Error", details: error.message },
+            { status: 500 }
+        );
+    }
+}

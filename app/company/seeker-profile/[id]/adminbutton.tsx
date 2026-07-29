@@ -1,56 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface AdminButtonProps {
   id: string;
   role: string;
-  // post_id: string;
-  user_id?: string;
+  user_id: string; // เปลี่ยนเป็น user_id
+  banned_until?: string | null;
+  onSuccess?: () => void;
 }
+
 export default function AdminButton({
   id,
   role,
-  // post_id,
   user_id,
+  banned_until,
+  onSuccess,
 }: AdminButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [banDuration, setBanDuration] = useState("3"); // ค่าเริ่มต้นเป็น 3 วัน
+  const [banDuration, setBanDuration] = useState("3");
   const [isLoading, setIsLoading] = useState(false);
+
+  // State เก็บข้อความเวลาถอยหลังและสถานะการแบน
+  const [countdownText, setCountdownText] = useState<string>("");
+  const [isBanned, setIsBanned] = useState<boolean>(false);
+
   const router = useRouter();
 
-  // const handleDelete = async () => {
-  //   const isConfirm = confirm(
-  //     `Are you sure you want to delete Company ID: ${company_id} ? This action cannot be undone.`,
-  //   );
-  //   if (!isConfirm) return;
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await fetch(`/api/posts/deletePost/${company_id}`, {
-  //       method: "DELETE",
-  //     });
-  //     if (response.ok) {
-  //       console.log("Post deleted successfully");
-  //       router.back();
-  //       // อัปเดตรายการโพสต์หลังจากลบ
-  //     } else {
-  //       const errorData = await response.json();
-  //       console.error("Error deleting post:", errorData);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting post:", error);
-  //     alert("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  //   // โค้ดลบประกาศงานของคุณ
-  // };
+  // --- ระบบนับเวลาถอยหลัง Real-time (อัปเดตทุก 1 นาที) ---
+  useEffect(() => {
+    if (!banned_until) {
+      setIsBanned(false);
+      setCountdownText("สถานะปกติ (ไม่ถูกแบน)");
+      return;
+    }
 
+    const checkTime = () => {
+      const targetDate = new Date(banned_until);
+      const now = new Date();
+      const diffMs = targetDate.getTime() - now.getTime();
+
+      if (targetDate.getFullYear() >= 9990) {
+        setIsBanned(true);
+        setCountdownText("ถูกแบนถาวร");
+        return;
+      }
+
+      if (diffMs <= 0) {
+        setIsBanned(false);
+        setCountdownText("ครบกำหนดแบนแล้ว (รอรีเฟรชสถานะ)");
+      } else {
+        setIsBanned(true);
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diffMs / (1000 * 60)) % 60);
+
+        setCountdownText(
+          `เหลือเวลา: ${days} วัน ${hours} ชั่วโมง ${mins} นาที`,
+        );
+      }
+    };
+
+    checkTime();
+    const interval = setInterval(checkTime, 60000); // อัปเดตทุก 1 นาที
+    return () => clearInterval(interval);
+  }, [banned_until]);
+
+  // --- ฟังก์ชันแบนผู้ใช้ ---
   const handleBan = async () => {
     const durationText = banDuration === "999" ? "ถาวร" : `${banDuration} วัน`;
     const isConfirm = confirm(
-      `คุณต้องการแบนผู้ company ID: ${user_id} เป็นเวลา ${durationText} ใช่หรือไม่?`,
+      `คุณต้องการแบนผู้ใช้งาน ID: ${user_id} เป็นเวลา ${durationText} ใช่หรือไม่?`,
     );
     if (!isConfirm) return;
 
@@ -68,19 +89,53 @@ export default function AdminButton({
       const result = await res.json();
 
       if (res.ok) {
-        alert(`แบนcompanyสำเร็จ! (ระยะเวลา: ${durationText})`);
+        alert(`แบนผู้ใช้งานสำเร็จ! (ระยะเวลา: ${durationText})`);
         setIsOpen(false);
-        router.back();
+        router.refresh();
+        if (onSuccess) onSuccess();
       } else {
-        alert(`เกิดข้อผิดพลาด: ${result.message || "ไม่สามารถแบนโพสต์ได้"}`);
+        alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถแบนผู้ใช้ได้"}`);
       }
     } catch (error) {
       console.error("Ban error:", error);
-      alert("เกิดข้อผิดพลาดในการแบนผู้ใช้");
+      alert("เกิดข้อผิดพลาดในการแบนผู้ใช้งาน");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // --- ฟังก์ชันปลดแบนผู้ใช้ ---
+  const handleUnban = async () => {
+    const isConfirm = confirm(
+      `คุณต้องการปลดแบนผู้ใช้งาน ID: ${user_id} ใช่หรือไม่?`,
+    );
+    if (!isConfirm) return;
+
+    setIsLoading(true);
+    try {
+      // เรียก API ลบการแบน (ส่ง user_id ไปกับ query string)
+      const res = await fetch(`/api/admin/user/ban?user_id=${user_id}`, {
+        method: "DELETE",
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        alert("ปลดแบนสำเร็จ!");
+        setIsOpen(false);
+        router.refresh();
+        if (onSuccess) onSuccess();
+      } else {
+        alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถปลดแบนได้"}`);
+      }
+    } catch (error) {
+      console.error("Unban error:", error);
+      alert("เกิดข้อผิดพลาดในการปลดแบน");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <button
@@ -98,8 +153,9 @@ export default function AdminButton({
         onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#c82333")}
         onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#dc3545")}
       >
-        จัดการโพสต์ (Admin)
+        จัดการผู้ใช้ (Admin)
       </button>
+
       {isOpen && (
         <div
           style={{
@@ -112,10 +168,9 @@ export default function AdminButton({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 9999, // ให้อยู่ชั้นบนสุด
+            zIndex: 9999,
           }}
         >
-          {/* กล่องเนื้อหาของ Popup */}
           <div
             style={{
               backgroundColor: "white",
@@ -128,13 +183,11 @@ export default function AdminButton({
               fontFamily: "inherit",
             }}
           >
-            {/* Header ของ Modal */}
             <h3
               style={{
                 margin: "0 0 8px 0",
                 fontSize: "1.25rem",
                 fontWeight: "bold",
-                color: "#222",
               }}
             >
               Admin User Management
@@ -143,7 +196,7 @@ export default function AdminButton({
               style={{
                 fontSize: "0.85rem",
                 color: "#666",
-                marginBottom: "20px",
+                marginBottom: "15px",
               }}
             >
               Managing Target ID:{" "}
@@ -152,72 +205,23 @@ export default function AdminButton({
               </span>
             </p>
 
-            <hr
+            {/* แสดงสถานะการแบนปัจจุบัน */}
+            <div
               style={{
-                border: "0",
-                borderTop: "1px solid #eee",
+                backgroundColor: isBanned ? "#fff3cd" : "#d4edda",
+                color: isBanned ? "#856404" : "#155724",
+                padding: "10px",
+                borderRadius: "6px",
                 marginBottom: "20px",
+                fontSize: "0.9rem",
+                fontWeight: "bold",
+                border: `1px solid ${isBanned ? "#ffeeba" : "#c3e6cb"}`,
               }}
-            />
-
-            {/* ส่วนที่ 1: การลบโพสต์ (Delete)
-            <div style={{ marginBottom: "25px" }}>
-              <h4
-                style={{
-                  margin: "0 0 6px 0",
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  color: "#dc3545",
-                }}
-              >
-                1. Delete This Post
-              </h4>
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#777",
-                  marginBottom: "10px",
-                }}
-              >
-                This post will be permanently deleted from the database.
-              </p>
-              <button
-                onClick={handleDelete}
-                disabled={isLoading}
-                style={{
-                  width: "100%",
-                  backgroundColor: "#dc3545",
-                  color: "white",
-                  border: "none",
-                  padding: "10px",
-                  borderRadius: "6px",
-                  fontWeight: "bold",
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: "background-color 0.2s",
-                }}
-                onMouseOver={(e) =>
-                  !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#c82333")
-                }
-                onMouseOut={(e) =>
-                  !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#dc3545")
-                }
-              >
-                {isLoading ? "Processing..." : "Delete Post Now"}
-              </button>
+            >
+              สถานะ: {countdownText}
             </div>
 
-            <hr
-              style={{
-                border: "0",
-                borderTop: "1px solid #eee",
-                marginBottom: "20px",
-              }}
-            /> */}
-
-            {/* ส่วนที่ 2: การแบนผู้สร้างโพสต์ (Ban) */}
+            {/* ส่วนที่ 2: การแบน หรือ ปลดแบน (Ban / Unban) */}
             <div style={{ marginBottom: "20px" }}>
               <h4
                 style={{
@@ -227,69 +231,77 @@ export default function AdminButton({
                   color: "#fd7e14",
                 }}
               >
-                {/* 2.  */}Ban User Account
+                Ban / Unban User Account
               </h4>
-              <p
-                style={{
-                  fontSize: "0.8rem",
-                  color: "#777",
-                  marginBottom: "10px",
-                }}
-              >
-                Temporarily or permanently suspend the account that created this
-                post.
-              </p>
 
-              {/* เมนูเลือกช่วงเวลาที่ต้องการแบน */}
-              <div
-                style={{ display: "flex", gap: "10px", marginBottom: "12px" }}
-              >
-                <select
-                  value={banDuration}
-                  onChange={(e) => setBanDuration(e.target.value)}
+              {isBanned ? (
+                // ถ้าโดนแบนอยู่ให้แสดงปุ่มปลดแบน
+                <button
+                  onClick={handleUnban}
+                  disabled={isLoading}
                   style={{
-                    flex: 1,
-                    padding: "8px 12px",
+                    width: "100%",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                    padding: "10px",
                     borderRadius: "6px",
-                    border: "1px solid #ccc",
-                    fontSize: "0.9rem",
-                    outline: "none",
-                    cursor: "pointer",
+                    fontWeight: "bold",
+                    cursor: isLoading ? "not-allowed" : "pointer",
+                    opacity: isLoading ? 0.7 : 1,
                   }}
                 >
-                  <option value="3">Ban for 3 Days</option>
-                  <option value="7">Ban for 7 Days</option>
-                  <option value="30">Ban for 30 Days</option>
-                  <option value="999">Permanently Suspend Account</option>
-                </select>
-              </div>
+                  {isLoading ? "Processing..." : "ปลดแบนผู้ใช้นี้"}
+                </button>
+              ) : (
+                // ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <select
+                      value={banDuration}
+                      onChange={(e) => setBanDuration(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        border: "1px solid #ccc",
+                        fontSize: "0.9rem",
+                        outline: "none",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="3">Ban for 3 Days</option>
+                      <option value="7">Ban for 7 Days</option>
+                      <option value="30">Ban for 30 Days</option>
+                      <option value="999">Permanently Suspend</option>
+                    </select>
+                  </div>
 
-              <button
-                onClick={handleBan}
-                disabled={isLoading}
-                style={{
-                  width: "100%",
-                  backgroundColor: "#fd7e14",
-                  color: "white",
-                  border: "none",
-                  padding: "10px",
-                  borderRadius: "6px",
-                  fontWeight: "bold",
-                  cursor: isLoading ? "not-allowed" : "pointer",
-                  opacity: isLoading ? 0.7 : 1,
-                  transition: "background-color 0.2s",
-                }}
-                onMouseOver={(e) =>
-                  !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#e06907")
-                }
-                onMouseOut={(e) =>
-                  !isLoading &&
-                  (e.currentTarget.style.backgroundColor = "#fd7e14")
-                }
-              >
-                {isLoading ? "Processing..." : "Confirm Ban"}
-              </button>
+                  <button
+                    onClick={handleBan}
+                    disabled={isLoading}
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#fd7e14",
+                      color: "white",
+                      border: "none",
+                      padding: "10px",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      cursor: isLoading ? "not-allowed" : "pointer",
+                      opacity: isLoading ? 0.7 : 1,
+                    }}
+                  >
+                    {isLoading ? "Processing..." : "Confirm Ban"}
+                  </button>
+                </>
+              )}
             </div>
 
             {/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
@@ -306,14 +318,7 @@ export default function AdminButton({
                 fontWeight: "bold",
                 cursor: "pointer",
                 marginTop: "10px",
-                transition: "background-color 0.2s",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#e9ecef")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f1f3f5")
-              }
             >
               Cancel / Close
             </button>

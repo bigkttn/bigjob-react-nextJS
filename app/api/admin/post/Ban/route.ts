@@ -61,3 +61,47 @@ export async function POST(request: Request) {
         );
     }
 }
+
+
+// ระบบปลดแบนโพสต์ (DELETE)
+export async function DELETE(request: Request) {
+    try {
+        // รับค่า post_id จาก URL Parameters (เช่น /api/admin/post/Ban?post_id=123)
+        const { searchParams } = new URL(request.url);
+        const post_id = searchParams.get("post_id");
+
+        if (!post_id) {
+            return NextResponse.json(
+                { error: "Please provide post_id" },
+                { status: 400 }
+            );
+        }
+
+        // อัปเดตสถานะกลับเป็นปกติ (เช่น 'active') และล้างค่า ban_until เป็น NULL
+        const query = `
+      UPDATE posts
+      SET status = 'active', ban_until = NULL
+      WHERE post_id = ?
+    `;
+
+        const [result]: any = await db.query(query, [post_id]);
+
+        if (result.affectedRows === 0) {
+            return NextResponse.json(
+                { error: "Post not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            { message: "Unbanned successfully" },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error("Database Error:", error);
+        return NextResponse.json(
+            { error: "Server Error", details: error.message },
+            { status: 500 }
+        );
+    }
+}

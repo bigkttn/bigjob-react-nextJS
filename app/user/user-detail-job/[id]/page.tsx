@@ -166,6 +166,15 @@ export default async function DetailJob({ params }: PageProps) {
               userId={Number(viewer?.id)}
               postId={Number(postId)}
             />
+            {isAdmin && (
+              <AdminButton
+                id={String(viewer?.id || "")}
+                role={viewer?.role || ""}
+                post_id={job.post_id}
+                company_id={job.company_id}
+                ban_until={job.ban_until}
+              />
+            )}
           </div>
 
           {/* --- ส่วนเนื้อหา (Grid) --- */}
@@ -207,7 +216,15 @@ export default async function DetailJob({ params }: PageProps) {
                     <td className={styles.label}>Details</td>
                     <td>
                       <ul className={styles.list}>
-                        <li>{job.job_description || "No details specified"}</li>
+                        <li
+                          style={{
+                            maxWidth: "450px",
+                            whiteSpace: "pre-line",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {job.job_description || "No details specified"}
+                        </li>
                       </ul>
                     </td>
                   </tr>
@@ -218,7 +235,13 @@ export default async function DetailJob({ params }: PageProps) {
                 <hr />
                 <h3 className={styles.sectionTitle}>Qualifications</h3>
                 <ol className={styles.list}>
-                  <li>
+                  <li
+                    style={{
+                      maxWidth: "450px",
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
+                    }}
+                  >
                     {job.preferred_qualifications ||
                       "No qualifications specified"}
                   </li>
@@ -248,7 +271,13 @@ export default async function DetailJob({ params }: PageProps) {
                 <h3 className={styles.sectionTitle}>How to Apply</h3>
 
                 <ul className={styles.list}>
-                  <li>
+                  <li
+                    style={{
+                      maxWidth: "450px",
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
+                    }}
+                  >
                     {job.how_to_apply ||
                       "No application instructions specified"}
                   </li>
@@ -259,7 +288,15 @@ export default async function DetailJob({ params }: PageProps) {
                 <hr />
                 <h3 className={styles.sectionTitle}>Contact</h3>
                 <ul className={styles.list}>
-                  <li>{job.contact || "No contact information specified"}</li>
+                  <li
+                    style={{
+                      maxWidth: "450px",
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {job.contact || "No contact information specified"}
+                  </li>
                 </ul>
                 {/* <div style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
                 {job.contact || "No contact information specified"}

@@ -10,6 +10,7 @@ import AdminButton from "./adminbutton";
 import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
 import CompanyMapSection from "./map";
 import { getSession, CustomJwtPayload } from "./getSession";
+import BanPopup from "./BanPopup";
 
 export default function ProfileCompany() {
   const { id } = useParams();
@@ -19,6 +20,7 @@ export default function ProfileCompany() {
   const [viewer, setViewer] = useState<CustomJwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // โหลด session ของผู้ใช้ที่กำลังดูหน้านี้ (เพื่อเช็คสิทธิ์ admin / ผู้รายงาน)
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function ProfileCompany() {
     }
 
     fetchCompanyProfile();
-  }, [id]);
+  }, [id, refreshTrigger]);
 
   const fmt = (val: any) =>
     val !== null && val !== undefined && val !== "" ? String(val) : "-";
@@ -130,177 +132,205 @@ export default function ProfileCompany() {
     ? String(company.company_id)
     : String(id);
 
+  console.log(company);
+
   return (
-    <div className={styles.container}>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-      />
+    <div>
+      {isAdmin && (
+        <h1
+          style={{
+            color: "red",
+            fontWeight: "bold",
+            fontSize: "1.50rem",
+            textAlign: "center",
+            backgroundColor: "#ffe6e6",
+            padding: "10px",
+            borderRadius: "8px",
+          }}
+        >
+          Admin Mode
+        </h1>
+      )}
+      <div className={styles.container}>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
+        {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
 
-      {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
-      <div className={styles.leftSection}>
-        <div style={{ width: "100px", height: "25px" }}>
-          <BackButton />
-        </div>
-        <div className={styles.profileCard}>
-          <img
-            src={company.cover_image || "/assets/images/company_2.jpg"}
-            className={styles.banner}
-            alt="Banner"
-          />
-
-          <div className={styles.logoWrapper}>
-            <img
-              src={company.logo_image || "/assets/images/suggestedCompanys.jpg"}
-              className={styles.logo}
-              alt="Logo"
-            />
+        <div className={styles.leftSection}>
+          <BanPopup company={company} isAdmin={isAdmin} />
+          <div style={{ width: "100px", height: "25px" }}>
+            <BackButton />
           </div>
 
-          <div className={styles.infoArea}>
-            <h1 className={styles.companyName}>
-              {fmt(company.company_name)}
-              {isVerified ? (
-                <span
-                  className="material-symbols-outlined"
-                  title="บริษัทนี้ผ่านการยืนยันตัวตนแล้ว"
-                  style={{ color: "#1d9bf0" }}
-                >
-                  verified
-                </span>
-              ) : (
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: statusColor,
-                    border: `1px solid ${statusColor}`,
-                    borderRadius: "999px",
-                    padding: "2px 10px",
-                    alignSelf: "center",
-                  }}
-                >
-                  {statusLabel}
-                </span>
-              )}
-              {viewer && (
+          <div className={styles.profileCard}>
+            <img
+              src={company.cover_image || "/assets/images/company_2.jpg"}
+              className={styles.banner}
+              alt="Banner"
+            />
+
+            <div className={styles.logoWrapper}>
+              <img
+                src={
+                  company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                }
+                className={styles.logo}
+                alt="Logo"
+              />
+            </div>
+
+            <div className={styles.infoArea}>
+              <h1 className={styles.companyName}>
+                {fmt(company.company_name)}
+                {isVerified ? (
+                  <span
+                    className="material-symbols-outlined"
+                    title="บริษัทนี้ผ่านการยืนยันตัวตนแล้ว"
+                    style={{ color: "#1d9bf0" }}
+                  >
+                    verified
+                  </span>
+                ) : (
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      color: statusColor,
+                      border: `1px solid ${statusColor}`,
+                      borderRadius: "999px",
+                      padding: "2px 10px",
+                      alignSelf: "center",
+                    }}
+                  >
+                    {statusLabel}
+                  </span>
+                )}
+                {viewer && (
+                  <div
+                    style={{
+                      marginLeft: "auto",
+                      marginRight: "20px",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <SaveAndReportCompany
+                      userId={Number(viewer.id)}
+                      companyId={Number(companyId)}
+                    />
+                  </div>
+                )}
+              </h1>
+              {isAdmin && (
                 <div
                   style={{
-                    marginLeft: "auto",
-                    marginRight: "20px",
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "end",
                   }}
                 >
-                  <SaveAndReportCompany
-                    userId={Number(viewer.id)}
-                    companyId={Number(companyId)}
+                  <AdminButton
+                    id={String(viewer?.id)}
+                    role={viewer?.role || ""}
+                    company_id={companyId}
+                    banned_until={company.banned_until}
+                    onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
                   />
                 </div>
               )}
-            </h1>
-            {isAdmin && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "end",
-                }}
-              >
-                <AdminButton
-                  id={String(viewer?.id)}
-                  role={viewer?.role || ""}
-                  company_id={companyId}
-                />
+
+              <p>{fmt(company.brief_history)}</p>
+              <hr />
+              <div className={styles.contactGroup}>
+                <h3>Contact & Location</h3>
+                <p>{fmt(company.contact_information)}</p>
+                <p>{fmt(company.full_address)}</p>
+                <p>{fmt(company.province)}</p>
+                <p>{fmt(company.postcode)}</p>
+                <p>Tel: {fmt(company.mobile_phone)}</p>
+                <p>Email: {fmt(company.company_email)}</p>
               </div>
-            )}
-
-            <p>{fmt(company.brief_history)}</p>
-
-            <hr />
-            <div className={styles.contactGroup}>
-              <h3>Contact & Location</h3>
-              <p>{fmt(company.contact_information)}</p>
-              <p>{fmt(company.full_address)}</p>
-              <p>{fmt(company.province)}</p>
-              <p>{fmt(company.postcode)}</p>
-              <p>Tel: {fmt(company.mobile_phone)}</p>
-              <p>Email: {fmt(company.company_email)}</p>
             </div>
           </div>
+
+          {/* แผนที่ย่อย */}
+          <CompanyMapSection
+            latitude={company.company_latitude}
+            longitude={company.company_longitude}
+          />
         </div>
-
-        {/* แผนที่ย่อย */}
-        <CompanyMapSection
-          latitude={company.company_latitude}
-          longitude={company.company_longitude}
-        />
-      </div>
-
-      {/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
-      <div className={styles.rightSection}>
-        <div className={styles.VerifiedConfirm}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "10px",
-            }}
-          >
-            <h3 style={{ margin: 0 }}>Company Registration Certificate</h3>
-            <span
+        {/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
+        <div className={styles.rightSection}>
+          <div className={styles.VerifiedConfirm}>
+            <div
               style={{
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                color: "#fff",
-                backgroundColor: statusColor,
-                borderRadius: "999px",
-                padding: "4px 12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "10px",
               }}
             >
-              {statusLabel}
-            </span>
+              <h3 style={{ margin: 0 }}>Company Registration Certificate</h3>
+              <span
+                style={{
+                  fontSize: "0.8rem",
+                  fontWeight: 700,
+                  color: "#fff",
+                  backgroundColor: statusColor,
+                  borderRadius: "999px",
+                  padding: "4px 12px",
+                }}
+              >
+                {statusLabel}
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div className={styles.jobScrollArea}>
-          <h2
-            style={{ margin: "0 0 4px", fontSize: "1.2rem", color: "#1e293b" }}
-          >
-            ตำแหน่งงานที่เปิดรับสมัคร ({posts.length})
-          </h2>
+          <div className={styles.jobScrollArea}>
+            <h2
+              style={{
+                margin: "0 0 4px",
+                fontSize: "1.2rem",
+                color: "#1e293b",
+              }}
+            >
+              ตำแหน่งงานที่เปิดรับสมัคร ({posts.length})
+            </h2>
 
-          {posts.length === 0 ? (
-            <p style={{ color: "#888" }}>ยังไม่มีตำแหน่งงานที่เปิดรับ</p>
-          ) : (
-            posts.map((job: any) => (
-              <div key={job.post_id} className={styles.jobCard}>
-                <img
-                  src={
-                    company.logo_image || "/assets/images/suggestedCompanys.jpg"
-                  }
-                  width={80}
-                  height={80}
-                  alt="Job Logo"
-                />
-                <div>
-                  <h2>{fmt(job.job_position)}</h2>
-                  <p>
-                    <strong>Details:</strong> {fmt(job.job_description)}
-                  </p>
-                  <p>
-                    <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
-                    {fmt(job.salary_max)} / month
-                  </p>
-                  <Link href={`/user/user-detail-job/${job.post_id}`}>
-                    <button className={styles.detailBtn}>Detail</button>
-                  </Link>
+            {posts.length === 0 ? (
+              <p style={{ color: "#888" }}>ยังไม่มีตำแหน่งงานที่เปิดรับ</p>
+            ) : (
+              posts.map((job: any) => (
+                <div key={job.post_id} className={styles.jobCard}>
+                  <img
+                    src={
+                      company.logo_image ||
+                      "/assets/images/suggestedCompanys.jpg"
+                    }
+                    width={80}
+                    height={80}
+                    alt="Job Logo"
+                  />
+                  <div>
+                    <h2>{fmt(job.job_position)}</h2>
+                    <p>
+                      <strong>Details:</strong> {fmt(job.job_description)}
+                    </p>
+                    <p>
+                      <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
+                      {fmt(job.salary_max)} / month
+                    </p>
+                    <Link href={`/user/user-detail-job/${job.post_id}`}>
+                      <button className={styles.detailBtn}>Detail</button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

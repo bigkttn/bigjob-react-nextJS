@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-// ⚠️ เปลี่ยนคีย์ด้านล่างนี้ให้ตรงกับตัวเชื่อมต่อ Database หรือ ORM (เช่น Prisma/Knex/pg) ที่คุณเตรียมไว้ในโปรเจกต์
 import db from "@/lib/db";
 import { cookies } from "next/headers";
 
@@ -7,6 +6,7 @@ export async function POST() {
     try {
         const cookieStore = await cookies();
         const hasVisited = cookieStore.get("hasVisited");
+        console.log("sss", hasVisited)
 
         if (hasVisited) {
             return NextResponse.json({

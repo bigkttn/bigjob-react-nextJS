@@ -3,7 +3,11 @@ import db from '@/lib/db'; // อ้างอิงไฟล์ db ของค�
 
 export async function GET() {
     try {
-        const sql = `SELECT posts.*, company.company_name, company.logo_image
+        const sql = `SELECT posts.*, company.company_name, company.logo_image,
+                CASE 
+                    WHEN application_dates < NOW() THEN 'closed'
+                    ELSE 'Open'  
+                END AS status
                      FROM posts
                      JOIN company ON posts.company_id = company.company_id`;
         const [posts]: any = await db.query(sql);

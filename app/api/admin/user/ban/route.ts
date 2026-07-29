@@ -61,3 +61,45 @@ export async function POST(request: Request) {
         );
     }
 }
+
+// ระบบปลดแบนผู้ใช้งาน (DELETE) -> ล้างค่า banned_until ให้เป็น NULL
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const user_id = searchParams.get("user_id"); // 🟢 รับค่า user_id จาก URL
+
+        if (!user_id) {
+            return NextResponse.json(
+                { error: "Please provide user_id" },
+                { status: 400 }
+            );
+        }
+
+        // ล้างค่า banned_until ให้เป็น NULL ในตาราง User
+        const query = `
+            UPDATE User
+            SET banned_until = NULL
+            WHERE uid = ?
+        `;
+
+        const [result]: any = await db.query(query, [user_id]);
+
+        if (result.affectedRows === 0) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json(
+            { message: "Unbanned user successfully" },
+            { status: 200 }
+        );
+    } catch (error: any) {
+        console.error("Database Error:", error);
+        return NextResponse.json(
+            { error: "Server Error", details: error.message },
+            { status: 500 }
+        );
+    }
+}
