@@ -75,6 +75,22 @@ export async function PUT(
             }
         }
 
+        if (body.languages !== undefined) {
+            await connection.query('DELETE FROM language_proficiency WHERE user_id = ?', [id]);
+            if (body.languages.length > 0) {
+                const values = body.languages.map((item: any) => [
+                    id,
+                    item.language_type,
+                    item.level,
+                    item.test_name ?? null,
+                    item.score !== undefined && item.score !== null && item.score !== ''
+                        ? Number(item.score)
+                        : null,
+                ]);
+                await connection.query('INSERT INTO language_proficiency (user_id, language_type, level, test_name, score) VALUES ?', [values]);
+            }
+        }
+
         await connection.commit();
         return NextResponse.json({ success: true });
     } catch (error: any) {

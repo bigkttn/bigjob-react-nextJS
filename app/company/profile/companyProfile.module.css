@@ -110,6 +110,15 @@
   padding: 15px;
   border-radius: 20px;
   position: relative;
+  align-items: flex-start; /* <--- ตัวนี้จะป้องกันไม่ให้รูปถูกยืดตามความสูงของข้อความ */
+}
+
+.jobCard img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain; /* หรือใช้ 'cover' ถ้าอยากให้รูปเต็มกรอบสี่เหลี่ยมจัตุรัส */
+  flex-shrink: 0; /* ป้องกันไม่ให้รูปถูกบีบให้เล็กลงเวลาหน้าจอแคบ */
+  align-self: flex-start; /* ให้รูปชิดขอบบน ไม่ยืดตามความสูงของกล่อง */
 }
 
 .detailBtn {

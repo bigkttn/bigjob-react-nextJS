@@ -326,6 +326,24 @@ export default async function SeekerProfilePage({
                   </ul>
                 ))}
               </section>
+
+              <section className={styles.section}>
+                <h4>Language Proficiency</h4>
+                {profile.languages?.map((exp: any, i: number) => (
+                  <ul key={i} style={{ marginBottom: "1rem" }}>
+                    <li>
+                      <h4>{fmt(exp.language_type)}</h4>
+                    </li>
+                    <li>- {fmt(exp.level)}</li>
+                    {(exp.test_name || exp.score) && (
+                      <li>
+                        - {fmt(exp.test_name)}
+                        {exp.score ? `: ${fmt(exp.score)}` : ""}
+                      </li>
+                    )}
+                  </ul>
+                ))}
+              </section>
             </div>
           </div>
 

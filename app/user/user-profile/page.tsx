@@ -1656,6 +1656,142 @@ const SeekerProfile = () => {
                 </div>
               )}
             </section>
+
+            <section className={styles.section}>
+              <h4>Language Proficiency</h4>
+              {!editMode ? (
+                profile.languages?.map((lang: any, i: number) => (
+                  <ul key={i} style={{ marginBottom: "1rem" }}>
+                    <li>
+                      <h4>{fmt(lang.language_type)}</h4>
+                    </li>
+                    <li>- {fmt(lang.level)}</li>
+                    {(lang.test_name || lang.score) && (
+                      <li>
+                        - {fmt(lang.test_name)}
+                        {lang.score ? `: ${fmt(lang.score)}` : ""}
+                      </li>
+                    )}
+                  </ul>
+                ))
+              ) : (
+                <div>
+                  {(editForm.languages || []).map((lang: any, i: number) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "0.5rem",
+                        alignItems: "center",
+                        borderBottom: "1px solid #eee",
+                        paddingBottom: "0.5rem",
+                        marginBottom: "0.5rem",
+                      }}
+                    >
+                      <input
+                        style={{
+                          flex: "1 1 120px",
+                          padding: "0.3rem",
+                          borderRadius: "4px",
+                          border: "1px solid #000000",
+                        }}
+                        type="text"
+                        placeholder="Language (e.g., English)"
+                        value={lang.language_type ?? ""}
+                        onChange={(e) =>
+                          handleArrayFieldChange(
+                            "languages",
+                            i,
+                            "language_type",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <input
+                        style={{
+                          flex: "1 1 100px",
+                          padding: "0.3rem",
+                          borderRadius: "4px",
+                          border: "1px solid #000000",
+                        }}
+                        type="text"
+                        placeholder="Level (e.g., Advanced)"
+                        value={lang.level ?? ""}
+                        onChange={(e) =>
+                          handleArrayFieldChange(
+                            "languages",
+                            i,
+                            "level",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <input
+                        style={{
+                          flex: "1 1 100px",
+                          padding: "0.3rem",
+                          borderRadius: "4px",
+                          border: "1px solid #000000",
+                        }}
+                        type="text"
+                        placeholder="Test (e.g., TOEIC)"
+                        value={lang.test_name ?? ""}
+                        onChange={(e) =>
+                          handleArrayFieldChange(
+                            "languages",
+                            i,
+                            "test_name",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <input
+                        style={{
+                          flex: "0 1 80px",
+                          padding: "0.3rem",
+                          borderRadius: "4px",
+                          border: "1px solid #000000",
+                        }}
+                        type="number"
+                        step="any"
+                        placeholder="Score"
+                        value={lang.score ?? ""}
+                        onChange={(e) =>
+                          handleArrayFieldChange(
+                            "languages",
+                            i,
+                            "score",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem("languages", i)}
+                      >
+                        ❌
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    style={{ marginTop: "0.5rem", border: "1px solid #000000" }}
+                    type="button"
+                    className={styles.tag}
+                    onClick={() =>
+                      addArrayItem("languages", {
+                        language_type: "",
+                        level: "",
+                        test_name: "",
+                        score: "",
+                      })
+                    }
+                  >
+                    + Add Language
+                  </button>
+                </div>
+              )}
+            </section>
           </div>
         </div>
 
