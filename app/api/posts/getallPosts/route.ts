@@ -6,7 +6,6 @@ export async function GET() {
         const sql = `SELECT posts.*, company.company_name,
                                      company.logo_image,
                                      company.full_address,
-                                     company.province,
                 CASE 
                     WHEN application_dates < NOW() THEN 'closed'
                     ELSE 'Open'  

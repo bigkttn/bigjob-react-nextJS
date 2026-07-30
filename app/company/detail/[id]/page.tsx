@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
+import ProvinceSelect from "@/components/ProvinceSelect";
 
 const DetailJob = () => {
   const params = useParams();
@@ -370,25 +371,6 @@ const DetailJob = () => {
             marginBottom: "30px",
           }}
         >
-          {/* ฝั่งซ้าย: ปุ่มย้อนกลับ */}
-          {/* <button
-            onClick={() => router.back()}
-            style={{
-              padding: "10px 18px",
-              borderRadius: "10px",
-              border: "1px solid #d1d5db",
-              background: "#fff",
-              color: "#374151",
-              cursor: "pointer",
-              fontWeight: "bold",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            ← ย้อนกลับ
-          </button> */}
-
           <button className={styles.backBtn} onClick={() => router.back()}>
             <span className={styles.spanMother}>
               <span>{"<"}</span>
@@ -528,7 +510,23 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Work Location</td>
+                      <td className={styles.label}>Province</td>
+                      <td>
+                        <div className={styles.editInputWrapper}>
+                          <ProvinceSelect
+                            value={editData.province ?? ""}
+                            onChange={(value) =>
+                              setEditData({
+                                ...editData,
+                                province: value,
+                              })
+                            }
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className={styles.label}>Work Location </td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input

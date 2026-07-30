@@ -25,6 +25,7 @@ export async function PATCH(
 
         const {
             job_position,
+            province,
             work_location,
             salary_min,
             salary_max,
@@ -49,6 +50,7 @@ export async function PATCH(
         const sql = `
         UPDATE posts SET
         job_position            = ?,
+        province                = ?,
         work_location           = ?,
         salary_min              = ?,
         salary_max              = ?,
@@ -69,6 +71,7 @@ export async function PATCH(
         // AND company_id = ? ป้องกันไม่ให้บริษัทอื่นแก้โพสต์ที่ไม่ใช่ของตัวเอง
         const [result]: any = await db.query(sql, [
             job_position,
+            province,
             work_location,
             salary_min,
             salary_max,

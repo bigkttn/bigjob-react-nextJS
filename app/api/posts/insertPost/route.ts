@@ -41,6 +41,7 @@ export async function POST(request: Request) {
         const data = await request.json();
         const {
             jobPosition,
+            province,
             workLocation,
             salary_min,
             salary_max,
@@ -62,15 +63,15 @@ export async function POST(request: Request) {
 
         const sql = `
             INSERT INTO posts (
-                company_id, job_position, work_location, vacancy, job_type, 
+                company_id, job_position, province, work_location, vacancy, job_type, 
                 application_dates, job_description, preferred_qualifications, 
                 benefits, how_to_apply, contact, status, created_at,
                 salary_min, salary_max, age_min, age_max
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', NOW(),?,?,?,?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', NOW(),?,?,?,?)
         `;
 
         const [result]: any = await db.query(sql, [
-            company_id, jobPosition, workLocation, vacancy, jobType,
+            company_id, jobPosition, province, workLocation, vacancy, jobType,
             formattedDeadline, jobDescription, qualifications, benefits,
             howToApply, contact, salary_min, salary_max, age_min, age_max
         ]);
