@@ -42,6 +42,7 @@
 .filters {
   display: flex;
   justify-content: center;
+  align-items: center; /* 📌 เพิ่มเพื่อให้ปุ่มทุกตัวจัดกึ่งกลางแนวนอนเท่ากัน */
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -52,6 +53,8 @@
   padding: 8px 12px;
   border-radius: 12px;
   height: 50px;
+  border: none;
+  outline: none;
 }
 
 /* ================= LAYOUT 30% / 70% ================= */

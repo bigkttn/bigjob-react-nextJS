@@ -3,26 +3,27 @@ import { useState, useEffect, useMemo } from "react";
 import styles from "./userhome-client.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProvinceSelect from "./province";
 
 const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [user] = useState(initialUser);
   const [posts, setPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. เพิ่ม State สำหรับ Suggested Posts ฝั่ง AI/Matching
+  // Suggested Posts State
   const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
-  // State สำหรับระบบค้นหาและ Filter
+  // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJobType, setSelectedJobType] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  // ⚡ เพิ่ม State สำหรับ Filter เรียงลำดับเวลา
+  // Sort State
   const [sortBy, setSortBy] = useState("newest");
 
-  // State สำหรับ Pagination
+  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 12;
 
@@ -95,18 +96,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     return `${diffInYears} ปีที่แล้ว`;
   }
 
-  // สกัดหาตัวเลือก Dynamic สำหรับ Dropdown
   const availableJobTypes = useMemo(() => {
     const types = posts.map((p) => p.job_type).filter(Boolean);
     return Array.from(new Set(types));
   }, [posts]);
 
-  const availableProvinces = useMemo(() => {
-    const provinces = posts.map((p) => p.province).filter(Boolean);
-    return Array.from(new Set(provinces));
-  }, [posts]);
-
-  // ฟังก์ชันกรองและเรียงลำดับข้อมูลตาม Filter ที่เลือก
   const filteredPosts = useMemo(() => {
     const filtered = posts.filter((post) => {
       const term = searchTerm.toLowerCase().trim();
@@ -136,15 +130,14 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
       );
     });
 
-    // ⚡ ทำงานตาม Filter เรียงลำดับ (Sort Engine)
     return filtered.sort((a, b) => {
       const timeA = new Date(a.created_at || 0).getTime();
       const timeB = new Date(b.created_at || 0).getTime();
 
       if (sortBy === "oldest") {
-        return timeA - timeB; // เก่าสุดขึ้นก่อน
+        return timeA - timeB;
       }
-      return timeB - timeA; // ล่าสุดขึ้นก่อน (Default)
+      return timeB - timeA;
     });
   }, [
     posts,
@@ -155,7 +148,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     sortBy,
   ]);
 
-  // คำนวณ Pagination
+  // Pagination Calculations
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
@@ -171,7 +164,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     setSelectedJobType("");
     setSelectedProvince("");
     setSelectedStatus("");
-    setSortBy("newest"); // ⚡ รีเซ็ตการเรียงลำดับ
+    setSortBy("newest");
     setCurrentPage(1);
   };
 
@@ -270,19 +263,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             ))}
           </select>
 
-          <select
+          {/* Standalone Province Select Component */}
+          <ProvinceSelect
             value={selectedProvince}
-            onChange={(e) =>
-              handleFilterChange(setSelectedProvince, e.target.value)
-            }
-          >
-            <option value="">ทุกจังหวัด</option>
-            {availableProvinces.map((prov, i) => (
-              <option key={i} value={prov}>
-                {prov}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleFilterChange(setSelectedProvince, val)}
+          />
 
           <select
             value={selectedStatus}
@@ -295,7 +280,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             <option value="Closed">Closed (ปิดรับ)</option>
           </select>
 
-          {/*  Dropdown Filter สำหรับการเรียงลำดับเวลา */}
           <select
             value={sortBy}
             onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
@@ -318,7 +302,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
 
       {/* Main Layout 30% / 70% */}
       <div className={styles.mainLayout}>
-        {/* ===== ฝั่งซ้าย 30%: Suggested Posts ===== */}
         <aside className={styles.leftSidebar}>
           <div className={styles.suggestContent}>
             <h3>Suggested Posts</h3>
@@ -378,7 +361,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
           </div>
         </aside>
 
-        {/* ===== ฝั่งขวา 70%: Search Results ===== */}
         <main className={styles.rightContent}>
           <div className={styles.suggestContent}>
             <div className={styles.headerTitleRow}>
@@ -443,8 +425,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                 <p className={styles.noData}>ไม่พบประกาศงานที่ตรงกับการค้นหา</p>
               )}
             </div>
-
-            {/* Pagination Controls */}
             {filteredPosts.length > postsPerPage && (
               <div className={styles.paginationWrapper}>
                 <button

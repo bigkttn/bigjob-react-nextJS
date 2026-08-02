@@ -8,6 +8,8 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import ProvinceSelect from "./province";
+import LevelSelect from "./levelSelect";
 
 const SeekerProfile = () => {
   const [sessionUser, setSessionUser] = useState<any>(null);
@@ -616,18 +618,24 @@ const SeekerProfile = () => {
                 {!editMode ? (
                   fmt(profile.province)
                 ) : (
-                  <input
-                    style={{
-                      minWidth: "120px",
-                      padding: "0.3rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                    type="text"
+                  // <input
+                  //   style={{
+                  //     minWidth: "120px",
+                  //     padding: "0.3rem",
+                  //     borderRadius: "4px",
+                  //     border: "1px solid #ccc",
+                  //   }}
+                  //   type="text"
+                  //   value={editForm.province ?? ""}
+                  //   onChange={(e) =>
+                  //     handleFieldChange("province", e.target.value)
+                  //   }
+                  // />
+                  <ProvinceSelect
                     value={editForm.province ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("province", e.target.value)
-                    }
+                    onChange={(value: string) => {
+                      handleFieldChange("province", value);
+                    }}
                   />
                 )}
               </div>
@@ -1034,31 +1042,24 @@ const SeekerProfile = () => {
                             >
                               <label
                                 style={{
-                                  fontWeight: "600",
+                                  fontWeight: "500",
                                   fontSize: "0.9rem",
                                   color: "#333",
                                 }}
                               >
                                 Level:
                               </label>
-                              <input
-                                type="text"
-                                placeholder="Level (e.g., ปริญญาตรี)"
+
+                              <LevelSelect
                                 value={item.level ?? ""}
-                                onChange={(e) =>
+                                onChange={(value: string) =>
                                   handleArrayFieldChange(
                                     "educations",
                                     i,
                                     "level",
-                                    e.target.value,
+                                    value,
                                   )
                                 }
-                                style={{
-                                  padding: "0.5rem",
-                                  borderRadius: "4px",
-                                  border: "1px solid #ccc",
-                                  width: "100%",
-                                }}
                               />
                             </div>
 
@@ -1072,7 +1073,7 @@ const SeekerProfile = () => {
                             >
                               <label
                                 style={{
-                                  fontWeight: "600",
+                                  fontWeight: "500",
                                   fontSize: "0.9rem",
                                   color: "#333",
                                 }}
@@ -1110,7 +1111,7 @@ const SeekerProfile = () => {
                             >
                               <label
                                 style={{
-                                  fontWeight: "600",
+                                  fontWeight: "500",
                                   fontSize: "0.9rem",
                                   color: "#333",
                                 }}
@@ -1153,7 +1154,7 @@ const SeekerProfile = () => {
                                   style={{
                                     fontWeight: "500",
                                     fontSize: "0.9rem",
-                                    color: "#333",
+                                    color: "#000000",
                                   }}
                                 >
                                   Year Start:
@@ -1198,7 +1199,7 @@ const SeekerProfile = () => {
                                   style={{
                                     fontWeight: "500",
                                     fontSize: "0.9rem",
-                                    color: "#333",
+                                    color: "#020202",
                                   }}
                                 >
                                   Year End:
