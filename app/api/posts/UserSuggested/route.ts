@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
         let userJobTitles: any[] = [];
 
-        // 1. ถ้ามี userId ส่งมา ให้ไปดึง JobTitle ของ User
+        // ถ้ามี userId ส่งมา ให้ไปดึง JobTitle ของ User
         if (userId) {
             const [titles]: any = await db.query(
                 "SELECT job_name FROM JobTitle WHERE user_id = ?",
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
             userJobTitles = titles || [];
         }
 
-        // 2. ถ้าไม่มี userId หรือ User คนนี้ยังไม่ได้ตั้งค่า JobTitle
+        // ถ้าไม่มี userId หรือ User คนนี้ยังไม่ได้ตั้งค่า JobTitle
         // ให้ดึงงานล่าสุด 6 อันดับแรกที่ยังเปิดรับสมัครอยู่ไปแสดงแทน
         if (!userId || userJobTitles.length === 0) {
             const [latestPosts]: any = await db.query(`
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ success: true, posts: latestPosts });
         }
 
-        // 3. ถ้ามีข้อมูล JobTitle ให้คำนวณความคล้ายคลึงด้วย AI Vector
+        // ถ้ามีข้อมูล JobTitle ให้คำนวณความคล้ายคลึงด้วย AI Vector
         const userInterestText = userJobTitles.map((j: any) => j.job_name).join(" ");
         const userVector = await getEmbedding(userInterestText);
 

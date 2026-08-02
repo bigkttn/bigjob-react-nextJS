@@ -19,6 +19,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
+  // ⚡ เพิ่ม State สำหรับ Filter เรียงลำดับเวลา
+  const [sortBy, setSortBy] = useState("newest");
+
   // State สำหรับ Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 12;
@@ -27,7 +30,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
 
   useEffect(() => {
     fetchPosts();
-    fetchSuggestedPosts(); // 2. เรียกฟังก์ชันดึง Suggested Posts
+    fetchSuggestedPosts();
   }, [user]);
 
   const fetchPosts = async () => {
@@ -46,11 +49,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     }
   };
 
-  // 3. ฟังก์ชันดึงตำแหน่งงานแนะนำจาก API AI Vector Matching
   const fetchSuggestedPosts = async () => {
     try {
       setIsSuggestLoading(true);
-      // ดึง ID ของ User (รองรับทั้ง user_id หรือ id)
       const userId = user?.user_id || user?.id || "";
 
       const res = await fetch(`/api/posts/UserSuggested?userId=${userId}`);
@@ -66,6 +67,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
       setIsSuggestLoading(false);
     }
   };
+
   function getTimeAgo(dateString: string | Date): string {
     if (!dateString) return "ไม่ระบุเวลา";
 
@@ -75,29 +77,19 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
       (now.getTime() - createdDate.getTime()) / 1000,
     );
 
-    if (diffInSeconds < 60) {
-      return "เมื่อสักครู่";
-    }
+    if (diffInSeconds < 60) return "เมื่อสักครู่";
 
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes} นาทีที่แล้ว`;
-    }
+    if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
 
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours} ชั่วโมงที่แล้ว`;
-    }
+    if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
 
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) {
-      return `${diffInDays} วันที่แล้ว`;
-    }
+    if (diffInDays < 30) return `${diffInDays} วันที่แล้ว`;
 
     const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) {
-      return `${diffInMonths} เดือนที่แล้ว`;
-    }
+    if (diffInMonths < 12) return `${diffInMonths} เดือนที่แล้ว`;
 
     const diffInYears = Math.floor(diffInDays / 365);
     return `${diffInYears} ปีที่แล้ว`;
@@ -114,9 +106,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     return Array.from(new Set(provinces));
   }, [posts]);
 
-  // ฟังก์ชันกรองข้อมูล (Filter Engine)
+  // ฟังก์ชันกรองและเรียงลำดับข้อมูลตาม Filter ที่เลือก
   const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
+    const filtered = posts.filter((post) => {
       const term = searchTerm.toLowerCase().trim();
       const matchesSearch =
         !term ||
@@ -143,7 +135,25 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
         matchesSearch && matchesJobType && matchesProvince && matchesStatus
       );
     });
-  }, [posts, searchTerm, selectedJobType, selectedProvince, selectedStatus]);
+
+    // ⚡ ทำงานตาม Filter เรียงลำดับ (Sort Engine)
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+
+      if (sortBy === "oldest") {
+        return timeA - timeB; // เก่าสุดขึ้นก่อน
+      }
+      return timeB - timeA; // ล่าสุดขึ้นก่อน (Default)
+    });
+  }, [
+    posts,
+    searchTerm,
+    selectedJobType,
+    selectedProvince,
+    selectedStatus,
+    sortBy,
+  ]);
 
   // คำนวณ Pagination
   const indexOfLastPost = currentPage * postsPerPage;
@@ -161,6 +171,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     setSelectedJobType("");
     setSelectedProvince("");
     setSelectedStatus("");
+    setSortBy("newest"); // ⚡ รีเซ็ตการเรียงลำดับ
     setCurrentPage(1);
   };
 
@@ -265,7 +276,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
               handleFilterChange(setSelectedProvince, e.target.value)
             }
           >
-            <option value="">ทุกจังหวัด / สถานที่</option>
+            <option value="">ทุกจังหวัด</option>
             {availableProvinces.map((prov, i) => (
               <option key={i} value={prov}>
                 {prov}
@@ -284,10 +295,20 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             <option value="Closed">Closed (ปิดรับ)</option>
           </select>
 
+          {/*  Dropdown Filter สำหรับการเรียงลำดับเวลา */}
+          <select
+            value={sortBy}
+            onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
+          >
+            <option value="newest">เรียงตาม: โพสต์ล่าสุด</option>
+            <option value="oldest">เรียงตาม: โพสต์เก่าสุด</option>
+          </select>
+
           {(searchTerm ||
             selectedJobType ||
             selectedProvince ||
-            selectedStatus) && (
+            selectedStatus ||
+            sortBy !== "newest") && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>
               Clear Filters
             </button>
@@ -338,7 +359,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           {formatSalary(post.salary_min, post.salary_max)}
                         </p>
                       </div>
-                      {/* แสดงเวลาที่โพสต์ล่าสุดที่มุมล่างซ้าย */}
                       <p className={styles.subText}>
                         {getTimeAgo(post.created_at)}
                       </p>
@@ -407,7 +427,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           {formatSalary(post.salary_min, post.salary_max)}
                         </p>
                       </div>
-                      {/* แสดงเวลาที่โพสต์ล่าสุดที่มุมล่างซ้าย */}
                       <p className={styles.subText}>
                         {getTimeAgo(post.created_at)}
                       </p>

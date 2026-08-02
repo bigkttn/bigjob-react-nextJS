@@ -1,12 +1,10 @@
-// lib/vectorSimilarity.ts
 import { pipeline } from "@xenova/transformers";
 
-// ตัวแปรเก็บ Pipeline โมเดล (Singleton Pattern กันการโหลดโมเดลซ้ำ)
 let extractorPipeline: any = null;
 
 export async function getEmbedding(text: string): Promise<number[]> {
     if (!extractorPipeline) {
-        // โหลดโมเดลสำหรับเปลี่ยนข้อความเป็น Vector (รองรับภาษาอังกฤษและไทยได้ดี)
+        // โหลดโมเดลสำหรับเปลี่ยนข้อความเป็น Vector (รองรับภาษาอังกฤษและไทยได้ดี) 
         extractorPipeline = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
     }
 
@@ -22,5 +20,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
     const normB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
 
     if (normA === 0 || normB === 0) return 0;
+    // const similarity = dotProduct / (normA * normB);
+    // console.log(`Cosine Similarity: ${similarity}`);
     return dotProduct / (normA * normB);
 }

@@ -2,18 +2,25 @@
 
 /* 1. ส่วนพื้นหลัง (บังคับเต็มจอแบบ Fixed) */
 .loginContainer {
-  width: 100%;
-  min-height: 100vh;
+  position: fixed;
   display: flex;
+
+  min-height: 100vh;
+
   justify-content: center;
   align-items: flex-start;
-  padding: 20px;
-  /* ใส่ padding-top เพิ่มถ้าติด Navbar */
-  padding-top: 60px;
-  background-image: url("/login-bg.png");
+  top: 20px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+
+  background-image: url("/login-bg.png"); /* ตรวจสอบพาธรูปภาพใน public/images */
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
+  padding: 100px 20px;
+  box-sizing: border-box;
 }
 
 /* 2. ตัวการ์ดกระจก (Glassmorphism) */

@@ -11,7 +11,8 @@ export async function GET() {
                     ELSE 'Open'  
                 END AS status
                      FROM posts
-                     JOIN company ON posts.company_id = company.company_id`;
+                     JOIN company ON posts.company_id = company.company_id
+                     ORDER BY posts.created_at DESC`;
         const [posts]: any = await db.query(sql);
         return NextResponse.json({ posts }, { status: 200 });
 
