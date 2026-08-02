@@ -6,6 +6,9 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
+import ApplyCompany from "./apply-company"
+
+
 interface CustomJwtPayload extends JwtPayload {
   id: number;
   role?: string;
@@ -16,6 +19,7 @@ interface PageProps {
 export default async function DetailJob({ params }: PageProps) {
   const resolvedParams = await params;
   const postId = resolvedParams.id;
+
 
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -68,6 +72,8 @@ export default async function DetailJob({ params }: PageProps) {
   } catch (error) {
     console.error("Fetch error:", error);
   }
+
+
   // กรณีไม่พบข้อมูล
   if (!job) {
     return (
@@ -119,7 +125,9 @@ export default async function DetailJob({ params }: PageProps) {
         <div className={styles.card}>
           <BackButton />
 
-          <button className={styles.applyBtn}>Apply Now</button>
+          {/* <button className={styles.applyBtn}>Apply Now</button> */}
+          <ApplyCompany/>
+
 
           <div className={styles.header}>
             <div className={styles.linkCard1}>

@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rateLimit"; // นำ rateLimit ตัวเดิมมาใช้ป้องกัน Spam
+
+// ตั้งค่า Transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+
+  // ป้องกันการกดส่งรัวๆ (จำกัด 3 ครั้ง ต่อ 1 นาที)
+  if (!rateLimit(ip, 3, 60_000)) {
+    return NextResponse.json(
+      { message: "คุณส่งคำขอมากเกินไป กรุณาลองใหม่อีกครั้งในภายหลัง" },
+      { status: 429 }
+    );
+  }
+
+  try {
+    const body = await req.json();
+    const { applicantName, applicantEmail, message, targetEmail, jobTitle } = body;
+
+    // Validate ข้อมูลเบื้องต้น
+    if (!applicantName || !applicantEmail || !targetEmail || !jobTitle) {
+      return NextResponse.json(
+        { message: "กรุณากรอกข้อมูลสำคัญให้ครบถ้วน" },
+        { status: 400 }
+      );
+    }
+
+    // ส่งอีเมลหาผู้ประกอบการ (Target Email)
+    await transporter.sendMail({
+      from: `"BIGJOBs Application" <${process.env.EMAIL_USER}>`,
+      replyTo: applicantEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที
+      to: targetEmail,
+      subject: `[BIGJOBs] ใบสมัครงานตำแหน่ง ${jobTitle} - ${applicantName}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+          <h2 style="color: #0d6efd;">มีการสมัครงานใหม่จาก BIGJOBs</h2>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;" />
+          
+          <p><strong>ตำแหน่งงาน:</strong> ${jobTitle}</p>
+          <p><strong>ชื่อผู้สมัคร:</strong> ${applicantName}</p>
+          <p><strong>อีเมลผู้สมัคร:</strong> ${applicantEmail}</p>
+          
+          <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+            <p style="margin-0; font-weight: bold;">ข้อความจากผู้สมัคร:</p>
+            <p style="white-space: pre-line;">${message || "ไม่มีข้อความเพิ่มเติม"}</p>
+          </div>
+          
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 12px; color: gray;">ข้อความนี้ถูกส่งจากระบบอัตโนมัติของ BIGJOBs คุณสามารถตอบกลับอีเมลนี้เพื่อติดต่อผู้สมัครได้โดยตรง</p>
+        </div>
+      `,
+    });
+
+    return NextResponse.json({ message: "ส่งใบสมัครเรียบร้อยแล้ว!" }, { status: 200 });
+
+  } catch (error: any) {
+    console.error("Error sending Job Application:", error);
+    return NextResponse.json(
+      { message: "เกิดข้อผิดพลาดในการส่งใบสมัคร", error: error.message },
+      { status: 500 }
+    );
+  }
+}
