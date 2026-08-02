@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import ApplyModal from '@/components/ApplyModal';
+import styles from './applyCompany.module.css'
 
 export default function JobDetailPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Mock ข้อมูลตำแหน่งงาน (ในงานจริงอาจมาจาก API/Database)
   const jobData = {
-    title: 'Soccer coach',
-    company: 'Chao Phraya United',
-    email: 'careers@chaophrayaunited.com',
+    title: 'job',
+    company: 'company',
+    email: 'mail',
   };
 
   return (
@@ -21,7 +22,7 @@ export default function JobDetailPage() {
         {/* ปุ่มกด Apply Now */}
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800"
+          className={styles.applyBtn}
         >
           Apply Now
         </button>
