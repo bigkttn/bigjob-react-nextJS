@@ -4,6 +4,7 @@ import styles from "./postjob.module.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSession } from "./getSession";
+import ProvinceSelect from "@/components/ProvinceSelect";
 
 interface Question {
   id: string;
@@ -24,6 +25,7 @@ const PostJob = () => {
 
   const [formData, setFormData] = useState({
     jobPosition: "",
+    province: "",
     workLocation: "",
     salary_min: "",
     salary_max: "",
@@ -472,6 +474,16 @@ const PostJob = () => {
                   disabled={!isApproved}
                   value={formData.jobPosition}
                   onChange={handleChange}
+                />
+              </div>
+              <div className={styles.inputGroupInline}>
+                <label>Province</label>
+                <ProvinceSelect
+                  value={formData.province ?? ""}
+                  onChange={(value: string) => {
+                    if (!isApproved) return;
+                    setFormData((prev) => ({ ...prev, province: value }));
+                  }}
                 />
               </div>
               <div className={styles.inputGroupInline}>

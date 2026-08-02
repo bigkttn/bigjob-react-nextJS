@@ -6,13 +6,13 @@ export async function GET() {
         const sql = `SELECT posts.*, company.company_name,
                                      company.logo_image,
                                      company.full_address,
-                                     company.province,
                 CASE 
                     WHEN application_dates < NOW() THEN 'closed'
                     ELSE 'Open'  
                 END AS status
                      FROM posts
-                     JOIN company ON posts.company_id = company.company_id`;
+                     JOIN company ON posts.company_id = company.company_id
+                     ORDER BY posts.created_at DESC`;
         const [posts]: any = await db.query(sql);
         return NextResponse.json({ posts }, { status: 200 });
 

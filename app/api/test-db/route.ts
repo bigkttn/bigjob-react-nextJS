@@ -1,6 +1,6 @@
 // app/api/posts/seed/route.ts
 //
-// API สำหรับ seed ข้อมูลปลอมลงตาราง `posts` จำนวน 100 แถว
+// API สำหรับ seed ข้อมูลปลอมลงตาราง `posts` จำนวน 50 แถว
 // ⚠️ ไม่มีการเช็ค session / JWT ใด ๆ ทั้งสิ้น ยิงเข้า DB ตรง ๆ
 // ⚠️ ใช้สำหรับ dev/test เท่านั้น — ห้าม deploy ขึ้น production เด็ดขาด
 //    เพราะใครก็สามารถเรียก endpoint นี้เพื่อยัดข้อมูลลง DB ได้โดยไม่ต้อง login
@@ -12,16 +12,74 @@ import db from "@/lib/db";
 
 // ---------- Mock data pools ----------
 const jobPositions = [
-    "Sales Executive", "Frontend Developer", "Backend Developer",
-    "Accountant", "Administrative Officer", "Graphic Designer", "Marketing Manager",
-    "Software Engineer", "HR Officer", "Warehouse Staff",
-    "Purchasing Officer", "Technician", "Delivery Driver",
-    "Customer Service Representative (Call Center)", "Digital Marketing Specialist",
+    // --- Tech & Software Development ---
+    "Frontend Developer",
+    "Backend Developer",
+    "Full Stack Developer",
+    "Java Developer",
+    "Node.js Developer",
+    "Python Developer",
+    "Golang Developer",
+    "React / Next.js Developer",
+    "Mobile Developer (iOS / Android)",
+    "Flutter Developer",
+    "Software Engineer",
+    "DevOps Engineer",
+    "Cloud Engineer",
+    "System Analyst (SA)",
+    "Business Analyst (BA)",
+    "Software Tester / QA Engineer",
+    "Automated Tester",
+    "Data Engineer",
+    "Data Scientist",
+    "Data Analyst",
+    "AI / Machine Learning Engineer",
+    "Security Engineer / DevSecOps",
+    "IT Support / Helpdesk",
+
+    // --- Product & Design ---
+    "Product Manager (PM)",
+    "Product Owner (PO)",
+    "UX/UI Designer",
+    "Graphic Designer",
+
+    // --- Business, Marketing & Supporting ---
+    "Digital Marketing Specialist",
+    "SEO / SEM Specialist",
+    "Content Writer / Copywriter",
+    "Sales Executive",
+    "Business Development Manager",
+    "Account Executive (AE)",
+    "HR Specialist / Tech Recruiter",
+    "Project Coordinator",
+];
+
+const provinces = [
+    "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร",
+    "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี", "ชัยนาท",
+    "ชัยภูมิ", "ชุมพร", "เชียงราย", "เชียงใหม่", "ตรัง",
+    "ตราด", "ตาก", "นครนายก", "นครปฐม", "นครพนม",
+    "นครราชสีมา", "นครศรีธรรมราช", "นครสวรรค์", "นนทบุรี", "นราธิวาส",
+    "น่าน", "บึงกาฬ", "บุรีรัมย์", "ปทุมธานี", "ประจวบคีรีขันธ์",
+    "ปราจีนบุรี", "ปัตตานี", "พระนครศรีอยุธยา", "พะเยา", "พังงา",
+    "พัทลุง", "พิจิตร", "พิษณุโลก", "เพชรบุรี", "เพชรบูรณ์",
+    "แพร่", "ภูเก็ต", "มหาสารคาม", "มุกดาหาร", "แม่ฮ่องสอน",
+    "ยโสธร", "ยะลา", "ร้อยเอ็ด", "ระนอง", "ระยอง",
+    "ราชบุรี", "ลพบุรี", "ลำปาง", "ลำพูน", "เลย",
+    "ศรีสะเกษ", "สกลนคร", "สงขลา", "สตูล", "สมุทรปราการ",
+    "สมุทรสงคราม", "สมุทรสาคร", "สระแก้ว", "สระบุรี", "สิงห์บุรี",
+    "สุโขทัย", "สุพรรณบุรี", "สุราษฎร์ธานี", "สุรินทร์", "หนองคาย",
+    "หนองบัวลำภู", "อ่างทอง", "อำนาจเจริญ", "อุดรธานี", "อุตรดิตถ์",
+    "อุทัยธานี", "อุบลราชธานี"
 ];
 
 const workLocations = [
-    "กรุงเทพมหานคร", "เชียงใหม่", "ขอนแก่น", "อุดรธานี", "ชลบุรี (ศรีราชา)",
-    "นนทบุรี", "ปทุมธานี", "ภูเก็ต", "นครราชสีมา", "สมุทรปราการ",
+    "อาคาร A ชั้น 12 ถนนสุขุมวิท",
+    "นิคมอุตสาหกรรมบางปู",
+    "ย่านใจกลางเมือง ติด BTS/MRT",
+    "ทำงานจากบ้าน (Remote 100%)",
+    "สาขาออฟฟิศประจำจังหวัด",
+    "อาคารซอฟต์แวร์ปาร์ค",
 ];
 
 const jobTypes = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
@@ -85,7 +143,7 @@ function randFutureDate(): string {
 
 export async function POST(request: Request) {
     try {
-        const total = 100;
+        const total = 150;
         const now = new Date().toISOString().slice(0, 19).replace("T", " ");
         const rows: any[] = [];
 
@@ -96,29 +154,30 @@ export async function POST(request: Request) {
             const age_max = age_min + randInt(5, 25);
 
             rows.push([
-                randCompanyId(),                    // company_id
-                randItem(jobPositions),              // job_position
-                randItem(workLocations),             // work_location
-                randInt(1, 10),                      // vacancy
-                randItem(jobTypes),                   // job_type
-                randFutureDate(),                     // application_dates
-                randItem(jobDescriptionPool),         // job_description
-                randItem(qualificationsPool),         // preferred_qualifications
-                randItem(benefitsPool),               // benefits
-                randItem(howToApplyPool),             // how_to_apply
-                randItem(contactPool),                // contact
-                randItem(statuses),                   // status
-                now,                                  // created_at
-                salary_min,
-                salary_max,
-                age_min,
-                age_max,
+                randCompanyId(),               // 1. company_id
+                randItem(jobPositions),         // 2. job_position
+                randItem(provinces),            // 3. province ✨ (เพิ่มตรงนี้)
+                randItem(workLocations),        // 4. work_location
+                randInt(1, 10),                 // 5. vacancy
+                randItem(jobTypes),              // 6. job_type
+                randFutureDate(),               // 7. application_dates
+                randItem(jobDescriptionPool),    // 8. job_description
+                randItem(qualificationsPool),    // 9. preferred_qualifications
+                randItem(benefitsPool),          // 10. benefits
+                randItem(howToApplyPool),        // 11. how_to_apply
+                randItem(contactPool),           // 12. contact
+                randItem(statuses),              // 13. status
+                now,                             // 14. created_at
+                salary_min,                      // 15. salary_min
+                salary_max,                      // 16. salary_max
+                age_min,                         // 17. age_min
+                age_max,                         // 18. age_max
             ]);
         }
 
         const sql = `
             INSERT INTO posts (
-                company_id, job_position, work_location, vacancy, job_type,
+                company_id, job_position, province, work_location, vacancy, job_type,
                 application_dates, job_description, preferred_qualifications,
                 benefits, how_to_apply, contact, status, created_at,
                 salary_min, salary_max, age_min, age_max

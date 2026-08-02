@@ -196,6 +196,10 @@ export default async function DetailJob({ params }: PageProps) {
                     <td>{job.job_position || "Job Title"}</td>
                   </tr>
                   <tr>
+                    <td className={styles.label}>Province</td>
+                    <td>{job.province || "Province"}</td>
+                  </tr>
+                  <tr>
                     <td className={styles.label}>Work Location</td>
                     <td>{job.work_location || "Work Location"}</td>
                   </tr>

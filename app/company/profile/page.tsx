@@ -6,7 +6,7 @@ import styles from "./companyProfile.module.css";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
-
+import ProvinceSelect from "@/components/ProvinceSelect";
 type LeafletMapProps = {
   lat: number | string | null;
   lng: number | string | null;
@@ -550,36 +550,10 @@ const CompanyProfile = () => {
                     *สามารถแก้ตัวเลขด้านบน หรือคลิก/ลากหมุดบนแผนที่ด้านล่างได้
                   </p>
 
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <input
-                      type="text"
-                      placeholder="จังหวัด"
-                      value={editForm.province ?? ""}
-                      onChange={(e) =>
-                        handleFieldChange("province", e.target.value)
-                      }
-                      style={{
-                        flex: 1,
-                        padding: "0.4rem",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="รหัสไปรษณีย์"
-                      value={editForm.postcode ?? ""}
-                      onChange={(e) =>
-                        handleFieldChange("postcode", e.target.value)
-                      }
-                      style={{
-                        flex: 1,
-                        padding: "0.4rem",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                    />
-                  </div>
+                  <ProvinceSelect
+                    value={editForm.province ?? ""}
+                    onChange={(val) => handleFieldChange("province", val)}
+                  />
                   <input
                     type="text"
                     placeholder="เบอร์โทรศัพท์"

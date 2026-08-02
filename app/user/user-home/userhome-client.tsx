@@ -9,21 +9,29 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [posts, setPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 1. เพิ่ม State สำหรับ Suggested Posts ฝั่ง AI/Matching
+  const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
+  const [isSuggestLoading, setIsSuggestLoading] = useState(true);
+
   // State สำหรับระบบค้นหาและ Filter
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJobType, setSelectedJobType] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
+  // ⚡ เพิ่ม State สำหรับ Filter เรียงลำดับเวลา
+  const [sortBy, setSortBy] = useState("newest");
+
   // State สำหรับ Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 9; // แสดงหน้าละ 9 โพสต์ (ปรับได้ตามต้องการ)
+  const postsPerPage = 12;
 
   const router = useRouter();
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+    fetchSuggestedPosts();
+  }, [user]);
 
   const fetchPosts = async () => {
     try {
@@ -41,23 +49,66 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     }
   };
 
-  // สกัดหาตัวเลือก Dynamic สำหรับ Dropdown (ดึงค่าที่ไม่ซ้ำจาก posts)
+  const fetchSuggestedPosts = async () => {
+    try {
+      setIsSuggestLoading(true);
+      const userId = user?.user_id || user?.id || "";
+
+      const res = await fetch(`/api/posts/UserSuggested?userId=${userId}`);
+      const data = await res.json();
+
+      if (data.success) {
+        setSuggestedPosts(data.posts || []);
+      }
+    } catch (err) {
+      console.error("Fetch suggested posts error:", err);
+      setSuggestedPosts([]);
+    } finally {
+      setIsSuggestLoading(false);
+    }
+  };
+
+  function getTimeAgo(dateString: string | Date): string {
+    if (!dateString) return "ไม่ระบุเวลา";
+
+    const createdDate = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor(
+      (now.getTime() - createdDate.getTime()) / 1000,
+    );
+
+    if (diffInSeconds < 60) return "เมื่อสักครู่";
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays} วันที่แล้ว`;
+
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) return `${diffInMonths} เดือนที่แล้ว`;
+
+    const diffInYears = Math.floor(diffInDays / 365);
+    return `${diffInYears} ปีที่แล้ว`;
+  }
+
+  // สกัดหาตัวเลือก Dynamic สำหรับ Dropdown
   const availableJobTypes = useMemo(() => {
     const types = posts.map((p) => p.job_type).filter(Boolean);
     return Array.from(new Set(types));
   }, [posts]);
 
   const availableProvinces = useMemo(() => {
-    const provinces = posts
-      .map((p) => p.province || p.work_location)
-      .filter(Boolean);
+    const provinces = posts.map((p) => p.province).filter(Boolean);
     return Array.from(new Set(provinces));
   }, [posts]);
 
-  //  ฟังก์ชันกรองข้อมูล (Filter Engine)
+  // ฟังก์ชันกรองและเรียงลำดับข้อมูลตาม Filter ที่เลือก
   const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      // ค้นหาจาก Keyword (ตำแหน่ง, บริษัท, รายละเอียด, คุณสมบัติ, จังหวัด, สถานที่ทำงาน)
+    const filtered = posts.filter((post) => {
       const term = searchTerm.toLowerCase().trim();
       const matchesSearch =
         !term ||
@@ -68,17 +119,14 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
         post.province?.toLowerCase().includes(term) ||
         post.work_location?.toLowerCase().includes(term);
 
-      // กรองตามประเภทงาน (Job Type)
       const matchesJobType =
         !selectedJobType || post.job_type === selectedJobType;
 
-      // กรองตามจังหวัด/สถานที่ (Province / Location)
       const matchesProvince =
         !selectedProvince ||
         post.province === selectedProvince ||
         post.work_location?.includes(selectedProvince);
 
-      // กรองตามสถานะ (Status)
       const matchesStatus =
         !selectedStatus ||
         post.status?.toLowerCase() === selectedStatus.toLowerCase();
@@ -87,18 +135,35 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
         matchesSearch && matchesJobType && matchesProvince && matchesStatus
       );
     });
-  }, [posts, searchTerm, selectedJobType, selectedProvince, selectedStatus]);
 
-  //  คำนวณ Pagination จากข้อมูลที่กรองแล้ว (filteredPosts)
+    // ⚡ ทำงานตาม Filter เรียงลำดับ (Sort Engine)
+    return filtered.sort((a, b) => {
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+
+      if (sortBy === "oldest") {
+        return timeA - timeB; // เก่าสุดขึ้นก่อน
+      }
+      return timeB - timeA; // ล่าสุดขึ้นก่อน (Default)
+    });
+  }, [
+    posts,
+    searchTerm,
+    selectedJobType,
+    selectedProvince,
+    selectedStatus,
+    sortBy,
+  ]);
+
+  // คำนวณ Pagination
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
 
-  // ฟังก์ชันจัดการเมื่อเปลี่ยนค่า Search/Filter
   const handleFilterChange = (setter: Function, value: string) => {
     setter(value);
-    setCurrentPage(1); // รีเซ็ตไปหน้า 1 เสมอเมื่อเปลี่ยนตัวกรอง
+    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
@@ -106,19 +171,16 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     setSelectedJobType("");
     setSelectedProvince("");
     setSelectedStatus("");
+    setSortBy("newest"); // ⚡ รีเซ็ตการเรียงลำดับ
     setCurrentPage(1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
   const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const getStatusStyle = (status: string) => {
@@ -148,24 +210,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     if (!min && max) return `สูงสุด ฿${max.toLocaleString()}`;
     return `฿ ${min?.toLocaleString()} - ฿ ${max?.toLocaleString()}`;
   };
-
-  const suggestedCompanys = [
-    {
-      job_title: "Quantum Software Engineer",
-      companyName: "Quantum nexus",
-      img: "/assets/images/suggestedCompanys.jpg",
-    },
-    {
-      job_title: "Quantum Software Engineer",
-      companyName: "Quantum nexus",
-      img: "/assets/images/suggestedCompanys.jpg",
-    },
-    {
-      job_title: "Quantum Software Engineer",
-      companyName: "Quantum nexus",
-      img: "/assets/images/suggestedCompanys.jpg",
-    },
-  ];
 
   if (isLoading) {
     return (
@@ -212,7 +256,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
 
         {/* Dynamic Filters */}
         <div className={styles.filters}>
-          {/* Filter 1: Job Type */}
           <select
             value={selectedJobType}
             onChange={(e) =>
@@ -227,14 +270,13 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             ))}
           </select>
 
-          {/* Filter 2: Province / Location */}
           <select
             value={selectedProvince}
             onChange={(e) =>
               handleFilterChange(setSelectedProvince, e.target.value)
             }
           >
-            <option value="">ทุกจังหวัด / สถานที่</option>
+            <option value="">ทุกจังหวัด</option>
             {availableProvinces.map((prov, i) => (
               <option key={i} value={prov}>
                 {prov}
@@ -242,7 +284,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             ))}
           </select>
 
-          {/* Filter 3: Status */}
           <select
             value={selectedStatus}
             onChange={(e) =>
@@ -254,11 +295,20 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             <option value="Closed">Closed (ปิดรับ)</option>
           </select>
 
-          {/* ปุ่มล้างตัวกรอง */}
+          {/*  Dropdown Filter สำหรับการเรียงลำดับเวลา */}
+          <select
+            value={sortBy}
+            onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
+          >
+            <option value="newest">เรียงตาม: โพสต์ล่าสุด</option>
+            <option value="oldest">เรียงตาม: โพสต์เก่าสุด</option>
+          </select>
+
           {(searchTerm ||
             selectedJobType ||
             selectedProvince ||
-            selectedStatus) && (
+            selectedStatus ||
+            sortBy !== "newest") && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>
               Clear Filters
             </button>
@@ -273,27 +323,57 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
           <div className={styles.suggestContent}>
             <h3>Suggested Posts</h3>
             <div className={styles.verticalList}>
-              {suggestedCompanys.map((company, index) => (
-                <div key={index} className={styles.suggestMiniCard}>
-                  <img
-                    src={company.img}
-                    alt={company.companyName}
-                    className={styles.cardImg}
-                  />
-                  <div className={styles.suggestMiniCardInfo}>
-                    <div>
-                      <p className={styles.bold}>{company.companyName}</p>
-                      <p className={styles.subText}>{company.job_title}</p>
+              {isSuggestLoading ? (
+                <p className={styles.subText}>
+                  กำลังประมวลผลตำแหน่งงานแนะนำ...
+                </p>
+              ) : suggestedPosts.length > 0 ? (
+                suggestedPosts.map((post) => (
+                  <div key={post.post_id} className={styles.suggestMiniCard}>
+                    <img
+                      src={
+                        post.logo_image || "/assets/images/default-company.png"
+                      }
+                      alt={post.company_name}
+                      className={styles.cardImg}
+                    />
+                    <div className={styles.suggestMiniCardInfo}>
+                      <div>
+                        <div className={styles.cardHeader}>
+                          <p className={styles.bold}>{post.company_name}</p>
+                          <span
+                            className={styles.statusBadge}
+                            style={getStatusStyle(post.status)}
+                          >
+                            {post.status || "ไม่ระบุ"}
+                          </span>
+                        </div>
+                        <p className={styles.subText}>{post.job_position}</p>
+                        <p className={styles.subText}>
+                          {post.province || "ไม่ระบุสถานที่"}
+                        </p>
+                        <p className={styles.subText}>
+                          {post.job_type || "ไม่ระบุประเภท"}
+                        </p>
+                        <p className={styles.subText}>
+                          {formatSalary(post.salary_min, post.salary_max)}
+                        </p>
+                      </div>
+                      <p className={styles.subText}>
+                        {getTimeAgo(post.created_at)}
+                      </p>
+                      <Link
+                        href={`/user/user-detail-job/${post.post_id}`}
+                        className={styles.btnWrapper}
+                      >
+                        <button className={styles.detailsBtn}>Details</button>
+                      </Link>
                     </div>
-                    <Link
-                      href={"/company/company-home"}
-                      className={styles.btnWrapper}
-                    >
-                      <button className={styles.detailsBtn}>Details</button>
-                    </Link>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className={styles.subText}>ไม่มีตำแหน่งงานแนะนำ</p>
+              )}
             </div>
           </div>
         </aside>
@@ -338,9 +418,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           {post.job_position}
                         </p>
                         <p className={styles.subText}>
-                          {post.province ||
-                            post.work_location ||
-                            "ไม่ระบุสถานที่"}
+                          {post.province || "ไม่ระบุสถานที่"}
                         </p>
                         <p className={styles.subText}>
                           {post.job_type || "ไม่ระบุประเภท"}
@@ -349,6 +427,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           {formatSalary(post.salary_min, post.salary_max)}
                         </p>
                       </div>
+                      <p className={styles.subText}>
+                        {getTimeAgo(post.created_at)}
+                      </p>
                       <Link
                         href={"/user/user-detail-job/" + post.post_id}
                         className={styles.btnWrapper}

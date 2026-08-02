@@ -74,7 +74,7 @@
 }
 
 .label {
-  width: 120px;
+  width: 120apx;
   font-weight: bold;
 }
 
@@ -443,70 +443,3 @@
 .backBtn .spanMother2 span:nth-child(6) {
   transition: 0.7s;
 }
-/*                <td>
-                    {isEditing ? (
-                      <div className={styles.editInputWrapper}>
-                        <input
-                          className={styles.inputField} // ใส่คลาสที่ตัว input ตรงๆ
-                          value={editData.job_position}
-                          onChange={(e) =>
-                            setEditData({
-                              ...editData,
-                              job_position: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    ) : (
-                      <span>{job.job_position}</span>
-                    )}
-                  </td> */
-
-/*                <select
-                  name="jobType"
-                  value={forData.jobType}
-                  className={styles.selectInput}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled>
-                    Select Job Type
-                  </option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Internship">Internship</option>
-                  <option value="Contract">Contract</option>
-                </select> */
-
-/*                <tr>
-                  <td className={styles.label}>Salary</td>
-                  {isEditing ? (
-                    <div className={styles.editInputWrapper}>
-                      <input
-                        className={styles.inputField}
-                        value={editData.salary_min}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            salary_min: e.target.value,
-                          })
-                        }
-                      />{" "}
-                      -{" "}
-                      <input
-                        className={styles.inputField}
-                        value={editData.salary_max}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            salary_max: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  ) : (
-                    <td>
-                     {job.age_min || "Salary"} - {job.age_max || "Salary"} ปี
-                    </td>
-                  )}
-                </tr> */
