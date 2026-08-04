@@ -56,7 +56,7 @@ export default function ApplyModal({
     setStatusMsg({ type: '', text: '' });
 
     try {
-      const res = await fetch('/api/apply-company', {
+      const res = await fetch('/api/apply/apply-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

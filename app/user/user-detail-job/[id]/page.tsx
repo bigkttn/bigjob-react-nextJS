@@ -6,26 +6,28 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import BackButton from "./backBttn";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
-import ApplyCompany from "./apply-company"
-
+import ApplyCompany from "./apply-company";
+import { apiUrl } from "@/lib/hostURL";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
   role?: string;
+  fullname?: string;
+  email?: string;
 }
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
+
 export default async function DetailJob({ params }: PageProps) {
   const resolvedParams = await params;
   const postId = resolvedParams.id;
 
-
-
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let viewer: CustomJwtPayload | null = null;
-  
+
   if (token) {
     try {
       const secret = process.env.JWT_SECRET || "fallback_secret";
@@ -42,106 +44,97 @@ export default async function DetailJob({ params }: PageProps) {
       </div>
     );
   }
-let seekerName = viewer?.fullname || "ผู้สมัคร";
+
+let seekerName = viewer?.fullname || "";
 let seekerEmail = viewer?.email || "";
 
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
 if (viewer?.id) {
+  console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
+
   try {
-   
-    const seekerRes = await fetch(`http://localhost:5000/api/seekers/${viewer.id}`, {
+    const seekerRes = await fetch(`${apiUrl}/api/user/getUserById/${viewer.id}`, {
+      method: "GET",
       headers: {
-        "Content-Type": "application/json",},
-      cache: "no-store", 
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
     });
 
     if (seekerRes.ok) {
-      const seekerData = await seekerRes.json();
-      seekerEmail = seekerData?.email || "invaild seeker email";
-      seekerName = seekerData?.fullname || "invaild seeker name";
-      // if (seekerData?.email ) seekerEmail = seekerData.email;
-      console.log("Seeker Full Profile:", seekerData);
-      console.log("seekerEmail:", seekerEmail);
-      console.log("seekerName:", seekerName);
+      const responseData = await seekerRes.json();
+      const seekerData = responseData?.user || responseData?.data || responseData;
 
+      seekerEmail = seekerData?.email || seekerEmail;
+      seekerName = seekerData?.fullname || seekerName;
+
+      // console.log(seekerEmail+ seekerName+"ok naka ");
+    } else {
+      // ปรับเปลี่ยนจาก console.error เป็น warning หรือใช้ค่า fallback จาก JWT
+      console.warn(`User profile not found in DB (Status ${seekerRes.status}). Using JWT fallback info.`);
     }
   } catch (error) {
     console.error("Error fetching seeker profile:", error);
   }
 }
 
-  //true if user is admin or superadmin
+
+// ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default ป้องกัน string ว่าง
+seekerEmail = seekerEmail || "invalid seeker email";
+seekerName = seekerName || "invalid seeker name";
+
+  // เช็กว่าเป็น admin หรือ superadmin
   const isAdmin = viewer.role === "admin" || viewer.role === "superadmin";
 
-
-  // Fetch job data
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  // 3. Fetch ข้อมูล Job Post
   let job: any = null;
 
-  const jobResponse = await fetch(`${apiUrl}/api/posts/getPostById/${postId}`, {
-    cache: "no-store", // เพื่อให้ได้ข้อมูลที่อัปเดตใหม่เสมอเหมือน useEffect
-    
-  });
-
   try {
-    // 1. เช็กว่า response status ok หรือไม่ (เช่น 200-299)
+    const jobResponse = await fetch(`${apiUrl}/api/posts/getPostById/${postId}`, {
+      cache: "no-store",
+    });
+
     if (jobResponse.ok) {
       const contentType = jobResponse.headers.get("content-type");
-   
-
-
-      // 2. เช็กว่าสิ่งที่ส่งกลับมาคือ JSON จริงๆ ไม่ใช่ HTML
       if (contentType && contentType.includes("application/json")) {
         job = await jobResponse.json();
-        // console.log('job data:',job)
       } else {
         const textError = await jobResponse.text();
-        console.error(
-          "API did not return JSON. Received:",
-          textError.substring(0, 200),
-        );
+        console.error("API did not return JSON. Received:", textError.substring(0, 200));
       }
-
-    
     } else {
       console.error(`Failed to fetch job. Status: ${jobResponse.status}`);
     }
   } catch (error) {
-    console.error("Fetch error:", error);
+    console.error("Fetch job error:", error);
   }
 
-  let companyEmail = '';
-  if(job?.company_id){
+  // 4. Fetch ข้อมูล Company Email
+  let companyEmail = "";
+  if (job?.company_id) {
     try {
       const companyResponse = await fetch(`${apiUrl}/api/company/getCompanyById/${job.company_id}`, {
         cache: "no-store",
       });
 
-     if (companyResponse.ok && companyResponse.headers.get("content-type")?.includes("application/json")) {
-  const responseData = await companyResponse.json();
-  console.log("Raw Response Data:", responseData);
-
-  // เข้าถึง object 'company' ที่ซ้อนอยู่ข้างใน
-  const companyData = responseData.company; 
-  companyEmail = companyData?.company_email ;
-
-
-  console.log("Company Email:",companyEmail ); 
-
-}
-      
+      if (companyResponse.ok && companyResponse.headers.get("content-type")?.includes("application/json")) {
+        const responseData = await companyResponse.json();
+        const companyData = responseData.company || responseData;
+        companyEmail = companyData?.company_email || "";
+      }
     } catch (error) {
       console.error("Fetch company error:", error);
     }
   }
-  // กรณีไม่พบข้อมูล
+
+  // กรณีไม่พบข้อมูลงาน
   if (!job) {
     return (
       <div className={styles.container}>
         <div className={styles.card}>
           <BackButton />
-          <div
-            style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}
-          >
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}>
             <h3>ไม่พบข้อมูลงาน หรือเกิดข้อผิดพลาดในการเชื่อมต่อระบบ</h3>
             <p style={{ color: "#666", fontSize: "0.9rem", marginTop: "8px" }}>
               โปรดตรวจสอบความถูกต้องของ URL หรือสถานะของเซิร์ฟเวอร์ API
@@ -152,7 +145,7 @@ if (viewer?.id) {
     );
   }
 
-  // --- ฟังก์ชันกำหนดสีของ Status ---
+  // ฟังก์ชันกำหนดสีของ Status
   const getStatusStyle = (status: string) => {
     const s = status?.toLowerCase();
     if (s === "open" || s === "เปิดรับสมัคร")
@@ -184,18 +177,14 @@ if (viewer?.id) {
         <div className={styles.card}>
           <BackButton />
 
-          {/* <button className={styles.applyBtn}>Apply Now</button> */}
-          
+          {/* ปุ่ม Apply พร้อมส่ง Props ที่อัปเดตแล้ว */}
           <ApplyCompany
-   companyName={job.company_name || "invaild Company Name"}
-    seekerName={seekerName || "invaild seeker Name"}
-    jobTitle={job.job_position || "invaild jobTitle"}
-    seekerEmail={seekerEmail || "invaild seeker Email"}
-    companyEmail={companyEmail || "invaild companyEmail"}
-    
-/>
-
-         
+            companyName={job.company_name || "invalid Company Name"}
+            seekerName={seekerName || "invalid seeker Name"}
+            jobTitle={job.job_position || "invalid jobTitle"}
+            seekerEmail={seekerEmail || "invalid seeker Email"}
+            companyEmail={companyEmail || "invalid companyEmail"}
+          />
 
           <div className={styles.header}>
             <div className={styles.linkCard1}>
@@ -215,9 +204,7 @@ if (viewer?.id) {
                   className={styles.logo}
                 />
 
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <h1 className={styles.companyName}>
                     {job.company_name || "Company Name"}
                   </h1>
@@ -274,8 +261,7 @@ if (viewer?.id) {
                   <tr>
                     <td className={styles.label}>Salary</td>
                     <td>
-                      {job.salary_min || "Salary"} -{" "}
-                      {job.salary_max || "Salary"} บาท
+                      {job.salary_min || "Salary"} - {job.salary_max || "Salary"} บาท
                     </td>
                   </tr>
                   <tr>
@@ -286,11 +272,11 @@ if (viewer?.id) {
                   </tr>
                   <tr>
                     <td className={styles.label}>Job type</td>
-                    <td>{job.job_type || "Salary"} </td>
+                    <td>{job.job_type || "Salary"}</td>
                   </tr>
                   <tr>
                     <td className={styles.label}>Vacancy</td>
-                    <td>{job.vacancy || 1} </td>
+                    <td>{job.vacancy || 1}</td>
                   </tr>
                   <tr>
                     <td className={styles.label}>Details</td>
@@ -322,8 +308,7 @@ if (viewer?.id) {
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.preferred_qualifications ||
-                      "No qualifications specified"}
+                    {job.preferred_qualifications || "No qualifications specified"}
                   </li>
                 </ol>
               </div>
@@ -349,7 +334,6 @@ if (viewer?.id) {
               <section style={{ marginTop: "30px" }}>
                 <hr />
                 <h3 className={styles.sectionTitle}>How to Apply</h3>
-
                 <ul className={styles.list}>
                   <li
                     style={{
@@ -358,8 +342,7 @@ if (viewer?.id) {
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.how_to_apply ||
-                      "No application instructions specified"}
+                    {job.how_to_apply || "No application instructions specified"}
                   </li>
                 </ul>
               </section>
@@ -378,23 +361,11 @@ if (viewer?.id) {
                     {job.contact || "No contact information specified"}
                   </li>
                 </ul>
-                {/* <div style={{ fontSize: "0.9rem", lineHeight: "1.6" }}>
-                {job.contact || "No contact information specified"}
-              </div> */}
               </section>
 
               <section style={{ marginTop: "30px" }}>
-                {/* <hr
-                style={{
-                  border: "0",
-                  borderTop: "1px solid #eee",
-                  marginBottom: "20px",
-                }}
-              /> */}
                 <hr />
-
                 <h3 className={styles.sectionTitle}>Application Deadline</h3>
-
                 <div
                   style={{
                     display: "flex",
@@ -403,7 +374,6 @@ if (viewer?.id) {
                     marginTop: "10px",
                   }}
                 >
-                  {/* จุดวงกลมเล็กๆ เพื่อเน้นสายตา */}
                   <div
                     style={{
                       width: "8px",
@@ -421,17 +391,14 @@ if (viewer?.id) {
                     }}
                   >
                     {job.application_dates
-                      ? new Date(job.application_dates).toLocaleDateString(
-                          "th-TH",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          },
-                        ) + " น."
+                      ? new Date(job.application_dates).toLocaleDateString("th-TH", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        }) + " น."
                       : "No deadline specified"}
                   </span>
                 </div>
