@@ -1,5 +1,5 @@
 /* ฉากหลัง Modal แบบมืดโปร่งแสง */
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -14,23 +14,25 @@
 }
 
 /* กล่อง Pop-up หลัก */
-.modal-container {
+.modalContainer {
   background-color: #ffffff;
   border-radius: 12px;
   width: 100%;
-  max-width: 500px;
-  padding: 24px;
+  max-width: 650px;
+  padding: 32px; /* เพิ่มพื้นที่ภายในขอบ */
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  
 }
 
-.modal-title {
+.modalTitle {
   font-size: 20px;
   font-weight: 700;
   color: #1f2937;
   margin: 0 0 4px 0;
 }
 
-.modal-subtitle {
+.modalSubtitle {
   font-size: 14px;
   font-weight: 600;
   color: #2563eb;
@@ -38,45 +40,47 @@
 }
 
 /* ข้อความแจ้งเตือน Success / Error */
-.status-alert {
+.statusAlert {
   padding: 12px;
   border-radius: 8px;
   font-size: 14px;
   margin-bottom: 16px;
 }
 
-.status-alert.success {
+.statusSuccess {
   background-color: #d1fae5;
   color: #065f46;
 }
 
-.status-alert.error {
+.statusError {
   background-color: #fee2e2;
   color: #991b1b;
 }
 
 /* ฟอร์มและ Input */
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.form-item {
+.formItem {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.form-item label {
+.formItem label {
   font-size: 12px;
   color: #6b7280;
   font-weight: 500;
 }
 
-.form-item input,
-.form-item textarea {
+/* ความยาวกรอบข้อความป็อปอัพ */
+.formItem input,
+.formItem textarea {
   width: 100%;
+  min-height: 300px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   padding: 10px;
@@ -85,21 +89,21 @@
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.form-item input:focus,
-.form-item textarea:focus {
+.formItem input:focus,
+.formItem textarea:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* กลุ่มปุ่มกดกดส่ง/ยกเลิก */
-.button-group {
+/* กลุ่มปุ่มกดส่ง/ยกเลิก */
+.buttonGroup {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 16px;
 }
 
-.btn-cancel {
+.btnCancel {
   padding: 8px 16px;
   font-size: 14px;
   color: #4b5563;
@@ -110,11 +114,11 @@
   transition: background-color 0.2s;
 }
 
-.btn-cancel:hover {
+.btnCancel:hover {
   background-color: #f3f4f6;
 }
 
-.btn-submit {
+.btnSubmit {
   padding: 8px 20px;
   font-size: 14px;
   font-weight: 500;
@@ -126,12 +130,12 @@
   transition: background-color 0.2s;
 }
 
-.btn-submit:hover {
+.btnSubmit:hover {
   background-color: #1d4ed8;
 }
 
-.btn-submit:disabled,
-.btn-cancel:disabled {
+.btnSubmit:disabled,
+.btnCancel:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
 }

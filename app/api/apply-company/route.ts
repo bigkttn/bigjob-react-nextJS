@@ -24,10 +24,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { applicantName, applicantEmail, message, targetEmail, jobTitle } = body;
+    const { seekerName, seekerEmail, message, companyEmail, jobTitle,companyName } = body;
+    
 
     // Validate ข้อมูลเบื้องต้น
-    if (!applicantName || !applicantEmail || !targetEmail || !jobTitle) {
+    if (!seekerName || !seekerEmail || !companyEmail || !jobTitle  || !companyName) {
       return NextResponse.json(
         { message: "กรุณากรอกข้อมูลสำคัญให้ครบถ้วน" },
         { status: 400 }
@@ -37,17 +38,17 @@ export async function POST(req: NextRequest) {
     // ส่งอีเมลหาผู้ประกอบการ (Target Email)
     await transporter.sendMail({
       from: `"BIGJOBs Application" <${process.env.EMAIL_USER}>`,
-      replyTo: applicantEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที
-      to: targetEmail,
-      subject: `[BIGJOBs] ใบสมัครงานตำแหน่ง ${jobTitle} - ${applicantName}`,
+      replyTo: seekerEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที
+      to: companyEmail,
+      subject: `[BIGJOBs] ใบสมัครงานตำแหน่ง ${jobTitle} - ${seekerName}`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
           <h2 style="color: #0d6efd;">มีการสมัครงานใหม่จาก BIGJOBs</h2>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;" />
           
           <p><strong>ตำแหน่งงาน:</strong> ${jobTitle}</p>
-          <p><strong>ชื่อผู้สมัคร:</strong> ${applicantName}</p>
-          <p><strong>อีเมลผู้สมัคร:</strong> ${applicantEmail}</p>
+          <p><strong>ชื่อผู้สมัคร:</strong> ${seekerName}</p>
+          <p><strong>อีเมลผู้สมัคร:</strong> ${seekerEmail}</p>
           
           <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
             <p style="margin-0; font-weight: bold;">ข้อความจากผู้สมัคร:</p>
