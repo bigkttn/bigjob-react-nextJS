@@ -21,10 +21,11 @@ export default async function DetailJob({ params }: PageProps) {
   const postId = resolvedParams.id;
 
 
+
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let viewer: CustomJwtPayload | null = null;
-
+  
   if (token) {
     try {
       const secret = process.env.JWT_SECRET || "fallback_secret";
@@ -33,8 +34,6 @@ export default async function DetailJob({ params }: PageProps) {
       console.error("Token invalid");
     }
   }
-  //true if user is admin or superadmin
-  const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
 
   if (!viewer) {
     return (
@@ -43,22 +42,57 @@ export default async function DetailJob({ params }: PageProps) {
       </div>
     );
   }
+let seekerName = viewer?.fullname || "ผู้สมัคร";
+let seekerEmail = viewer?.email || "";
+
+if (viewer?.id) {
+  try {
+   
+    const seekerRes = await fetch(`http://localhost:5000/api/seekers/${viewer.id}`, {
+      headers: {
+        "Content-Type": "application/json",},
+      cache: "no-store", 
+    });
+
+    if (seekerRes.ok) {
+      const seekerData = await seekerRes.json();
+      seekerEmail = seekerData?.email || "invaild seeker email";
+      seekerName = seekerData?.fullname || "invaild seeker name";
+      // if (seekerData?.email ) seekerEmail = seekerData.email;
+      console.log("Seeker Full Profile:", seekerData);
+      console.log("seekerEmail:", seekerEmail);
+      console.log("seekerName:", seekerName);
+
+    }
+  } catch (error) {
+    console.error("Error fetching seeker profile:", error);
+  }
+}
+
+  //true if user is admin or superadmin
+  const isAdmin = viewer.role === "admin" || viewer.role === "superadmin";
+
 
   // Fetch job data
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   let job: any = null;
+
   const jobResponse = await fetch(`${apiUrl}/api/posts/getPostById/${postId}`, {
     cache: "no-store", // เพื่อให้ได้ข้อมูลที่อัปเดตใหม่เสมอเหมือน useEffect
+    
   });
 
   try {
     // 1. เช็กว่า response status ok หรือไม่ (เช่น 200-299)
     if (jobResponse.ok) {
       const contentType = jobResponse.headers.get("content-type");
+   
+
 
       // 2. เช็กว่าสิ่งที่ส่งกลับมาคือ JSON จริงๆ ไม่ใช่ HTML
       if (contentType && contentType.includes("application/json")) {
         job = await jobResponse.json();
+        // console.log('job data:',job)
       } else {
         const textError = await jobResponse.text();
         console.error(
@@ -66,6 +100,8 @@ export default async function DetailJob({ params }: PageProps) {
           textError.substring(0, 200),
         );
       }
+
+    
     } else {
       console.error(`Failed to fetch job. Status: ${jobResponse.status}`);
     }
@@ -73,7 +109,30 @@ export default async function DetailJob({ params }: PageProps) {
     console.error("Fetch error:", error);
   }
 
+  let companyEmail = '';
+  if(job?.company_id){
+    try {
+      const companyResponse = await fetch(`${apiUrl}/api/company/getCompanyById/${job.company_id}`, {
+        cache: "no-store",
+      });
 
+     if (companyResponse.ok && companyResponse.headers.get("content-type")?.includes("application/json")) {
+  const responseData = await companyResponse.json();
+  console.log("Raw Response Data:", responseData);
+
+  // เข้าถึง object 'company' ที่ซ้อนอยู่ข้างใน
+  const companyData = responseData.company; 
+  companyEmail = companyData?.company_email ;
+
+
+  console.log("Company Email:",companyEmail ); 
+
+}
+      
+    } catch (error) {
+      console.error("Fetch company error:", error);
+    }
+  }
   // กรณีไม่พบข้อมูล
   if (!job) {
     return (
@@ -126,8 +185,17 @@ export default async function DetailJob({ params }: PageProps) {
           <BackButton />
 
           {/* <button className={styles.applyBtn}>Apply Now</button> */}
-          <ApplyCompany/>
+          
+          <ApplyCompany
+   companyName={job.company_name || "invaild Company Name"}
+    seekerName={seekerName || "invaild seeker Name"}
+    jobTitle={job.job_position || "invaild jobTitle"}
+    seekerEmail={seekerEmail || "invaild seeker Email"}
+    companyEmail={companyEmail || "invaild companyEmail"}
+    
+/>
 
+         
 
           <div className={styles.header}>
             <div className={styles.linkCard1}>

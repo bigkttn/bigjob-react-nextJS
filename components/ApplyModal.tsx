@@ -1,27 +1,52 @@
 'use client';
 
-import { useState } from 'react';
-import "./ApplyModel.css"
+import { useEffect, useState } from 'react';
+import styles from './ApplyModel.module.css'
 
 interface ApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  seekerEmail:string;
+  seekerName:string;
+  companyName: string;
+  companyEmail: string;
   jobTitle: string;
-  targetEmail: string; // อีเมลบริษัท เช่น careers@chaophrayaunited.com
 }
 
 export default function ApplyModal({
   isOpen,
   onClose,
-  // jobTitle,
-  // targetEmail,
-}: ApplyModalProps) {
-  const [applicantName, setApplicantName] = useState('');
-  const [applicantEmail, setApplicantEmail] = useState('');
-  // const [message, setMessage] = useState(`สวัสดีครับ/ค่ะ มีความสนใจสมัครงานตำแหน่ง ${jobTitle}`);
+   companyName, 
+   seekerName,
+   jobTitle,
+   seekerEmail,
+   companyEmail
   
+}: ApplyModalProps) {
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    if (isOpen) {
+      setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName || 'invaild company name'}
+
+ข้าพเจ้า ${seekerName || 'invaild seeker name'} มีความประสงค์ขอสมัครงานในตำแหน่ง ${jobTitle || 'invaild job Title'}
+
+เนื่องด้วยข้าพเจ้า มีความสนใจในสายงานนี้ และเชื่อมั่นว่าทักษะ รวมถึงประสบการณ์ที่มีจะสามารถนำมาประยุกต์ใช้เพื่อร่วมสร้างประโยชน์ให้แก่องค์กรของท่านได้เป็นอย่างดี
+
+ทั้งนี้ ได้แนบข้อมูลสำหรับการพิจารณาเบื้องต้นมาพร้อมกับใบสมัครนี้แล้ว ${seekerEmail || 'invaild seeker Email'}; หากต้องการข้อมูลเพิ่มเติมหรือประสงค์นัดสัมภาษณ์งาน สามารถติดต่อกลับได้ผ่านอีเมลนี้
+
+ขอแสดงความนับถือ${companyEmail || 'invaild company Email'} `);
+    }
+  console.log({'console':
+        isOpen,
+        companyName,
+        seekerName,
+        jobTitle,
+        seekerEmail,
+        companyEmail
+      });},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
 
   if (!isOpen) return null;
 
@@ -31,15 +56,16 @@ export default function ApplyModal({
     setStatusMsg({ type: '', text: '' });
 
     try {
-      const res = await fetch('/api/apply', {
+      const res = await fetch('/api/apply-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          applicantName,
-          applicantEmail,
-          // message,
-          // targetEmail,
-          // jobTitle,
+        companyName,
+        seekerName,
+        jobTitle,
+        seekerEmail,
+        companyEmail,
+        message,
         }),
       });
 
@@ -64,72 +90,45 @@ export default function ApplyModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative">
-        <h3 className="text-xl font-bold text-gray-800 mb-1">สมัครงานตำแหน่ง</h3>
-        {/* <p className="text-sm font-semibold text-blue-600 mb-4">{jobTitle}</p> */}
+ return (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalContainer}>
+        <h3 className={styles.modalTitle}>สมัครงานตำแหน่ง {jobTitle}</h3>
 
         {statusMsg.text && (
           <div
-            className={`p-3 rounded-lg text-sm mb-4 ${
-              statusMsg.type === 'success'
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700'
+            className={`${styles.statusAlert} ${
+              statusMsg.type === 'success' ? styles.statusSuccess : styles.statusError
             }`}
           >
             {statusMsg.text}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <div>
-            <label className="text-xs text-gray-500 font-medium">ชื่อ-นามสกุล ผู้สมัคร</label>
-            <input
-              type="text"
-              required
-              className="w-full border rounded-lg p-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="นาย สมชาย ใจดี"
-              value={applicantName}
-              onChange={(e) => setApplicantName(e.target.value)}
-            />
-          </div>
+        <form onSubmit={handleSubmit} className={styles.formGroup}>
 
-          <div>
-            <label className="text-xs text-gray-500 font-medium">อีเมลติดต่อกลับ</label>
-            <input
-              type="email"
-              required
-              className="w-full border rounded-lg p-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="your-name@email.com"
-              value={applicantEmail}
-              onChange={(e) => setApplicantEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500 font-medium">ข้อความถึง HR</label>
+          <div className={styles.formItem}>
+            {/* <label>ข้อความถึง HR</label> */}
             <textarea
               rows={4}
-              className="w-full border rounded-lg p-2.5 text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none"
-              // value={message}
-              // onChange={(e) => setMessage(e.target.value)}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
             />
           </div>
 
-          <div className="flex justify-end gap-2 mt-4">
+          <div className={styles.buttonGroup}>
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition"
+              className={styles.btnCancel}
             >
               ยกเลิก
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-sm bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+              className={styles.btnSubmit}
             >
               {loading ? 'กำลังส่ง...' : 'ส่งใบสมัคร'}
             </button>

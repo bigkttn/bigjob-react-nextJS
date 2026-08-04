@@ -4,20 +4,38 @@ import { useState } from 'react';
 import ApplyModal from '@/components/ApplyModal';
 import styles from './applyCompany.module.css'
 
-export default function JobDetailPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+interface ApplyCompanyProps {
+  companyName:string,
+  seekerName:string,
+  jobTitle:string,
+  seekerEmail:string,
+  companyEmail:string
+}
 
-  // Mock ข้อมูลตำแหน่งงาน (ในงานจริงอาจมาจาก API/Database)
-  const jobData = {
-    title: 'job',
-    company: 'company',
-    email: 'mail',
-  };
+export default function ApplyCompany({
+  companyName,
+   seekerName,
+   jobTitle,
+   seekerEmail,
+   companyEmail
+  }:ApplyCompanyProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+// LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
+  console.log('--- ApplyCompany Props ---', {
+    jobTitle,
+    companyName,
+    companyEmail,
+    seekerName,
+    seekerEmail,
+  });
+
+
+  
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{jobData.company}</h1>
+        {/* <h1 className="text-3xl font-bold">{jobData.company}</h1> */}
         
         {/* ปุ่มกด Apply Now */}
         <button
@@ -28,15 +46,20 @@ export default function JobDetailPage() {
         </button>
       </div>
 
-      <p className="text-lg">Job Title: {jobData.title}</p>
+      {/* <p className="text-lg">Job Title: {jobData.title}</p> */}
       
       {/* เรียกใช้งาน Modal Component */}
       <ApplyModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        jobTitle={jobData.title}
-        targetEmail={jobData.email}
+        companyName={companyName}
+        seekerName={seekerName}
+        jobTitle={jobTitle}
+        seekerEmail={seekerEmail}
+        companyEmail={companyEmail}
       />
+
+      
     </main>
   );
 }
