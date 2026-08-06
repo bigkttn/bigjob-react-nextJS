@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { rateLimit } from "@/lib/rateLimit"; // นำ rateLimit ตัวเดิมมาใช้ป้องกัน Spam
+import { rateLimit } from "@/lib/rateLimit";
+import db from "@/lib/db";
+import { Seq2SeqLMOutput } from "@xenova/transformers";
 
 // ตั้งค่า Transporter
 const transporter = nodemailer.createTransport({
@@ -24,8 +26,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { seekerName, seekerEmail, message, companyEmail, jobTitle,companyName } = body;
+    const { seekerName, seekerEmail, message, companyEmail, jobTitle,companyName,
+            postId,userId
+     } = body;
+
+     console.log(" Received Payload:", { postId, userId, seekerName });
     
+    const post_id = Number(postId);
+    const user_id = Number(userId);
 
     // Validate ข้อมูลเบื้องต้น
     if (!seekerName || !seekerEmail || !companyEmail || !jobTitle  || !companyName) {
@@ -35,7 +43,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ส่งอีเมลหาผู้ประกอบการ (Target Email)
+    if (!post_id || !user_id) {
+      return NextResponse.json(
+        { message: "ไม่พบข้อมูล postId หรือ userId" },
+        { status: 400 }
+      );
+    }
+    const {rows}:any  = await db.query(
+      `SELECT * FROM interview_tracking WHERE post_id = ?  AND user_id = ?`,
+      [postId,userId]);
+     
+    if(rows && rows.length>0){
+      return NextResponse.json(
+        {message:"คุณได้ทำการสมัครงานในตำแหน่งนี้ไปแล้ว"},
+        {status:400}
+      );
+    }
+
+    const spl = `INSERT interview_tracking
+                (post_id,user_id,status,interview_message)
+                VALUES(?,?,?,?)`;
+  
+    const initStatus = "applied";
+    
+    await db.query(spl,[
+      postId,userId,initStatus,message||null
+    ]);
+
     await transporter.sendMail({
       from: `"BIGJOBs Application" <${process.env.EMAIL_USER}>`,
       replyTo: seekerEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที

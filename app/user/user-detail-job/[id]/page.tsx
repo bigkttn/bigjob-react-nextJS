@@ -51,7 +51,7 @@ let seekerEmail = viewer?.email || "";
 // const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 if (viewer?.id) {
-  console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
+  // console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
 
   try {
     const seekerRes = await fetch(`${apiUrl}/api/user/getUserById/${viewer.id}`, {
@@ -179,6 +179,8 @@ seekerName = seekerName || "invalid seeker name";
 
           {/* ปุ่ม Apply พร้อมส่ง Props ที่อัปเดตแล้ว */}
           <ApplyCompany
+            postId={Number(postId)}
+            userId={viewer.id}
             companyName={job.company_name || "invalid Company Name"}
             seekerName={seekerName || "invalid seeker Name"}
             jobTitle={job.job_position || "invalid jobTitle"}

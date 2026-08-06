@@ -6,6 +6,8 @@ import styles from './ApplyModel.module.css'
 interface ApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
+  postId:number;
+  userId:number;
   seekerEmail:string;
   seekerName:string;
   companyName: string;
@@ -16,17 +18,19 @@ interface ApplyModalProps {
 export default function ApplyModal({
   isOpen,
   onClose,
-   companyName, 
-   seekerName,
-   jobTitle,
-   seekerEmail,
-   companyEmail
+  postId,
+  userId,
+  companyName, 
+  seekerName,
+  jobTitle,
+  seekerEmail,
+  companyEmail
   
 }: ApplyModalProps) {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
-
+ const indent = "\u00A0".repeat(109);
   useEffect(() => {
     if (isOpen) {
       setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName || 'invaild company name'}
@@ -35,18 +39,11 @@ export default function ApplyModal({
 
 เนื่องด้วยข้าพเจ้า มีความสนใจในสายงานนี้ และเชื่อมั่นว่าทักษะ รวมถึงประสบการณ์ที่มีจะสามารถนำมาประยุกต์ใช้เพื่อร่วมสร้างประโยชน์ให้แก่องค์กรของท่านได้เป็นอย่างดี
 
-ทั้งนี้ ได้แนบข้อมูลสำหรับการพิจารณาเบื้องต้นมาพร้อมกับใบสมัครนี้แล้ว ${seekerEmail || 'invaild seeker Email'}; หากต้องการข้อมูลเพิ่มเติมหรือประสงค์นัดสัมภาษณ์งาน สามารถติดต่อกลับได้ผ่านอีเมลนี้
+ทั้งนี้ หากต้องการข้อมูลเพิ่มเติมหรือประสงค์นัดสัมภาษณ์งาน สามารถติดต่อกลับได้ผ่านอีเมลนี้
 
-ขอแสดงความนับถือ${companyEmail || 'invaild company Email'} `);
-    }
-  console.log({'console':
-        isOpen,
-        companyName,
-        seekerName,
-        jobTitle,
-        seekerEmail,
-        companyEmail
-      });},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
+${indent}ขอแสดงความนับถือ
+${indent}${seekerName || 'invalid seeker name'}`);
+    }},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
 
   if (!isOpen) return null;
 
@@ -56,10 +53,12 @@ export default function ApplyModal({
     setStatusMsg({ type: '', text: '' });
 
     try {
-      const res = await fetch('/api/apply/apply-company', {
+      const res = await fetch('/api/interview_tracking/apply-company', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+        postId:postId,
+        userId:userId,
         companyName,
         seekerName,
         jobTitle,
