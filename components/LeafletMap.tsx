@@ -10,7 +10,7 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-
+// 
 // กำหนด Type ของ Props ให้ตรงกับที่ CompanyProfile ส่งมา
 type LeafletMapProps = {
   lat: number | string | null;
