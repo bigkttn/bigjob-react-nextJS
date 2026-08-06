@@ -2,6 +2,15 @@
 
 import React, { useState } from "react";
 import styles from "./seeker_tracking.module.css";
+import { JwtPayload } from "jsonwebtoken";
+
+interface CustomJwtPayload extends JwtPayload{
+  id: number;
+}
+
+interface PageProps{
+  params: Promise<{id:string}>;
+}
 
 // Mock Data งานที่สมัคร
 const mockJobs = [
@@ -89,7 +98,10 @@ const mockJobs = [
   },
 ];
 
-export default function SeekerTrackingPage() {
+export default async function SeekerTracking({params}:PageProps) {
+  const resParams = await params;
+  const userId = resParams.id;
+  console.log("userId",userId);
   const [selectedJob, setSelectedJob] = useState(mockJobs[2]); // เลือก Head Coach เป็นค่าเริ่มต้น
 
   const getStatusBadgeClass = (status: string) => {

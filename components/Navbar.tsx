@@ -331,6 +331,19 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
+                  href={`/user/seeker_tracking/${userId}`}
+                  className={`nav-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
+                >
+                  Tracking
+                </Link>
+
+                <Link
+                  href="/user/savedCompany"
+                  className={`nav-item ${isActive("/user/saveCompany")}`}
+                >
+                  Saved
+                </Link>
+                <Link
                   href="/user/user-feedback"
                   className={`nav-item nav-feedback-link ${isActive("/user/user-feedback")}`}
                 >
@@ -338,12 +351,6 @@ export default function Navbar() {
                   {unreadCount > 0 && (
                     <span className="shock-badge">! {unreadCount}</span>
                   )}
-                </Link>
-                <Link
-                  href="/user/savedCompany"
-                  className={`nav-item ${isActive("/user/saveCompany")}`}
-                >
-                  Saved
                 </Link>
                 <Link
                   href="/user/user-profile"
@@ -364,6 +371,12 @@ export default function Navbar() {
                   className={`nav-item ${isActive("/company/company-home")}`}
                 >
                   Home
+                </Link>
+                 <Link
+                  href="/company/company_tracking"
+                  className={`nav-item ${isActive("/company/company_tracking")}`}
+                >
+                  Tracking
                 </Link>
                 <Link
                   href="/company/savedSeeker"

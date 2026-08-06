@@ -1,18 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import ApplyModal from '@/components/ApplyModal';
 import styles from './applyCompany.module.css'
+import ApplyModal from '@/components/ApplyModal';
 
 interface ApplyCompanyProps {
-  companyName:string,
-  seekerName:string,
-  jobTitle:string,
-  seekerEmail:string,
-  companyEmail:string
+  postId: number,
+  userId: number,
+  companyName: string,
+  seekerName: string,
+  jobTitle: string,
+  seekerEmail: string,
+  companyEmail: string
 }
 
 export default function ApplyCompany({
+  postId,
+  userId,
   companyName,
    seekerName,
    jobTitle,
@@ -20,15 +24,37 @@ export default function ApplyCompany({
    companyEmail
   }:ApplyCompanyProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isReported, setIsReported] = useState(false);
 // LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
-  console.log('--- ApplyCompany Props ---', {
-    jobTitle,
-    companyName,
-    companyEmail,
-    seekerName,
-    seekerEmail,
-  });
-
+  // console.log('--- ApplyCompany Props ---', {
+  //   jobTitle,
+  //   companyName,
+  //   companyEmail,
+  //   seekerName,
+  //   seekerEmail,
+  //   postId,
+  //   userId
+  // });
+const checkApplied = async () => {
+    try {
+      const response = await fetch("/api/seeker/check_report_company", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: Number(userId),
+          post_id: Number(postId),
+        }),
+      });
+      const data = await response.json();
+      if (data && data.rows && data.rows.length > 0) {
+        setIsReported(true);
+      } else {
+        setIsReported(false);
+      }
+    } catch (error) {
+      console.error("Error in checkSaved:", error);
+    }
+  };
 
   
 
@@ -52,6 +78,8 @@ export default function ApplyCompany({
       <ApplyModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        postId={Number(postId)}
+        userId={userId}
         companyName={companyName}
         seekerName={seekerName}
         jobTitle={jobTitle}
