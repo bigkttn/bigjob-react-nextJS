@@ -82,6 +82,22 @@
   width: 300px;
   box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
+.inputGroupFull2 {
+  display: grid;
+  grid-template-columns: 0.4fr 1fr; /* แบ่ง 2 ฝั่ง */
+  gap: 5px;
+}
+.inputGroupFull2 label {
+  font-weight: bold;
+}
+.inputGroupFull2 textarea {
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 12px;
+  resize: none;
+  width: 339px;
+  box-shadow: inset 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
 
 /* ปรับให้รองรับหน้าจอเล็กลง */
 @media (max-width: 768px) {

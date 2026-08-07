@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
     const session = req.cookies.get("session")?.value;
     const pathname = req.nextUrl.pathname;
-    const publicPaths = ['/login', '/register', '/forgotPassword'];
+    const publicPaths = ['/login', '/register', '/forgotPassword','/user/user-detail-job','/company/seeker-profile'];
     const isPublicPath = pathname === '/' || publicPaths.some(path => req.nextUrl.pathname.startsWith(path));
     if (!session && !isPublicPath) {
         return NextResponse.redirect(new URL('/', req.url));

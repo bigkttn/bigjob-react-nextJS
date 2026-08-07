@@ -241,3 +241,10 @@
     opacity: 1;
   }
 }
+.avatarWrappercompany {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 15px auto;
+}

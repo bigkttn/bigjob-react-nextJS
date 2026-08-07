@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import styles from "./companyhome.module.css";
 import Link from "next/link";
 import { EDUCATION_LEVELS } from "@/lib/educationLevels";
-import ProvinceSelect from "./province"; // 👈 เพิ่มการนำเข้า ProvinceSelect
+import ProvinceSelect from "./province";
 
 // ตัวเลือกรูปแบบการทำงานแบบ Fixed
 const WORK_TYPES = [
@@ -18,6 +18,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [company] = useState(initialUser);
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Suggested seekers
   const [suggestedSeekers, setSuggestedSeekers] = useState<any[]>([]);
@@ -37,17 +38,31 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [maxAge, setMaxAge] = useState<number>(60);
 
   // Filter เรียงลำดับเวลา
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("relevance"); // default เป็น relevance หรือ newest
 
   // State สำหรับ Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 12;
 
+  // ดึงข้อมูล Suggested Seekers ครั้งแรก
   useEffect(() => {
-    fetchUsers();
     fetchSuggestedSeekers();
   }, [company]);
 
+  // Debounce Search Effect สำหรับ Hybrid Search API
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm.trim()) {
+        performHybridSearch(searchTerm.trim());
+      } else {
+        fetchUsers();
+      }
+    }, 400); // ชะลอ 400ms ก่อนยิง API Search
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // ฟังก์ชันดึงผู้ใช้ปกติ (กรณีไม่มีการค้นหา)
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
@@ -64,12 +79,28 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     }
   };
 
+  // ฟังก์ชันยิง Hybrid Search API (Keyword + AI Vector)
+  const performHybridSearch = async (query: string) => {
+    try {
+      setIsSearching(true);
+      const res = await fetch(`/api/posts/company-search-user?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data.success) {
+        setUsers(data.users || []);
+      }
+    } catch (err) {
+      console.error("Hybrid Search Error:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const fetchSuggestedSeekers = async () => {
     try {
       setIsSuggestLoading(true);
       const companyId = company?.company_id || company?.id || "";
       const res = await fetch(
-        `/api/posts/CompanySuggested?companyId=${companyId}`,
+        `/api/posts/CompanySuggested?companyId=${companyId}`
       );
       const data = await res.json();
       if (data.success) {
@@ -88,7 +119,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     const createdDate = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor(
-      (now.getTime() - createdDate.getTime()) / 1000,
+      (now.getTime() - createdDate.getTime()) / 1000
     );
 
     if (diffInSeconds < 60) return "เมื่อสักครู่";
@@ -104,22 +135,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     return `${diffInYears} ปีที่แล้ว`;
   }
 
-  // Dynamic Options
-  const availableJobNames = useMemo(() => {
-    const names = users.map((u) => u.job_name).filter(Boolean);
-    return Array.from(new Set(names));
-  }, [users]);
-
-  // ฟังก์ชันกรองข้อมูล
+  // ฟังก์ชันกรองข้อมูลแบบรายละเอียดบน Client-side
   const filteredUsers = useMemo(() => {
     const filtered = users.filter((u) => {
-      const term = searchTerm.toLowerCase().trim();
-      const matchesSearch =
-        !term ||
-        u.fullname?.toLowerCase().includes(term) ||
-        u.job_name?.toLowerCase().includes(term) ||
-        u.province?.toLowerCase().includes(term);
-
       const matchesJobName = !selectedJobName || u.job_name === selectedJobName;
       const matchesProvince =
         !selectedProvince || u.province === selectedProvince;
@@ -139,7 +157,6 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
       const matchesAge = !u.age || (userAge >= minAge && userAge <= maxAge);
 
       return (
-        matchesSearch &&
         matchesJobName &&
         matchesProvince &&
         matchesWorkType &&
@@ -148,14 +165,22 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
       );
     });
 
+    // เรียงลำดับข้อมูล
     return filtered.sort((a, b) => {
-      const timeA = new Date(a.created_at || 0).getTime();
-      const timeB = new Date(b.created_at || 0).getTime();
-      return sortBy === "oldest" ? timeA - timeB : timeB - timeA;
+      if (sortBy === "oldest") {
+        return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+      }
+      if (sortBy === "newest") {
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      }
+      // ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี
+      if (typeof b.matchScore === "number" && typeof a.matchScore === "number") {
+        return b.matchScore - a.matchScore;
+      }
+      return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
     });
   }, [
     users,
-    searchTerm,
     selectedJobName,
     selectedProvince,
     selectedWorkType,
@@ -194,7 +219,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     setSelectedEducation("");
     setMinAge(20);
     setMaxAge(60);
-    setSortBy("newest");
+    setSortBy("relevance");
     setCurrentPage(1);
   };
 
@@ -206,7 +231,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     selectedEducation ||
     minAge !== 20 ||
     maxAge !== 60 ||
-    sortBy !== "newest";
+    sortBy !== "relevance";
 
   if (isLoading) {
     return (
@@ -245,20 +270,14 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
-            placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด..."
+            placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด (รองรับ AI Semantic Search)..."
             className={styles.searchInput}
           />
+          {isSearching && <span className={styles.searchingBadge}>กำลังค้นหาด้วย AI...</span>}
         </div>
 
         {/* Dynamic Filters */}
         <div className={styles.filters}>
-          {/*  ใช้งาน ProvinceSelect แบบค้นหาได้ พร้อมตัวเลือก "ทุกจังหวัด" */}
-          <ProvinceSelect
-            value={selectedProvince}
-            onChange={(val) => handleFilterChange(setSelectedProvince, val)}
-          />
-
-          {/* ตัวเลือกรูปแบบการทำงาน */}
           <select
             value={selectedWorkType}
             onChange={(e) =>
@@ -272,6 +291,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
               </option>
             ))}
           </select>
+
+          <ProvinceSelect
+            value={selectedProvince}
+            onChange={(val) => handleFilterChange(setSelectedProvince, val)}
+          />
 
           <select
             value={selectedEducation}
@@ -349,12 +373,12 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                   กำลังประมวลผลผู้สมัครที่แนะนำ...
                 </p>
               ) : suggestedSeekers.length > 0 ? (
-                suggestedSeekers.map((seeker) => (
-                  <div key={seeker.uid} className={styles.suggestMiniCard}>
+                suggestedSeekers.map((seeker, index) => (
+                  <div key={`suggested-${seeker.uid}-${index}`} className={styles.suggestMiniCard}>
                     <img
                       src={
                         seeker.profile_image ||
-                        "/assets/images/default-profile.png"
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(seeker.fullname || "User")}&background=random`
                       }
                       alt={seeker.fullname}
                       className={styles.cardImg}
@@ -363,13 +387,8 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                       <div>
                         <div className={styles.cardHeader}>
                           <p className={styles.bold}>{seeker.fullname}</p>
-                          {typeof seeker.similarityScore === "number" && (
-                            <span className={styles.matchBadge}>
-                              {Math.round(seeker.similarityScore * 100)}% Match
-                            </span>
-                          )}
                         </div>
-                        <p className={styles.subText}>
+                        <p className={styles.jobPositionText}>
                           {seeker.job_name || "ไม่ระบุตำแหน่งที่สนใจ"}
                         </p>
                         <p className={styles.subText}>
@@ -405,11 +424,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
 
             <div className={styles.suggestGrid}>
               {currentUsers.length > 0 ? (
-                currentUsers.map((u) => (
-                  <div key={u.uid} className={styles.suggestMiniCard}>
+                currentUsers.map((u, index) => (
+                  <div key={`user-${u.uid}-${index}`} className={styles.suggestMiniCard}>
                     <img
                       src={
-                        u.profile_image || "/assets/images/default-profile.png"
+                        u.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullname || "User")}&background=random`
                       }
                       alt={u.fullname}
                       className={styles.cardImg}

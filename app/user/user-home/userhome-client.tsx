@@ -9,6 +9,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [user] = useState(initialUser);
   const [posts, setPosts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Suggested Posts State
   const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
@@ -20,8 +21,8 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  // Sort State
-  const [sortBy, setSortBy] = useState("newest");
+  // Sort State (ค่าเริ่มต้นเรียงตามความเกี่ยวข้อง AI Match)
+  const [sortBy, setSortBy] = useState("relevance");
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,11 +30,25 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
 
   const router = useRouter();
 
+  // 1. ดึงข้อมูล Suggested Posts ครั้งแรก
   useEffect(() => {
-    fetchPosts();
     fetchSuggestedPosts();
   }, [user]);
 
+  // 2. Debounce Search Effect สำหรับ AI Hybrid Search API
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm.trim()) {
+        performHybridSearch(searchTerm.trim());
+      } else {
+        fetchPosts();
+      }
+    }, 400); // ชะลอ 400ms ก่อนยิง API
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // ฟังก์ชันดึงโพสต์งานปกติ (กรณีไม่มีคำค้นหา)
   const fetchPosts = async () => {
     try {
       setIsLoading(true);
@@ -47,6 +62,24 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
       setPosts([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // ฟังก์ชันยิง AI Hybrid Search API
+  const performHybridSearch = async (query: string) => {
+    try {
+      setIsSearching(true);
+      const res = await fetch(
+        `/api/posts/user-search-post?q=${encodeURIComponent(query)}`
+      );
+      const data = await res.json();
+      if (data.success) {
+        setPosts(data.posts || []);
+      }
+    } catch (err) {
+      console.error("Hybrid Search Error:", err);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -75,7 +108,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     const createdDate = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor(
-      (now.getTime() - createdDate.getTime()) / 1000,
+      (now.getTime() - createdDate.getTime()) / 1000
     );
 
     if (diffInSeconds < 60) return "เมื่อสักครู่";
@@ -101,18 +134,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     return Array.from(new Set(types));
   }, [posts]);
 
+  // ฟังก์ชันกรองและเรียงลำดับโพสต์งานบน Client-Side
   const filteredPosts = useMemo(() => {
     const filtered = posts.filter((post) => {
-      const term = searchTerm.toLowerCase().trim();
-      const matchesSearch =
-        !term ||
-        post.job_position?.toLowerCase().includes(term) ||
-        post.company_name?.toLowerCase().includes(term) ||
-        post.job_description?.toLowerCase().includes(term) ||
-        post.preferred_qualifications?.toLowerCase().includes(term) ||
-        post.province?.toLowerCase().includes(term) ||
-        post.work_location?.toLowerCase().includes(term);
-
       const matchesJobType =
         !selectedJobType || post.job_type === selectedJobType;
 
@@ -125,9 +149,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
         !selectedStatus ||
         post.status?.toLowerCase() === selectedStatus.toLowerCase();
 
-      return (
-        matchesSearch && matchesJobType && matchesProvince && matchesStatus
-      );
+      return matchesJobType && matchesProvince && matchesStatus;
     });
 
     return filtered.sort((a, b) => {
@@ -137,11 +159,17 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
       if (sortBy === "oldest") {
         return timeA - timeB;
       }
+      if (sortBy === "newest") {
+        return timeB - timeA;
+      }
+      // ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี (กรณีค้นหาด้วย Hybrid Search)
+      if (typeof b.matchScore === "number" && typeof a.matchScore === "number") {
+        return b.matchScore - a.matchScore;
+      }
       return timeB - timeA;
     });
   }, [
     posts,
-    searchTerm,
     selectedJobType,
     selectedProvince,
     selectedStatus,
@@ -164,7 +192,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     setSelectedJobType("");
     setSelectedProvince("");
     setSelectedStatus("");
-    setSortBy("newest");
+    setSortBy("relevance");
     setCurrentPage(1);
   };
 
@@ -242,9 +270,12 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
-            placeholder="ค้นหาตำแหน่งงาน, ชื่อบริษัท, ทักษะ หรือสถานที่..."
+            placeholder="ค้นหาตำแหน่งงาน, ชื่อบริษัท, ทักษะ หรือสถานที่ (รองรับ AI Semantic Search)..."
             className={styles.searchInput}
           />
+          {isSearching && (
+            <span className={styles.searchingBadge}>กำลังค้นหาด้วย AI...</span>
+          )}
         </div>
 
         {/* Dynamic Filters */}
@@ -284,6 +315,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             value={sortBy}
             onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
           >
+            {/* <option value="relevance">
+              เรียงตาม: ความเกี่ยวข้อง (AI Match)
+            </option> */}
             <option value="newest">เรียงตาม: โพสต์ล่าสุด</option>
             <option value="oldest">เรียงตาม: โพสต์เก่าสุด</option>
           </select>
@@ -292,7 +326,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
             selectedJobType ||
             selectedProvince ||
             selectedStatus ||
-            sortBy !== "newest") && (
+            sortBy !== "relevance") && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>
               Clear Filters
             </button>
@@ -315,7 +349,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                   <div key={post.post_id} className={styles.suggestMiniCard}>
                     <img
                       src={
-                        post.logo_image || "/assets/images/default-company.png"
+                        post.logo_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          post.company_name || "Company"
+                        )}&background=random`
                       }
                       alt={post.company_name}
                       className={styles.cardImg}
@@ -331,7 +368,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                             {post.status || "ไม่ระบุ"}
                           </span>
                         </div>
-                        <p className={styles.subText}>{post.job_position}</p>
+                        <p className={styles.jobPositionText}>
+                          {post.job_position}
+                        </p>
                         <p className={styles.subText}>
                           {post.province || "ไม่ระบุสถานที่"}
                         </p>
@@ -380,7 +419,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                   <div key={post.post_id} className={styles.suggestMiniCard}>
                     <img
                       src={
-                        post.logo_image || "/assets/images/default-company.png"
+                        post.logo_image ||`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          post.company_name || "Company"
+                        )}&background=random`
                       }
                       alt={post.company_name}
                       className={styles.cardImg}
@@ -389,6 +430,12 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                       <div>
                         <div className={styles.cardHeader}>
                           <p className={styles.bold}>{post.company_name}</p>
+                          {/* แสดง AI Match Score เปอร์เซ็นต์เมื่อมีการค้นหา */}
+                          {/* {typeof post.matchScore === "number" && 
+                            <span className={styles.matchBadge}>
+                              {Math.min(100, Math.round(post.matchScore * 100))}% Match
+                            </span>
+                          )} */}
                           <span
                             className={styles.statusBadge}
                             style={getStatusStyle(post.status)}
@@ -413,7 +460,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                         {getTimeAgo(post.created_at)}
                       </p>
                       <Link
-                        href={"/user/user-detail-job/" + post.post_id}
+                        href={`/user/user-detail-job/${post.post_id}`}
                         className={styles.btnWrapper}
                       >
                         <button className={styles.detailsBtn}>Details</button>

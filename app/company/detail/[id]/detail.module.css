@@ -9,7 +9,7 @@
 .card {
   background: white;
   width: 100%;
-  max-width: 1000px;
+  max-width: 1100px;
   border-radius: 30px;
   padding: 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -134,7 +134,7 @@
 /* ===== Test Editor ===== */
 /* Container ครอบพื้นที่ Test Editor ทั้งหมด */
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 40px auto;
   padding: 40px;
   background-color: #fff;

@@ -15,14 +15,14 @@ export async function POST(request: Request) {
     }
 
     // เขียนคำสั่ง SQL INNER JOIN ระหว่างตาราง favour_user และ User
-    const [rows]: any = await db.query(
+      const [rows]: any = await db.query(
       `SELECT 
         fu.favour_id,
         fu.company_id,
         u.uid,
         u.fullname AS name,
         u.profile_image AS image,
-        jobU.job_name AS jobtitle, 
+        GROUP_CONCAT(DISTINCT jobU.job_name SEPARATOR ', ') AS jobtitle, 
         u.gender,
         u.age,
         u.military_status AS militaryStatus,
@@ -31,10 +31,11 @@ export async function POST(request: Request) {
         u.religion,
         u.weight,
         u.height 
-     FROM favour_user fu
-     INNER JOIN User u ON fu.user_id = u.uid
-     INNER JOIN JobTitle jobU ON u.uid = jobU.user_id
-     WHERE fu.company_id = ?`,
+      FROM favour_user fu
+      INNER JOIN User u ON fu.user_id = u.uid
+      LEFT JOIN JobTitle jobU ON u.uid = jobU.user_id
+      WHERE fu.company_id = ?
+      GROUP BY fu.favour_id, u.uid`,
       [company_id],
     );
 

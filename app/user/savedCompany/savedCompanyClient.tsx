@@ -78,7 +78,10 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
               {/* Image Section */}
               <div className={styles.imageWrapper}>
                 <img
-                  src={company.logo || "/images/default-avatar.jpg"}
+                  src={
+                    company.logo ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name || "Company")}&background=random`
+                  }
                   alt={company.name}
                   width={240}
                   height={160}

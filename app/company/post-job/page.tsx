@@ -18,7 +18,7 @@ const PostJob = () => {
   const [isNext, setIsNext] = useState(false);
   const [postId, setPostId] = useState<number | null>(null);
 
-  // 🔑 เพิ่ม State สำหรับเก็บสถานะการยืนยันตัวตน (ค่าเริ่มต้นเป็นเท็จก่อนโหลดข้อมูลเสร็จ)
+  // เพิ่ม State สำหรับเก็บสถานะการยืนยันตัวตน (ค่าเริ่มต้นเป็นเท็จก่อนโหลดข้อมูลเสร็จ)
   const [isApproved, setIsApproved] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [viewer, setViewer] = useState<any>(null);
@@ -486,15 +486,17 @@ const PostJob = () => {
                   }}
                 />
               </div>
-              <div className={styles.inputGroupInline}>
+
+          
+              <div className={styles.inputGroupFull2}>
                 <label>Work Location</label>
-                <input
-                  type="text"
+                <textarea
                   name="workLocation"
                   style={inputStyle}
                   disabled={!isApproved}
                   value={formData.workLocation}
                   onChange={handleChange}
+                   rows={3}
                 />
               </div>
               <div className={styles.inputGroupInline}>

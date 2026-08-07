@@ -323,8 +323,9 @@ const CompanyProfile = () => {
       <div className={styles.leftSection}>
         <div className={styles.profileCard}>
           <div
-            style={{ position: "relative", cursor: "pointer" }}
+            style={{ position: "relative", cursor: "pointer", }}
             onClick={() => bannerInputRef.current?.click()}
+            
           >
             <input
               type="file"
@@ -334,10 +335,33 @@ const CompanyProfile = () => {
               style={{ display: "none" }}
             />
             <img
-              src={company.cover_image || "/assets/images/company_2.jpg"}
+              src={company.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`}
               className={styles.banner}
               alt="Banner"
-            />
+            /> 
+            <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  // borderRadius: "50%",
+                  backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "#fff",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold",
+                  opacity: 0,
+                  transition: "opacity 0.2s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
+              >
+                เปลี่ยนรูป
+              </div>
           </div>
 
           <div
@@ -355,12 +379,36 @@ const CompanyProfile = () => {
             <div style={{ position: "relative", width: 120, height: 120 }}>
               <img
                 src={
-                  company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                  company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                 }
                 className={styles.logo}
                 alt="Logo"
               />
+               <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  color: "#fff",
+                  fontSize: "0.85rem",
+                  fontWeight: "bold",
+                  opacity: 0,
+                  transition: "opacity 0.2s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
+              >
+                เปลี่ยนรูป
+              </div>
             </div>
+            
           </div>
 
           <div className={styles.infoArea}>
@@ -859,7 +907,7 @@ const CompanyProfile = () => {
               <div key={job.post_id} className={styles.jobCard}>
                 <img
                   src={
-                    company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                    company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                   }
                   width={80}
                   height={80}

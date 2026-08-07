@@ -166,7 +166,7 @@ export default function ProfileCompany() {
 
           <div className={styles.profileCard}>
             <img
-              src={company.cover_image || "/assets/images/company_2.jpg"}
+              src={company.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`}
               className={styles.banner}
               alt="Banner"
             />
@@ -174,7 +174,7 @@ export default function ProfileCompany() {
             <div className={styles.logoWrapper}>
               <img
                 src={
-                  company.logo_image || "/assets/images/suggestedCompanys.jpg"
+                  company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                 }
                 className={styles.logo}
                 alt="Logo"
@@ -308,7 +308,7 @@ export default function ProfileCompany() {
                   <img
                     src={
                       company.logo_image ||
-                      "/assets/images/suggestedCompanys.jpg"
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                     }
                     width={80}
                     height={80}

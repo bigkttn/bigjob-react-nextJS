@@ -5,10 +5,10 @@ const secret = process.env.JWT_SECRET || 'fallback_secret';
 
 // ฟังก์ชันสำหรับสร้าง Session และบันทึกลง Cookie
 export async function createSession(payload: any) {
-    // 1. สร้าง Token มีอายุ 1 วัน
+    //  สร้าง Token มีอายุ 1 วัน
     const token = jwt.sign(payload, secret, { expiresIn: '1d' });
 
-    // 2. บันทึก Token ลงใน Cookie
+    //  บันทึก Token ลงใน Cookie
     const cookieStore = await cookies();
     cookieStore.set('session', token, {
         httpOnly: true,

@@ -161,7 +161,7 @@ export default async function SeekerProfilePage({
             <div className={styles.personalInfoContent}>
               <div className={styles.avatarWrapper}>
                 <img
-                  src={profile.profile_image ?? "/assets/images/seeker.jpg"}
+                  src={profile.profile_image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`}
                   alt="avatar"
                   className={styles.avatar}
                 />

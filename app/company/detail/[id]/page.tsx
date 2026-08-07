@@ -464,7 +464,7 @@ const DetailJob = () => {
             {/* ข้อมูลบริษัทพื้นฐาน */}
             <div className={styles.header}>
               <img
-                src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
+                src={job.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`}
                 alt="Company Logo"
                 className={styles.logo}
               />
@@ -529,7 +529,7 @@ const DetailJob = () => {
                       <td className={styles.label}>Work Location </td>
                       <td>
                         <div className={styles.editInputWrapper}>
-                          <input
+                          <textarea
                             className={styles.inputField}
                             value={editData.work_location ?? ""}
                             onChange={(e) =>
@@ -538,6 +538,7 @@ const DetailJob = () => {
                                 work_location: e.target.value,
                               })
                             }
+                            rows={3}
                           />
                         </div>
                       </td>
@@ -664,7 +665,7 @@ const DetailJob = () => {
                 </table>
 
                 <div style={{ marginTop: "30px" }}>
-                  <hr />
+                  {/* <hr /> */}
                   <h3 className={styles.sectionTitle}>Qualifications</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
@@ -696,7 +697,7 @@ const DetailJob = () => {
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
-                  <hr />
+                  {/* <hr /> */}
                   <h3 className={styles.sectionTitle}>How to Apply</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
@@ -713,7 +714,7 @@ const DetailJob = () => {
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
-                  <hr />
+                  {/* <hr /> */}
                   <h3 className={styles.sectionTitle}>Contact</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
@@ -727,7 +728,7 @@ const DetailJob = () => {
                 </section>
 
                 <section style={{ marginTop: "30px" }}>
-                  <hr />
+                  {/* <hr /> */}
                   <h3 className={styles.sectionTitle}>Application Deadline</h3>
                   <div className={styles.editInputWrapper}>
                     <input

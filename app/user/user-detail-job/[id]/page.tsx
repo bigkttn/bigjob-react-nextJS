@@ -201,7 +201,7 @@ seekerName = seekerName || "invalid seeker name";
                 }}
               >
                 <img
-                  src={job.logo_image || "/assets/images/suggestedCompanys.jpg"}
+                  src={job.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`}
                   alt="Company Logo"
                   className={styles.logo}
                 />
@@ -258,7 +258,11 @@ seekerName = seekerName || "invalid seeker name";
                   </tr>
                   <tr>
                     <td className={styles.label}>Work Location</td>
-                    <td>{job.work_location || "Work Location"}</td>
+                    <td    style={{
+                      maxWidth: "450px",
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
+                    }}>{job.work_location || "Work Location"}</td>
                   </tr>
                   <tr>
                     <td className={styles.label}>Salary</td>

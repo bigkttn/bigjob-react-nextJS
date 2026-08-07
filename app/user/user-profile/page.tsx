@@ -410,7 +410,7 @@ const SeekerProfile = () => {
                 src={
                   editMode
                     ? (editForm.profile_image ?? "/assets/images/seeker.jpg")
-                    : (profile.profile_image ?? "/assets/images/seeker.jpg")
+                    : (`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`)
                 }
                 className={styles.avatar}
                 alt="avatar"

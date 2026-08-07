@@ -5,7 +5,10 @@ let extractorPipeline: any = null;
 export async function getEmbedding(text: string): Promise<number[]> {
     if (!extractorPipeline) {
         // โหลดโมเดลสำหรับเปลี่ยนข้อความเป็น Vector (รองรับภาษาอังกฤษและไทยได้ดี) 
-        extractorPipeline = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+        extractorPipeline = await pipeline(
+            "feature-extraction",
+            "Xenova/paraphrase-multilingual-MiniLM-L12-v2"
+            );
     }
 
     // แปลงข้อความให้เป็น Vector Array
