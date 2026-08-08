@@ -6,6 +6,7 @@ import BackButton from "./BackButton";
 import ProfileActionsButton from "./ProfileActionsButton";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
+import ApplySeeker from "./apply-seeker";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -396,7 +397,19 @@ export default async function SeekerProfilePage({
             </div>
             <div className={styles.contactCard}>
               <h3>Contact</h3>
-              <button className={styles.sentBtn}>Send</button>
+              <ApplySeeker
+                mode="apply"
+                isOpen
+                onClose={() => {}}
+                postId={0}
+                userId={Number(id)}
+                companyId={Number(viewer.id)}
+                companyName={viewer.email || "Company"}
+                seekerName={profile.fullname || "Seeker"}
+                jobTitle={profile.job_titles?.[0]?.job_name || "Open Position"}
+                seekerEmail={profile.email || ""}
+                companyEmail={viewer.email || ""}
+              />
             </div>
           </div>
         </div>

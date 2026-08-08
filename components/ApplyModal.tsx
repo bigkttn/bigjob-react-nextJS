@@ -3,19 +3,34 @@
 import { useEffect, useState } from 'react';
 import styles from './ApplyModel.module.css'
 
-interface ApplyModalProps {
+// interface ApplyModalProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   postId:number;
+//   userId:number;
+//   seekerEmail:string;
+//   seekerName:string;
+//   companyName: string;
+//   companyEmail: string;
+//   jobTitle: string;
+// }
+
+interface ContactModalProps {
+  mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
   isOpen: boolean;
   onClose: () => void;
-  postId:number;
-  userId:number;
-  seekerEmail:string;
-  seekerName:string;
+  postId?: number;           // ใส่หรือไม่ใส่ก็ได้
+  userId: number;            // ID ผู้สมัคร
+  companyId?: number;        // ID บริษัท (ถ้ามี)
+  seekerEmail: string;
+  seekerName: string;
   companyName: string;
   companyEmail: string;
-  jobTitle: string;
+  jobTitle?: string;         // ใส่หรือไม่ใส่ก็ได้
 }
 
 export default function ApplyModal({
+  mode,
   isOpen,
   onClose,
   postId,
@@ -26,13 +41,16 @@ export default function ApplyModal({
   seekerEmail,
   companyEmail
   
-}: ApplyModalProps) {
+}: ContactModalProps) {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
  const indent = "\u00A0".repeat(109);
+ 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen) return;
+    if(mode === 'apply') {
+      
       setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName || 'invaild company name'}
 
 ข้าพเจ้า ${seekerName || 'invaild seeker name'} มีความประสงค์ขอสมัครงานในตำแหน่ง ${jobTitle || 'invaild job Title'}
@@ -43,7 +61,18 @@ export default function ApplyModal({
 
 ${indent}ขอแสดงความนับถือ
 ${indent}${seekerName || 'invalid seeker name'}`);
-    }},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
+    } else  if (mode === 'invite'){
+      setMessage(`เรียนคุณ ${seekerName || 'invaild seeker name'}
+     ทางบริษัท ${companyName || 'เรา companyName'} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
+
+จึงขออนุญาตติดต่อเพื่อสอบถามความสนใจ และเรียนเชิญพูดคุยรายละเอียดเกี่ยวกับโอกาสในการมารร่วมงานกับเราค่ะ
+
+หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ
+
+ขอแสดงความนับถือ
+ฝ่ายทรัพยากรบุคคล ${companyName || 'invaild companyName'}`);
+      }
+},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
 
   if (!isOpen) return null;
 
@@ -52,13 +81,18 @@ ${indent}${seekerName || 'invalid seeker name'}`);
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
+    const endpoint = 
+    mode === 'apply'
+        ? '/api/interview_tracking/apply-company'
+        : '/api/interview_tracking/invite-seeker';
+
     try {
-      const res = await fetch('/api/interview_tracking/apply-company', {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-        postId:postId,
-        userId:userId,
+        postId,
+        userId,
         companyName,
         seekerName,
         jobTitle,
@@ -71,11 +105,12 @@ ${indent}${seekerName || 'invalid seeker name'}`);
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'เกิดข้อผิดพลาด');
+        throw new Error(data.message || 'เกิดข้อผิดพลาดในการส่ง');
       }
 
-      setStatusMsg({ type: 'success', text: 'ส่งใบสมัครสำเร็จแล้ว!' });
-      
+      setStatusMsg({ type: 'success', 
+        text: mode === 'apply' ? 'ส่งใบสมัครสำเร็จแล้ว!': 'ส่งข้อความเชิญชวนสำเร็จแล้ว!', });
+    
       // ปิด modal หลังส่งสำเร็จ 1.5 วินาที
       setTimeout(() => {
         onClose();
@@ -88,6 +123,8 @@ ${indent}${seekerName || 'invalid seeker name'}`);
       setLoading(false);
     }
   };
+
+  const titleText = mode === 'apply'? `สมัครงานตำแหน่ง ${jobTitle || ''}` : `ส่งข้อความติดต่อคุณ ${seekerName}`;
 
  return (
     <div className={styles.modalOverlay}>
@@ -109,7 +146,7 @@ ${indent}${seekerName || 'invalid seeker name'}`);
           <div className={styles.formItem}>
             {/* <label>ข้อความถึง HR</label> */}
             <textarea
-              rows={4}
+              rows={6}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
@@ -129,7 +166,7 @@ ${indent}${seekerName || 'invalid seeker name'}`);
               disabled={loading}
               className={styles.btnSubmit}
             >
-              {loading ? 'กำลังส่ง...' : 'ส่งใบสมัคร'}
+              {loading ? 'กำลังส่ง...' : mode === 'apply' ? 'ส่งใบสมัคร':'ส่งข้อความ'}
             </button>
           </div>
         </form>

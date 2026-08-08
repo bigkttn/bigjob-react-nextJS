@@ -372,9 +372,9 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                 <Link
-                  href="/company/company_tracking"
-                  className={`nav-item ${isActive("/company/company_tracking")}`}
+                  <Link
+                  href={`/company/company_tracking/${userId}`}
+                  className={`nav-item ${isActive(`/company/company_tracking/${userId}`)}`}
                 >
                   Tracking
                 </Link>
