@@ -406,17 +406,17 @@ const SeekerProfile = () => {
               />
 
               {/* แสดงรูปโปรไฟล์ปัจจุบัน */}
-              <img
+             <img
                 src={
-                  editMode
-                    ? (editForm.profile_image ?? "/assets/images/seeker.jpg")
-                    : (`https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`)
+                  // เช็คก่อนว่ามีรูปในระบบไหม (ดึงจาก editForm ถ้าแก้กดอยู่ หรือ profile ในโหมดปกติ)
+                  (editMode ? editForm?.profile_image : profile?.profile_image) ||
+                  //  ถ้าไม่มีรูปจริง ให้ใช้ UI Avatars เป็นค่าเริ่มต้น
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent((editMode ? editForm?.fullname : profile?.fullname) || "User")}&background=random`
                 }
                 className={styles.avatar}
                 alt="avatar"
                 style={{ width: "100%", height: "100%", display: "block" }}
               />
-
               {/* ตัวครอบเอฟเฟกต์ Overlay ปรากฏขึ้นเมื่อนำเมาส์มา Hover รูปภาพ */}
               <div
                 style={{

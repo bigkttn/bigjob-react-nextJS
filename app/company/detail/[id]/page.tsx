@@ -26,6 +26,11 @@ const DetailJob = () => {
   let remainingText = "";
   let isBanned = false;
 
+  const blockInvalidKeys = (e: { key: string; preventDefault: () => void; }) => {
+    if (["e", "E", "+", "-", ".","="].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
   // เช็คว่าโหลดข้อมูล job มาเสร็จแล้ว และมี ban_until ค่อยเริ่มคำนวณ
   if (job && job.ban_until) {
     const banDate = new Date(job.ban_until.replace(" ", "T"));
@@ -557,6 +562,7 @@ const DetailJob = () => {
                                 salary_min: e.target.value,
                               })
                             }
+                            onKeyDown={blockInvalidKeys}
                           />{" "}
                           -{" "}
                           <input
@@ -569,6 +575,7 @@ const DetailJob = () => {
                                 salary_max: e.target.value,
                               })
                             }
+                            onKeyDown={blockInvalidKeys}
                           />
                         </div>
                       </td>
@@ -587,6 +594,7 @@ const DetailJob = () => {
                                 age_min: e.target.value,
                               })
                             }
+                            onKeyDown={blockInvalidKeys}
                           />{" "}
                           -{" "}
                           <input
@@ -599,6 +607,7 @@ const DetailJob = () => {
                                 age_max: e.target.value,
                               })
                             }
+                            onKeyDown={blockInvalidKeys}
                           />
                         </div>
                       </td>
@@ -640,6 +649,7 @@ const DetailJob = () => {
                                 vacancy: e.target.value,
                               })
                             }
+                            onKeyDown={blockInvalidKeys}
                           />
                         </div>
                       </td>

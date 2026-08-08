@@ -46,6 +46,12 @@ const PostJob = () => {
     { id: "1", text: "", options: ["", ""], correctIndex: null },
   ]);
 
+  const blockInvalidKeys = (e: { key: string; preventDefault: () => void; }) => {
+    if (["e", "E", "+", "-", ".","="].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   // ── ดึงข้อมูลสถานะและโพสต์เก่า ─────────────────────────────────
   const fetchData = async () => {
     try {
@@ -62,8 +68,7 @@ const PostJob = () => {
         }
       }
 
-      // 2. ดึงข้อมูลสถานะของบริษัท
-      // ⚠️ ระบุ ID ให้ตรงกับ Route ที่คุณมี (เช่น ดึงจาก Session/Context หรือ LocalStorage)
+      // ระบุ ID ให้ตรงกับ Route ที่คุณมี (เช่น ดึงจาก Session/Context หรือ LocalStorage)
       // สมมติว่าบริษัทที่ล็อกอินอยู่คือ ID: 1
       // const companyId = 1;
 
@@ -80,7 +85,7 @@ const PostJob = () => {
       );
       console.log(userData.id);
 
-      // 🛡️ เช็คก่อนแปลงเป็น JSON ว่าไม่ได้ส่ง HTML Error กลับมา
+      //  เช็คก่อนแปลงเป็น JSON ว่าไม่ได้ส่ง HTML Error กลับมา
       if (companyResponse.ok) {
         const companyData = await companyResponse.json();
 
@@ -129,6 +134,20 @@ const PostJob = () => {
 
   const handleSubmit = async () => {
     if (!isApproved) return;
+    if (!formData.jobPosition 
+      || !formData.province 
+      || !formData.workLocation 
+      || !formData.jobType 
+      || !formData.deadline
+      || !formData.jobDescription
+      || !formData.qualifications
+      || !formData.benefits
+      || !formData.howToApply
+      || !formData.contact
+      ) {
+      alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -277,6 +296,8 @@ const PostJob = () => {
       </div>
     );
   }
+
+  
 
   return (
     <div>
@@ -495,6 +516,7 @@ const PostJob = () => {
                   style={inputStyle}
                   disabled={!isApproved}
                   value={formData.workLocation}
+                  onKeyDown={blockInvalidKeys}
                   onChange={handleChange}
                    rows={3}
                 />
@@ -507,6 +529,7 @@ const PostJob = () => {
                   disabled={!isApproved}
                   value={formData.salary_min}
                   onChange={handleChange}
+                  onKeyDown={blockInvalidKeys} 
                   style={{ ...inputStyle, width: "100%" }}
                 />
                 -
@@ -526,6 +549,7 @@ const PostJob = () => {
                   name="age_min"
                   disabled={!isApproved}
                   value={formData.age_min}
+                  onKeyDown={blockInvalidKeys}
                   onChange={handleChange}
                   style={{ ...inputStyle, width: "100%" }}
                 />
@@ -535,6 +559,7 @@ const PostJob = () => {
                   name="age_max"
                   disabled={!isApproved}
                   value={formData.age_max}
+                  onKeyDown={blockInvalidKeys}
                   onChange={handleChange}
                   style={{ ...inputStyle, width: "100%" }}
                 />
@@ -548,6 +573,7 @@ const PostJob = () => {
                   disabled={!isApproved}
                   value={formData.vacancy}
                   onChange={handleChange}
+                  onKeyDown={blockInvalidKeys}
                 />
               </div>
               <div className={styles.inputGroupInline}>
