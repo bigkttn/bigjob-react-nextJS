@@ -1,12 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './applyCompany.module.css'
+import styles from './applySeeker.module.css'
 import ApplyModal from '@/components/ApplyModal';
 
-interface ApplyCompanyProps {
+interface ContactModalProps {
+  mode:'apply'| 'invite';
+  isOpen:boolean;
+  onClose:() => void;
   postId: number,
   userId: number,
+  companyId:number;
   companyName: string,
   seekerName: string,
   jobTitle: string,
@@ -14,27 +18,31 @@ interface ApplyCompanyProps {
   companyEmail: string
 }
 
-export default function ApplyCompany({
+export default function ApplySeeker({
+  mode,
+  isOpen,
+  onClose,
   postId,
   userId,
+  companyId,
   companyName,
    seekerName,
    jobTitle,
    seekerEmail,
    companyEmail
-  }:ApplyCompanyProps) {
+  }:ContactModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReported, setIsReported] = useState(false);
 // LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
-  // console.log('--- ApplyCompany Props ---', {
-  //   jobTitle,
-  //   companyName,
-  //   companyEmail,
-  //   seekerName,
-  //   seekerEmail,
-  //   postId,
-  //   userId
-  // });
+  console.log('--- ApplyCompany Props ---', {
+    jobTitle,
+    companyName,
+    companyEmail,
+    seekerName,
+    seekerEmail,
+    postId,
+    userId
+  });
 const checkApplied = async () => {
     try {
       const response = await fetch("/api/seeker/check_report_company", {
@@ -68,7 +76,7 @@ const checkApplied = async () => {
           onClick={() => setIsModalOpen(true)}
           className={styles.applyBtn}
         >
-          Apply Now
+          Send
         </button>
       </div>
 
@@ -76,10 +84,9 @@ const checkApplied = async () => {
       
       {/* เรียกใช้งาน Modal Component */}
       <ApplyModal
-        mode="apply"
+      mode="invite"
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        postId={Number(postId)}
         userId={userId}
         companyName={companyName}
         seekerName={seekerName}

@@ -49,7 +49,16 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
+    const {rows}:any  = await db.query(
+      `SELECT * FROM interview_tracking WHERE post_id = ?  AND user_id = ?`,
+      [postId,userId]);
+     
+    if(rows && rows.length>0){
+      return NextResponse.json(
+        {message:"คุณได้ทำการสมัครงานในตำแหน่งนี้ไปแล้ว"},
+        {status:400}
+      );
+    }
 
     const spl = `INSERT interview_tracking
                 (post_id,user_id,status,interview_message)

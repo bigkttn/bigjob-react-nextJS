@@ -923,7 +923,7 @@ const CompanyProfile = () => {
                     {fmt(job.salary_max)} / month
                   </p>
                   <Link href={`/company/detail/${job.post_id}`}>
-                    <button className={styles.detailBtn}>Detail</button>
+                    <button className={styles.detailBtn}>Edit</button>
                   </Link>
                 </div>
               </div>
