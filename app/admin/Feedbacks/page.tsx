@@ -15,9 +15,7 @@ export default function AdminFeedbackPage() {
   const [feedbacks, setFeedbacks] = useState<IFeedback[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // 📌 State สำหรับเก็บคำตอบของแต่ละการ์ดแยกกัน (เช่น {"user-1": "ข้อความตอบกลับ"})
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
-  // 📌 State สำหรับเก็บสถานะกำลังส่งของแต่ละการ์ดแยกกัน (เช่น {"user-1": true})
   const [submittingStates, setSubmittingStates] = useState<
     Record<string, boolean>
   >({});
@@ -27,12 +25,10 @@ export default function AdminFeedbackPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<string>("desc");
 
-  // ดึงข้อมูลเมื่อโหลดหน้าเว็บ
   useEffect(() => {
     fetchFeedbacks();
   }, []);
 
-  // ซิงค์ข้อความตอบกลับดั้งเดิมเข้าสู่ State เมื่อได้ข้อมูลมาใหม่
   useEffect(() => {
     const initialReplies: Record<string, string> = {};
     feedbacks.forEach((item) => {
@@ -42,7 +38,6 @@ export default function AdminFeedbackPage() {
     setReplyTexts(initialReplies);
   }, [feedbacks]);
 
-  // ดึงข้อมูล Feedbacks จาก API
   const fetchFeedbacks = async () => {
     try {
       setIsLoading(true);
@@ -58,7 +53,18 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  // ดำเนินการส่งคำตอบกลับ
+  // แปลงฟอร์แมตวันที่ (DD/MM/YYYY HH:mm)
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
   const handleReplySubmit = async (item: IFeedback) => {
     const key = `${item.source_type}-${item.feedback_id}`;
     const text = replyTexts[key]?.trim() || "";
@@ -69,7 +75,6 @@ export default function AdminFeedbackPage() {
     }
 
     try {
-      // เปิด Loading เฉพาะการ์ดใบนี้
       setSubmittingStates((prev) => ({ ...prev, [key]: true }));
 
       const res = await fetch("/api/admin/feedbacks", {
@@ -92,30 +97,28 @@ export default function AdminFeedbackPage() {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
-      // ปิด Loading เฉพาะการ์ดใบนี้
       setSubmittingStates((prev) => ({ ...prev, [key]: false }));
     }
   };
 
-  // ดำเนินการลบ Feedback
   const handleDeleteFeedback = async (
     feedback_id: number,
-    source_type: string,
+    source_type: string
   ): Promise<void> => {
     if (!confirm("คุณต้องการลบ Feedback นี้ใช่หรือไม่?")) return;
 
     try {
       const res = await fetch(
         `/api/admin/feedbacks?id=${feedback_id}&type=${source_type}`,
-        { method: "DELETE" },
+        { method: "DELETE" }
       );
 
       if (res.ok) {
         setFeedbacks((prev) =>
           prev.filter(
             (f) =>
-              !(f.feedback_id === feedback_id && f.source_type === source_type),
-          ),
+              !(f.feedback_id === feedback_id && f.source_type === source_type)
+          )
         );
       } else {
         alert("ลบไม่สำเร็จ");
@@ -125,7 +128,6 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  // กรองข้อมูลและเรียงลำดับ
   const processedFeedbacks = useMemo(() => {
     return feedbacks
       .filter((item) => {
@@ -148,16 +150,16 @@ export default function AdminFeedbackPage() {
 
   return (
     <div className={styles.container}>
-      {/* ส่วนหัวเว็บบอร์ด */}
+      {/* ส่วนหัว Dashboard */}
       <div className={styles.header}>
         <h2>Admin Feedback Dashboard</h2>
-        <p>จัดการและตอบกลับข้อเสนอแนะจากผู้ใช้งาน</p>
+        <p>จัดการและตอบกลับข้อเสนอแนะจากผู้ใช้งานอย่างเป็นระบบ</p>
       </div>
 
-      {/* ส่วนตัวกรอง (Filters) */}
+      {/* ส่วนตัวกรอง (Control Bar) */}
       <div className={styles.filterContainer}>
         <div className={styles.filterGroup}>
-          <label>ประเภทบัญชี:</label>
+          <label>ประเภทบัญชี</label>
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
@@ -170,7 +172,7 @@ export default function AdminFeedbackPage() {
         </div>
 
         <div className={styles.filterGroup}>
-          <label>สถานะรายการ:</label>
+          <label>สถานะรายการ</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -184,7 +186,7 @@ export default function AdminFeedbackPage() {
         </div>
 
         <div className={styles.filterGroup}>
-          <label>เรียงตามวันที่:</label>
+          <label>เรียงลำดับ</label>
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
@@ -196,14 +198,14 @@ export default function AdminFeedbackPage() {
         </div>
       </div>
 
-      {/* ส่วนแสดงรายการ Feedbacks */}
+      {/* รายการ Feedbacks */}
       <div className={styles.listContainer}>
         {isLoading ? (
-          <p className={styles.loading}>Loading feedbacks...</p>
+          <div className={styles.loading}>กำลังโหลดข้อมูล Feedbacks...</div>
         ) : processedFeedbacks.length === 0 ? (
-          <p className={styles.empty}>
-            ไม่มีข้อมูล Feedback ที่ตรงกับเงื่อนไขการค้นหา
-          </p>
+          <div className={styles.empty}>
+            ไม่พบข้อมูล Feedback ที่ตรงกับเงื่อนไขที่เลือก
+          </div>
         ) : (
           processedFeedbacks.map((item, index) => {
             const cardKey = `${item.source_type}-${item.feedback_id}`;
@@ -220,52 +222,70 @@ export default function AdminFeedbackPage() {
 
             return (
               <div key={`${cardKey}-${index}`} className={styles.card}>
-                {/* 1. ส่วนข้อมูลผู้ใช้ (User Info) */}
+                {/* 1. ส่วนข้อมูลผู้ใช้และเวลา */}
                 <div className={styles.userInfo}>
                   <span
-                    className={`${styles.badge} ${isCompany ? styles.badgeCompany : styles.badgeUser}`}
+                    className={`${styles.badge} ${
+                      isCompany ? styles.badgeCompany : styles.badgeUser
+                    }`}
                   >
-                    {isCompany ? "Company" : "User"}
+                    {isCompany ? "company" : "user"}
                   </span>
+
                   <span className={styles.date}>
-                    {new Date(item.created_at).toLocaleString("th-TH")}
+                    {formatDate(item.created_at)}
                   </span>
-                  <div style={{ marginTop: "6px" }}>
-                    <span
-                      className={`${styles.statusBadge} ${statusInfo.class}`}
-                    >
-                      {statusInfo.label}
+
+                  <span
+                    className={`${styles.statusBadge} ${statusInfo.class}`}
+                  >
+                    <span className={styles.statusDot}></span>
+                    {statusInfo.label}
+                  </span>
+
+                  {item.email && (
+                    <span className={styles.emailText} title={item.email}>
+                      {item.email}
                     </span>
-                  </div>
-                  <span className={styles.emailText}>
-                    {item.email || "ไม่มีอีเมล"}
-                  </span>
+                  )}
                 </div>
 
-                {/* 2. ส่วนข้อความ Feedback */}
+                {/* 2. ส่วนเนื้อหา Feedback & แบบฟอร์มตอบกลับ */}
                 <div className={styles.messageContent}>
+                  {/* Speech Bubble ข้อความฝั่งผู้ใช้ */}
                   <div className={styles.userMessage}>
-                    <p>{item.message}</p>
+                    <p className={styles.messageText}>{item.message}</p>
                   </div>
 
-                  {/* ประวัติ Admin Message เดิม */}
+                  {/* ประวัติการตอบกลับเดิมของแอดมิน */}
                   {hasAdminMessage && (
                     <div className={styles.repliedBox}>
-                      <strong>Admin Reply (ประวัติคำตอบเดิม):</strong>
+                      <div className={styles.repliedHeader}>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Admin Reply (ประวัติคำตอบเดิม):</span>
+                      </div>
                       <p>{item.admin_message}</p>
                       {item.replied_at && (
-                        <small>
-                          ตอบเมื่อ:{" "}
-                          {new Date(item.replied_at).toLocaleString("th-TH")}
-                        </small>
+                        <small>ตอบเมื่อ: {formatDate(item.replied_at)}</small>
                       )}
                     </div>
                   )}
 
-                  {/* ฟอร์มพิมพ์คำตอบใหม่/แก้ไขคำตอบ */}
+                  {/* ฟอร์มพิมพ์ข้อความตอบกลับ */}
                   <div className={styles.replySection}>
                     <textarea
-                      placeholder="พิมพ์ข้อความตอบกลับ..."
+                      placeholder="พิมพ์ข้อความตอบกลับผู้ใช้..."
                       value={replyText}
                       onChange={(e) =>
                         setReplyTexts((prev) => ({
@@ -286,12 +306,15 @@ export default function AdminFeedbackPage() {
                   </div>
                 </div>
 
-                {/* 3. ปุ่มลบรายการ */}
+                {/* 3. ปุ่ม Remove สไตล์แคปซูลสีแดง */}
                 <div className={styles.actions}>
                   <button
                     className={styles.removeBtn}
                     onClick={() =>
-                      handleDeleteFeedback(item.feedback_id, item.source_type)
+                      handleDeleteFeedback(
+                        item.feedback_id,
+                        item.source_type
+                      )
                     }
                   >
                     remove

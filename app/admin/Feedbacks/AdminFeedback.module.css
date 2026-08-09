@@ -1,243 +1,55 @@
+/* 
+   GLOBAL RESET & CONTAINER
+*/
+.container,
+.container * {
+  box-sizing: border-box;
+}
+
 .container {
-  max-width: 1100px;
+  width: 100%;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 40px 20px;
-  font-family: sans-serif;
+  padding: 32px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #0f172a;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+/* Header Section */
+.header {
+  width: 100%;
+  margin-bottom: 24px;
 }
 
 .header h2 {
-  font-size: 24px;
-  color: #333;
-  margin-bottom: 5px;
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
 }
 
 .header p {
-  color: #666;
-  margin-bottom: 30px;
-}
-
-.listContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* การ์ดหลัก */
-.card {
-  display: flex;
-  flex-direction: row;
-  background: #e9ecef;
-  border-radius: 20px;
-  padding: 25px;
-  gap: 25px;
-  align-items: flex-start;
-}
-
-/* ด้านซ้าย (ป้ายกำกับ + เวลา) */
-.userInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 180px;
-  flex-shrink: 0;
-}
-
-.badge {
-  display: inline-block;
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-weight: bold;
-  text-align: center;
-  font-size: 14px;
-  text-transform: capitalize;
-}
-
-.badgeUser {
-  background-color: #a3c2fa;
-  color: #1d4ed8;
-}
-
-.badgeCompany {
-  background-color: #fca5a5;
-  color: #b91c1c;
-}
-
-.date {
-  font-size: 15px;
-  font-weight: 600;
-  color: #111;
-}
-
-.emailText {
-  font-size: 12px;
-  color: #666;
-  word-break: break-all;
-}
-
-/* ส่วนกลางเนื้อหา */
-.messageContent {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.userMessage p {
-  margin: 0;
-  color: #222;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-/* ช่องตอบกลับ */
-.replySection {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #ffffff;
-  padding: 15px;
-  border-radius: 12px;
-}
-
-.replyTextarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  resize: vertical;
-  font-family: inherit;
+  color: #64748b;
   font-size: 14px;
 }
 
-.replyTextarea:focus {
-  outline: none;
-  border-color: #666;
-}
-
-.replyBtn {
-  align-self: flex-end;
-  background-color: #333;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.2s;
-}
-
-.replyBtn:hover {
-  background-color: #111;
-}
-
-/* กล่องเมื่อตอบแล้ว */
-.repliedBox {
-  background-color: #d1fae5;
-  color: #065f46;
-  padding: 15px;
-  border-radius: 12px;
-  border-left: 5px solid #10b981;
-}
-
-.repliedBox strong {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.repliedBox p {
-  margin: 0 0 10px 0;
-}
-
-.repliedBox small {
-  opacity: 0.8;
-}
-
-/* ปุ่มลบด้านขวา */
-.actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding-top: 10px;
-}
-
-.removeBtn {
-  background-color: #b91c1c;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.removeBtn:hover {
-  background-color: #991b1b;
-}
-
-.loading,
-.empty {
-  text-align: center;
-  color: #666;
-  font-size: 16px;
-  margin-top: 40px;
-}
-.repliedBox {
-  background-color: #f4f6f8;
-  border-left: 4px solid #28a745; /* เส้นขอบข้างสีเขียวเด่นชัด */
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-top: 12px;
-  margin-bottom: 12px;
-  text-align: left;
-}
-.repliedBox strong {
-  color: #1c7430; /* ตัวอักษร Admin Reply สีเขียวเข้ม */
-  font-size: 0.95rem;
-}
-.repliedBox p {
-  margin: 6px 0;
-  color: #333333;
-  font-weight: 500;
-}
-.repliedBox small {
-  color: #888888;
-  font-size: 0.8rem;
-}
-
-/* สไตล์พื้นฐานของสถานะ */
-.statusBadge {
-  display: inline-block;
-  padding: 3px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 12px;
-}
-.statusPending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-.statusRead {
-  background-color: #e2e3e5;
-  color: #383d41;
-}
-.statusReplied {
-  background-color: #d4edda;
-  color: #155724;
-}
-/*  Filter & Sorting Controls                             */
+/* 
+   FILTERS BAR
+    */
 .filterContainer {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  background-color: #ffffff;
-  padding: 15px 25px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  gap: 16px;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
   align-items: center;
 }
 
@@ -245,29 +57,366 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1 1 200px;
 }
 
 .filterGroup label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #444;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .filterSelect {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   font-size: 14px;
-  color: #333;
-  background-color: #fafafa;
+  font-weight: 500;
+  color: #1e293b;
+  background-color: #f8fafc;
   cursor: pointer;
   outline: none;
-  min-width: 150px;
   transition: all 0.2s ease;
 }
 
+.filterSelect:hover {
+  background-color: #ffffff;
+  border-color: #94a3b8;
+}
+
 .filterSelect:focus {
-  border-color: #666;
-  background-color: #fff;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* 
+   FEEDBACK CARDS LIST
+    */
+.listContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  gap: 24px;
+  align-items: flex-start;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+/* LEFT COLUMN */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.badgeUser {
+  background-color: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.badgeCompany {
+  background-color: #ffe4e6;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+
+.date {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.emailText {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  word-break: break-all;
+  background-color: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+  width: 100%;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.statusPending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+.statusPending .statusDot { background-color: #d97706; }
+
+.statusRead {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+.statusRead .statusDot { background-color: #64748b; }
+
+.statusReplied {
+  background-color: #dcfce7;
+  color: #166534;
+}
+.statusReplied .statusDot { background-color: #16a34a; }
+
+/* CENTER COLUMN */
+.messageContent {
+  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.userMessage {
+  width: 100%;
+  background-color: #f1f5f9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.messageText {
+  margin: 0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.repliedBox {
+  width: 100%;
+  background-color: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border-top: 1px solid #dcfce7;
+  border-right: 1px solid #dcfce7;
+  border-bottom: 1px solid #dcfce7;
+}
+
+.repliedHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.repliedBox p {
+  margin: 0 0 6px 0;
+  color: #166534;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.repliedBox small {
+  font-size: 11px;
+  font-weight: 500;
+  color: #15803d;
+  opacity: 0.8;
+}
+
+.replySection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+}
+
+.replyTextarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+}
+
+.replyBtn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* RIGHT COLUMN */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.removeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: lowercase;
+}
+
+.loading,
+.empty {
+  width: 100%;
+  text-align: center;
+  color: #64748b;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 60px 0;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* 
+    MEDIA QUERIES (Mobile & Tablet)
+    */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .header h2 {
+    font-size: 20px;
+  }
+
+  /* ปรับแต่ง Filter Bar บนมือถือให้กระชับและไม่ยืดสูง */
+  .filterContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .filterGroup {
+    flex: none; /* แก้ไข: ยกเลิกการใช้ flex-basis: 200px ที่ดันความสูง */
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .card {
+    flex-direction: column;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .userInfo {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  .emailText {
+    width: 100%;
+  }
+
+  .replyBtn {
+    width: 100%;
+  }
+
+  .actions {
+    width: 100%;
+    padding-top: 6px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .removeBtn {
+    width: 100%;
+    padding: 10px 16px;
+  }
 }

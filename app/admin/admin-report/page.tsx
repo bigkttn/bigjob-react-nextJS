@@ -81,8 +81,8 @@ const AdminReportPage = () => {
             details: item.description,
             target: item.target_name || "ไม่ทราบข้อมูล",
             targetId: item.target_id,
-            source: item.source, // ประเภทบัญชี: user, company, post
-            rawDate: new Date(item.report_date).getTime(), // เก็บค่าเวลาเพื่อใช้ Sort
+            source: item.source,
+            rawDate: new Date(item.report_date).getTime(),
             date: new Date(item.report_date).toLocaleDateString("en-GB"),
             status: getStatusText(item.status),
           }));
@@ -100,28 +100,24 @@ const AdminReportPage = () => {
     fetchReports();
   }, []);
 
-  // ฟังก์ชันคำนวณข้อมูลที่ผ่านการกรองและการจัดเรียง
   const filteredAndSortedData = reportData
     .filter((report) => {
-      // กรองประเภทบัญชี (อิงตาม source ของเป้าหมายที่ถูก Report)
       if (
         filterAccountType !== "ทั้งหมด" &&
         report.source !== filterAccountType
       ) {
         return false;
       }
-      // กรองสถานะรายการ
       if (filterStatus !== "ทั้งหมด" && report.status !== filterStatus) {
         return false;
       }
       return true;
     })
     .sort((a, b) => {
-      // จัดเรียงตามวันที่
       if (sortOrder === "desc") {
-        return b.rawDate - a.rawDate; // ใหม่สุด ไป เก่าสุด
+        return b.rawDate - a.rawDate;
       } else {
-        return a.rawDate - b.rawDate; // เก่าสุด ไป ใหม่สุด
+        return a.rawDate - b.rawDate;
       }
     });
 
@@ -132,7 +128,7 @@ const AdminReportPage = () => {
       <div className={styles.reportCard}>
         <h2 className={styles.title}>Report</h2>
 
-        {/* --- ส่วนตัวกรอง (อ้างอิงจาก image_3d1246.png) --- */}
+        {/* --- ส่วน Filter --- */}
         <div className={styles.filterContainer}>
           <div className={styles.filterGroup}>
             <span className={styles.filterLabel}>ประเภทบัญชี:</span>
@@ -174,69 +170,68 @@ const AdminReportPage = () => {
             </select>
           </div>
         </div>
-        {/* ------------------------------------------- */}
 
-        <div className={styles.tableHeader}>
-          <div className={styles.headerCell}>ID</div>
-          <div className={styles.headerCell}>Reported By</div>
-          <div className={styles.headerCell}>Report Type</div>
-          <div className={styles.headerCell}>Report Details</div>
-          <div className={styles.headerCell}>Reported User</div>
-          <div className={styles.headerCell}>Report Date</div>
-          <div className={styles.headerCell}>Status Report</div>
-        </div>
+        {/* --- เพิ่ม tableWrapper สำหรับรองรับระบบ Mobile --- */}
+        <div className={styles.tableWrapper}>
+          <div className={styles.tableHeader}>
+            <div className={styles.headerCell}>ID</div>
+            <div className={styles.headerCell}>Reported By</div>
+            <div className={styles.headerCell}>Report Type</div>
+            <div className={styles.headerCell}>Report Details</div>
+            <div className={styles.headerCell}>Reported User</div>
+            <div className={styles.headerCell}>Report Date</div>
+            <div className={styles.headerCell}>Status Report</div>
+          </div>
 
-        <div className={styles.tableBody}>
-          {filteredAndSortedData.map((report, index) => (
-            <div key={report.id} className={styles.reportRow}>
-              <div className={styles.cell}>
-                <span className={styles.badgeGray}>{index + 1}</span>
-              </div>
+          <div className={styles.tableBody}>
+            {filteredAndSortedData.map((report, index) => (
+              <div key={report.id} className={styles.reportRow}>
+                <div className={styles.cell}>
+                  <span className={styles.badgeGray}>{index + 1}</span>
+                </div>
 
-              <div className={styles.cell}>
-                <Link
-                  href={getReportLink(report.reporterRole, report.reporterId)}
-                >
-                  <span
-                    className={styles.nextLink}
-                    style={{ cursor: "pointer" }}
+                <div className={styles.cell}>
+                  <Link
+                    href={getReportLink(report.reporterRole, report.reporterId)}
+                    className={styles.cellLink}
                   >
-                    <span className={styles.badgeGray}>{report.reporter}</span>
-                  </span>
-                </Link>
-              </div>
+                    <span className={styles.nextLink}>{report.reporter}</span>
+                  </Link>
+                </div>
 
-              <div className={styles.cell}>
-                <span className={styles.badgeGray}>{report.reportType}</span>
-              </div>
+                <div className={styles.cell}>
+                  <span className={styles.badgeGray}>{report.reportType}</span>
+                </div>
 
-              <div className={styles.cell}>
-                <div className={styles.detailBubble}>{report.details}</div>
-              </div>
-              <div className={styles.cell}>
-                <Link href={getTargetLink(report.source, report.targetId)}>
-                  <span
-                    className={styles.nextLink}
-                    style={{ cursor: "pointer" }}
+                <div className={styles.cell}>
+                  <div className={styles.detailBubble}>{report.details}</div>
+                </div>
+
+                <div className={styles.cell}>
+                  <Link
+                    href={getTargetLink(report.source, report.targetId)}
+                    className={styles.cellLink}
                   >
-                    {report.target}
-                  </span>
-                </Link>
+                    <span className={styles.nextLink}>{report.target}</span>
+                  </Link>
+                </div>
+
+                <div className={styles.cell}>
+                  <span className={styles.badgeGray}>{report.date}</span>
+                </div>
+
+                <div className={styles.cell}>
+                  <button
+                    className={`${styles.statusBtn} ${
+                      styles[report.status.toLowerCase()]
+                    }`}
+                  >
+                    {report.status}
+                  </button>
+                </div>
               </div>
-              <div className={styles.cell}>
-                <span className={styles.badgeGray}>{report.date}</span>
-              </div>
-              <div className={styles.cell}>
-                <button
-                  className={`${styles.statusBtn} ${
-                    styles[report.status.toLowerCase()]
-                  }`}
-                >
-                  {report.status}
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>

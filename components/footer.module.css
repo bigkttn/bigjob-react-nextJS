@@ -1,45 +1,77 @@
 .footerContainer {
   background-color: #ffffff;
-  /* border-top: 1px solid #ccc; */
-  border-radius: 30px 30px 0 0; /* ทำมุมโค้งด้านบน */
-  padding: 30px 50px;
+  border-radius: 30px 30px 0 0;
+  padding: 24px 32px 40px 32px;
   width: 100%;
-  margin-top: auto; /* ดันลงล่างสุดเสมอ */
+  margin-top: auto; /* ดันลงล่างสุดของ Layout เสมอ */
+  box-sizing: border-box;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #ffffff;
+  margin-bottom: 24px;
+  width: 100%;
 }
 
 .footerContent {
   display: flex;
-  justify-content: flex-start; /* เรียงจากซ้ายไปขวา */
-  gap: 10px; /* ระยะห่างระหว่างคอลัมน์ */
-  max-width: 1200px;
-  margin: 10 auto;
-  /* background-color: olive; */
+  justify-content: space-between; /* กระจายคอลัมน์ให้เต็มพื้นที่ซ้าย-กลาง-ขวา */
+  align-items: flex-start;
+  gap: 32px;
+  max-width: 1120px;
+  margin: 0 auto; /* แก้ไขหน่วย px: จัดกึ่งกลางคอนเทนเนอร์ */
+  width: 100%;
 }
 
 .footerColumn {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  /* background-color: darkgoldenrod; */
+  gap: 12px;
+  flex: 1; /* ให้แต่ละคอลัมน์ขยายพื้นที่เท่าๆ กัน */
+  min-width: 220px;
 }
 
 .statRow {
   display: flex;
-  width: 250px; /* กำหนดความกว้างเพื่อให้ Value ตรงกัน */
-  justify-content: space-around;
-  align-items: flex-start;
-  /* background-color: forestgreen; */
+  justify-content: space-between; /* ชิดซ้ายสำหรับ Label และ ชิดขวาสำหรับ Value */
+  align-items: center;
+  width: 100%;
+  padding: 6px 12px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ffffff;
 }
 
 .label {
   font-weight: 600;
-  color: #333;
-  font-size: 16px;
+  color: #475569;
+  font-size: 14px;
 }
 
 .value {
-  font-weight: bold;
-  color: #000;
-  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 15px;
   text-align: right;
+}
+
+/* 
+   📱 MEDIA QUERIES (Mobile & Tablet)
+    */
+@media (max-width: 768px) {
+  .footerContainer {
+    padding: 20px 16px 32px 16px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .footerContent {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .footerColumn {
+    width: 100%;
+    min-width: unset;
+  }
 }

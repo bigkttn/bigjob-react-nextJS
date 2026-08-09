@@ -1,4 +1,5 @@
-"use client"; // อย่าลืมใส่ use client ด้านบนสุดของไฟล์เพราะมีการใช้ React Hook
+"use client";
+
 import { useEffect, useState } from "react";
 import styles from "./footer.module.css";
 
@@ -23,7 +24,6 @@ const Footer = () => {
       const data = await res.json();
       if (data.success) {
         setStats(data.data);
-        console.log("Footer stats fetched successfully:", data.data);
       }
     } catch (err) {
       console.error("Fetch stats error:", err);
@@ -32,21 +32,21 @@ const Footer = () => {
 
   return (
     <footer className={styles.footerContainer}>
-      <hr />
+      <hr className={styles.divider} />
       <div className={styles.footerContent}>
         {/* Column 1: User Stats */}
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
             <span className={styles.label}>Total Users</span>
-            <span className={styles.value}>{stats?.total_users || 0}</span>
+            <span className={styles.value}>{stats?.total_users ?? 0}</span>
           </div>
           <div className={styles.statRow}>
             <span className={styles.label}>General Users</span>
-            <span className={styles.value}>{stats?.general_users || 0}</span>
+            <span className={styles.value}>{stats?.general_users ?? 0}</span>
           </div>
           <div className={styles.statRow}>
             <span className={styles.label}>Companies</span>
-            <span className={styles.value}>{stats?.companies || 0}</span>
+            <span className={styles.value}>{stats?.companies ?? 0}</span>
           </div>
         </div>
 
@@ -54,7 +54,7 @@ const Footer = () => {
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
             <span className={styles.label}>All Jobs</span>
-            <span className={styles.value}>{stats?.all_jobs || 0}</span>
+            <span className={styles.value}>{stats?.all_jobs ?? 0}</span>
           </div>
         </div>
 
@@ -62,7 +62,7 @@ const Footer = () => {
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
             <span className={styles.label}>Visitors</span>
-            <span className={styles.value}>{stats?.visitors || 0}</span>
+            <span className={styles.value}>{stats?.visitors ?? 0}</span>
           </div>
         </div>
       </div>
