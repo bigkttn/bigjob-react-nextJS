@@ -48,7 +48,7 @@ export default function ApplyModal({
  const indent = "\u00A0".repeat(109);
  
   useEffect(() => {
-    if (isOpen) return;
+    if (!isOpen) return;
     if(mode === 'apply') {
       
       setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName || 'invaild company name'}

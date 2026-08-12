@@ -12,7 +12,13 @@ interface CustomJwtPayload extends JwtPayload {
   id: number;
   email: string;
   role: string;
+  company_name:string;
 }
+
+interface PageProps{
+   params: Promise<{ id: string }>;
+}
+
 
 async function getSeekerProfile(userId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -36,13 +42,10 @@ const formatDate = (dateStr: string | null) => {
   });
 };
 
-export default async function SeekerProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-
+export default async function SeekerProfilePage({params}:PageProps)
+{
+  const Param = await params;
+  const userId = Param.id;
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   let viewer: CustomJwtPayload | null = null;
@@ -56,6 +59,8 @@ export default async function SeekerProfilePage({
     }
   }
 
+  let jobTitle = "";
+  let postId: number | null = null;
   if (!viewer) {
     return (
       <div className={styles.centerMsg}>
@@ -64,12 +69,33 @@ export default async function SeekerProfilePage({
     );
   }
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
+  const profile = await getSeekerProfile(userId);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+ try {
+   const postRes = await fetch(`${baseUrl}/api/posts/getPostbyCompanyId?company_id=${viewer.id}`,{
+    method:"GET",
+    headers:{
+      "Content-Type": "application/json",
+    },cache:"no-store",
+  });
 
-  // console.log(viewer);
-  // if (viewer.role === "admin") {
-  //   console.log(1);
-  // }
-  const profile = await getSeekerProfile(id);
+  if(postRes.ok){
+    const reponseData = await postRes.json();
+
+    const postData = reponseData;
+    // 🟢 เพิ่มบรรทัดนี้เพื่อดูว่า Backend ส่ง field ID ชื่ออะไรมากันแน่
+  console.log("--- DEBUG POST DATA ---", reponseData);
+    // support both single object or array response
+    // const firstPost = Array.isArray(postData) ? postData[0] : postData;
+    // jobTitle = firstPost?.job_position || "";
+    // postId = firstPost?.post_id ;
+  }
+  
+ } catch (error) {
+   console.error("Fetch Seeker error:", error);
+ }
+
+
 
   if (!profile) {
     return (
@@ -117,7 +143,7 @@ export default async function SeekerProfilePage({
 
           {viewer.role === "admin" && (
             <AdminButton
-              user_id={id}
+              user_id={userId}
               role={viewer.role}
               id={viewer.id.toString()}
               banned_until={profile.banned_until}
@@ -154,7 +180,7 @@ export default async function SeekerProfilePage({
                 }}
               >
                 <ProfileActionsButton
-                  userId={Number(id)}
+                  userId={Number(userId)}
                   companyId={Number(viewer?.id)}
                 />
               </div>
@@ -398,13 +424,11 @@ export default async function SeekerProfilePage({
             <div className={styles.contactCard}>
               <h3>Contact</h3>
               <ApplySeeker
-                mode="apply"
-                isOpen
-                onClose={() => {}}
-                postId={0}
-                userId={Number(id)}
+                mode="invite"
+                postId={postId ?? 0}
+                userId={Number(userId)}
                 companyId={Number(viewer.id)}
-                companyName={viewer.email || "Company"}
+                companyName={viewer.company_name || "Company"}
                 seekerName={profile.fullname || "Seeker"}
                 jobTitle={profile.job_titles?.[0]?.job_name || "Open Position"}
                 seekerEmail={profile.email || ""}
