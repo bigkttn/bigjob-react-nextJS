@@ -79,3 +79,49 @@
 .approve { background-color: #1a8a2a; }
 .reject { background-color: #b50000; }
 .seeInfo { background-color: #000000; }
+
+/* 📱 Responsive Styles สำหรับหน้าจอมือถือ (<= 768px) */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 10px; /* ลด Padding ขอบนอก */
+  }
+
+  .cardWrapper {
+    padding: 20px 15px;
+    border-radius: 20px; /* ลดรัศมีขอบมนลงเล็กน้อย */
+  }
+
+  .headerTitle {
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+
+  .companyRow {
+    flex-direction: column; /* เปลี่ยนเรียงจากแนวนอนเป็นแนวตั้ง */
+    align-items: stretch; /* ขยายให้เต็มความกว้าง */
+    padding: 20px 15px;
+    gap: 15px;
+  }
+
+  .leftInfo {
+    flex-direction: column; /* โลโก้อยู่บน ชื่ออยู่ล่าง */
+    text-align: center;
+    gap: 10px;
+  }
+
+  .companyName {
+    font-size: 18px; /* ปรับขนาดฟอนต์ให้พอดีกับจอ */
+  }
+
+  .buttonGroup {
+    width: 100%;
+    flex-direction: column; /* ปรับปุ่มกดเรียงลงมาเป็นแนวตั้ง */
+    gap: 8px;
+  }
+
+  .btn {
+    width: 100%; /* ปุ่มขยายเต็มความกว้างเพื่อให้กดง่าย */
+    padding: 12px;
+    font-size: 15px;
+  }
+}
