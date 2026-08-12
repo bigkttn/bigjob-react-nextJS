@@ -5,6 +5,9 @@ import styles from './applyCompany.module.css'
 import ApplyModal from '@/components/ApplyModal';
 
 interface ApplyCompanyProps {
+  mode?:'apply'|'invite';
+  isOpen?:boolean;
+  onClose?:() => void;
   postId: number,
   userId: number,
   companyName: string,

@@ -179,13 +179,14 @@ seekerName = seekerName || "invalid seeker name";
 
           {/* ปุ่ม Apply พร้อมส่ง Props ที่อัปเดตแล้ว */}
           <ApplyCompany
+            mode="invite"
             postId={Number(postId)}
-            userId={viewer.id}
-            companyName={job.company_name || "invalid Company Name"}
-            seekerName={seekerName || "invalid seeker Name"}
+            userId={1}
+            companyName={viewer.company_name || "invalid Company Name"}
+            seekerName={seekerName || "invalid seeker Name"} 
             jobTitle={job.job_position || "invalid jobTitle"}
             seekerEmail={seekerEmail || "invalid seeker Email"}
-            companyEmail={companyEmail || "invalid companyEmail"}
+            companyEmail={viewer.email || "invalid companyEmail"}
           />
 
           <div className={styles.header}>
