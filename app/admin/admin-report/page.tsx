@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,23 +9,38 @@ const AdminReportPage = () => {
   const [reportData, setReportData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // States สำหรับตัวกรอง
+  // States สำหรับตัวกรอง (คง value ภาษาอังกฤษดั้งเดิมไว้)
   const [filterAccountType, setFilterAccountType] = useState("ทั้งหมด");
   const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  // แปลงสถานะรายการจาก DB เป็นภาษาไทยเพื่อแสดงผลบน UI
   const getStatusText = (statusCode: any) => {
     switch (statusCode) {
       case 1:
-        return "Suspend";
+        return "ระงับการใช้งาน";
       case 2:
-        return "Warn";
+        return "ตักเตือน";
       case 0:
       default:
-        return "Review";
+        return "รอดำเนินการ";
     }
   };
 
+  // ดึง Class CSS สำหรับสีปุ่มสถานะตามรหัส
+  const getStatusClass = (statusCode: any) => {
+    switch (statusCode) {
+      case 1:
+        return styles.suspend;
+      case 2:
+        return styles.warn;
+      case 0:
+      default:
+        return styles.review;
+    }
+  };
+
+  // แปลงหัวข้อประเภทการรายงานเป็นภาษาไทย
   const getReportTypeText = (type: string) => {
     switch (type) {
       case "identity_fraud":
@@ -83,15 +99,20 @@ const AdminReportPage = () => {
             targetId: item.target_id,
             source: item.source,
             rawDate: new Date(item.report_date).getTime(),
-            date: new Date(item.report_date).toLocaleDateString("en-GB"),
+            date: new Date(item.report_date).toLocaleDateString("th-TH", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            }),
             status: getStatusText(item.status),
+            statusClass: getStatusClass(item.status),
           }));
           setReportData(formattedData);
         } else {
           console.error(result.message);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
       } finally {
         setLoading(false);
       }
@@ -121,26 +142,26 @@ const AdminReportPage = () => {
       }
     });
 
-  if (loading) return <div>Loading reports...</div>;
+  if (loading) return <div>กำลังโหลดข้อมูลการรายงาน...</div>;
 
   return (
     <div className={styles.container}>
       <div className={styles.reportCard}>
-        <h2 className={styles.title}>Report</h2>
+        <h2 className={styles.title}>รายงานการร้องเรียน (Report)</h2>
 
         {/* --- ส่วน Filter --- */}
         <div className={styles.filterContainer}>
           <div className={styles.filterGroup}>
-            <span className={styles.filterLabel}>ประเภทบัญชี:</span>
+            <span className={styles.filterLabel}>ประเภทรายการ:</span>
             <select
               className={styles.filterSelect}
               value={filterAccountType}
               onChange={(e) => setFilterAccountType(e.target.value)}
             >
               <option value="ทั้งหมด">ทั้งหมด</option>
-              <option value="user">User</option>
-              <option value="company">Company</option>
-              <option value="post">Post</option>
+              <option value="user">ผู้หางาน (User)</option>
+              <option value="company">บริษัท (Company)</option>
+              <option value="post">โพสต์ประกาศงาน (Post)</option>
             </select>
           </div>
 
@@ -152,9 +173,9 @@ const AdminReportPage = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
             >
               <option value="ทั้งหมด">ทั้งหมด</option>
-              <option value="Review">Review</option>
-              <option value="Warn">Warn</option>
-              <option value="Suspend">Suspend</option>
+              <option value="Review">รอดำเนินการ</option>
+              <option value="Warn">ตักเตือน</option>
+              <option value="Suspend">ระงับการใช้งาน</option>
             </select>
           </div>
 
@@ -171,16 +192,16 @@ const AdminReportPage = () => {
           </div>
         </div>
 
-        {/* --- เพิ่ม tableWrapper สำหรับรองรับระบบ Mobile --- */}
+        {/* --- ตารางแสดงข้อมูล --- */}
         <div className={styles.tableWrapper}>
           <div className={styles.tableHeader}>
-            <div className={styles.headerCell}>ID</div>
-            <div className={styles.headerCell}>Reported By</div>
-            <div className={styles.headerCell}>Report Type</div>
-            <div className={styles.headerCell}>Report Details</div>
-            <div className={styles.headerCell}>Reported User</div>
-            <div className={styles.headerCell}>Report Date</div>
-            <div className={styles.headerCell}>Status Report</div>
+            <div className={styles.headerCell}>ลำดับ</div>
+            <div className={styles.headerCell}>ผู้แจ้งรายงาน</div>
+            <div className={styles.headerCell}>ประเภทข้อร้องเรียน</div>
+            <div className={styles.headerCell}>รายละเอียด</div>
+            <div className={styles.headerCell}>เป้าหมายที่ถูกรายงาน</div>
+            <div className={styles.headerCell}>วันที่แจ้ง</div>
+            <div className={styles.headerCell}>สถานะ</div>
           </div>
 
           <div className={styles.tableBody}>
@@ -222,9 +243,7 @@ const AdminReportPage = () => {
 
                 <div className={styles.cell}>
                   <button
-                    className={`${styles.statusBtn} ${
-                      styles[report.status.toLowerCase()]
-                    }`}
+                    className={`${styles.statusBtn} ${report.statusClass}`}
                   >
                     {report.status}
                   </button>
@@ -239,3 +258,4 @@ const AdminReportPage = () => {
 };
 
 export default AdminReportPage;
+
