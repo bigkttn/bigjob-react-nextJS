@@ -108,16 +108,14 @@ const Home = () => {
               <div key={company.company_id} className={styles.companyRow}>
                 {/* ส่วนชื่อและโลโก้ */}
                 <div className={styles.leftInfo}>
-                  <img
-                    src={
-                      company.logo_image ||
-                      "/assets/images/suggestedCompanys.jpg"
-                    }
-                    alt={company.company_name}
-                    width={120}
-                    height={60}
-                    className={styles.logo}
-                  />
+                 <img
+                      src={
+                        company.logo_image ||
+                        "/assets/images/suggestedCompanys.jpg"
+                      }
+                      alt={company.company_name}
+                      className={styles.logo}
+                    />
                   <span className={styles.companyName}>
                     {company.company_name}
                   </span>

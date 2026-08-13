@@ -1,99 +1,133 @@
+/* --- Global Container --- */
 .container {
-  padding: 20px;
-  background-color: #f0f0f0;
+  padding: 30px 20px;
+  background-color: #f4f6f8;
   min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #2d3748;
 }
 
+/* --- Card หลัก --- */
 .reportCard {
-  background-color: #d9d9d9;
-  border-radius: 40px;
-  padding: 30px;
-  max-width: 100%; /* ให้การ์ดขยายเต็มพื้นที่ */
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+  max-width: 1400px;
   margin: 0 auto;
   box-sizing: border-box;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .title {
-  margin-bottom: 15px;
-  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a202c;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* --- ส่วน Filter --- */
+/* --- ส่วน Filter Bar --- */
 .filterContainer {
-  background-color: #ffffff;
-  padding: 15px 25px;
-  border-radius: 15px;
+  background-color: #f8fafc;
+  padding: 18px 24px;
+  border-radius: 16px;
   display: flex;
-  gap: 30px;
+  gap: 24px;
   align-items: center;
-  margin-bottom: 25px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 28px;
+  border: 1px solid #e2e8f0;
 }
 
 .filterGroup {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .filterLabel {
-  font-weight: bold;
-  font-size: 15px;
-  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  color: #4a5568;
   white-space: nowrap;
 }
 
 .filterSelect {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
   font-size: 14px;
+  font-weight: 500;
   outline: none;
   cursor: pointer;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
+  color: #334155;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.filterSelect:hover {
+  border-color: #94a3b8;
 }
 
 .filterSelect:focus {
   border-color: #3653f8;
+  box-shadow: 0 0 0 3px rgba(54, 83, 248, 0.15);
 }
 
-/* --- ส่วนตาราง Scroll แนวนอน + ยืดเต็ม 100% --- */
+/* --- ส่วนตาราง Scroll แนวนอน --- */
 .tableWrapper {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-radius: 16px;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .tableHeader,
 .reportRow {
   display: grid;
-  /* ใช้ minmax ร่วมกับ fr เพื่อให้ยืดเต็ม 100% ของหน้าจอ และกระจายสัดส่วนเท่าๆ กัน */
   grid-template-columns: 
-    minmax(50px, 0.5fr) 
-    minmax(150px, 1.5fr) 
-    minmax(180px, 2fr) 
-    minmax(220px, 2.5fr) 
-    minmax(150px, 1.5fr) 
+    minmax(60px, 0.5fr) 
+    minmax(160px, 1.5fr) 
+    minmax(190px, 2fr) 
+    minmax(240px, 2.5fr) 
+    minmax(160px, 1.5fr) 
     minmax(130px, 1.2fr) 
-    minmax(110px, 1fr);
-  align-items: stretch;
-  gap: 10px;
+    minmax(130px, 1fr);
+  align-items: center;
+  gap: 12px;
   width: 100%;
-  min-width: 1100px; /* ป้องกันตารางเบี้ยวเมื่อหดจอเล็ก */
+  min-width: 1100px;
   box-sizing: border-box;
 }
 
+/* --- Header ตาราง (สีเขียวดั้งเดิม #4dfc50) --- */
 .tableHeader {
   background-color: #4dfc50;
-  padding: 10px 15px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  font-weight: bold;
-}
-
-.reportRow {
-  margin-bottom: 15px;
-  padding: 0 15px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  font-weight: 700;
+  color: #0f3811;
+  box-shadow: 0 4px 12px rgba(77, 252, 80, 0.2);
 }
 
 .headerCell {
@@ -101,28 +135,30 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-right: 1px solid #000;
-  padding: 5px;
-  min-width: 0;
+  font-size: 14px;
+  letter-spacing: 0.02em;
 }
 
-.headerCell:last-child {
-  border-right: none;
+/* --- Row แถวข้อมูล --- */
+.reportRow {
+  padding: 12px 18px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9; /* ใช้เส้นแบ่งแถวอ่อนๆ แทน */
+  transition: all 0.2s ease;
+}
+
+.reportRow:hover {
+  background-color: #f8fafc;
 }
 
 .cell {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-right: 1px solid #000;
   height: 100%;
-  padding: 10px 5px;
+  padding: 4px;
   min-width: 0;
   overflow: hidden;
-}
-
-.cell:last-child {
-  border-right: none;
 }
 
 .cellLink {
@@ -133,80 +169,88 @@
   min-width: 0;
 }
 
+/* --- ปรับแต่งตัวอักษรธรรมดา (ถอดขอบและพื้นหลังสีเทาออก) --- */
 .badgeGray {
-  background-color: #e0e0e0;
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-weight: bold;
+  background-color: transparent;
+  color: #475569;
+  font-weight: 600;
   font-size: 14px;
   text-align: center;
-  word-break: break-word;
-  white-space: nowrap; /* แก้วันที่ตกบรรทัด */
-  max-width: 100%;
-  box-sizing: border-box;
+  
+  /* ปรับแต่งส่วนนี้เพื่อให้ตัดขึ้นบรรทัดใหม่อย่างสวยงาม */
+  white-space: normal;       /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+  word-break: break-word;     /* ตัดคำตามความเหมาะสม */
+  line-height: 1.4;          /* เพิ่มระยะห่างระหว่างบรรทัดให้น่าอ่าน */
+  width: 100%;
 }
 
 .nextLink {
-  background-color: #e0e0e0;
-  padding: 8px 12px;
-  border-radius: 20px;
-  font-weight: bold;
+  background-color: transparent;
+  color: #334155;
+  font-weight: 600;
   font-size: 14px;
   text-decoration: none;
-  color: inherit;
   display: inline-block;
   text-align: center;
   word-break: break-word;
-  max-width: 100%;
-  box-sizing: border-box;
+  transition: all 0.25s ease-in-out;
 }
+
+
 
 .nextLink:hover {
   color: #3653f8;
+  background-color: #f0f4ff; /* พื้นหลังสีฟ้าอ่อนมากๆ จางๆ ออกมาจากความว่างเปล่า */
 }
 
+
 .detailBubble {
-  background-color: #e0e0e0;
-  padding: 12px;
-  border-radius: 20px;
-  font-size: 13px;
-  line-height: 1.4;
-  text-align: left;
+  background-color: transparent;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
   width: 100%;
-  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   word-break: break-word;
-  max-width: 100%;
+  white-space: normal;
 }
 
+/* --- ปุ่มสถานะ (คงไว้ปุ่มเดียว) --- */
 .statusBtn {
   width: 100%;
-  padding: 10px 5px;
-  border-radius: 25px;
+  padding: 8px 12px;
+  border-radius: 20px;
   border: none;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .suspend {
   background-color: #ff8c8c;
+  color: #7f1d1d;
 }
 
 .warn {
   background-color: #ffff00;
+  color: #713f12;
 }
 
 .review {
   background-color: #ffd8b1;
+  color: #7c2d12;
 }
 
 .statusBtn:hover {
-  opacity: 0.7;
-  transform: translateY(-2px);
-  transition: all 0.2s;
+  opacity: 0.85;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* ==========================================
@@ -214,19 +258,19 @@
    ========================================== */
 @media (max-width: 768px) {
   .container {
-    padding: 10px;
+    padding: 12px;
   }
 
   .reportCard {
-    padding: 15px;
-    border-radius: 25px;
+    padding: 16px;
+    border-radius: 16px;
   }
 
   .filterContainer {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
-    padding: 15px;
+    padding: 14px;
   }
 
   .filterGroup {

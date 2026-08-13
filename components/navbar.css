@@ -1,5 +1,5 @@
 /* =========================
-   GLOBAL
+   GLOBAL & NAVBAR
 ========================= */
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap");
 
@@ -19,9 +19,6 @@
   font-family: "Nunito", sans-serif;
 }
 
-/* =========================
-   NAVBAR
-========================= */
 .navbar {
   width: 100%;
   height: 60px;
@@ -41,21 +38,29 @@
   align-items: center;
 }
 
-/* =========================
-   BRAND
-========================= */
 .brand {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
+/* 🟢 แสดงปุ่ม Hamburger บนทุกหน้าจอ (ทั้ง PC และ มือถือ) */
 .menu-icon {
-  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
   border: none;
   color: var(--text-light);
-  font-size: 28px;
+  font-size: 26px;
   cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.menu-icon:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .logo-text {
@@ -89,7 +94,7 @@
 }
 
 /* =========================
-   BUTTONS
+   BUTTONS & BADGES
 ========================= */
 .nav-btn-outline {
   border: 1px solid var(--text-light);
@@ -120,19 +125,6 @@
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
-/* =========================
-   USER
-========================= */
-.user-display {
-  padding: 0 15px;
-  border-right: 1px solid var(--glass-border);
-}
-
-.u-name {
-  color: var(--text-light);
-  font-size: 14px;
-}
-
 .nav-btn-logout {
   border: 1px solid var(--glass-border);
   color: var(--text-dim);
@@ -140,96 +132,13 @@
   border-radius: 24px;
   cursor: pointer;
   background: transparent;
+  font-weight: 600;
+  transition: 0.3s;
 }
 
 .nav-btn-logout:hover {
   border-color: var(--text-light);
   color: var(--text-light);
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media (max-width: 768px) {
-  .desktop-menu {
-    display: none;
-  }
-}
-
-/* =========================
-   SIDEBAR
-========================= */
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1001;
-}
-
-.sidebar-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 280px;
-  height: 100%;
-  background: #1a1a1a;
-  transform: translateX(-100%);
-  transition: 0.3s;
-  z-index: 1002;
-}
-
-.sidebar-menu.open {
-  transform: translateX(0);
-}
-
-.sidebar-header {
-  padding: 20px;
-  background: #000;
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #333;
-}
-
-.sidebar-links {
-  padding: 20px;
-}
-
-.side-item {
-  display: block;
-  padding: 12px;
-  color: #ccc;
-  text-decoration: none;
-  border-radius: 8px;
-}
-
-.side-item:hover {
-  background: #333;
-  color: #fff;
-}
-
-.side-item.highlight {
-  background: #fff;
-  color: #000;
-  text-align: center;
-}
-
-.side-item.logout {
-  border: 1px solid red;
-  color: red;
-  text-align: center;
-}
-
-.side-item.logout:hover {
-  background: red;
-  color: #fff;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 28px;
-  cursor: pointer;
 }
 
 .nav-feedback-link {
@@ -238,7 +147,6 @@
   align-items: center;
 }
 
-/* ป้ายแจ้งเตือนแบบกระตุ้นสายตาตกใจสีแดงสว่าง */
 .shock-badge {
   background: #ff1744;
   color: #ffffff;
@@ -253,17 +161,200 @@
   animation: shockPulse 1.5s infinite ease-in-out;
 }
 
+.side-item .shock-badge {
+  position: static;
+  margin-left: 8px;
+}
+
 @keyframes shockPulse {
-  0% {
-    transform: scale(1);
-    filter: brightness(1);
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.15); filter: brightness(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* =========================
+   SIDEBAR & DRAWER (PC + MOBILE)
+========================= */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 1001;
+}
+
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 340px; /* ปรับขนาดกว้างขึ้นเล็กน้อยเพื่อรองรับตาราง/การ์ดนัดสัมภาษณ์ */
+  max-width: 85vw;
+  height: 100%;
+  background: #141414;
+  border-right: 1px solid #2a2a2a;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+}
+
+.sidebar-menu.open {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: 20px;
+  background: #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.sidebar-links {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.user-info {
+  margin-bottom: 5px;
+}
+
+.u-name {
+  color: var(--text-light);
+  font-size: 14px;
+  word-break: break-all;
+}
+
+.sidebar-divider {
+  border: 0;
+  border-top: 1px solid #2a2a2a;
+  margin: 10px 0;
+}
+
+/* 📅 ส่วนการ์ดวันเวลานัดสัมภาษณ์ (Interview Schedule) */
+.sidebar-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #a1a1aa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.interview-card {
+  background: #1e1e24;
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.interview-company {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.interview-position {
+  font-size: 13px;
+  color: #38bdf8;
+}
+
+.interview-time {
+  font-size: 12px;
+  color: #a1a1aa;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.interview-empty {
+  font-size: 13px;
+  color: #71717a;
+  font-style: italic;
+  padding: 10px 0;
+}
+
+/* สไตล์ลิงก์อื่นๆ ใน Sidebar */
+.side-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: #ccc;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.side-item:hover,
+.side-item.active {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.side-item.highlight {
+  background: #fff;
+  color: #000;
+  text-align: center;
+  justify-content: center;
+}
+
+.side-btn-logout {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #ef4444;
+  background: transparent;
+  color: #ef4444;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.side-btn-logout:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Responsive Hide Desktop Menu */
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none;
   }
-  50% {
-    transform: scale(1.15);
-    filter: brightness(1.3);
-  }
-  100% {
-    transform: scale(1);
-    filter: brightness(1);
+}
+/* ซ่อนรายการเมนูด้านล่างเมื่อดูบนหน้าจอ PC */
+.mobile-only-links {
+  display: none;
+}
+
+/* แสดงรายการเมนูด้านล่างเฉพาะบนหน้าจอมือถือ */
+@media (max-width: 768px) {
+  .mobile-only-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 }

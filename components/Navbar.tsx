@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import "./navbar.css";
-import { styles } from "next/dist/client/components/styles/access-error-styles";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,7 +33,6 @@ export default function Navbar() {
 
           if (data.user.role !== "guest") {
             fetchNotificationBadge(data.user.id, data.user.role);
-            //เรียกใช้ฟังก์ชันเช็กสถานะแบนหลังจากรู้ Role และ ID
             checkBanStatus(data.user.id, data.user.role);
           }
         } else {
@@ -57,22 +55,19 @@ export default function Navbar() {
     setIsBanned(false);
   };
 
-  // . ฟังก์ชันตรวจสอบการแบน
+  // ฟังก์ชันตรวจสอบการแบน
   const checkBanStatus = async (uid: string, role: string) => {
     try {
-      // ⚠️ เปลี่ยน URL API ให้ตรงกับที่คุณใช้ดึงข้อมูล Profile ของ User หรือ Company
       const apiUrl =
         role === "company"
           ? `/api/company/getCompanyById/${uid}`
-          : `/api/user/getUserById/${uid}`; // สมมติชื่อ API ของฝั่ง User
+          : `/api/user/getUserById/${uid}`;
 
       const res = await fetch(apiUrl);
       if (res.ok) {
         const data = await res.json();
-        // ดึงฟิลด์ banned_until ออกมา (แก้ชื่อตัวแปรให้ตรงกับผลลัพธ์ของ API)
         const targetData = role === "company" ? data.company : data.user;
         const bannedUntil = targetData?.banned_until || targetData?.ban_until;
-        console.log("banned_until = ", bannedUntil);
 
         if (bannedUntil) {
           calculateBan(bannedUntil);
@@ -83,7 +78,7 @@ export default function Navbar() {
     }
   };
 
-  //  คำนวณวันหมดอายุการแบน
+  // คำนวณวันหมดอายุการแบน
   const calculateBan = (bannedUntil: string) => {
     const banDate = new Date(bannedUntil.replace(" ", "T"));
     const now = new Date();
@@ -128,13 +123,13 @@ export default function Navbar() {
         date: formattedBanDate,
         remaining: `(เหลือเวลาอีก ${dayText}${hourText}${minText})`,
       });
-      setIsBanned(true); // เปิด Popup
+      setIsBanned(true);
     } else {
       setIsBanned(false);
     }
   };
 
-  // ฟังก์ชัน Notification (เดิมของคุณ)
+  // Notification Badge
   const fetchNotificationBadge = async (uid: string, role: string) => {
     try {
       const apiUrl =
@@ -176,7 +171,6 @@ export default function Navbar() {
     }
   };
 
-  // 🔴 4. ฟังก์ชัน Force Logout (ใช้ตอนกดรับทราบการแบนด้วย)
   const forceLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -205,7 +199,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* 🔴 ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
+      {/* ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
       {isBanned && (
         <div
           style={{
@@ -218,7 +212,7 @@ export default function Navbar() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            zIndex: 99999, // บังทับทุกอย่าง
+            zIndex: 99999,
           }}
         >
           <div
@@ -271,7 +265,7 @@ export default function Navbar() {
             <button
               onClick={() => {
                 setIsBanned(false);
-                forceLogout(); // เตะออกจากระบบเมื่อกดรับทราบ
+                forceLogout();
               }}
               style={{
                 backgroundColor: "#ef4444",
@@ -297,12 +291,15 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Navbar Structure ปกติของคุณ */}
+      {/* Navbar Structure */}
       <nav className="navbar">
         <div className="nav-container">
-          {/* ... โค้ดส่วนอื่นๆ คงเดิมทั้งหมด ... */}
           <div className="brand">
-            <button className="menu-icon" onClick={toggleMenu}>
+            <button
+              className="menu-icon"
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+            >
               ☰
             </button>
             <Link href={getDashboardRoute()} className="logo-text">
@@ -310,6 +307,7 @@ export default function Navbar() {
             </Link>
           </div>
 
+          {/* Desktop Menu */}
           <div className="nav-links desktop-menu">
             {userRole === "guest" && (
               <>
@@ -339,7 +337,7 @@ export default function Navbar() {
 
                 <Link
                   href="/user/savedCompany"
-                  className={`nav-item ${isActive("/user/saveCompany")}`}
+                  className={`nav-item ${isActive("/user/savedCompany")}`}
                 >
                   Saved
                 </Link>
@@ -372,7 +370,7 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                  <Link
+                <Link
                   href={`/company/company_tracking/${userId}`}
                   className={`nav-item ${isActive(`/company/company_tracking/${userId}`)}`}
                 >
@@ -384,8 +382,6 @@ export default function Navbar() {
                 >
                   Saved
                 </Link>
-
-                {/* 🔔 จุดแสดงแจ้งเตือนสำหรับฝั่ง Company */}
                 <Link
                   href="/company/company-feedback"
                   className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}
@@ -432,8 +428,10 @@ export default function Navbar() {
           </div>
         </div>
 
+        {/* Backdrop overlay สำหรับปิดเมนูเมื่อแตะพื้นหลัง */}
         {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
 
+        {/* Mobile Drawer / Sidebar */}
         <div className={`sidebar-menu ${isMenuOpen ? "open" : ""}`}>
           <div className="sidebar-header">
             <h3 className="logo-text">BIGJOBs</h3>
@@ -442,11 +440,160 @@ export default function Navbar() {
             </button>
           </div>
           <div className="sidebar-links">
-            <div className="user-info">
-              <span className="u-name">
-                Hi {userRole}, {userName} ({userId})
-              </span>
-              <hr />
+            {/* ข้อมูลผู้ใช้ */}
+            {userRole !== "guest" && (
+              <div className="user-info">
+                <span className="u-name">
+                  Hi {userRole}, {userName} ({userId})
+                </span>
+              </div>
+            )}
+            {/* ครอบด้วย mobile-only-links: แสดงเมนูพวกนี้เฉพาะบนมือถือเท่านั้น */}
+            <div className="mobile-only-links">
+              <hr className="sidebar-divider" />
+
+              {userRole === "guest" && (
+                <>
+                  <Link href="/login" className="side-item" onClick={closeMenu}>
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="side-item highlight"
+                    onClick={closeMenu}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+
+              {userRole === "seeker" && (
+                <>
+                  <Link
+                    href="/user/user-home"
+                    className={`side-item ${isActive("/user/user-home")}`}
+                    onClick={closeMenu}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    href={`/user/seeker_tracking/${userId}`}
+                    className={`side-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
+                    onClick={closeMenu}
+                  >
+                    Tracking
+                  </Link>
+                  <Link
+                    href="/user/savedCompany"
+                    className={`side-item ${isActive("/user/savedCompany")}`}
+                    onClick={closeMenu}
+                  >
+                    Saved
+                  </Link>
+                  <Link
+                    href="/user/user-feedback"
+                    className={`side-item ${isActive("/user/user-feedback")}`}
+                    onClick={closeMenu}
+                  >
+                    Feedback{" "}
+                    {unreadCount > 0 && (
+                      <span className="shock-badge">! {unreadCount}</span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/user/user-profile"
+                    className={`side-item ${isActive("/user/user-profile")}`}
+                    onClick={closeMenu}
+                  >
+                    My Profile
+                  </Link>
+                  <button onClick={onLogout} className="side-btn-logout">
+                    Log out
+                  </button>
+                </>
+              )}
+
+              {userRole === "company" && (
+                <>
+                  <Link
+                    href="/company/company-home"
+                    className={`side-item ${isActive("/company/company-home")}`}
+                    onClick={closeMenu}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    href={`/company/company_tracking/${userId}`}
+                    className={`side-item ${isActive(`/company/company_tracking/${userId}`)}`}
+                    onClick={closeMenu}
+                  >
+                    Tracking
+                  </Link>
+                  <Link
+                    href="/company/savedSeeker"
+                    className={`side-item ${isActive("/company/savedSeeker")}`}
+                    onClick={closeMenu}
+                  >
+                    Saved
+                  </Link>
+                  <Link
+                    href="/company/company-feedback"
+                    className={`side-item ${isActive("/company/company-feedback")}`}
+                    onClick={closeMenu}
+                  >
+                    Feedback{" "}
+                    {unreadCount > 0 && (
+                      <span className="shock-badge">! {unreadCount}</span>
+                    )}
+                  </Link>
+                  <Link
+                    href="/company/post-job"
+                    className={`side-item ${isActive("/company/post-job")}`}
+                    onClick={closeMenu}
+                  >
+                    Post a Job
+                  </Link>
+                  <Link
+                    href="/company/profile"
+                    className={`side-item ${isActive("/company/profile")}`}
+                    onClick={closeMenu}
+                  >
+                    Profile
+                  </Link>
+                  <button onClick={onLogout} className="side-btn-logout">
+                    Log out
+                  </button>
+                </>
+              )}
+
+              {userRole === "admin" && (
+                <>
+                  <Link
+                    href="/admin/admin-report"
+                    className={`side-item ${isActive("/admin/admin-report")}`}
+                    onClick={closeMenu}
+                  >
+                    Report
+                  </Link>
+                  <Link
+                    href="/admin/Feedbacks"
+                    className={`side-item ${isActive("/admin/Feedbacks")}`}
+                    onClick={closeMenu}
+                  >
+                    Feedbacks
+                  </Link>
+                  <Link
+                    href="/admin/home"
+                    className={`side-item ${isActive("/admin/home")}`}
+                    onClick={closeMenu}
+                  >
+                    Verification
+                  </Link>
+                  <button onClick={onLogout} className="side-btn-logout">
+                    Log out
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
