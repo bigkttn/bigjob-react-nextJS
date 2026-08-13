@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './applyCompany.module.css'
 import ApplyModal from '@/components/ApplyModal';
+import { apiUrl } from '@/lib/hostURL';
 
 interface ApplyCompanyProps {
   mode?:'apply'|'invite';
@@ -38,9 +39,18 @@ export default function ApplyCompany({
   //   postId,
   //   userId
   // });
+
+
+  useEffect(() => {
+    if (userId) {
+      checkApplied();
+    }
+  }
+    , [userId, postId]);
+
 const checkApplied = async () => {
     try {
-      const response = await fetch("/api/seeker/check_report_company", {
+      const response = await fetch(`${apiUrl}/api/user/check_interview_seeker/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -72,6 +82,13 @@ const checkApplied = async () => {
           className={styles.applyBtn}
         >
           Apply Now
+        </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className={styles.applyBtn}
+          disabled={isReported} >
+
+          {isReported ? 'Applied' : ' Apply Now'}
         </button>
       </div>
 

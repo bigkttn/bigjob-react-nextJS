@@ -7,6 +7,7 @@ import ProfileActionsButton from "./ProfileActionsButton";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
 import ApplySeeker from "./apply-seeker";
+import { apiUrl } from "@/lib/hostURL";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -21,8 +22,8 @@ interface PageProps{
 
 
 async function getSeekerProfile(userId: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/user/getUserById/${userId}`, {
+  
+  const res = await fetch(`${apiUrl}/api/user/getUserById/${userId}`, {
     cache: "no-store",
   });
   if (!res.ok) return null;
@@ -59,8 +60,6 @@ export default async function SeekerProfilePage({params}:PageProps)
     }
   }
 
-  let jobTitle = "";
-  let postId: number | null = null;
   if (!viewer) {
     return (
       <div className={styles.centerMsg}>
@@ -70,31 +69,48 @@ export default async function SeekerProfilePage({params}:PageProps)
   }
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
   const profile = await getSeekerProfile(userId);
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
- try {
-   const postRes = await fetch(`${baseUrl}/api/posts/getPostbyCompanyId?company_id=${viewer.id}`,{
-    method:"GET",
-    headers:{
-      "Content-Type": "application/json",
-    },cache:"no-store",
-  });
+ 
+  let jobTitle = "";
+  let postId: number | null = null;
 
-  if(postRes.ok){
-    const reponseData = await postRes.json();
+  if (viewer?.id) {
+    try {
+      const postRes = await fetch(
+        `${apiUrl}/api/posts/getPostbyCompanyId?company_id=${viewer.id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json",
+          "Cookie": `session=${token}`
+          },
+          cache: "no-store",
+        }
+      );
 
-    const postData = reponseData;
-    // 🟢 เพิ่มบรรทัดนี้เพื่อดูว่า Backend ส่ง field ID ชื่ออะไรมากันแน่
-  console.log("--- DEBUG POST DATA ---", reponseData);
-    // support both single object or array response
-    // const firstPost = Array.isArray(postData) ? postData[0] : postData;
-    // jobTitle = firstPost?.job_position || "";
-    // postId = firstPost?.post_id ;
+      if (postRes.ok) {
+        const reponseData = await postRes.json();
+        
+        // Print ออก VS Code Terminal เพื่อดูโครงสร้างข้อมูลจริง
+        console.log("--- RAW RESPONSE ---", reponseData);
+
+        // ดึง array จาก responseData (รองรับกรณี Response หุ้มด้วย data/posts หรือเป็น Array ตรงๆ)
+        const rawList = Array.isArray(reponseData)
+          ? reponseData
+          : (reponseData?.data || reponseData?.posts || [reponseData]);
+
+        const firstPost = rawList[0];
+
+        if (firstPost) {
+          jobTitle = firstPost.job_position || firstPost.post_title || "";
+
+          // 🟢 ลองดึง Key ID ทั้งหมดที่เป็นไปได้
+          const foundId = firstPost.post_id ?? firstPost.id ?? firstPost.postId ?? firstPost._id;
+          postId = foundId ? Number(foundId) : null;
+        }
+      }
+    } catch (error) {
+      console.error("Fetch Seeker error:", error);
+    }
   }
-  
- } catch (error) {
-   console.error("Fetch Seeker error:", error);
- }
-
 
 
   if (!profile) {
@@ -423,17 +439,17 @@ export default async function SeekerProfilePage({params}:PageProps)
             </div>
             <div className={styles.contactCard}>
               <h3>Contact</h3>
-              <ApplySeeker
-                mode="invite"
-                postId={postId ?? 0}
-                userId={Number(userId)}
-                companyId={Number(viewer.id)}
-                companyName={viewer.company_name || "Company"}
-                seekerName={profile.fullname || "Seeker"}
-                jobTitle={profile.job_titles?.[0]?.job_name || "Open Position"}
-                seekerEmail={profile.email || ""}
-                companyEmail={viewer.email || ""}
-              />
+             <ApplySeeker
+  mode="invite"
+  postId={postId ?? 0}
+  userId={Number(userId)}
+  companyId={Number(viewer.id)}
+  companyName={viewer.company_name || "Company"}
+  seekerName={profile.fullname || "Seeker"}
+  jobTitle={jobTitle || profile.job_titles?.[0]?.job_name || "Open Position"}
+  seekerEmail={profile.email || ""}
+  companyEmail={viewer.email || ""}
+/>
             </div>
           </div>
         </div>

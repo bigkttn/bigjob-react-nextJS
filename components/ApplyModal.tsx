@@ -15,6 +15,11 @@ import styles from './ApplyModel.module.css'
 //   jobTitle: string;
 // }
 
+interface  jobOption{
+  post_id:number;
+  job_position:string;
+}
+
 interface ContactModalProps {
   mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
   isOpen: boolean;
@@ -27,6 +32,7 @@ interface ContactModalProps {
   companyName: string;
   companyEmail: string;
   jobTitle?: string;         // ใส่หรือไม่ใส่ก็ได้
+  companyJobs: jobOption[];
 }
 
 export default function ApplyModal({
@@ -39,14 +45,38 @@ export default function ApplyModal({
   seekerName,
   jobTitle,
   seekerEmail,
-  companyEmail
-  
+  companyEmail,
+  companyJobs = []
 }: ContactModalProps) {
+  // derive initial values from props to avoid undefined identifier errors
+  const initialPostId = postId;
+  const initialJobTitle = jobTitle;
+  // State สำหรับจัดการงานที่เลือก
+  const [selectedPostId, setSelectedPostId] = useState<number | undefined>(initialPostId);
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>(initialJobTitle || '');
+
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
  const indent = "\u00A0".repeat(109);
  
+
+ // เมื่อมีการเลือก Job ใหม่จาก Dropdown
+  const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const pId = Number(e.target.value);
+    const job = companyJobs.find((j) => j.post_id === pId);
+    if (job) {
+      setSelectedPostId(job.post_id);
+      setSelectedJobTitle(job.job_position);
+    }
+  };
+
+  // Sync state เมื่อ Prop เปลี่ยน
+  useEffect(() => {
+    if (initialPostId) setSelectedPostId(initialPostId);
+    if (initialJobTitle) setSelectedJobTitle(initialJobTitle);
+  }, [initialPostId, initialJobTitle]);
+  
   useEffect(() => {
     if (!isOpen) return;
     if(mode === 'apply') {
@@ -63,18 +93,19 @@ ${indent}ขอแสดงความนับถือ
 ${indent}${seekerName || 'invalid seeker name'}`);
     } else  if (mode === 'invite'){
       setMessage(`เรียนคุณ ${seekerName || 'invaild seeker name'}
-     ทางบริษัท ${companyName || 'เรา companyName'} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
+     ทางบริษัท ${companyName || 'เรา companyyyName'} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
 
 จึงขออนุญาตติดต่อเพื่อสอบถามความสนใจ และเรียนเชิญพูดคุยรายละเอียดเกี่ยวกับโอกาสในการมารร่วมงานกับเราค่ะ
 
-หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ
+ทั้งนี้หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ
 
-ขอแสดงความนับถือ
-ฝ่ายทรัพยากรบุคคล ${companyName || 'invaild companyName'}`);
+${indent}ขอแสดงความนับถือ
+${indent}ฝ่ายทรัพยากรบุคคล ${companyName || 'invaild companyNameyyyyyy'}`);
       }
 },[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
 
   if (!isOpen) return null;
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +160,7 @@ ${indent}${seekerName || 'invalid seeker name'}`);
  return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
-        <h3 className={styles.modalTitle}>สมัครงานตำแหน่ง {jobTitle}</h3>
+        <h3 className={styles.modalTitle}>{titleText}</h3>
 
         {statusMsg.text && (
           <div
