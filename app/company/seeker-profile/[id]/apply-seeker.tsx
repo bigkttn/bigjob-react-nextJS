@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import styles from './applySeeker.module.css'
 import ApplyModal from '@/components/ApplyModal';
+import { apiUrl } from '@/lib/hostURL';
 
 interface ContactModalProps {
   mode: 'apply' | 'invite';
@@ -51,7 +52,7 @@ export default function ApplySeeker({
   // check รายการสมัครซ้ำ ทำroute แล้ว เหลือเทศ
   const checkApplied = async () => {
     try {
-      const response = await fetch("/api/user/check_interview_seeker", {
+      const response = await fetch(`${apiUrl}/api/company/check_favour_user/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -95,6 +96,7 @@ export default function ApplySeeker({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         userId={userId}
+        companyId={companyId}
         companyName={companyName}
         seekerName={seekerName}
         jobTitle={jobTitle}
