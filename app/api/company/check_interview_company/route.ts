@@ -6,9 +6,7 @@ export async function POST(req: NextRequest) {
     const { user_id, post_id } = await req.json();
 
     const [rows]: any = await db.query(
-      `SELECT it.tracking_id, it.status 
-      FROM interview_tracking it 
-      WHERE it.post_id = ? AND it.user_id = ? LIMIT 1`,
+      `SELECT tracking_id, status FROM interview_tracking WHERE post_id = ? AND user_id = ? LIMIT 1`,
       [Number(post_id), Number(user_id)]
     );
 

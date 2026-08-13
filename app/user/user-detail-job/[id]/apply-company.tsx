@@ -11,6 +11,7 @@ interface ApplyCompanyProps {
   onClose?:() => void;
   postId: number,
   userId: number,
+  companyId:number,
   companyName: string,
   seekerName: string,
   jobTitle: string,
@@ -25,7 +26,8 @@ export default function ApplyCompany({
    seekerName,
    jobTitle,
    seekerEmail,
-   companyEmail
+   companyEmail,
+   companyId
   }:ApplyCompanyProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReported, setIsReported] = useState(false);
@@ -37,7 +39,8 @@ export default function ApplyCompany({
   //   seekerName,
   //   seekerEmail,
   //   postId,
-  //   userId
+  //   userId,
+  //   companyId,
   // });
 
 
@@ -69,7 +72,11 @@ const checkApplied = async () => {
     }
   };
 
-  
+  const handleCloseModal = () => {
+     checkApplied();     
+    setIsModalOpen(false); 
+   
+  };
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
@@ -98,7 +105,7 @@ const checkApplied = async () => {
       <ApplyModal
         mode="apply"
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         postId={Number(postId)}
         userId={userId}
         companyName={companyName}

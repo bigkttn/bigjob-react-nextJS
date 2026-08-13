@@ -39,7 +39,7 @@
 .navRight {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
 }
 
 .navLink {
@@ -73,7 +73,7 @@
   margin: 0 auto;
 }
 
-/* Left Sidebar - Job Cards */
+/* Left Sidebar - Applicant Cards */
 .sidebar {
   background-color: #f2f2f2;
   border-radius: 20px;
@@ -114,8 +114,9 @@
 .companyLogo {
   width: 50px;
   height: 50px;
-  border-radius: 10px;
+  border-radius: 50%;
   object-fit: cover;
+  background-color: #ccc;
 }
 
 .cardDetails h4 {
@@ -139,17 +140,23 @@
   font-weight: 600;
   color: #fff;
   text-align: center;
+  text-transform: capitalize;
 }
 
-.statusScreening {
-  background-color: #ff8c32;
+.statusScreening,
+.statusInterview {
+  background-color: #eab308;
+  color: #000;
 }
 
-.statusRejected {
+.statusRejected,
+.statusClosed {
   background-color: #d32f2f;
 }
 
-.statusOffer {
+.statusOffer,
+.statusAppointment,
+.statusApplied {
   background-color: #2e7d32;
 }
 
@@ -179,7 +186,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 600px;
+  max-width: 650px;
   margin: 0 auto;
   width: 100%;
   position: relative;
@@ -206,6 +213,11 @@
 }
 
 .step.active .stepIcon {
+  background-color: #eab308;
+  color: #000;
+}
+
+.step.completed .stepIcon {
   background-color: #2e7d32;
   color: #fff;
 }
@@ -213,6 +225,7 @@
 .stepLabel {
   font-size: 14px;
   font-weight: 600;
+  text-transform: capitalize;
 }
 
 .stepLine {
@@ -223,38 +236,22 @@
   margin-bottom: 24px;
 }
 
-.actionButtons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-}
-
-.btnAccept, .btnReject {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.btnAccept span, .btnReject span {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+.datePickerRow {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  margin-bottom: 4px;
+  gap: 16px;
+  margin-top: 8px;
 }
 
-.btnAccept span { background-color: #2e7d32; }
-.btnReject span { background-color: #d32f2f; }
+.inputField {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+}
 
-/* Job Detail Section */
+/* Applicant Detail Section */
 .detailBox {
   background-color: #f2f2f2;
   border-radius: 20px;
@@ -273,6 +270,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 .detailHeader h2 {
@@ -282,10 +280,16 @@
 
 .detailGrid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 24px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+.gridColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .infoTable {
@@ -294,22 +298,43 @@
 }
 
 .infoTable td {
-  padding: 6px 0;
+  padding: 4px 0;
   vertical-align: top;
 }
 
 .infoTable td:first-child {
   font-weight: bold;
   width: 110px;
+  color: #555;
 }
 
 .sectionTitle {
   font-weight: bold;
-  margin-top: 12px;
-  margin-bottom: 6px;
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: #111;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
 }
 
-.contactBox a {
-  color: #0066cc;
-  text-decoration: underline;
+.pdfButton {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 16px;
+  background-color: #666;
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 12px;
+  text-align: center;
+  width: fit-content;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  font-size: 18px;
+  color: #777;
 }

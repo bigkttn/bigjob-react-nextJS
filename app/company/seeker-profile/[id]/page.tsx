@@ -28,7 +28,29 @@ async function getSeekerProfile(userId: string) {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  return data.user ?? null;
+  return data.company ??data.user ?? null;
+}
+
+async function getCompanyProfile(companyId: number, token?: string) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Cookie = `session=${token}`;
+  }
+
+  const res = await fetch(`${apiUrl}/api/company/getCompanyById/${companyId}`, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  return data.company ?? data.user ?? data.data ?? data;
+
 }
 
 const fmt = (val: any) =>
@@ -70,11 +92,15 @@ export default async function SeekerProfilePage({params}:PageProps)
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
   const profile = await getSeekerProfile(userId);
  
+  let company: any = null;
   let jobTitle = "";
   let postId: number | null = null;
   let companyJobs = [];
+
   if (viewer?.id) {
+    company = await getCompanyProfile(viewer.id, token);
     try {
+      
       const postRes = await fetch(
         `${apiUrl}/api/posts/getPostbyCompanyId?company_id=${viewer.id}`,
         {
@@ -83,8 +109,7 @@ export default async function SeekerProfilePage({params}:PageProps)
           "Cookie": `session=${token}`
           },
           cache: "no-store",
-        }
-      );
+        });
 
       if (postRes.ok) {
         const reponseData = await postRes.json();
@@ -237,7 +262,7 @@ export default async function SeekerProfilePage({params}:PageProps)
                   className={styles.titleinfoRow}
                   style={{ marginTop: "12px" }}
                 >
-                  <strong>Contact</strong>
+                  <strong>การติดต่อ</strong>
                 </div>
                 {[
                   { label: "Line ID", key: "line_id" },
@@ -431,15 +456,15 @@ export default async function SeekerProfilePage({params}:PageProps)
               )}
             </div>
             <div className={styles.contactCard}>
-              <h3>Contact</h3>
+              <h3>การติดต่อ</h3>
              <ApplySeeker
   mode="invite"
-  postId={postId ?? 0}
+  postId={Number(postId) ?? 0}
   userId={Number(userId)}
   companyId={Number(viewer.id)}
-  companyName={viewer.company_name || "Company"}
-  seekerName={profile.fullname || "Seeker"}
-  jobTitle={jobTitle || profile.job_titles?.[0]?.job_name || "Open Position"}
+  companyName={company?.company_name || viewer?.company_name || "invaid Company"}
+  seekerName={profile.fullname || "invaid Seeker"}
+  jobTitle={jobTitle || profile.job_titles?.[0]?.job_name}
   seekerEmail={profile.email || ""}
   companyEmail={viewer.email || ""}
   companyJobs={companyJobs}

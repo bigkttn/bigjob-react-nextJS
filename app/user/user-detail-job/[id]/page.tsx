@@ -181,13 +181,13 @@ seekerName = seekerName || "invalid seeker name";
           <ApplyCompany
             mode="invite"
             postId={Number(postId)}
-            userId={1}
-            companyName={viewer.company_name || "invalid Company Name"}
-            seekerName={seekerName || "invalid seeker Name"} 
+            userId={viewer.id}
+            companyId={Number(job.company_id)}
+            companyName={job.company_name || "invalid Company Name"}
+            seekerName={seekerName || "invalid seeker Name"}
             jobTitle={job.job_position || "invalid jobTitle"}
             seekerEmail={seekerEmail || "invalid seeker Email"}
-            companyEmail={viewer.email || "invalid companyEmail"}
-          
+            companyEmail={companyEmail || viewer.email || "invalid companyEmail"}
           />
 
           <div className={styles.header}>

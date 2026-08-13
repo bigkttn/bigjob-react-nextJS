@@ -15,7 +15,7 @@ interface PageProps{
 export default async function SeekerTracking({params}:PageProps) {
   const resParams = await params;
   const companyId = resParams.id;
-  // console.log("userId",userId);
+  console.log("companyId",companyId);
 
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -39,13 +39,17 @@ export default async function SeekerTracking({params}:PageProps) {
   }
   let trackingList:any[]=[];
   try {
-    const res = await fetch(`${apiUrl}/api/interview_tracking/GetByCompany/${companyId}`,{
-      cache:"no-store"
+    const res = await fetch(`${apiUrl}/api/interview_tracking/GetByCompany/${companyId}`, {
+      cache: "no-store",
+      headers: {
+        Cookie: `session=${token}`,
+      },
     });
+
+     const data = await res.json();
     if(res.ok){
-      const data = await res.json();
-      trackingList = data.rows || [];
-      console.log("trackingList",trackingList);
+      trackingList = Array.isArray (data)? data: (data.rows || []);
+      console.log("data หน้าcompany tracking:",trackingList);
     }
     
   } catch (error) {
