@@ -5,6 +5,11 @@ import styles from './applySeeker.module.css'
 import ApplyModal from '@/components/ApplyModal';
 import { apiUrl } from '@/lib/hostURL';
 
+interface JobOption {
+  post_id: number;
+  job_position: string;
+}
+
 interface ContactModalProps {
   mode: 'apply' | 'invite';
   postId: number,
@@ -15,6 +20,7 @@ interface ContactModalProps {
   jobTitle: string,
   seekerEmail: string,
   companyEmail: string
+  companyJobs?: any[]
 }
 
 export default function ApplySeeker({
@@ -26,10 +32,12 @@ export default function ApplySeeker({
   seekerName,
   jobTitle,
   seekerEmail,
-  companyEmail
+  companyEmail,
+  companyJobs = [],
 }: ContactModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReported, setIsReported] = useState(false);
+
   // LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
   console.log('--- InviteSeeker Props ---', {
     jobTitle,
@@ -46,8 +54,7 @@ export default function ApplySeeker({
     if (userId) {
       checkApplied();
     }
-  }
-    , [userId, postId]);
+  }, [userId, postId]);
 
   // check รายการสมัครซ้ำ ทำroute แล้ว เหลือเทศ
   const checkApplied = async () => {
@@ -76,7 +83,6 @@ export default function ApplySeeker({
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        {/* <h1 className="text-3xl font-bold">{jobData.company}</h1> */}
 
         {/* ปุ่มกด Apply Now */}
         <button
@@ -102,6 +108,7 @@ export default function ApplySeeker({
         jobTitle={jobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
+        companyJobs={companyJobs}
       />
 
 

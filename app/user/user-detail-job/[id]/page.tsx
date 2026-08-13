@@ -187,6 +187,7 @@ seekerName = seekerName || "invalid seeker name";
             jobTitle={job.job_position || "invalid jobTitle"}
             seekerEmail={seekerEmail || "invalid seeker Email"}
             companyEmail={viewer.email || "invalid companyEmail"}
+          
           />
 
           <div className={styles.header}>
