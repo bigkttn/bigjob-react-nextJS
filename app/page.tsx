@@ -1,33 +1,84 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import UserHomeClient from './user/user-home/userhome-client';
-import CompanyHomeClient from './company/company-home/page';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import UserHomeClient from "./user/user-home/userhome-client";
+import CompanyHomeClient from "./company/company-home/page";
 
 interface HomeSwitcherProps {
-  initialUser: any;
+  initialUser?: any;
 }
 
 export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
-  const [mode, setMode] = useState<'user' | 'company'>('user');
-  const particles = ['30deg', '60deg', '90deg', '120deg', '150deg', '180deg'];
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(initialUser || null);
+  const [mode, setMode] = useState<"user" | "company">("user");
+
+  const particles = ["30deg", "60deg", "90deg", "120deg", "150deg", "180deg"];
+
+  useEffect(() => {
+    const checkSessionAndRedirect = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+
+        if (data?.user) {
+          const role = data.user.role;
+          setUser(data.user);
+
+          // เช็ค Role แล้วพาแยกไปหน้าตามบทบาททันที
+          switch (role) {
+            case "admin":
+              router.replace("/admin/home");
+              return;
+            case "company":
+              router.replace("/company/company-home");
+              return;
+            case "seeker":
+            case "user":
+              router.replace("/user/user-home");
+              return;
+            default:
+              break;
+          }
+        }
+      } catch (error) {
+        console.error("Failed to check session:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSessionAndRedirect();
+  }, [router]);
 
   const handleToggleChange = (checked: boolean) => {
-    setMode(checked ? 'company' : 'user');
+    setMode(checked ? "company" : "user");
   };
 
+  // แสดงหน้า Loading ชั่วคราวก่อนย้ายหน้า เพื่อป้องกันหน้าจอกระตุก
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-900 text-white">
+        <p className="text-lg font-semibold">กำลังตรวจสอบสิทธิ์ผู้ใช้งาน...</p>
+      </div>
+    );
+  }
+
+  // กรณีที่เป็น Guest (ไม่ได้ Login) ให้แสดงหน้า Switcher/Landing ตามปกติ
   return (
     <main className="relative min-h-screen">
       <div className="floating-mode-switcher">
         <span className="mode-label">
-          {mode === 'company' ? 'COMPANY MODE' : 'USER MODE'}
+          {mode === "company" ? "COMPANY MODE" : "USER MODE"}
         </span>
 
         <label className="cosmic-toggle">
           <input
             className="toggle"
             type="checkbox"
-            checked={mode === 'company'}
+            checked={mode === "company"}
             onChange={(e) => handleToggleChange(e.target.checked)}
           />
           <div className="slider">
@@ -46,7 +97,7 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
                 <div
                   key={index}
                   className="particle"
-                  style={{ '--angle': angle } as React.CSSProperties}
+                  style={{ "--angle": angle } as React.CSSProperties}
                 />
               ))}
             </div>
@@ -54,16 +105,16 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
         </label>
       </div>
 
-      {mode === 'user' ? (
-        <UserHomeClient initialUser={initialUser} />
+      {mode === "user" ? (
+        <UserHomeClient initialUser={user} />
       ) : (
-        <CompanyHomeClient initialUser={initialUser} />
+        <CompanyHomeClient initialUser={user} />
       )}
 
       <style jsx global>{`
         .floating-mode-switcher {
-          position: Absolute;
-          top: 20px; /* ดันลงมาจาก Navbar สีดำ */
+          position: absolute;
+          top: 20px;
           display: flex;
           left: 10px;
           align-items: center;
@@ -74,6 +125,7 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
           border-radius: 40px;
           border: 1px solid rgba(255, 255, 255, 0.2);
           box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+          z-index: 50;
         }
 
         .mode-label {
@@ -120,7 +172,8 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
         .cosmos {
           position: absolute;
           inset: 0;
-          background: radial-gradient(1px 1px at 10% 10%, #fff 100%, transparent),
+          background:
+            radial-gradient(1px 1px at 10% 10%, #fff 100%, transparent),
             radial-gradient(1px 1px at 30% 30%, #fff 100%, transparent),
             radial-gradient(1px 1px at 50% 50%, #fff 100%, transparent),
             radial-gradient(1px 1px at 70% 70%, #fff 100%, transparent),
@@ -207,9 +260,18 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
           transition: 0.5s;
         }
 
-        .energy-line:nth-of-type(1) { top: 20%; transform: rotate(15deg); }
-        .energy-line:nth-of-type(2) { top: 50%; transform: rotate(0deg); }
-        .energy-line:nth-of-type(3) { top: 80%; transform: rotate(-15deg); }
+        .energy-line:nth-of-type(1) {
+          top: 20%;
+          transform: rotate(15deg);
+        }
+        .energy-line:nth-of-type(2) {
+          top: 50%;
+          transform: rotate(0deg);
+        }
+        .energy-line:nth-of-type(3) {
+          top: 80%;
+          transform: rotate(-15deg);
+        }
 
         .toggle:checked + .slider .energy-line {
           opacity: 1;
@@ -235,31 +297,72 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
           animation: particleBurst 1s ease-out infinite;
         }
 
-        .particle:nth-child(1) { left: 20%; animation-delay: 0s; }
-        .particle:nth-child(2) { left: 40%; animation-delay: 0.2s; }
-        .particle:nth-child(3) { left: 60%; animation-delay: 0.4s; }
-        .particle:nth-child(4) { left: 80%; animation-delay: 0.6s; }
-        .particle:nth-child(5) { left: 30%; animation-delay: 0.8s; }
-        .particle:nth-child(6) { left: 70%; animation-delay: 1s; }
+        .particle:nth-child(1) {
+          left: 20%;
+          animation-delay: 0s;
+        }
+        .particle:nth-child(2) {
+          left: 40%;
+          animation-delay: 0.2s;
+        }
+        .particle:nth-child(3) {
+          left: 60%;
+          animation-delay: 0.4s;
+        }
+        .particle:nth-child(4) {
+          left: 80%;
+          animation-delay: 0.6s;
+        }
+        .particle:nth-child(5) {
+          left: 30%;
+          animation-delay: 0.8s;
+        }
+        .particle:nth-child(6) {
+          left: 70%;
+          animation-delay: 1s;
+        }
 
         @keyframes ringPulse {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.1); opacity: 0.6; }
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 0.3;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.6;
+          }
         }
 
         @keyframes patternRotate {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         @keyframes energyFlow {
-          0% { transform: scaleX(0) translateX(0); opacity: 0; }
-          50% { transform: scaleX(1) translateX(50%); opacity: 1; }
-          100% { transform: scaleX(0) translateX(100%); opacity: 0; }
+          0% {
+            transform: scaleX(0) translateX(0);
+            opacity: 0;
+          }
+          50% {
+            transform: scaleX(1) translateX(50%);
+            opacity: 1;
+          }
+          100% {
+            transform: scaleX(0) translateX(100%);
+            opacity: 0;
+          }
         }
 
         @keyframes particleBurst {
-          0% { transform: translate(0, 0) scale(1); opacity: 1; }
+          0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+          }
           100% {
             transform: translate(
                 calc(cos(var(--angle)) * 25px),
