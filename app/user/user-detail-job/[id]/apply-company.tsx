@@ -106,6 +106,7 @@ const checkApplied = async () => {
         jobTitle={jobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
+        companyJobs={[]}
       />
 
       

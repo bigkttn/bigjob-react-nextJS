@@ -59,6 +59,8 @@ export default function ApplyModal({
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
  const indent = "\u00A0".repeat(109);
+ const indenttwo = "\u00A0".repeat(95);
+
  
 
  // เมื่อมีการเลือก Job ใหม่จาก Dropdown
@@ -81,31 +83,31 @@ export default function ApplyModal({
     if (!isOpen) return;
     if(mode === 'apply') {
       
-      setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName || 'invaild company name'}
+      setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName}
 
-ข้าพเจ้า ${seekerName || 'invaild seeker name'} มีความประสงค์ขอสมัครงานในตำแหน่ง ${jobTitle || 'invaild job Title'}
+ข้าพเจ้า ${seekerName} มีความประสงค์ขอสมัครงานในตำแหน่ง ${jobTitle}
 
 เนื่องด้วยข้าพเจ้า มีความสนใจในสายงานนี้ และเชื่อมั่นว่าทักษะ รวมถึงประสบการณ์ที่มีจะสามารถนำมาประยุกต์ใช้เพื่อร่วมสร้างประโยชน์ให้แก่องค์กรของท่านได้เป็นอย่างดี
 
 ทั้งนี้ หากต้องการข้อมูลเพิ่มเติมหรือประสงค์นัดสัมภาษณ์งาน สามารถติดต่อกลับได้ผ่านอีเมลนี้
 
 ${indent}ขอแสดงความนับถือ
-${indent}${seekerName || 'invalid seeker name'}`);
+${indent}${seekerName}`);
     } else  if (mode === 'invite'){
-      setMessage(`เรียนคุณ ${seekerName || 'invaild seeker name'}
-     ทางบริษัท ${companyName || 'เรา companyyyName'} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
+      setMessage(`เรียนคุณ ${seekerName}
+     ทางบริษัท ${companyName} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
 
 จึงขออนุญาตติดต่อเพื่อสอบถามความสนใจ และเรียนเชิญพูดคุยรายละเอียดเกี่ยวกับโอกาสในการมารร่วมงานกับเราค่ะ
 
 ทั้งนี้หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ
 
 ${indent}ขอแสดงความนับถือ
-${indent}ฝ่ายทรัพยากรบุคคล ${companyName || 'invaild companyNameyyyyyy'}`);
+${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`);
       }
 },[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
 
   if (!isOpen) return null;
-  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,11 +124,11 @@ ${indent}ฝ่ายทรัพยากรบุคคล ${companyName || 'i
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-        postId,
+        postId:selectedPostId,
         userId,
         companyName,
         seekerName,
-        jobTitle,
+        jobTitle:selectedJobTitle,
         seekerEmail,
         companyEmail,
         message,
@@ -174,12 +176,29 @@ ${indent}ฝ่ายทรัพยากรบุคคล ${companyName || 'i
 
         <form onSubmit={handleSubmit} className={styles.formGroup}>
 
+        {mode === 'invite' && companyJobs.length>0 && (
+          <div className={styles.formItem} style={{marginBottom:'15px'}}>
+            <label style={{fontWeight:'bold',display:'block',marginBottom:'5px'}}>
+              เลือกตำแหน่งงานที่ต้องการเสนอ:
+            </label>
+            <select value={selectedPostId || ''} onChange={handleJobChange} style={{width:'100%', padding:'8px 12px',borderRadius:'6px',border:'1px solid #ccc'}}>
+              <option value="" disabled>--เลือกตำแหน่งงาน--</option>
+              {companyJobs.map((job)=>(
+                <option value={job.post_id} key={job.post_id}>
+                  {job.job_position}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
           <div className={styles.formItem}>
             {/* <label>ข้อความถึง HR</label> */}
             <textarea
-              rows={6}
+              rows={8}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              style={{width:'100%',padding:'10px'}}
             />
           </div>
 

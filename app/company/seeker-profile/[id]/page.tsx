@@ -72,7 +72,7 @@ export default async function SeekerProfilePage({params}:PageProps)
  
   let jobTitle = "";
   let postId: number | null = null;
-
+  let companyJobs = [];
   if (viewer?.id) {
     try {
       const postRes = await fetch(
@@ -88,21 +88,14 @@ export default async function SeekerProfilePage({params}:PageProps)
 
       if (postRes.ok) {
         const reponseData = await postRes.json();
-        
-        // Print ออก VS Code Terminal เพื่อดูโครงสร้างข้อมูลจริง
-        console.log("--- RAW RESPONSE ---", reponseData);
+        companyJobs = Array.isArray(reponseData)? reponseData:[];
 
-        // ดึง array จาก responseData (รองรับกรณี Response หุ้มด้วย data/posts หรือเป็น Array ตรงๆ)
-        const rawList = Array.isArray(reponseData)
-          ? reponseData
-          : (reponseData?.data || reponseData?.posts || [reponseData]);
-
-        const firstPost = rawList[0];
+      
+        const firstPost = companyJobs[0];
 
         if (firstPost) {
           jobTitle = firstPost.job_position || firstPost.post_title || "";
 
-          // 🟢 ลองดึง Key ID ทั้งหมดที่เป็นไปได้
           const foundId = firstPost.post_id ?? firstPost.id ?? firstPost.postId ?? firstPost._id;
           postId = foundId ? Number(foundId) : null;
         }
@@ -449,6 +442,7 @@ export default async function SeekerProfilePage({params}:PageProps)
   jobTitle={jobTitle || profile.job_titles?.[0]?.job_name || "Open Position"}
   seekerEmail={profile.email || ""}
   companyEmail={viewer.email || ""}
+  companyJobs={companyJobs}
 />
             </div>
           </div>
