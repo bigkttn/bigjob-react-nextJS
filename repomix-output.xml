@@ -1,0 +1,6274 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+app/
+  admin/
+    admin-report/
+      adminReport.module.css
+      page.tsx
+    company/
+      [id]/
+        adminCompanyDetail.module.css
+        AdminCompanyDetail.tsx
+        page.tsx
+    Feedbacks/
+      AdminFeedback.module.css
+      layout.tsx
+      page.tsx
+    home/
+      home.module.css
+      page.tsx
+  api/
+    admin/
+      companies/
+        Ban/
+          route.ts
+        route.ts
+      feedbacks/
+        route.ts
+      post/
+        Ban/
+          route.ts
+      reports/
+        route.ts
+      user/
+        ban/
+          route.ts
+      verify/
+        [id]/
+          route.ts
+    auth/
+      google/
+        route.ts
+      login/
+        route.ts
+      logout/
+        route.ts
+      me/
+        route.ts
+      registerB/
+        route.ts
+      registerGoogle/
+        route.ts
+      request-otp/
+        route.ts
+      reset-password/
+        route.ts
+      verify-otp/
+        route.ts
+    company/
+      all-company/
+        route.ts
+      check_favour_user/
+        route.ts
+      check_report_user/
+        route.ts
+      delete_favour_user/
+        route.ts
+      favour_user/
+        route.ts
+      feedbacks/
+        route.ts
+      getCompanyById/
+        [id]/
+          route.ts
+      notifications/
+        route.ts
+      report_user/
+        route.ts
+      saved-seekers/
+        route.ts
+      updateProfile/
+        [id]/
+          route.ts
+    feedback/
+      notifications/
+        route.ts
+      route.ts
+    footer-stats/
+      route.ts
+    interview_tracking/
+      apply-company/
+        route.ts
+      GetByCompany/
+        [id]/
+          route.ts
+      GetByUser/
+        [id]/
+          route.ts
+      invite-seeker/
+        route.ts
+    posts/
+      company-search-user/
+        route.ts
+      CompanySuggested/
+        route.ts
+      deletePost/
+        [id]/
+          route.ts
+      getallPosts/
+        route.ts
+      getPostbyCompanyId/
+        route.ts
+      getPostById/
+        [id]/
+          route.ts
+      insertPost/
+        route.ts
+      updatePost/
+        [id]/
+          route.ts
+      user-search-post/
+        route.ts
+      UserSuggested/
+        route.ts
+    question/
+      createTest/
+        route.ts
+      getTestByPostId/
+        [id]/
+          route.ts
+      saveTest/
+        route.ts
+    seeker/
+      check_favour_post/
+        route.ts
+      check_report_company/
+        route.ts
+      check_report_post/
+        route.ts
+      delete_favour_post/
+        route.ts
+      delete_report_post/
+        route.ts
+      favour_post/
+        route.ts
+      report_company/
+        route.ts
+      report_post/
+        route.ts
+    test/
+      [id]/
+        route.ts
+    test-db/
+      route.ts
+    user/
+      check_interview_seeker/
+        route.ts
+      deleteFileRecord/
+        route.ts
+      getAllUser/
+        route.ts
+      getUserAndJobtitle/
+        route.ts
+      getUserById/
+        [id]/
+          route.ts
+      saved-company/
+        route.ts
+      saveFileRecord/
+        route.ts
+      toggleVisibility/
+        [id]/
+          route.ts
+      updateProfile/
+        [id]/
+          route.ts
+    visitor/
+      route.ts
+  company/
+    company-feedback/
+      CompanyFeedback.module.css
+      page.tsx
+    company-home/
+      companyhome.module.css
+      page.tsx
+      province.tsx
+    company_tracking/
+      [id]/
+        company_application.tsx
+        company_tracking.module.css
+        page.tsx
+    detail/
+      [id]/
+        detail.module.css
+        page.tsx
+    post-job/
+      getSession.tsx
+      page.tsx
+      postjob.module.css
+    profile/
+      companyProfile.module.css
+      page.tsx
+    savedSeeker/
+      page.tsx
+      savedSeekerClient.tsx
+      savedSeeker.module.css
+    seeker-profile/
+      [id]/
+        adminbutton.tsx
+        applySeeker.module.css
+        apply-seeker.tsx
+        BackButton.tsx
+        BanPopup.tsx
+        FilePreviewButton.tsx
+        page.tsx
+        ProfileActionsButton.tsx
+        profile.module.css
+        seekerProfile.module.css
+  forgotPassword/
+    forgotPassword.module.css
+    page.tsx
+  login/
+    login.module.css
+    page.tsx
+  register/
+    page.tsx
+    register.module.css
+  user/
+    savedCompany/
+      page.tsx
+      savedCompanyClient.tsx
+      savedCompany.module.css
+    seeker_tracking/
+      [id]/
+        page.tsx
+        seeker_application.tsx
+        seeker_tracking.module.css
+    user-detail-job/
+      [id]/
+        adminbutton.tsx
+        applyCompany.module.css
+        apply-company.tsx
+        backBttn.tsx
+        BanPopup.tsx
+        detailjob.module.css
+        page.tsx
+      saveAndreportBttn.module.css
+      saveAndreportBttn.tsx
+      seekerProfile.module.css
+    user-feedback/
+      Feedback.module.css
+      page.tsx
+    user-home/
+      page.tsx
+      province.tsx
+      userhome-client.module.css
+      userhome-client.tsx
+    user-profile/
+      levelSelect.tsx
+      page.tsx
+      province.tsx
+      seekerProfile.module.css
+    userProfileCompany/
+      [id]/
+        adminbutton.tsx
+        backBttn.tsx
+        BanPopup.tsx
+        getSession.tsx
+        map.module.css
+        map.tsx
+        page.tsx
+        saveAndreportBttn.module.css
+        SaveAndReportCompanyBttn.tsx
+        userProfileCompany.module.css
+  favicon.ico
+  globals.css
+  home.module.css
+  layout.tsx
+  not-found.tsx
+  page.tsx
+components/
+  ApplyModal.tsx
+  ApplyModel.module.css
+  footer.module.css
+  footer.tsx
+  LeafletMap.tsx
+  navbar.css
+  Navbar.tsx
+  ProvinceSelect.tsx
+lib/
+  db.ts
+  educationLevels.tsx
+  firebase.ts
+  hostURL.ts
+  otpStore.ts
+  rateLimit.ts
+  session.ts
+  thaiProvinces.ts
+  vectorSimilarity.ts
+public/
+  assets/
+    images/
+      login-bg.png
+  file.svg
+  globe.svg
+  login-bg.png
+  next.svg
+  vercel.svg
+  window.svg
+AGENTS.md
+CLAUDE.md
+eslint.config.mjs
+.gitignore
+middleware.ts
+next.config.ts
+package.json
+postcss.config.mjs
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="app/admin/company/[id]/adminCompanyDetail.module.css">
+/* 📂 วางไฟล์นี้ที่: app/admin/company/[id]/adminCompanyDetail.module.css */
+.container {
+⋮----
+.backBtn {
+⋮----
+.card {
+⋮----
+.headerRow {
+⋮----
+.logo {
+⋮----
+.companyName {
+⋮----
+.statusBadge {
+⋮----
+.rejectReason {
+⋮----
+.infoGrid {
+⋮----
+.sectionTitle {
+⋮----
+.filePreview {
+⋮----
+.actionRow {
+⋮----
+.btn {
+⋮----
+.btn:hover {
+⋮----
+.btn:disabled {
+⋮----
+.approve {
+⋮----
+.reject {
+.topBar {
+⋮----
+.backButtonCustom {
+⋮----
+.backButtonCustom:hover {
+⋮----
+/* เพิ่มเติม: เช็คให้แน่ใจว่า .actionRow ไม่ได้ถูกซ่อน */
+</file>
+
+<file path="app/admin/company/[id]/page.tsx">
+// 📂 วางไฟล์นี้ที่: app/admin/company/[id]/page.tsx
+import AdminCompanyDetail from "./AdminCompanyDetail";
+⋮----
+export default async function AdminCompanyDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+})
+</file>
+
+<file path="app/api/admin/feedbacks/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import { RowDataPacket } from "mysql2";
+⋮----
+export type FeedbackStatus = 'pending' | 'read' | 'replied';
+export type UserRole = 'seeker' | 'company' | 'admin' | 'user';
+⋮----
+export interface IFeedback {
+    feedback_id: number;
+    message: string;
+    created_at: string;
+    admin_message: string | null;
+    status: FeedbackStatus;
+    replied_at: string | null;
+    email: string | null;
+    role: string;
+    source_type: 'user' | 'company'; // 📌 เพิ่มตัวบอกว่ามาจากตารางไหน
+}
+⋮----
+source_type: 'user' | 'company'; // 📌 เพิ่มตัวบอกว่ามาจากตารางไหน
+⋮----
+export interface ApiResponse<T> {
+    success: boolean;
+    data?: T;
+    error?: string;
+}
+⋮----
+// ============================================================================
+// 📥 GET: ดึงประวัติคำติชมทั้งหมด (UNION ALL 2 ตารางเข้าด้วยกัน)
+// ============================================================================
+export async function GET()
+// ============================================================================
+// 📤 PUT: แอดมินบันทึกข้อความตอบกลับ
+// ============================================================================
+export async function PUT(request: NextRequest)
+⋮----
+// 📌 เลือกตารางที่จะอัปเดตตาม source_type
+⋮----
+// ============================================================================
+// 🗑️ DELETE: ลบข้อมูลฟีดแบ็ค
+// ============================================================================
+export async function DELETE(request: NextRequest)
+⋮----
+const source_type = searchParams.get("type"); // รับค่า type มาด้วย
+⋮----
+// 📌 เลือกตารางที่จะลบตาม source_type
+</file>
+
+<file path="app/api/admin/reports/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function GET()
+⋮----
+// 1. รายงานเกี่ยวกับบริษัท: ผู้รายงานคือ user (คนหางาน), เป้าหมายคือ company
+⋮----
+// 2. รายงานเกี่ยวกับผู้ใช้: ผู้รายงานคือ company, เป้าหมายคือ user (คนหางาน)
+⋮----
+// 3. รายงานเกี่ยวกับโพสต์: ผู้รายงานคือ user (คนหางาน), เป้าหมายคือ post
+⋮----
+// รวมข้อมูลทั้ง 3 ตาราง และเรียงตามวันที่ล่าสุด
+</file>
+
+<file path="app/api/admin/verify/[id]/route.ts">
+// 📂 วางไฟล์นี้ที่: app/api/admin/verify/[id]/route.ts (ทับไฟล์เดิม)
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function PATCH(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> },
+)
+⋮----
+// ถ้า reject ควรมี comment อธิบายเหตุผลให้บริษัทแก้ไขได้ตรงจุด
+</file>
+
+<file path="app/api/auth/google/route.ts">
+import { NextResponse } from 'next/server';
+import { OAuth2Client } from 'google-auth-library';
+import db from '@/lib/db';
+import { createSession } from '@/lib/session'; // 👈 Import ฟังก์ชันสร้าง Session
+⋮----
+export async function POST(request: Request)
+⋮----
+// 1. ค้นหาใน User
+⋮----
+// 2. ค้นหาใน company
+⋮----
+// ลบรหัสผ่านออกก่อนทำอย่างอื่น (ถ้ามี)
+⋮----
+// -----------------------------------------------------
+// 🔐 สร้าง Session สำหรับ Google Login
+// -----------------------------------------------------
+⋮----
+// เรียกใช้ฟังก์ชันที่แยกไว้ บรรทัดเดียวจบ!
+⋮----
+// -----------------------------------------------------
+</file>
+
+<file path="app/api/auth/logout/route.ts">
+import { NextResponse } from 'next/server';
+import { deleteSession } from '@/lib/session'; // หรือถ้าไม่ได้สร้างฟังก์ชันไว้ ให้ใช้ cookies().delete('session')
+⋮----
+export async function POST()
+⋮----
+await deleteSession(); // ลบ Cookie
+</file>
+
+<file path="app/api/auth/me/route.ts">
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
+⋮----
+export async function GET()
+⋮----
+// ถ้าไม่มี Token แปลว่าไม่ได้ล็อกอิน
+⋮----
+// ถอดรหัส Token
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/auth/registerB/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import bcrypt from 'bcryptjs';
+import { createSession } from "@/lib/session";
+import { otpStore } from "@/lib/otpStore";
+⋮----
+export async function POST(request: NextRequest)
+⋮----
+//  1. เริ่มส่วนตรวจสอบ OTP (เอาโค้ดที่เคยส่งมาปรับใช้)
+⋮----
+//  1.1 เช็คเวลาหมดอายุ
+⋮----
+otpStore.delete(email); // ลบทิ้งเลยถ้าหมดเวลา
+⋮----
+// 1.2 กันเดาสุ่ม (Brute force) ลองได้ 5 ครั้ง
+⋮----
+//  1.3 ถอดรหัสเทียบ OTP ด้วย bcrypt
+⋮----
+storedOtpData.attempts++; // บวกจำนวนครั้งที่ผิดเข้าไป
+⋮----
+//  จบส่วนตรวจสอบ OTP (ถ้าผ่านจุดนี้ไปได้แปลว่า OTP ถูกต้องชัวร์ 100%)
+⋮----
+// 2. ตรวจสอบข้อมูลบังคับ
+⋮----
+// 3. ตรวจสอบอีเมลซ้ำในระบบ
+⋮----
+// 4. เข้ารหัสผ่าน และบันทึกข้อมูล
+⋮----
+// 5. สร้าง Session
+⋮----
+// 🧹 6. เคลียร์ OTP ทิ้งหลังจากสมัครสมาชิกสำเร็จแล้ว! (สำคัญมาก ป้องกันคนเอารหัสเดิมมาใช้ซ้ำ)
+</file>
+
+<file path="app/api/auth/registerGoogle/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import { OAuth2Client } from 'google-auth-library';
+import { createSession } from "@/lib/session";
+import bcrypt from 'bcryptjs';
+⋮----
+export async function POST(request: NextRequest)
+⋮----
+// ดึงข้อมูลที่เพิ่ง insert
+⋮----
+// ดึงข้อมูลที่เพิ่ง insert
+</file>
+
+<file path="app/api/auth/request-otp/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import { otpStore } from "@/lib/otpStore"; // นำเข้า temp table ของเรา
+import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rateLimit";
+import bcrypt from "bcryptjs";
+⋮----
+// ตั้งค่า Email Transporter (ใส่ค่าของคุณ)
+⋮----
+service: 'gmail', // หรือ SMTP ที่คุณใช้งาน
+⋮----
+export async function POST(req: NextRequest)
+⋮----
+if (!rateLimit(ip, 5, 60_000)) { // จำกัด 5 ครั้งต่อ 1 นาที
+⋮----
+// สุ่ม OTP 6 หลัก
+⋮----
+const expiresAt = Date.now() + 5 * 60 * 1000; // 5 นาที
+⋮----
+// 1. บันทึกเก็บไว้ใน Memory Map (แทน Database)
+⋮----
+// 2. ส่งอีเมล
+⋮----
+// 3. ตั้งเวลาลบทิ้งเมื่อครบ 5 นาที (เพื่อเคลียร์ Memory)
+⋮----
+// เช็คก่อนลบ เผื่อเขากดขอใหม่ รหัสจะเปลี่ยนไปแล้ว
+</file>
+
+<file path="app/api/auth/reset-password/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import { otpStore } from "@/lib/otpStore";
+import db from "@/lib/db";
+import bcrypt from "bcryptjs";
+⋮----
+export async function POST(req: NextRequest)
+⋮----
+// 🔐 hash password
+⋮----
+// 🔍 2. ตรวจสอบว่าอีเมลนี้อยู่ในตารางไหนกันแน่
+⋮----
+// ถ้าเจอในตาราง User
+⋮----
+// ถ้าไม่เจอใน User ให้ไปอัปเดตในตาราง company
+// ตรวจสอบชื่อคอลัมน์ให้ตรงกับในตาราง company (เช่น company_password และ company_email)
+</file>
+
+<file path="app/api/auth/verify-otp/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import { otpStore } from "@/lib/otpStore";
+import bcrypt from "bcryptjs";
+⋮----
+export async function POST(req: NextRequest)
+⋮----
+// ⏰ หมดอายุ
+⋮----
+// 🚫 กัน brute force (ลองได้ 5 ครั้ง)
+</file>
+
+<file path="app/api/company/check_favour_user/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/company/check_report_user/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/company/feedbacks/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+// 📥 GET: ดึงประวัติการส่ง Feedback (ถอดการ UPDATE เหมาเข่งออกแล้ว)
+export async function GET(request: Request)
+⋮----
+// ดึงประวัติทั้งหมดมาแสดงเรียงจากใหม่ไปเก่าตามปกติ โดยไม่แอบเปลี่ยนสถานะอัตโนมัติแล้ว
+⋮----
+// 🔀 PATCH: อัปเดตสถานะเป็น 'read' เฉพาะรายการที่บริษัทกดคลิกอ่านเท่านั้น
+export async function PATCH(request: Request)
+⋮----
+// ปรับสถานะเป็น 'read' เฉพาะของ ID นี้ และต้องเป็นรายการที่ Admin เคยตอบกลับมาแล้ว ('replied')
+⋮----
+// 📤 POST: บันทึก Feedback ใหม่จาก Company ส่งหา Admin (เหมือนเดิม)
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/company/getCompanyById/[id]/route.ts">
+// 📂 วางไฟล์นี้ที่: app/api/company/getCompanyById/[id]/route.ts
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }, // 1. เปลี่ยนตรงนี้ให้เป็น Promise
+)
+⋮----
+{ params }: { params: Promise<{ id: string }> }, // 1. เปลี่ยนตรงนี้ให้เป็น Promise
+⋮----
+// 2. ใช้ await เพื่อแกะค่า id ออกมาจาก params
+⋮----
+// ดึงข้อมูลบริษัท
+⋮----
+// ❗ ไม่ส่ง password กลับไปฝั่ง client เด็ดขาด
+⋮----
+// ดึงตำแหน่งงานที่บริษัทนี้โพสต์ไว้ทั้งหมด
+</file>
+
+<file path="app/api/company/notifications/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(request: Request)
+⋮----
+// 🌟 ดึง connection เดี่ยวออกจาก pool เพื่อให้อยู่ใน Session เครือข่ายเดียวกัน
+⋮----
+// 1. สร้าง MySQL TEMPORARY TABLE ขึ้นมาใน Session ปัจจุบัน
+⋮----
+// ล้างข้อมูลขยะในตารางชั่วคราวของ Session นี้ก่อนหน้า (ถ้ามี)
+⋮----
+// 2. ดึงเฉพาะไอดี Feedback ของบริษัทนี้ที่มีการตอบกลับ (replied) มาใส่ลงตารางชั่วคราว
+⋮----
+// 3. ทำการ Query นับจำนวนสรุปยอดจาก TEMPORARY TABLE ตามโจทย์
+⋮----
+// 🌟 คืน connection กลับเข้า pool (ตาราง TEMPORARY TABLE จะถูก Drop ทิ้งจากหน่วยความจำอัตโนมัติ)
+</file>
+
+<file path="app/api/company/report_user/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/company/updateProfile/[id]/route.ts">
+// 📂 วางไฟล์นี้ที่: app/api/company/updateProfile/[id]/route.ts (ทับไฟล์เดิม)
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+// ✅ ฟิลด์ที่ "อนุญาต" ให้บริษัทแก้ไขเองได้จากหน้าโปรไฟล์
+// 🆕 เพิ่ม dbd_file เข้ามา เพราะบริษัทต้องอัปโหลดหนังสือรับรองได้เอง
+// ❌ ยังคงห้าม verification_status / verification_comment / banned_until /
+//    company_email / company_password อยู่ในลิสต์นี้เด็ดขาด — ค่าพวกนี้
+//    ต้องถูกควบคุมโดย Admin (ผ่าน /api/admin/verify/[id]) เท่านั้น
+⋮----
+export async function PUT(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> },
+)
+⋮----
+// 🆕 ถ้าบริษัทอัปโหลดไฟล์หนังสือรับรองใหม่ (dbd_file) ระบบจะรีเซ็ตสถานะ
+// การตรวจสอบกลับเป็น "Pending" และล้าง comment เดิมโดยอัตโนมัติ
+// เพราะ Admin ต้องตรวจสอบไฟล์ใหม่อีกครั้งเสมอ ป้องกัน badge "verified"
+// ค้างอยู่จากไฟล์เก่าที่ไม่ตรงกับไฟล์ที่อัปโหลดล่าสุด
+</file>
+
+<file path="app/api/feedback/notifications/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(request: Request)
+</file>
+
+<file path="app/api/feedback/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+// 📥 GET: ดึงประวัติการส่ง Feedback ของผู้ใช้ (ถอดการแอบสลับสถานะออกแล้ว)
+export async function GET(request: Request)
+⋮----
+// ดึงเฉพาะประวัติขึ้นมาเรียงลำดับจากใหม่ไปเก่าอย่างเดียว ไม่แอบอัปเดตอัตโนมัติ
+⋮----
+// 🔀 PATCH: อัปเดตสถานะเป็น 'read' เฉพาะรายการที่ผู้ใช้คลิกเลือกบนหน้า UI
+export async function PATCH(request: Request)
+⋮----
+// ปรับสถานะเป็น 'read' เฉพาะแถวข้อมูลที่ระบุไอดีเข้ามา และยังไม่ได้กดอ่านมาก่อนหน้า
+⋮----
+// 📤 POST: บันทึก Feedback ใหม่จาก User ส่งหา Admin
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/footer-stats/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET()
+</file>
+
+<file path="app/api/interview_tracking/GetByCompany/[id]/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+)
+⋮----
+console.error("SQL Error:", error.message); // เพิ่ม log ดู error ใน terminal
+</file>
+
+<file path="app/api/interview_tracking/GetByUser/[id]/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+)
+⋮----
+console.error("SQL Error:", error.message); // เพิ่ม log ดู error ใน terminal
+</file>
+
+<file path="app/api/interview_tracking/invite-seeker/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rateLimit";
+import db from "@/lib/db";
+import { Seq2SeqLMOutput } from "@xenova/transformers";
+⋮----
+// ตั้งค่า Transporter
+⋮----
+export async function POST(req: NextRequest)
+⋮----
+// ป้องกันการกดส่งรัวๆ (จำกัด 3 ครั้ง ต่อ 1 นาที)
+⋮----
+// Validate ข้อมูลเบื้องต้น
+⋮----
+replyTo: seekerEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที
+</file>
+
+<file path="app/api/posts/company-search-user/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import { getEmbedding, cosineSimilarity } from "@/lib/vectorSimilarity";
+⋮----
+export async function GET(request: NextRequest)
+⋮----
+//  กรณีไม่มีคำค้นหา ดึงผู้ใช้ล่าสุด 10 รายการ
+⋮----
+//  แปลงคำค้นหาเป็นตัวพิมพ์เล็กทั้งหมด
+⋮----
+//  ดึงข้อมูลผู้ใช้ทั้งหมดเพื่อนำมาประมวลผล AI Hybrid Search
+⋮----
+// แปลงคำค้นหาที่เป็นตัวพิมพ์เล็กแล้วไปสร้าง Embedding Vector
+⋮----
+// คำนวณคะแนน Hybrid (แปลงข้อความทุกจุดเป็นตัวพิมพ์เล็กก่อนประมวลผล)
+⋮----
+//  แปลงข้อมูลผู้ใช้ทุกฟิลด์เป็นตัวพิมพ์เล็กทั้งหมด
+⋮----
+// เช็ค Keyword Match (เปรียบเทียบด้วยตัวพิมพ์เล็กทั้งหมด)
+⋮----
+// สร้าง Vector จากข้อความรวมที่เป็นตัวพิมพ์เล็กทั้งหมด
+⋮----
+// รวมคะแนนแบบถ่วงน้ำหนัก
+⋮----
+// กรองเฉพาะคนที่มีคะแนนผ่านเกณฑ์ แล้วเรียงลำดับจากมากไปน้อย
+</file>
+
+<file path="app/api/posts/deletePost/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function DELETE(request: Request,
+⋮----
+const { id } = await params; // ดึง post_id จาก URL
+const post_id = id; // ตัวอย่าง post_id ที่คุณต้องการลบข้อมูล
+const sql = `DELETE FROM posts WHERE post_id = ?`; // ตัวอย่าง SQL ที่คุณต้องการใช้
+await db.query(sql, [post_id]); // แทนที่ ? ด้วยค่า post_id ที่ต้องการ
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/posts/user-search-post/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import { getEmbedding, cosineSimilarity } from "@/lib/vectorSimilarity";
+⋮----
+export async function GET(request: NextRequest)
+⋮----
+//  ถ้าไม่มีคำค้นหา ให้ดึง 10 ประกาศงานล่าสุด
+⋮----
+//  ดึงประกาศงานทั้งหมดพร้อมข้อมูลบริษัทสำหรับทำ AI Hybrid Search
+⋮----
+// สร้าง Vector จากคำค้นหา
+⋮----
+// คำนวณคะแนน Hybrid Search โดยอิงชื่อคอลัมน์ตาม DB จริง
+⋮----
+// ดึงข้อมูลตามชื่อคอลัมน์จาก DB Schema ของคุณ
+⋮----
+// เช็ค Keyword Match
+⋮----
+// สร้าง Vector จากเนื้อหาทั้งหมด
+⋮----
+// รวมคะแนน Keyword + AI Vector
+⋮----
+// กรองเฉพาะอันที่มีความเกี่ยวข้อง เรียงลำดับจากคะแนนสูงสุด
+</file>
+
+<file path="app/api/question/createTest/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+⋮----
+console.log("Post ID:", postId); // เช็คว่ามีค่าไหม
+console.log("Questions:", questions); // เช็คว่ามีคำถามไหม
+</file>
+
+<file path="app/api/question/getTestByPostId/[id]/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+)
+</file>
+
+<file path="app/api/question/saveTest/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function PUT(request: Request)
+⋮----
+// 1. ดึง ID คำถามเก่าทั้งหมดของโพสต์นี้ เพื่อเอาไปลบ Choice
+⋮----
+// 2. ลบ Choice เก่าทั้งหมดที่ผูกกับคำถามเดิมก่อน
+⋮----
+// 3. ลบ คำถามเก่า ทั้งหมดของโพสต์นี้
+⋮----
+// 4. Insert คำถามและ Choice ชุดใหม่ที่แก้ไขแล้วกลับเข้าไปแทน
+</file>
+
+<file path="app/api/seeker/check_favour_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/seeker/check_report_company/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/seeker/check_report_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/seeker/delete_favour_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function DELETE(request: Request)
+</file>
+
+<file path="app/api/seeker/delete_report_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function DELETE(request: Request)
+</file>
+
+<file path="app/api/seeker/favour_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/seeker/report_post/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/test/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db'; // อ้างอิงไฟล์ db ของคุณ
+⋮----
+export async function GET(request: Request,
+⋮----
+const { id } = await params; // ดึง post_id จาก URL
+const post_id = id; // ตัวอย่าง post_id ที่คุณต้องการดึงข้อมูล
+⋮----
+JOIN company ON posts.company_id = company.company_id WHERE posts.post_id = ?`; // ตัวอย่าง SQL ที่คุณต้องการใช้
+const [posts]: any = await db.query(sql, [post_id]); // แทนที่ ? ด้วยค่า post_id ที่ต้องการ
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/user/check_interview_seeker/route.ts">
+import db from "@/lib/db";
+import { NextResponse } from "next/server";
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/user/deleteFileRecord/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function DELETE(request: Request)
+</file>
+
+<file path="app/api/user/getAllUser/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db'; // อ้างอิงไฟล์ db ของคุณ
+⋮----
+export async function GET()
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/user/saveFileRecord/route.ts">
+// ตัวอย่างโค้ดภายใน app/api/user/saveFileRecord/route.ts
+import { NextResponse } from 'next/server';
+import db from '@/lib/db'; // ปรับ path ตามจริงของคุณ
+⋮----
+export async function POST(request: Request)
+⋮----
+// ตรวจสอบค่าที่จำเป็น
+⋮----
+// เขียนคำสั่ง INSERT ลงตารางข้อมูลของคุณ (ตัวอย่างตารางชื่อ files)
+</file>
+
+<file path="app/api/user/toggleVisibility/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function PATCH(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+)
+⋮----
+// รับเฉพาะ 0 หรือ 1 เท่านั้น ป้องกันค่าแปลกปลอม
+</file>
+
+<file path="app/company/company-feedback/CompanyFeedback.module.css">
+.container {
+⋮----
+.leftPanel,
+⋮----
+.rightPanel {
+⋮----
+.title {
+⋮----
+.subtitle {
+⋮----
+.form {
+⋮----
+.textarea {
+⋮----
+.textarea:focus {
+⋮----
+.submitBtn {
+⋮----
+.submitBtn:disabled {
+⋮----
+.historyList {
+⋮----
+.card {
+⋮----
+.cardHeader {
+⋮----
+.date {
+⋮----
+.status {
+.status.pending {
+.status.replied {
+.status.read {
+⋮----
+.userMessage {
+⋮----
+.adminReply {
+.adminReply strong {
+.adminReply p {
+.replyDate {
+⋮----
+.emptyText {
+</file>
+
+<file path="app/company/company-feedback/page.tsx">
+import { useState, useEffect, FormEvent } from "react";
+import styles from "./CompanyFeedback.module.css";
+⋮----
+interface FeedbackItem {
+  feedback_id: number;
+  company_id: number;
+  message: string;
+  created_at: string;
+  admin_message: string | null;
+  status: "pending" | "replied" | "read";
+  replied_at: string | null;
+}
+⋮----
+const initFeedbackDashboard = async () =>
+⋮----
+// แจ้งเตือน Navbar ให้คำนวณตัวเลขแจ้งเตือนใหม่
+⋮----
+const handleMarkAsRead = async (
+    feedbackId: number,
+    currentStatus: string,
+) =>
+⋮----
+await initFeedbackDashboard(); // รีเฟรชเพื่อเปลี่ยนสีส้มกลับเป็นสีปกติหลังกดอ่าน
+⋮----
+const handleSubmit = async (e: FormEvent) =>
+⋮----
+{/* ฝั่งซ้าย: ฟอร์มส่งข้อมูล */}
+⋮----
+{/* ฝั่งขวา: ประวัติคำติชม */}
+⋮----
+onClick=
+// 🌟 ปรับแต่งสไตล์เพิ่มส้มพาสเทลเมื่อมีสถานะเป็น replied
+⋮----
+item.status === "replied" ? "#fff7ed" : undefined, // สีส้มอ่อนนวลตา (Orange 50)
+⋮----
+item.status === "replied" ? "#ffedd5" : undefined, // ขอบส้มจางๆ (Orange 100)
+⋮----
+transition: "all 0.2s ease", // เพิ่ม Animation ตอนเปลี่ยนสีให้นุ่มนวลขึ้น
+</file>
+
+<file path="app/company/company-home/province.tsx">
+import { useState, useRef, useEffect } from "react";
+import { THAI_PROVINCES } from "@/lib/thaiProvinces";
+⋮----
+interface ProvinceSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+⋮----
+// รายการตัวเลือก "ทุกจังหวัด" + รายการจังหวัดทั้งหมด
+⋮----
+// กรองจังหวัดตามคำค้นหา
+⋮----
+// ปิด Dropdown เมื่อคลิกนอกกล่อง
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+{/* ช่อง Input แต่งสไตล์ให้เป็นปุ่มสีดำมน ความสูง 50px เท่าตัวเลือกอื่น */}
+⋮----
+setSearch(""); // เคลียร์คำค้นหาเมื่อกดเปิด
+⋮----
+height: "50px", // 📌 ปรับจาก 38px เป็น 50px เท่ากับ select ตัวอื่น
+⋮----
+borderRadius: "12px", // 📌 ความโค้งมน 12px เท่ากับปุ่มอื่น
+⋮----
+// 🎨 สไตล์ปุ่มสีดำข้อความขาว พอกดพิมพ์จะเปลี่ยนเป็นสีขาวข้อความดำ
+⋮----
+{/* รายการเมนู Dropdown */}
+⋮----
+onChange(prov === "ทุกจังหวัด" ? "" : prov);
+setIsOpen(false);
+</file>
+
+<file path="app/company/company_tracking/[id]/company_application.tsx">
+import styles from "./company_tracking.module.css";
+import { useState } from "react";
+⋮----
+export interface AppliedSekerItem{
+  tracking_id: number;
+  company_id: number;
+  post_id: number;
+  user_id: number;
+  status: string; // applied, screening, interview, offer, rejected
+  interview_message?: string;
+  
+  // ข้อมูล Post
+  job_position: string;
+  job_description?: string;
+  preferred_qualifications?: string;
+  Benefits?: string;
+  province?: string;
+  work_location?: string;
+  salary_min?: number;
+  salary_max?: number;
+  job_type?: string;
+  vacancy?: number;
+  how_to_apply?: string;
+  contact?: string;
+
+  // ข้อมูล Company
+  company_name?: string;
+  logo_image?: string;
+  company_email?: string;
+}
+⋮----
+status: string; // applied, screening, interview, offer, rejected
+⋮----
+// ข้อมูล Post
+⋮----
+// ข้อมูล Company
+⋮----
+interface TrackingProps {
+  initialJobs: AppliedSekerItem[];
+  companyId:string;
+}
+⋮----
+const getStatus = (status:string = "")=>
+⋮----
+{/* Left Sidebar - รายการงานที่กดสมัครไป */}
+⋮----
+onClick=
+⋮----
+{/* Right Section - แสดงรายละเอียดงานที่เลือก */}
+⋮----
+{/* Status Tracker Box */}
+⋮----
+{/* Accept / Reject Controls */}
+⋮----
+{/* Job Details Box */}
+⋮----
+{/* Left Column - Details */}
+⋮----
+? `$
+</file>
+
+<file path="app/company/company_tracking/[id]/company_tracking.module.css">
+/* Container & Layout */
+.container {
+⋮----
+/* Header Navbar */
+.navbar {
+⋮----
+.navLeft {
+⋮----
+.hamburgerBtn {
+⋮----
+.brandLogo {
+⋮----
+.navRight {
+⋮----
+.navLink {
+⋮----
+.navLink.active {
+⋮----
+.logoutBtn {
+⋮----
+/* Main Content Area Layout */
+.mainContent {
+⋮----
+/* Left Sidebar - Job Cards */
+.sidebar {
+⋮----
+.jobCard {
+⋮----
+.jobCard.selected {
+⋮----
+.cardLeft {
+⋮----
+.companyLogo {
+⋮----
+.cardDetails h4 {
+⋮----
+.cardDetails p {
+⋮----
+/* Status Badges */
+.statusBadge {
+⋮----
+.statusScreening {
+⋮----
+.statusRejected {
+⋮----
+.statusOffer {
+⋮----
+.statusPending {
+⋮----
+/* Right Content Area */
+.rightPanel {
+⋮----
+/* Tracker Section */
+.trackerBox {
+⋮----
+.stepperContainer {
+⋮----
+.step {
+⋮----
+.stepIcon {
+⋮----
+.step.active .stepIcon {
+⋮----
+.stepLabel {
+⋮----
+.stepLine {
+⋮----
+.actionButtons {
+⋮----
+.btnAccept, .btnReject {
+⋮----
+.btnAccept span, .btnReject span {
+⋮----
+.btnAccept span { background-color: #2e7d32; }
+.btnReject span { background-color: #d32f2f; }
+⋮----
+/* Job Detail Section */
+.detailBox {
+⋮----
+.detailHeader {
+⋮----
+.detailLogo {
+⋮----
+.detailHeader h2 {
+⋮----
+.detailGrid {
+⋮----
+.infoTable {
+⋮----
+.infoTable td {
+⋮----
+.infoTable td:first-child {
+⋮----
+.sectionTitle {
+⋮----
+.contactBox a {
+</file>
+
+<file path="app/company/company_tracking/[id]/page.tsx">
+import styles from "./company_tracking.module.css";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { apiUrl } from "@/lib/hostURL";
+import CompanyApplication from "./company_application";
+⋮----
+interface CustomJwtPayload extends JwtPayload{
+  id: number;
+}
+⋮----
+interface PageProps{
+  params: Promise<{id:string}>;
+}
+⋮----
+export default async function SeekerTracking(
+⋮----
+// console.log("userId",userId);
+</file>
+
+<file path="app/company/post-job/getSession.tsx">
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { cookies } from "next/headers";
+⋮----
+// 1. ประกาศ Interface เพื่อบอกว่าข้างใน Payload เราเก็บอะไรไว้บ้าง
+export interface CustomJwtPayload extends JwtPayload {
+  id: number;
+  role?: string;
+}
+⋮----
+export async function getSession()
+⋮----
+// 2. ใส่ "as CustomJwtPayload" ต่อท้ายเพื่อบังคับระบุประเภทข้อมูล
+</file>
+
+<file path="app/company/savedSeeker/savedSeeker.module.css">
+/* Base Layout & Reset Base */
+.container {
+⋮----
+/* Navbar Styling */
+.navbar {
+⋮----
+.navLinks {
+⋮----
+.navLinks a {
+⋮----
+.navLinks a:hover {
+⋮----
+/* Active State (ปุ่ม saved สีขาวตัวหนังสือดำ)
+.activeLink {
+  background-color: #ffffff;
+  color: #000000 !important;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem !important;
+  font-weight: 600 !important;
+} */
+⋮----
+/* Main Content Container */
+.mainContent {
+⋮----
+/* Seeker Card Styling */
+.card {
+⋮----
+.cardFlex {
+⋮----
+/* Image Section */
+.imageWrapper {
+⋮----
+.seekerImage {
+⋮----
+/* Info Section */
+.infoWrapper {
+⋮----
+.seekerName {
+⋮----
+.seekerPosition {
+⋮----
+/* Details Typography */
+.detailsGrid {
+⋮----
+.detailsGrid p {
+⋮----
+.detailsGrid span {
+⋮----
+/* Button Section */
+.buttonWrapper {
+⋮----
+.infoButton {
+⋮----
+.infoButton:hover {
+⋮----
+.infoButton:active {
+⋮----
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+⋮----
+/* สำหรับ Tablet และหน้าจอขนาดกลาง */
+⋮----
+flex-wrap: wrap; /* ให้ดันปุ่มลงไปด้านล่างได้ถ้าพื้นที่ไม่พอ */
+⋮----
+/* สำหรับ Mobile / หน้าจอขนาดเล็ก */
+⋮----
+flex-direction: column; /* เปลี่ยนจากแนวนอนเป็นแนวตั้งเพื่อความสบายตาบนมือถือ */
+⋮----
+max-width: 300px; /* ให้รูปใหญ่เต็มที่ 300px บนมือถือ */
+⋮----
+justify-content: center; /* ให้ปุ่มอยู่ตรงกลางบนจอมือถือ */
+⋮----
+width: 100%; /* ให้ปุ่มเต็มความกว้างเพื่อกดง่ายขึ้น */
+</file>
+
+<file path="app/company/seeker-profile/[id]/applySeeker.module.css">
+.applyBtn {
+⋮----
+/* position: absolute; */
+</file>
+
+<file path="app/company/seeker-profile/[id]/BackButton.tsx">
+import { useRouter } from "next/navigation";
+import styles from "./seekerProfile.module.css";
+⋮----
+export default function BackButton()
+</file>
+
+<file path="app/company/seeker-profile/[id]/BanPopup.tsx">
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+⋮----
+// อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
+const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
+⋮----
+// 2. คำนวณตรรกะต่างๆ ก่อนแสดงผล
+⋮----
+// 3. ส่วนของการแสดงผล (return) จะอยู่ล่างสุดเสมอ
+⋮----
+{/* เนื้อหาอื่นๆ ในหน้าเว็บของคุณ */}
+⋮----
+{/* โค้ด Popup ของคุณ */}
+⋮----
+setShowBanPopup(false);
+router.back();
+</file>
+
+<file path="app/company/seeker-profile/[id]/FilePreviewButton.tsx">
+import { useState } from "react";
+import styles from "./seekerProfile.module.css";
+⋮----
+interface FilePreviewButtonProps {
+  filePath: string;
+  fileName: string;
+}
+</file>
+
+<file path="app/forgotPassword/forgotPassword.module.css">
+.logo-forgot {
+.title {
+.fpPage {
+⋮----
+.fpCard {
+.fpLogo {
+.fpLogoText {
+.fpButton {
+.fpError {
+.fpCountdown {
+</file>
+
+<file path="app/forgotPassword/page.tsx">
+import React, { useState, useEffect } from "react";
+import styles from "./forgotPassword.module.css";
+import { useRouter } from "next/navigation";
+⋮----
+const [countdown, setCountdown] = useState(300); // 5 นาที
+⋮----
+// ⏱ countdown
+⋮----
+const countdownDisplay = () =>
+⋮----
+// 📧 validate email
+const isValidEmail = (email: string) =>
+⋮----
+// 📩 ส่ง OTP
+const sendOtp = async () =>
+⋮----
+setCountdown(300); // reset timer
+⋮----
+// 🔢 verify OTP
+const verifyOtp = async () =>
+⋮----
+// 🔐 reset password
+const resetPassword = async () =>
+⋮----
+{/* STEP 1: EMAIL */}
+⋮----
+{/* STEP 2: OTP */}
+⋮----
+onChange=
+⋮----
+หมดอายุใน <strong>
+⋮----
+{/* STEP 3: RESET PASSWORD */}
+</file>
+
+<file path="app/register/page.tsx">
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import ReCAPTCHA from 'react-google-recaptcha';
+import styles from './register.module.css'
+⋮----
+businessType: '', // เพิ่มรับค่าประเภทธุรกิจ
+⋮----
+// เชื่อมต่อ Google Auth และแสดงปุ่มสมัครสมาชิก
+⋮----
+const initGoogle = () =>
+⋮----
+// เช็ค script โหลดหรือยัง
+⋮----
+const handleGoogleCredentialResponse = async (response: any) =>
+⋮----
+const requestOtp = async () =>
+⋮----
+// เรียก API ไปยัง Route ที่เราสร้างไว้
+⋮----
+alert('✅ ' + data.message); // แสดงข้อความ "ส่ง OTP สำเร็จ"
+⋮----
+setIsLoadingOtp(false); // ปิดสถานะโหลดไม่ว่าจะสำเร็จหรือล้มเหลว
+⋮----
+// --------------------------------------------------------
+// อัปเดต: ฟังก์ชันสมัครสมาชิกแบบปกติ
+// --------------------------------------------------------
+const onRegister = async (e: React.FormEvent) =>
+⋮----
+// 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
+⋮----
+if (!otpCode) return alert('Please enter and verify OTP first!'); // เช็ค OTP
+⋮----
+// 2. เตรียมข้อมูลส่งไป API
+⋮----
+otpCode: otpCode // 👈 เพิ่มบรรทัดนี้ เพื่อส่ง OTP ไปให้หลังบ้านเช็ค!
+⋮----
+// 3. ยิง API สมัครสมาชิกแบบปกติ
+⋮----
+// (โค้ดส่วนที่เหลือของคุณใช้งานได้ดีอยู่แล้วครับ)
+⋮----
+{/* Brand Side */}
+⋮----
+{/* Form Side */}
+⋮----
+{/* Input: Full Name (Seeker Only) */}
+⋮----
+{/* Input: Email */}
+⋮----
+{/* Input: OTP */}
+⋮----
+{/* Password Row */}
+⋮----
+{/* Company Fields */}
+⋮----
+{/* ReCaptcha */}
+⋮----
+{/* Google Button Container */}
+</file>
+
+<file path="app/register/register.module.css">
+/* register.module.css */
+⋮----
+/* 1. นำเข้า Fonts */
+⋮----
+/* 2. กำหนดตัวแปรแบบ CSS Variables (ใช้แทน $ ใน SCSS) */
+:root {
+⋮----
+.mainWrapper {
+⋮----
+/* --- Layout Container --- */
+.registerContainer {
+⋮----
+/* left: 0; */
+⋮----
+background-image: url("/login-bg.png"); /* ตรวจสอบพาธรูปภาพใน public/images */
+⋮----
+.registerCard {
+⋮----
+/* --- แก้ไขจุดนี้เพื่อให้ทึบ --- */
+background: #1a1a1a; /*สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง*/
+/* backdrop-filter: blur(20px);  <-- ลบทิ้งหรือ Comment ไว้เพื่อไม่ให้เห็นภาพพื้นหลัง */
+⋮----
+box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); /* เพิ่มเงาให้ดูมีมิติ */
+⋮----
+/* --- Brand Side (Left) --- */
+.brandSide {
+⋮----
+.logo {
+⋮----
+.slogan h1 {
+⋮----
+.slogan h1 span {
+⋮----
+/* --- Form Side (Right) --- */
+.formSide {
+⋮----
+.userTypeSelector {
+⋮----
+.typeBtn {
+⋮----
+.typeBtnActive {
+⋮----
+/* --- Input Groups --- */
+.formContent h2 {
+⋮----
+.inputGroup {
+⋮----
+.inputGroup label {
+⋮----
+.inputGroup input {
+⋮----
+.inputGroup input::placeholder {
+⋮----
+.inputGroup input:focus {
+⋮----
+/* --- Buttons & Utilities --- */
+.btnRegister {
+⋮----
+.btnRegister:hover {
+⋮----
+.divider {
+⋮----
+.divider::before,
+⋮----
+.divider span {
+⋮----
+/* --- Animation --- */
+⋮----
+.fadeInEffect {
+⋮----
+/* --- Media Queries --- */
+⋮----
+.footerLink {
+⋮----
+.footerLink a {
+⋮----
+.footerLink a:hover {
+</file>
+
+<file path="app/user/savedCompany/savedCompany.module.css">
+/* Base Layout & Reset Base */
+.container {
+⋮----
+/* Navbar Styling */
+.navbar {
+⋮----
+.navLinks {
+⋮----
+.navLinks a {
+⋮----
+.navLinks a:hover {
+⋮----
+/* Active State (ปุ่ม saved สีขาวตัวหนังสือดำ)
+.activeLink {
+  background-color: #ffffff;
+  color: #000000 !important;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem !important;
+  font-weight: 600 !important;
+} */
+⋮----
+/* Main Content Container */
+.mainContent {
+⋮----
+/* Seeker Card Styling */
+.card {
+⋮----
+.cardFlex {
+⋮----
+/* Image Section */
+.imageWrapper {
+⋮----
+.seekerImage {
+⋮----
+/* Info Section */
+.infoWrapper {
+⋮----
+.seekerName {
+⋮----
+.seekerPosition {
+⋮----
+/* Details Typography */
+.detailsGrid {
+⋮----
+.detailsGrid p {
+⋮----
+.detailsGrid span {
+⋮----
+/* Button Section */
+.buttonWrapper {
+⋮----
+.infoButton {
+⋮----
+.infoButton:hover {
+⋮----
+.infoButton:active {
+⋮----
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+⋮----
+/* สำหรับ Tablet และหน้าจอขนาดกลาง */
+⋮----
+flex-wrap: wrap; /* ให้ดันปุ่มลงไปด้านล่างได้ถ้าพื้นที่ไม่พอ */
+⋮----
+/* สำหรับ Mobile / หน้าจอขนาดเล็ก */
+⋮----
+flex-direction: column; /* เปลี่ยนจากแนวนอนเป็นแนวตั้งเพื่อความสบายตาบนมือถือ */
+⋮----
+max-width: 300px; /* ให้รูปใหญ่เต็มที่ 300px บนมือถือ */
+⋮----
+justify-content: center; /* ให้ปุ่มอยู่ตรงกลางบนจอมือถือ */
+⋮----
+width: 100%; /* ให้ปุ่มเต็มความกว้างเพื่อกดง่ายขึ้น */
+</file>
+
+<file path="app/user/seeker_tracking/[id]/page.tsx">
+import styles from "./seeker_tracking.module.css";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { apiUrl } from "@/lib/hostURL";
+import SeekerApplication from "./seeker_application";
+⋮----
+interface CustomJwtPayload extends JwtPayload{
+  id: number;
+}
+⋮----
+interface PageProps{
+  params: Promise<{id:string}>;
+}
+⋮----
+export default async function SeekerTracking(
+⋮----
+// console.log("userId",userId);
+</file>
+
+<file path="app/user/seeker_tracking/[id]/seeker_application.tsx">
+import styles from "./seeker_tracking.module.css";
+import { useState } from "react";
+⋮----
+export interface AppliedJobItem{
+  tracking_id: number;
+  post_id: number;
+  user_id: number;
+  status: string; // applied, screening, interview, offer, rejected
+  interview_message?: string;
+  
+  // ข้อมูล Post
+  job_position: string;
+  job_description?: string;
+  preferred_qualifications?: string;
+  Benefits?: string;
+  province?: string;
+  work_location?: string;
+  salary_min?: number;
+  salary_max?: number;
+  job_type?: string;
+  vacancy?: number;
+  how_to_apply?: string;
+  contact?: string;
+
+  // ข้อมูล Company
+  company_name?: string;
+  logo_image?: string;
+  company_email?: string;
+}
+⋮----
+status: string; // applied, screening, interview, offer, rejected
+⋮----
+// ข้อมูล Post
+⋮----
+// ข้อมูล Company
+⋮----
+interface TrackingProps {
+  initialJobs: AppliedJobItem[];
+  userId:string;
+}
+⋮----
+const getStatus = (status:string = "")=>
+⋮----
+{/* Left Sidebar - รายการงานที่กดสมัครไป */}
+⋮----
+onClick=
+⋮----
+{/* Right Section - แสดงรายละเอียดงานที่เลือก */}
+⋮----
+{/* Status Tracker Box */}
+⋮----
+{/* Accept / Reject Controls */}
+⋮----
+{/* Job Details Box */}
+⋮----
+{/* Left Column - Details */}
+⋮----
+? `$
+</file>
+
+<file path="app/user/seeker_tracking/[id]/seeker_tracking.module.css">
+/* Container & Layout */
+.container {
+⋮----
+/* Header Navbar */
+.navbar {
+⋮----
+.navLeft {
+⋮----
+.hamburgerBtn {
+⋮----
+.brandLogo {
+⋮----
+.navRight {
+⋮----
+.navLink {
+⋮----
+.navLink.active {
+⋮----
+.logoutBtn {
+⋮----
+/* Main Content Area Layout */
+.mainContent {
+⋮----
+/* Left Sidebar - Job Cards */
+.sidebar {
+⋮----
+.jobCard {
+⋮----
+.jobCard.selected {
+⋮----
+.cardLeft {
+⋮----
+.companyLogo {
+⋮----
+.cardDetails h4 {
+⋮----
+.cardDetails p {
+⋮----
+/* Status Badges */
+.statusBadge {
+⋮----
+.statusScreening {
+⋮----
+.statusRejected {
+⋮----
+.statusOffer {
+⋮----
+.statusPending {
+⋮----
+/* Right Content Area */
+.rightPanel {
+⋮----
+/* Tracker Section */
+.trackerBox {
+⋮----
+.stepperContainer {
+⋮----
+.step {
+⋮----
+.stepIcon {
+⋮----
+.step.active .stepIcon {
+⋮----
+.stepLabel {
+⋮----
+.stepLine {
+⋮----
+.actionButtons {
+⋮----
+.btnAccept, .btnReject {
+⋮----
+.btnAccept span, .btnReject span {
+⋮----
+.btnAccept span { background-color: #2e7d32; }
+.btnReject span { background-color: #d32f2f; }
+⋮----
+/* Job Detail Section */
+.detailBox {
+⋮----
+.detailHeader {
+⋮----
+.detailLogo {
+⋮----
+.detailHeader h2 {
+⋮----
+.detailGrid {
+⋮----
+.infoTable {
+⋮----
+.infoTable td {
+⋮----
+.infoTable td:first-child {
+⋮----
+.sectionTitle {
+⋮----
+.contactBox a {
+</file>
+
+<file path="app/user/user-detail-job/[id]/applyCompany.module.css">
+.applyBtn {
+</file>
+
+<file path="app/user/user-detail-job/[id]/backBttn.tsx">
+import { useRouter } from "next/navigation";
+import styles from "../seekerProfile.module.css";
+⋮----
+export default function BackButton()
+</file>
+
+<file path="app/user/user-detail-job/saveAndreportBttn.module.css">
+.savedButton {
+⋮----
+/* สไตล์ตั้งต้น (ถ้าไม่ใส่ ในอินไลน์สไตล์ที่คุณเขียนไว้ก็ทำงานได้ครับ) */
+⋮----
+/* Action 1: ตอนเมาส์ชี้ (Hover) ให้ปุ่มเปลี่ยนสีไฮไลท์ */
+.savedButton:hover {
+⋮----
+background-color: #f5f5f5 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อน */
+color: #0070f3 !important;            /* เปลี่ยนสีข้อความ/ไอคอนเป็นสีฟ้า */
+⋮----
+/* Action 2: ตอนกดคลิกค้าง (Active) ให้ปุ่มยุบลงไปนิดหน่อย */
+.savedButton:active {
+⋮----
+.reportedButton {
+⋮----
+.reportedButton:hover {
+⋮----
+.reportedButton:active {
+</file>
+
+<file path="app/user/user-detail-job/saveAndreportBttn.tsx">
+import { useState, useRef, useEffect } from "react";
+⋮----
+import styles from "./saveAndreportBttn.module.css";
+⋮----
+//  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ
+interface ProfileActionsProps {
+  userId: number;
+  postId: number;
+}
+⋮----
+type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
+⋮----
+// ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+// โค้ดสำหรับเซฟ/บุ๊กมาร์ก
+const handleBookmark = async () =>
+⋮----
+const handleDeleteBookmark = async () =>
+⋮----
+const checkSaved = async () =>
+⋮----
+const handleDeleteSaved = async (userId: number, companyId: number) =>
+⋮----
+const openReportModal = () =>
+⋮----
+setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
+⋮----
+const handleReport = async (reportType: ReportType, description: string) =>
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+setIsOpen(false);      // ปิดเมนูสามจุด
+⋮----
+setIsReported(true); //  แก้ไขชื่อตัวแปรให้ตรงกับ State
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+⋮----
+const checkReport = async () =>
+⋮----
+// alert("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
+⋮----
+onClick=
+⋮----
+{/* Dropdown เมนูย่อย */}
+⋮----
+onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
+⋮----
+{/* หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.5)", // พื้นหลังมืดโปร่งแสง
+⋮----
+zIndex: 9999, // ให้อยู่ชั้นบนสุดของหน้าจอเสมอ
+⋮----
+{/* หัวข้อโมดอล */}
+⋮----
+onClick={() => setIsModalOpen(false)} // ปุ่มกากบาทปิดโมดอล
+⋮----
+{/* ฟอร์มเลือกประเภท */}
+⋮----
+{/* ฟอร์มพิมพ์รายละเอียด */}
+⋮----
+{/* ปุ่มกดยืนยันหรือยกเลิก */}
+⋮----
+backgroundColor: "#d93025", // สีแดง
+</file>
+
+<file path="app/user/user-detail-job/seekerProfile.module.css">
+.container {
+⋮----
+.profileGrid {
+⋮----
+grid-template-columns: 1fr 1fr 1fr 0.8fr; /* แบ่ง 4 คอลัมน์ */
+⋮----
+.column {
+⋮----
+.cardHeader {
+⋮----
+.personalInfoContent {
+.avatarWrapper {
+⋮----
+.avatar {
+.titleinfoRow {
+.infoRow {
+⋮----
+.detailsBox {
+⋮----
+.contentPadding {
+⋮----
+.section {
+⋮----
+.section h4 {
+.setJobTitle {
+.section ol,
+.setLiTitle {
+.setLi {
+⋮----
+.tagGroup {
+⋮----
+.tag,
+⋮----
+.tagActive {
+⋮----
+/* ----------------------------------- */
+.Educontainer {
+⋮----
+.timeline {
+⋮----
+.centralLine {
+⋮----
+.timelineItem {
+⋮----
+.left {
+⋮----
+.right {
+⋮----
+.connector {
+⋮----
+.left .connector {
+.right .connector {
+⋮----
+.degree {
+⋮----
+.school {
+⋮----
+.columnTransparent {
+⋮----
+.fileItem {
+⋮----
+.fileItem label {
+⋮----
+.hiddenInput {
+⋮----
+/* ─── สไตล์ไฟล์แบบใหม่ ─── */
+.fileContainerBox {
+⋮----
+.fileNameDisplay {
+⋮----
+.deleteFileIcon {
+.deleteFileIcon:hover {
+⋮----
+.fileBox {
+⋮----
+.fileBox:hover {
+⋮----
+.addFileInlineBtn {
+⋮----
+.addFileInlineBtn:hover {
+⋮----
+/* ─── POPUP MODAL สไตล์ ─── */
+.modalOverlay {
+⋮----
+.modalContainer {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.modalCloseBtn {
+⋮----
+.modalBody {
+⋮----
+.modalIframe {
+⋮----
+.modalImg {
+⋮----
+.contactCard {
+.contactCard1 {
+⋮----
+.sentBtn {
+.sentBtn:hover {
+.sentBtn:active {
+⋮----
+/* ── Back Button ── */
+.backRow {
+⋮----
+.backBtn {
+⋮----
+.backBtn:hover {
+⋮----
+.backBtn:active {
+.bookmarkIcon:hover {
+⋮----
+color: darkcyan; /* 💡 ปรับให้เป็นสีเข้มขึ้น เพื่อให้ตัดกับพื้นหลังสีฟ้าอ่อน จะได้มองเห็นชัดเจนครับ */
+cursor: pointer; /* แก้ไขตรงนี้ */
+⋮----
+/* ตอนคลิกปุ่ม (ขณะกดเมาส์ค้างไว้) */
+.bookmarkIcon:active {
+⋮----
+color: white; /* 💡 ตอนปุ่มเข้มขึ้น ค่อยเปลี่ยนไอคอนเป็นสีขาวจะสวยกว่าครับ */
+</file>
+
+<file path="app/user/user-feedback/Feedback.module.css">
+.container {
+⋮----
+.leftPanel,
+⋮----
+.rightPanel {
+⋮----
+.title {
+⋮----
+.subtitle {
+⋮----
+.form {
+⋮----
+.textarea {
+⋮----
+.textarea:focus {
+⋮----
+.submitBtn {
+⋮----
+.submitBtn:disabled {
+⋮----
+.historyList {
+⋮----
+.card {
+⋮----
+.cardHeader {
+⋮----
+.date {
+⋮----
+.status {
+.status.pending {
+.status.replied {
+.status.read {
+⋮----
+.userMessage {
+⋮----
+.adminReply {
+.adminReply strong {
+.adminReply p {
+.replyDate {
+⋮----
+.emptyText {
+</file>
+
+<file path="app/user/user-home/province.tsx">
+import { useState, useRef, useEffect } from "react";
+import { THAI_PROVINCES } from "@/lib/thaiProvinces";
+⋮----
+interface ProvinceSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+onChange(prov === "ทุกจังหวัด" ? "" : prov);
+setIsOpen(false);
+</file>
+
+<file path="app/user/user-profile/levelSelect.tsx">
+import { useState, useRef, useEffect } from "react";
+import { EDUCATION_LEVELS } from "@/lib/educationLevels";
+⋮----
+interface LevelSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+⋮----
+// กรองระดับการศึกษาตามคำค้นหา
+⋮----
+// ปิด Dropdown เมื่อคลิกนอกกล่อง
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+// ใช้ display: inline-block + minWidth เหมือน ProvinceSelect ที่แก้แล้ว
+// เพื่อไม่ให้หลุดไปขึ้นบรรทัดใหม่/ผิดขนาดจาก input ตัวอื่นในฟอร์มเดียวกัน
+⋮----
+{/* ช่อง Input หลัก */}
+⋮----
+setSearch(""); // เคลียร์คำค้นหาเมื่อกดเปิด
+⋮----
+{/* เมนู Dropdown รายการที่ค้นหาเจอ */}
+⋮----
+onChange(lvl);
+setIsOpen(false);
+</file>
+
+<file path="app/user/user-profile/province.tsx">
+import { useState, useRef, useEffect } from "react";
+import { THAI_PROVINCES } from "@/lib/thaiProvinces";
+⋮----
+interface ProvinceSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+⋮----
+// กรองจังหวัดตามคำค้นหา
+⋮----
+// ปิด Dropdown เมื่อคลิกนอกกล่อง
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+// ⚠️ เดิมตรงนี้เป็น <div style={{ position: "relative", flex: 1 }}>
+// <div> เป็น block element เสมอ (flex: 1 ไม่มีผลอะไรเพราะ parent ที่เรียกใช้
+// component นี้ใน seekerProfile.tsx ไม่ใช่ display:flex) เลยไปขึ้นบรรทัดใหม่
+// และกว้างเต็ม container ต่างจาก input ตัวอื่น (Line ID, Country ฯลฯ) ที่เป็น
+// inline element เลยลอยต่อท้าย label ได้ปกติ
+// แก้โดยใช้ display: inline-block + minWidth ให้เท่ากับ input ตัวอื่น
+⋮----
+{/* ช่อง Input หลัก */}
+⋮----
+setSearch(""); // เคลียร์คำค้นหาเมื่อกดเปิด
+⋮----
+{/* เมนู Dropdown รายการที่ค้นหาเจอ */}
+⋮----
+onChange(prov);
+setIsOpen(false);
+</file>
+
+<file path="app/user/userProfileCompany/[id]/BanPopup.tsx">
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+⋮----
+// อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
+const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
+⋮----
+// 2. คำนวณตรรกะต่างๆ ก่อนแสดงผล
+⋮----
+// 3. ส่วนของการแสดงผล (return) จะอยู่ล่างสุดเสมอ
+⋮----
+{/* เนื้อหาอื่นๆ ในหน้าเว็บของคุณ */}
+⋮----
+{/* โค้ด Popup ของคุณ */}
+⋮----
+setShowBanPopup(false);
+router.back();
+</file>
+
+<file path="app/user/userProfileCompany/[id]/getSession.tsx">
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { cookies } from "next/headers";
+⋮----
+// 1. ประกาศ Interface เพื่อบอกว่าข้างใน Payload เราเก็บอะไรไว้บ้าง
+export interface CustomJwtPayload extends JwtPayload {
+  id: number;
+  role?: string;
+}
+⋮----
+export async function getSession()
+⋮----
+// 2. ใส่ "as CustomJwtPayload" ต่อท้ายเพื่อบังคับระบุประเภทข้อมูล
+</file>
+
+<file path="app/user/userProfileCompany/[id]/map.module.css">
+.mapWrapper {
+</file>
+
+<file path="app/user/userProfileCompany/[id]/map.tsx">
+import dynamic from "next/dynamic";
+import styles from "./map.module.css"; // หรือเปลี่ยนพาธ CSS ให้ตรงกับโฟลเดอร์ของคุณ
+⋮----
+type LeafletMapProps = {
+  lat: number | string | null;
+  lng: number | string | null;
+  isEditMode: boolean;
+  onChangeLocation: (newLat: number, newLng: number) => void;
+};
+⋮----
+// ใช้ dynamic import โหลดแผนที่แบบ No SSR ไว้ที่นี่
+⋮----
+interface CompanyMapSectionProps {
+  latitude: number | string | null;
+  longitude: number | string | null;
+}
+⋮----
+export default function CompanyMapSection(
+</file>
+
+<file path="app/user/userProfileCompany/[id]/saveAndreportBttn.module.css">
+.savedButton {
+⋮----
+/* สไตล์ตั้งต้น (ถ้าไม่ใส่ ในอินไลน์สไตล์ที่คุณเขียนไว้ก็ทำงานได้ครับ) */
+⋮----
+/* Action 1: ตอนเมาส์ชี้ (Hover) ให้ปุ่มเปลี่ยนสีไฮไลท์ */
+.savedButton:hover {
+⋮----
+background-color: #f5f5f5 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อน */
+color: #0070f3 !important;            /* เปลี่ยนสีข้อความ/ไอคอนเป็นสีฟ้า */
+⋮----
+/* Action 2: ตอนกดคลิกค้าง (Active) ให้ปุ่มยุบลงไปนิดหน่อย */
+.savedButton:active {
+⋮----
+.reportedButton {
+⋮----
+.reportedButton:hover {
+⋮----
+.reportedButton:active {
+</file>
+
+<file path="components/ApplyModel.module.css">
+/* ฉากหลัง Modal แบบมืดโปร่งแสง */
+.modalOverlay {
+⋮----
+/* กล่อง Pop-up หลัก */
+.modalContainer {
+⋮----
+padding: 32px; /* เพิ่มพื้นที่ภายในขอบ */
+⋮----
+.modalTitle {
+⋮----
+.modalSubtitle {
+⋮----
+/* ข้อความแจ้งเตือน Success / Error */
+.statusAlert {
+⋮----
+.statusSuccess {
+⋮----
+.statusError {
+⋮----
+/* ฟอร์มและ Input */
+.formGroup {
+⋮----
+.formItem {
+⋮----
+.formItem label {
+⋮----
+/* ความยาวกรอบข้อความป็อปอัพ */
+.formItem input,
+⋮----
+.formItem input:focus,
+⋮----
+/* กลุ่มปุ่มกดส่ง/ยกเลิก */
+.buttonGroup {
+⋮----
+.btnCancel {
+⋮----
+.btnCancel:hover {
+⋮----
+.btnSubmit {
+⋮----
+.btnSubmit:hover {
+⋮----
+.btnSubmit:disabled,
+</file>
+
+<file path="components/ProvinceSelect.tsx">
+import { useState, useRef, useEffect } from "react";
+import { THAI_PROVINCES } from "@/lib/thaiProvinces";
+⋮----
+interface ProvinceSelectProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+⋮----
+// กรองจังหวัดตามคำค้นหา
+⋮----
+// ปิด Dropdown เมื่อคลิกนอกกล่อง
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+{/* ช่อง Input หลัก */}
+⋮----
+setSearch(""); // เคลียร์คำค้นหาเมื่อกดเปิด
+⋮----
+{/* เมนู Dropdown รายการที่ค้นหาเจอ */}
+⋮----
+onChange(prov);
+setIsOpen(false);
+</file>
+
+<file path="lib/db.ts">
+// lib/db.ts
+import mysql from 'mysql2/promise';
+</file>
+
+<file path="lib/educationLevels.tsx">
+
+</file>
+
+<file path="lib/firebase.ts">
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getStorage } from "firebase/storage";
+⋮----
+// ป้องกันการ Initialize ซ้ำซ้อนในโหมด Dev ของ Next.js (Fast Refresh)
+⋮----
+// ตัวแปรสำหรับเรียกใช้ Storage คลาวด์
+</file>
+
+<file path="lib/hostURL.ts">
+
+</file>
+
+<file path="lib/otpStore.ts">
+// lib/otpStore.ts
+⋮----
+export type OtpData = {
+    otp_code: string;   // เก็บรหัสที่ผ่านการ Hash แล้ว
+    expires_at: number; // เวลาหมดอายุ
+    attempts: number;   // จำนวนครั้งที่กรอก (เผื่อใช้กันคนเดารหัส)
+};
+⋮----
+otp_code: string;   // เก็บรหัสที่ผ่านการ Hash แล้ว
+expires_at: number; // เวลาหมดอายุ
+attempts: number;   // จำนวนครั้งที่กรอก (เผื่อใช้กันคนเดารหัส)
+⋮----
+// 👇 declare global
+//  ประกาศตัวแปร globalForOtp เพื่อเชื่อมต่อกับระบบ Global ของ Node.js / Browser
+// เราต้องใช้ "as unknown as" เพื่อหลบเลี่ยงการตรวจ Type ของ TypeScript ในขั้นตอนนี้
+⋮----
+// สร้างหรือดึงตัวเก็บข้อมูล (otpStore) ออกมาใช้งาน
+⋮----
+// 👇 กันสร้างซ้ำใน dev
+</file>
+
+<file path="lib/rateLimit.ts">
+export function rateLimit(key: string, limit = 5, windowMs = 60_000)
+</file>
+
+<file path="lib/thaiProvinces.ts">
+
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="AGENTS.md">
+<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->
+</file>
+
+<file path="CLAUDE.md">
+@AGENTS.md
+</file>
+
+<file path="eslint.config.mjs">
+// Override default ignores of eslint-config-next.
+⋮----
+// Default ignores of eslint-config-next:
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="postcss.config.mjs">
+
+</file>
+
+<file path="README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="app/admin/company/[id]/AdminCompanyDetail.tsx">
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "./adminCompanyDetail.module.css";
+⋮----
+interface Props {
+  companyId: string;
+}
+⋮----
+const fetchCompany = async () =>
+⋮----
+const handleApprove = async () =>
+⋮----
+const handleReject = async () =>
+⋮----
+const fmt = (val: any)
+⋮----
+{/* 🟢 ปุ่มย้อนกลับรูปแบบใหม่สไตล์โมเดิร์น */}
+⋮----
+
+⋮----
+{/* 🟢 ส่วนปุ่มกดที่จัดระเบียบให้แสดงผลชัดเจนขึ้น */}
+</file>
+
+<file path="app/admin/Feedbacks/layout.tsx">
+import React from "react";
+⋮----
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+})
+⋮----
+{/* Main Content Area */}
+⋮----
+minWidth: 0, /* ปลดล็อกปัญหา Flex item หดตัวผิดปกติบนมือถือ */
+</file>
+
+<file path="app/admin/home/home.module.css">
+.container {
+⋮----
+background-color: #d9d9d9; /* สีพื้นหลังเทาตามภาพ */
+⋮----
+.cardWrapper {
+⋮----
+background-color: #cccccc; /* สีขอบมนด้านหลัง */
+⋮----
+.headerTitle {
+⋮----
+.list {
+⋮----
+.companyRow {
+⋮----
+justify-content: space-between; /* แยกชื่อกับกลุ่มปุ่ม */
+⋮----
+.leftInfo {
+⋮----
+.logo {
+⋮----
+.companyName {
+⋮----
+.buttonGroup {
+⋮----
+/* สไตล์ปุ่มกด */
+.btn {
+⋮----
+.btn:hover {
+⋮----
+.approve { background-color: #1a8a2a; }
+.reject { background-color: #b50000; }
+.seeInfo { background-color: #000000; }
+⋮----
+/* 📱 Responsive Styles สำหรับหน้าจอมือถือ (<= 768px) */
+⋮----
+padding: 20px 10px; /* ลด Padding ขอบนอก */
+⋮----
+border-radius: 20px; /* ลดรัศมีขอบมนลงเล็กน้อย */
+⋮----
+flex-direction: column; /* เปลี่ยนเรียงจากแนวนอนเป็นแนวตั้ง */
+align-items: stretch; /* ขยายให้เต็มความกว้าง */
+⋮----
+flex-direction: column; /* โลโก้อยู่บน ชื่ออยู่ล่าง */
+⋮----
+font-size: 18px; /* ปรับขนาดฟอนต์ให้พอดีกับจอ */
+⋮----
+flex-direction: column; /* ปรับปุ่มกดเรียงลงมาเป็นแนวตั้ง */
+⋮----
+width: 100%; /* ปุ่มขยายเต็มความกว้างเพื่อให้กดง่าย */
+</file>
+
+<file path="app/api/admin/companies/Ban/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+⋮----
+// 1. แก้ข้อความแจ้งเตือนให้ตรงกับ company_id
+⋮----
+// 2. แก้ erro เป็น error และปรับข้อความให้เป็น Company
+⋮----
+// ระบบปลดแบนบริษัท (DELETE) -> ล้างค่า banned_until ให้เป็น NULL
+export async function DELETE(request: Request)
+⋮----
+// ล้างค่า banned_until ให้เป็น NULL
+</file>
+
+<file path="app/api/admin/companies/route.ts">
+// (อยู่ระดับเดียวกับ admin/feedbacks และ admin/verify/[id])
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function GET(request: Request)
+⋮----
+// ?status=Pending | Approved | Rejected — ถ้าไม่ส่งมา จะดึงมาทั้งหมด
+</file>
+
+<file path="app/api/admin/user/ban/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+⋮----
+// 1. แก้ข้อความแจ้งเตือนให้ตรงกับ company_id
+⋮----
+// 2. แก้ erro เป็น error และปรับข้อความให้เป็น Company
+⋮----
+// ระบบปลดแบนผู้ใช้งาน (DELETE) -> ล้างค่า banned_until ให้เป็น NULL
+export async function DELETE(request: Request)
+⋮----
+const user_id = searchParams.get("user_id"); // 🟢 รับค่า user_id จาก URL
+⋮----
+// ล้างค่า banned_until ให้เป็น NULL ในตาราง User
+</file>
+
+<file path="app/api/company/all-company/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db'; // อ้างอิงไฟล์ db ของคุณ
+⋮----
+export async function GET()
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/company/delete_favour_user/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function DELETE(request: Request)
+</file>
+
+<file path="app/api/company/favour_user/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/interview_tracking/apply-company/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { rateLimit } from "@/lib/rateLimit";
+import db from "@/lib/db";
+import { Seq2SeqLMOutput } from "@xenova/transformers";
+⋮----
+// ตั้งค่า Transporter
+⋮----
+export async function POST(req: NextRequest)
+⋮----
+// ป้องกันการกดส่งรัวๆ (จำกัด 3 ครั้ง ต่อ 1 นาที)
+⋮----
+// Validate ข้อมูลเบื้องต้น
+⋮----
+replyTo: seekerEmail, // เมื่อ HR กด Reply จะเด้งไปหาผู้สมัครทันที
+</file>
+
+<file path="app/api/posts/CompanySuggested/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+import { getEmbedding, cosineSimilarity } from "@/lib/vectorSimilarity";
+⋮----
+export async function GET(request: Request)
+⋮----
+// ดึงโพสต์งานที่ยังเปิดรับสมัครของบริษัทนี้ เพื่อเอา job_position มาสร้างข้อความสำหรับ embedding
+⋮----
+// Fallback: ถ้าไม่มี companyId หรือบริษัทนี้ยังไม่มีโพสต์งานเปิดรับเลย
+// ให้แสดงผู้สมัครล่าสุด 6 คนแทน (จัดกลุ่มไม่ให้ข้อมูลผู้สมัครซ้ำ)
+⋮----
+// รวมตำแหน่งงานทั้งหมดของบริษัทเป็นข้อความเดียว แล้วสร้าง embedding
+⋮----
+// ดึง user ทุกคนที่มี JobTitle โดยรวบตำแหน่งงานผ่าน SQL GROUP BY
+⋮----
+// คำนวณความคล้ายคลึง (Cosine Similarity) ระหว่างงานของบริษัท กับ JobTitle ของแต่ละ user
+⋮----
+// กรองเฉพาะที่คะแนน > 0.2 แล้วเรียงจากมากไปน้อย เอาแค่ 6 อันดับแรก
+</file>
+
+<file path="app/api/posts/getPostbyCompanyId/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
+import { cookies } from "next/headers"; //
+import jwt from "jsonwebtoken";
+export async function GET(request: NextRequest)
+⋮----
+// const decoded: any = jwt.decode(token);
+</file>
+
+<file path="app/api/posts/getPostById/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function GET(request: Request,
+⋮----
+const { id } = await params; // ดึง post_id จาก URL
+const post_id = id; // ตัวอย่าง post_id ที่คุณต้องการดึงข้อมูล
+⋮----
+WHERE posts.post_id = ?;`; // ตัวอย่าง SQL ที่คุณต้องการใช้
+const [posts]: any = await db.query(sql, [post_id]); // แทนที่ ? ด้วยค่า post_id ที่ต้องการ
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/api/posts/updatePost/[id]/route.ts">
+import { NextResponse } from "next/server";
+import db from '@/lib/db';
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+⋮----
+export async function PATCH(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+)
+⋮----
+// เปลี่ยนมาใช้การจับ String แทน เพื่อรักษาตัวเลขเวลาเดิมที่ผู้ใช้เลือกไว้
+⋮----
+? application_dates.replace("T", " ").slice(0, 19) // แปลง "2026-06-03T15:35" เป็น "2026-06-03 15:35:00" ใน MySQL ท้องถิ่น
+⋮----
+// AND company_id = ? ป้องกันไม่ให้บริษัทอื่นแก้โพสต์ที่ไม่ใช่ของตัวเอง
+</file>
+
+<file path="app/api/posts/UserSuggested/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+import { getEmbedding, cosineSimilarity } from "@/lib/vectorSimilarity";
+⋮----
+export async function GET(request: Request)
+⋮----
+// ถ้ามี userId ส่งมา ให้ไปดึง JobTitle ของ User
+⋮----
+// ถ้าไม่มี userId หรือ User คนนี้ยังไม่ได้ตั้งค่า JobTitle
+// ให้ดึงงานล่าสุด 6 อันดับแรกที่ยังเปิดรับสมัครอยู่ไปแสดงแทน
+⋮----
+// ถ้ามีข้อมูล JobTitle ให้คำนวณความคล้ายคลึงด้วย AI Vector
+⋮----
+// ดึงเฉพาะประกาศงานที่ application_dates ยังไม่หมดอายุ
+⋮----
+// คำนวณความคล้ายคลึงระหว่างความสนใจของ User กับโพสต์งาน
+⋮----
+// กรองเฉพาะงานที่มีคะแนนความคล้ายคลึง > 0.2 แล้วเรียงลำดับคัดเอา 6 อันดับแรก
+</file>
+
+<file path="app/api/seeker/report_company/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/api/user/updateProfile/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function PUT(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+)
+</file>
+
+<file path="app/api/visitor/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+import { cookies } from "next/headers";
+⋮----
+export async function POST()
+⋮----
+// ใช้คำสั่ง SQL ในการบวกยอดเพิ่มขึ้นทีละ 1 ลงในตาราง site_settings ของ MySQL
+⋮----
+maxAge: 60 * 60 * 24 * 30, // 30 วัน
+⋮----
+}); // ตั้งคุกกี้ให้หมดอายุใน 30 วัน
+</file>
+
+<file path="app/company/company-home/companyhome.module.css">
+.container {
+⋮----
+/* Search Section */
+.searchSection {
+⋮----
+.searchBarWrapper {
+⋮----
+.searchInput {
+⋮----
+.searchBtnMain {
+⋮----
+.filters {
+⋮----
+align-items: center; /* 📌 เพิ่มบรรทัดนี้ เพื่อจัดระนาบกึ่งกลางแนวตั้ง */
+⋮----
+.filters select {
+⋮----
+border: none; /* ลบขอบเดิมออกเพื่อความสวยงาม */
+⋮----
+/* ================= LAYOUT 30% / 70% ================= */
+.mainLayout {
+⋮----
+/* ฝั่งซ้าย 30%: Suggested Seekers (AI matching) */
+.leftSidebar {
+⋮----
+/* ฝั่งขวา 70%: รายชื่อ User ทั้งหมด + Search/Filter */
+.rightContent {
+⋮----
+.suggestContent {
+⋮----
+.suggestContent h3 {
+⋮----
+/* ซ้าย: เรียงลงมาแนวตั้ง */
+.verticalList {
+⋮----
+/* ขวา: แสดงแบบ Grid สองคอลัมน์ หรือยืดหยุ่นตามหน้าจอ */
+.suggestGrid {
+⋮----
+/* ================= CARDS & ITEMS ================= */
+.suggestMiniCard {
+⋮----
+.cardImg {
+⋮----
+.suggestMiniCardInfo {
+⋮----
+.cardHeader {
+⋮----
+.bold {
+⋮----
+.subText {
+⋮----
+.jobPositionText {
+⋮----
+.matchBadge {
+⋮----
+.btnWrapper {
+⋮----
+.detailsBtn {
+⋮----
+.detailsBtn:hover {
+⋮----
+.noData {
+⋮----
+/* ================= SKELETON ================= */
+.skeletonWrapper {
+⋮----
+.skeletonBlock {
+⋮----
+/* รองรับมือถือ ปรับกลับเป็นคอลัมน์เดียว */
+⋮----
+.leftSidebar,
+⋮----
+/* ================= PAGINATION BUTTONS ================= */
+.paginationWrapper {
+⋮----
+.pageBtn {
+⋮----
+.pageBtn:hover:not(:disabled) {
+⋮----
+.pageBtn:disabled {
+⋮----
+.pageInfo {
+⋮----
+.resetBtn {
+⋮----
+.resetBtn:hover {
+⋮----
+.headerTitleRow {
+/* ================= AGE RANGE SLIDER BOX (ตามรูปภาพ) ================= */
+.ageFilterBox {
+⋮----
+.ageLabel {
+⋮----
+.sliderContainer {
+⋮----
+.sliderTrack {
+⋮----
+background-color: #0056b3; /* แถบไฮไลต์สีฟ้าตรงกลาง */
+⋮----
+.rangeInput {
+⋮----
+/* Custom ปุ่มสไลด์ (Thumbs) */
+.rangeInput::-webkit-slider-thumb {
+⋮----
+.rangeInput::-moz-range-thumb {
+⋮----
+.ageValues {
+</file>
+
+<file path="app/company/savedSeeker/page.tsx">
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import SavedSeekerClient from "./savedSeekerClient"; // นำเข้าไฟล์ Client
+import styles from "./savedSeeker.module.css";
+⋮----
+interface CustomJwtPayload {
+  id: number;
+  email: string;
+  role: string;
+}
+⋮----
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+⋮----
+export default async function Page(
+</file>
+
+<file path="app/company/seeker-profile/[id]/seekerProfile.module.css">
+.container {
+⋮----
+.profileGrid {
+⋮----
+grid-template-columns: 1fr 1fr 1fr 0.8fr; /* แบ่ง 4 คอลัมน์ */
+⋮----
+.column {
+⋮----
+.cardHeader {
+⋮----
+.personalInfoContent {
+.avatarWrapper {
+⋮----
+.avatar {
+.titleinfoRow {
+.infoRow {
+⋮----
+.detailsBox {
+⋮----
+.contentPadding {
+⋮----
+.section {
+⋮----
+.section h4 {
+.setJobTitle {
+.section ol,
+.setLiTitle {
+.setLi {
+⋮----
+.tagGroup {
+⋮----
+.tag,
+⋮----
+.tagActive {
+⋮----
+/* ----------------------------------- */
+.Educontainer {
+⋮----
+.timeline {
+⋮----
+.centralLine {
+⋮----
+.timelineItem {
+⋮----
+.left {
+⋮----
+.right {
+⋮----
+.connector {
+⋮----
+.left .connector {
+.right .connector {
+⋮----
+.degree {
+⋮----
+.school {
+⋮----
+.columnTransparent {
+⋮----
+.fileItem {
+⋮----
+.fileItem label {
+⋮----
+.hiddenInput {
+⋮----
+/* ─── สไตล์ไฟล์แบบใหม่ ─── */
+.fileContainerBox {
+⋮----
+.fileNameDisplay {
+⋮----
+.deleteFileIcon {
+.deleteFileIcon:hover {
+⋮----
+.fileBox {
+⋮----
+.fileBox:hover {
+⋮----
+.addFileInlineBtn {
+⋮----
+.addFileInlineBtn:hover {
+⋮----
+/* ─── POPUP MODAL สไตล์ ─── */
+.modalOverlay {
+⋮----
+.modalContainer {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.modalCloseBtn {
+⋮----
+.modalBody {
+⋮----
+.modalIframe {
+⋮----
+.modalImg {
+⋮----
+.contactCard {
+.contactCard1 {
+⋮----
+.sentBtn {
+.sentBtn:hover {
+.sentBtn:active {
+⋮----
+/* ── Back Button ── */
+.backRow {
+⋮----
+.backBtn {
+⋮----
+.backBtn:hover {
+⋮----
+.backBtn:active {
+.bookmarkIcon:hover {
+⋮----
+color: darkcyan; /* 💡 ปรับให้เป็นสีเข้มขึ้น เพื่อให้ตัดกับพื้นหลังสีฟ้าอ่อน จะได้มองเห็นชัดเจนครับ */
+cursor: pointer; /* แก้ไขตรงนี้ */
+⋮----
+/* ตอนคลิกปุ่ม (ขณะกดเมาส์ค้างไว้) */
+.bookmarkIcon:active {
+⋮----
+color: white; /* 💡 ตอนปุ่มเข้มขึ้น ค่อยเปลี่ยนไอคอนเป็นสีขาวจะสวยกว่าครับ */
+</file>
+
+<file path="app/user/user-home/page.tsx">
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import UserHomeClient from "./userhome-client";
+export const dynamic = "force-dynamic"; // ✅ ต้องอยู่ที่นี่
+⋮----
+export default async function Page()
+</file>
+
+<file path="app/user/user-profile/seekerProfile.module.css">
+.container {
+⋮----
+.profileGrid {
+⋮----
+grid-template-columns: 1fr 1fr 1fr 0.8fr; /* แบ่ง 4 คอลัมน์ */
+⋮----
+.column {
+⋮----
+.cardHeader {
+⋮----
+.personalInfoContent {
+.avatarWrapper {
+⋮----
+.avatar {
+.titleinfoRow {
+.infoRow {
+⋮----
+.detailsBox {
+⋮----
+.contentPadding {
+⋮----
+.section {
+⋮----
+.section h4 {
+.setJobTitle {
+.section ol,
+.setLiTitle {
+.setLi {
+⋮----
+.tagGroup {
+⋮----
+.tag,
+⋮----
+.tagActive {
+⋮----
+/* ----------------------------------- */
+.Educontainer {
+⋮----
+.timeline {
+⋮----
+.centralLine {
+⋮----
+.timelineItem {
+⋮----
+.left {
+⋮----
+.right {
+⋮----
+.connector {
+⋮----
+.left .connector {
+.right .connector {
+⋮----
+.degree {
+⋮----
+.school {
+⋮----
+.columnTransparent {
+⋮----
+.fileItem {
+⋮----
+.fileItem label {
+⋮----
+.hiddenInput {
+⋮----
+/* ─── สไตล์ไฟล์แบบใหม่ ─── */
+.fileContainerBox {
+⋮----
+.fileNameDisplay {
+⋮----
+.deleteFileIcon {
+.deleteFileIcon:hover {
+⋮----
+.fileBox {
+⋮----
+.fileBox:hover {
+⋮----
+.addFileInlineBtn {
+⋮----
+.addFileInlineBtn:hover {
+⋮----
+/* ─── POPUP MODAL สไตล์ ─── */
+.modalOverlay {
+⋮----
+.modalContainer {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.modalCloseBtn {
+⋮----
+.modalBody {
+⋮----
+.modalIframe {
+⋮----
+.modalImg {
+⋮----
+.contactCard {
+.contactCard1 {
+⋮----
+.sentBtn {
+.sentBtn:hover {
+.sentBtn:active {
+</file>
+
+<file path="app/user/userProfileCompany/[id]/backBttn.tsx">
+import { useRouter } from "next/navigation";
+import styles from "./userProfileCompany.module.css";
+⋮----
+export default function BackButton()
+</file>
+
+<file path="app/globals.css">
+/* :root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+} */
+</file>
+
+<file path="components/footer.module.css">
+.footerContainer {
+⋮----
+margin-top: auto; /* ดันลงล่างสุดของ Layout เสมอ */
+⋮----
+.divider {
+⋮----
+.footerContent {
+⋮----
+justify-content: space-between; /* กระจายคอลัมน์ให้เต็มพื้นที่ซ้าย-กลาง-ขวา */
+⋮----
+margin: 0 auto; /* แก้ไขหน่วย px: จัดกึ่งกลางคอนเทนเนอร์ */
+⋮----
+.footerColumn {
+⋮----
+flex: 1; /* ให้แต่ละคอลัมน์ขยายพื้นที่เท่าๆ กัน */
+⋮----
+.statRow {
+⋮----
+justify-content: space-between; /* ชิดซ้ายสำหรับ Label และ ชิดขวาสำหรับ Value */
+⋮----
+.label {
+⋮----
+.value {
+⋮----
+/* 
+   📱 MEDIA QUERIES (Mobile & Tablet)
+    */
+</file>
+
+<file path="components/LeafletMap.tsx">
+import { useEffect, useMemo, useRef } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+⋮----
+import L from "leaflet";
+//
+// กำหนด Type ของ Props ให้ตรงกับที่ CompanyProfile ส่งมา
+type LeafletMapProps = {
+  lat: number | string | null;
+  lng: number | string | null;
+  isEditMode: boolean;
+  onChangeLocation: (newLat: number, newLng: number) => void;
+};
+⋮----
+// Custom Icon สำหรับ Marker
+⋮----
+// Component ย่อยสำหรับจัดการเมื่อผู้ใช้ "คลิก" บนแผนที่เพื่อปักหมุดใหม่
+function MapClickHandler({
+  isEditMode,
+  onChangeLocation,
+}: {
+  isEditMode: boolean;
+onChangeLocation: (lat: number, lng: number)
+⋮----
+click(e)
+⋮----
+// Component ย่อยสำหรับอัปเดตจุดกึ่งกลาง (Center) ของแผนที่เมื่อพิกัดเปลี่ยนจากภายนอก
+function MapUpdater(
+⋮----
+// ดึงค่าซูมปัจจุบัน ณ วินาทีนั้น มาใช้กับพิกัดใหม่เลย
+⋮----
+// สั่งให้แผนที่ย้ายไปจุด center ใหม่ โดยคงระยะซูมเดิมไว้
+⋮----
+animate: true, // เปิดให้มันสไลด์เลื่อนแบบสมูทๆ
+duration: 0.5, // ความเร็วในการสไลด์ (หน่วยเป็นวินาที ปรับเพิ่มลดได้)
+⋮----
+const API_KEY = "ae32626403be455d96f52f6bcc1a07be"; // ใส่ API Key ของคุณ
+⋮----
+// ค่า Default เป็นกรุงเทพฯ หากไม่มีพิกัดถูกส่งมา
+⋮----
+// จัดการ Event เมื่อผู้ใช้ "ลาก" หมุดเสร็จสิ้น
+⋮----
+dragend()
+⋮----
+border: isEditMode ? "2px dashed #1d9bf0" : "none", // เพิ่มกรอบประเพื่อให้รู้ว่าอยู่ในโหมดแก้ไข
+⋮----
+{/* อัปเดตมุมมองแผนที่เมื่อพิกัดเปลี่ยน */}
+⋮----
+{/* รองรับการคลิกบนแผนที่เพื่อเปลี่ยนพิกัด (เฉพาะโหมดแก้ไข) */}
+⋮----
+draggable={isEditMode} // ให้ลากได้เฉพาะเมื่ออยู่ในโหมดแก้ไข
+</file>
+
+<file path="lib/session.ts">
+import jwt from 'jsonwebtoken';
+import { cookies } from 'next/headers';
+⋮----
+// ฟังก์ชันสำหรับสร้าง Session และบันทึกลง Cookie
+export async function createSession(payload: any)
+⋮----
+//  สร้าง Token มีอายุ 1 วัน
+⋮----
+//  บันทึก Token ลงใน Cookie
+⋮----
+maxAge: 60 * 60 * 24, // 1 วัน
+⋮----
+// (แถม) ฟังก์ชันสำหรับลบ Session ตอน Logout
+export async function deleteSession()
+</file>
+
+<file path="middleware.ts">
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+⋮----
+export function middleware(req: NextRequest)
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+⋮----
+/* config options here */
+</file>
+
+<file path="app/admin/Feedbacks/AdminFeedback.module.css">
+/* 
+   GLOBAL RESET & CONTAINER
+*/
+.container,
+⋮----
+.container {
+⋮----
+/* Header Section */
+.header {
+⋮----
+.header h2 {
+⋮----
+.header p {
+⋮----
+/* 
+   FILTERS BAR
+    */
+.filterContainer {
+⋮----
+.filterGroup {
+⋮----
+.filterGroup label {
+⋮----
+.filterSelect {
+⋮----
+.filterSelect:hover {
+⋮----
+.filterSelect:focus {
+⋮----
+/* 
+   FEEDBACK CARDS LIST
+    */
+.listContainer {
+⋮----
+.card {
+⋮----
+.card:hover {
+⋮----
+/* LEFT COLUMN */
+.userInfo {
+⋮----
+.badge {
+⋮----
+.badgeUser {
+⋮----
+.badgeCompany {
+⋮----
+.date {
+⋮----
+.emailText {
+⋮----
+.statusBadge {
+⋮----
+.statusDot {
+⋮----
+.statusPending {
+.statusPending .statusDot { background-color: #d97706; }
+⋮----
+.statusRead {
+.statusRead .statusDot { background-color: #64748b; }
+⋮----
+.statusReplied {
+.statusReplied .statusDot { background-color: #16a34a; }
+⋮----
+/* CENTER COLUMN */
+.messageContent {
+⋮----
+.userMessage {
+⋮----
+.messageText {
+⋮----
+.repliedBox {
+⋮----
+.repliedHeader {
+⋮----
+.repliedBox p {
+⋮----
+.repliedBox small {
+⋮----
+.replySection {
+⋮----
+.replyTextarea {
+⋮----
+.replyBtn {
+⋮----
+/* RIGHT COLUMN */
+.actions {
+⋮----
+.removeBtn {
+⋮----
+.loading,
+⋮----
+/* 
+    MEDIA QUERIES (Mobile & Tablet)
+    */
+⋮----
+/* ปรับแต่ง Filter Bar บนมือถือให้กระชับและไม่ยืดสูง */
+⋮----
+flex: none; /* แก้ไข: ยกเลิกการใช้ flex-basis: 200px ที่ดันความสูง */
+</file>
+
+<file path="app/api/admin/post/Ban/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+⋮----
+// ระบบปลดแบนโพสต์ (DELETE)
+export async function DELETE(request: Request)
+⋮----
+// รับค่า post_id จาก URL Parameters (เช่น /api/admin/post/Ban?post_id=123)
+⋮----
+// อัปเดตสถานะกลับเป็นปกติ (เช่น 'active') และล้างค่า ban_until เป็น NULL
+</file>
+
+<file path="app/api/company/saved-seekers/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+⋮----
+// รับ company_id เข้ามาเพื่อระบุตัวตนของบริษัทที่กำลังเรียกดูข้อมูล
+⋮----
+// เขียนคำสั่ง SQL INNER JOIN ระหว่างตาราง favour_user และ User
+⋮----
+// จัดโครงสร้างข้อมูลให้อยู่ในรูปแบบ Object ตามโครงสร้าง Interface ที่เราออกแบบไว้ก่อนหน้านี้
+⋮----
+jobtitle: row.jobtitle || "General Seeker", //   -- 4. เปลี่ยนจากคำว่า "Seeker" มาใช้ค่าจริงที่ดึงจาก SQL
+⋮----
+formattedData, // ส่งข้อมูลที่พร้อมใช้งานให้ฝั่ง Frontend ไปวน Loop ได้ทันที
+</file>
+
+<file path="app/api/posts/insertPost/route.ts">
+// app/api/posts/insertPost/route.ts (หรือไฟล์ API ของคุณ)
+import { NextResponse } from "next/server";
+import db from '@/lib/db';
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+⋮----
+export async function POST(request: Request)
+⋮----
+return NextResponse.json({ message: "Unauthorized" }, { status: 401 }); // เปลี่ยนสถานะเป็น 401 ให้ถูกต้องตามหลักการ
+⋮----
+// 🔍 [เพิ่มส่วนนี้] ตรวจสอบสถานะการยืนยันตัวตนของบริษัทจาก Database
+⋮----
+// ── ข้อมูลเดิมของคุณ ─────────────────────────────────
+</file>
+
+<file path="app/api/user/saved-company/route.ts">
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+export async function POST(request: Request)
+</file>
+
+<file path="app/company/profile/companyProfile.module.css">
+.container {
+⋮----
+grid-template-columns: 1fr 1fr; /* แบ่งครึ่งซ้าย-ขวา */
+⋮----
+.profileCard {
+⋮----
+.banner {
+⋮----
+.logoWrapper {
+⋮----
+margin-top: -60px; /* ให้โลโก้ลอยทับแบนเนอร์ */
+⋮----
+.logo {
+⋮----
+.infoArea {
+⋮----
+.companyName {
+⋮----
+display: flex; /* เปิดใช้งาน Flexbox */
+align-items: flex-start; /* จัดให้ไอคอนกับชื่ออยู่กึ่งกลางบรรทัดเดียวกัน */
+gap: 8px; /* เพิ่มระยะห่างระหว่างชื่อกับไอคอน */
+font-size: 24px; /* ปรับขนาดตามต้องการ */
+⋮----
+/* background-color: darkcyan; */
+⋮----
+.material-symbols-outlined {
+⋮----
+/* ทำให้ไอคอนดูเป็นรูปภาพ ไม่ใช่ตัวหนังสือ */
+⋮----
+/* ตั้งค่าแกน (Axes) ของ Variable Font */
+⋮----
+/* 0 = โปร่งใส, 1 = ระบายสีเต็ม */ "wght" 100,
+/* ความหนาของเส้น (100 - 700) */ "GRAD" 0,
+/* ความหนาพิเศษ (เฉดสี) */ "opsz" 18; /* ขนาดที่เหมาะสมกับสายตา */
+⋮----
+.mapWrapper {
+⋮----
+/* --- ฝั่งขวา (Right Column) --- */
+.rightSection {
+.VerifiedConfirm {
+⋮----
+/* background-color: darkgoldenrod; */
+⋮----
+.dropzoneStyle {
+⋮----
+transition: border 0.3s ease; /* เวลาเอาเมาส์วางแล้วจะสมูท */
+⋮----
+.dropzoneStyle:hover {
+⋮----
+border-color: #1d9bf0; /* เปลี่ยนเป็นสีฟ้าเวลาเอาเมาส์มาชี้ */
+⋮----
+.jobScrollArea {
+⋮----
+height: 500px; /* กำหนดความสูงเพื่อให้ Scroll ได้แบบในภาพ */
+⋮----
+.jobCard {
+⋮----
+align-items: flex-start; /* <--- ตัวนี้จะป้องกันไม่ให้รูปถูกยืดตามความสูงของข้อความ */
+⋮----
+.jobCard img {
+⋮----
+object-fit: contain; /* หรือใช้ 'cover' ถ้าอยากให้รูปเต็มกรอบสี่เหลี่ยมจัตุรัส */
+flex-shrink: 0; /* ป้องกันไม่ให้รูปถูกบีบให้เล็กลงเวลาหน้าจอแคบ */
+align-self: flex-start; /* ให้รูปชิดขอบบน ไม่ยืดตามความสูงของกล่อง */
+⋮----
+.detailBtn {
+⋮----
+.reviewSection {
+⋮----
+.reviewCard {
+/* คลุมส่วน Contact ทั้งหมด */
+.contactGroup {
+⋮----
+gap: 0px; /* ปรับระยะห่างระหว่างบรรทัดได้ตรงนี้ */
+⋮----
+.contactGroup h3 {
+⋮----
+margin: 0; /* ลบ Margin เริ่มต้นที่ทำให้มันดูเยื้องออก */
+⋮----
+.contactGroup p {
+⋮----
+margin: 0; /* ลบ Margin ของ p ด้วยเพื่อให้ Gap คุมระยะห่างแทน */
+⋮----
+/* ------------------------------------- */
+/* 🆕 Modal Preview Styles */
+⋮----
+.modalOverlay {
+⋮----
+background-color: rgba(0, 0, 0, 0.55); /* พื้นหลังทึบ ๆ */
+⋮----
+.modalContent {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.closeModalBtn {
+⋮----
+.closeModalBtn:hover {
+⋮----
+.modalBody {
+⋮----
+.avatarWrappercompany {
+</file>
+
+<file path="app/company/seeker-profile/[id]/adminbutton.tsx">
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+⋮----
+interface AdminButtonProps {
+  id: string;
+  role: string;
+  user_id: string; // เปลี่ยนเป็น user_id
+  banned_until?: string | null;
+  onSuccess?: () => void;
+}
+⋮----
+user_id: string; // เปลี่ยนเป็น user_id
+⋮----
+// State เก็บข้อความเวลาถอยหลังและสถานะการแบน
+⋮----
+// --- ระบบนับเวลาถอยหลัง Real-time (อัปเดตทุก 1 นาที) ---
+⋮----
+const checkTime = () =>
+⋮----
+const interval = setInterval(checkTime, 60000); // อัปเดตทุก 1 นาที
+⋮----
+// --- ฟังก์ชันแบนผู้ใช้ ---
+const handleBan = async () =>
+⋮----
+// --- ฟังก์ชันปลดแบนผู้ใช้ ---
+const handleUnban = async () =>
+⋮----
+// เรียก API ลบการแบน (ส่ง user_id ไปกับ query string)
+⋮----
+onClick=
+⋮----
+{/* แสดงสถานะการแบนปัจจุบัน */}
+⋮----
+{/* ส่วนที่ 2: การแบน หรือ ปลดแบน (Ban / Unban) */}
+⋮----
+// ถ้าโดนแบนอยู่ให้แสดงปุ่มปลดแบน
+⋮----
+// ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
+⋮----
+{/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
+</file>
+
+<file path="app/company/seeker-profile/[id]/profile.module.css">
+.savedButton {
+⋮----
+/* สไตล์ตั้งต้น (ถ้าไม่ใส่ ในอินไลน์สไตล์ที่คุณเขียนไว้ก็ทำงานได้ครับ) */
+⋮----
+/* Action 1: ตอนเมาส์ชี้ (Hover) ให้ปุ่มเปลี่ยนสีไฮไลท์ */
+.savedButton:hover {
+⋮----
+background-color: #f5f5f5 !important; /* เปลี่ยนพื้นหลังเป็นสีเทาอ่อน */
+color: #0070f3 !important;            /* เปลี่ยนสีข้อความ/ไอคอนเป็นสีฟ้า */
+⋮----
+/* Action 2: ตอนกดคลิกค้าง (Active) ให้ปุ่มยุบลงไปนิดหน่อย */
+.savedButton:active {
+⋮----
+.reportedButton {
+⋮----
+.reportedButton:hover {
+⋮----
+.reportedButton:active {
+</file>
+
+<file path="app/login/login.module.css">
+/* 1. ส่วนพื้นหลัง (บังคับเต็มจอแบบ Fixed) */
+.loginContainer {
+⋮----
+background-image: url("/login-bg.png"); /* ตรวจสอบพาธรูปภาพใน public/images */
+⋮----
+/* 2. ตัวการ์ดกระจก (Glassmorphism) */
+.loginCard {
+⋮----
+/* --- แก้ไขจุดนี้เพื่อให้ทึบ --- */
+background: #1a1a1a; /* สีเทาดำทึบ ไม่ใช้ rgba โปร่งแสง*/
+/* backdrop-filter: blur(20px);  <-- ลบทิ้งหรือ Comment ไว้เพื่อไม่ให้เห็นภาพพื้นหลัง */
+⋮----
+box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8); /* เพิ่มเงาให้ดูมีมิติ */
+⋮----
+.brandSide {
+⋮----
+/* ส่วนของ Brand Side (ฝั่งซ้าย) */
+⋮----
+background: #252525; /* ปรับให้ทึบและตัดกับฝั่งขวาเล็กน้อย*/
+⋮----
+/* justify-content: flex-start; */
+⋮----
+.logo {
+⋮----
+.icon {
+⋮----
+.slogan h1 {
+⋮----
+/* ไล่สีตัวอักษร */
+⋮----
+.slogan h1 span {
+⋮----
+/* ส่วนของ Form Side (ฝั่งขวา) */
+.formSide {
+⋮----
+background: #1a1a1a; /* สีเดียวกับ Card */
+⋮----
+.formContent h2 {
+⋮----
+.inputGroup {
+⋮----
+.inputGroup label {
+⋮----
+/* ปรับ Input ให้ดูเด่นขึ้นบนพื้นหลังทึบ */
+.inputGroup input {
+⋮----
+background: #2a2a2a; /* เข้มกว่าพื้นหลังการ์ดเล็กน้อย */
+⋮----
+.inputGroup input::placeholder {
+⋮----
+.inputGroup input:focus {
+⋮----
+.btnLogin {
+⋮----
+.btnLogin:hover {
+⋮----
+.divider {
+⋮----
+.divider::before,
+⋮----
+.divider span {
+⋮----
+/* ✅ ปุ่ม Google อ้างอิงผ่าน ID ตรงๆ ตามที่คุณตั้งไว้ */
+#google-btn-login-container {
+⋮----
+min-height: 44px; /* จองพื้นที่ความสูงไว้กัน Layout ขยับตอนโหลด */
+⋮----
+/* hack เล็กน้อย: ถ้า Google โหลดช้า ให้ซ่อน overflow */
+⋮----
+.footerLink {
+⋮----
+.footerLink a {
+⋮----
+.footerLink a:hover {
+</file>
+
+<file path="app/login/page.tsx">
+import React, { useState, useEffect } from "react"; // เอา useEffect ออก
+import { useRouter } from "next/navigation";
+import Script from "next/script";
+import Link from "next/link";
+import styles from "./login.module.css"; // เปลี่ยนเป็น .module.css
+⋮----
+interface Window {
+    google: any;
+  }
+⋮----
+// แนะนำให้ย้าย Client ID ไปไว้ใน .env.local (เช่น NEXT_PUBLIC_GOOGLE_CLIENT_ID)
+⋮----
+// ฟังก์ชันตั้งค่าปุ่ม Google
+const initGoogleButton = () =>
+⋮----
+// ถ้า script โหลดเสร็จไปแล้ว (จากหน้าอื่นหรือโหลดค้างไว้) ให้รันเลย
+⋮----
+// จัดการเมื่อ Login ด้วย Google สำเร็จ
+const handleGoogleLogin = async (response: any) =>
+⋮----
+// เรียก API (แทน ApiService ของ Angular)
+⋮----
+// เปลี่ยนเป็น URL Backend ของคุณ
+⋮----
+// TODO: เก็บ Session/Token (เช่น localStorage, Cookies, หรือ Context)
+// authService.login(data.user);
+⋮----
+// จัดการ Login ด้วย Email/Password ปกติ
+const onLogin = async (e: React.FormEvent) =>
+⋮----
+e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บ Refresh เมื่อกด Submit
+⋮----
+// เปลี่ยนเป็น URL Backend ของคุณ
+⋮----
+// TODO: เก็บ Session/Token
+⋮----
+// ฟังก์ชันช่วย Redirect แยกตาม Role
+const redirectUser = (role: string) =>
+⋮----
+{/* แถบด้านซ้าย */}
+⋮----
+{/* แถบฟอร์มด้านขวา */}
+</file>
+
+<file path="app/user/user-detail-job/[id]/adminbutton.tsx">
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+⋮----
+interface AdminButtonProps {
+  id: string;
+  role: string;
+  post_id: string;
+  company_id?: string;
+  ban_until?: string | null; // รับเวลาปลดแบนจาก Database เข้ามา
+}
+⋮----
+ban_until?: string | null; // รับเวลาปลดแบนจาก Database เข้ามา
+⋮----
+// State สำหรับเก็บข้อความแสดงเวลาแบนถอยหลัง
+⋮----
+// ฟังก์ชันคำนวณเวลาถอยหลัง
+⋮----
+const checkTime = () =>
+⋮----
+// เนื่องจาก backend มีการ +7 ชม. ตอนเซฟ ดังนั้นถ้าแสดงผลในไทยถือว่าเวลาตรงกันแล้ว
+⋮----
+// อัปเดตเวลาทุกๆ 1 นาที (60000 ms)
+⋮----
+const handleDelete = async () =>
+⋮----
+const handleBan = async () =>
+⋮----
+router.refresh(); // ใช้ refresh แทน back เพื่อให้ข้อมูลหน้าที่เปิดอยู่อัปเดต
+⋮----
+const handleUnban = async () =>
+⋮----
+// ส่ง DELETE Request พร้อม query parameter
+⋮----
+router.refresh(); // รีเฟรชหน้าเพื่อดึงข้อมูลใหม่
+⋮----
+onClick=
+⋮----
+{/* แสดงสถานะการแบนปัจจุบัน */}
+⋮----
+{/* ส่วนที่ 1: การลบโพสต์ (Delete) */}
+⋮----
+{/* ส่วนที่ 2: การแบน หรือ ปลดแบน (Ban / Unban) */}
+⋮----
+// ถ้าโดนแบนอยู่ให้แสดงปุ่มปลดแบน
+⋮----
+// ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
+⋮----
+{/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
+</file>
+
+<file path="app/user/user-detail-job/[id]/BanPopup.tsx">
+import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+⋮----
+// อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
+const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
+⋮----
+// 2. คำนวณตรรกะต่างๆ ก่อนแสดงผล
+⋮----
+// 3. ส่วนของการแสดงผล (return) จะอยู่ล่างสุดเสมอ
+⋮----
+{/* เนื้อหาอื่นๆ ในหน้าเว็บของคุณ */}
+⋮----
+{/* โค้ด Popup ของคุณ */}
+⋮----
+setShowBanPopup(false);
+router.back();
+</file>
+
+<file path="app/user/user-feedback/page.tsx">
+import { useState, useEffect, FormEvent } from "react";
+import styles from "./Feedback.module.css";
+⋮----
+interface FeedbackItem {
+  feedback_id: number;
+  user_id: number;
+  message: string;
+  created_at: string;
+  admin_message: string | null;
+  status: "pending" | "replied" | "read";
+  replied_at: string | null;
+}
+⋮----
+const initFeedbackDashboard = async () =>
+⋮----
+// 📥 เช็ค URL ตรงนี้ให้มั่นใจว่าตรงกับโฟลเดอร์หลังบ้าน (มี s หรือไม่มี s)
+⋮----
+// 🌟 ดักดึงข้อมูล: ถ้าหลังบ้านพัง (ไม่ใช่ status 200) ให้หยุดทำงานทันที จะได้ไม่เกิดบั๊ก SyntaxError
+⋮----
+// 🌟 ฟังก์ชันจัดการเมื่อเกิดการคลิกอ่านที่กล่องข้อความ (เปลี่ยนเป็น read เฉพาะ ID นั้น)
+const handleMarkAsRead = async (
+    feedbackId: number,
+    currentStatus: string,
+) =>
+⋮----
+// 🌟 แก้ตรงนี้: เอาตัว s ออกให้ตรงกับเส้น GET
+⋮----
+console.error("PATCH Error:", res.status); // เพิ่ม log ไว้ดูเผื่อพัง
+⋮----
+const handleSubmit = async (e: FormEvent) =>
+⋮----
+// 🌟 แก้ตรงนี้: เอาตัว s ออกด้วยเหมือนกันครับ
+⋮----
+{/* ฝั่งซ้าย: ฟอร์มกรอกข้อความคำติชม */}
+⋮----
+{/* ฝั่งขวา: แสดงลิสต์ประวัติพร้อมข้อความตอบกลับ */}
+⋮----
+// 🌟 ผูกเหตุการณ์คลิกอ่านแยกทีละกล่อง
+onClick=
+// 🌟 ปรับแต่งสไตล์เพิ่มสีส้มพาสเทลนวลตาเมื่อมีคำตอบใหม่เข้ามา
+</file>
+
+<file path="app/user/userProfileCompany/[id]/adminbutton.tsx">
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+⋮----
+interface AdminButtonProps {
+  id: string;
+  role: string;
+  company_id: string; // เปลี่ยนจาก post_id เป็น company_id
+  banned_until?: string | null; // ใช้ ban_until ตามโค้ดต้นฉบับของคุณ
+  onSuccess?: () => void;
+}
+⋮----
+company_id: string; // เปลี่ยนจาก post_id เป็น company_id
+banned_until?: string | null; // ใช้ ban_until ตามโค้ดต้นฉบับของคุณ
+⋮----
+// State เก็บข้อความเวลาถอยหลังและสถานะการแบน (เหมือนต้นฉบับของคุณ 100%)
+⋮----
+// --- ระบบนับเวลาถอยหลัง Real-time (อัปเดตทุก 1 นาที ตามต้นฉบับ) ---
+⋮----
+const checkTime = () =>
+⋮----
+const interval = setInterval(checkTime, 60000); // อัปเดตทุก 1 นาที
+⋮----
+// --- ฟังก์ชันแบนบริษัท ---
+const handleBan = async () =>
+⋮----
+// --- ฟังก์ชันปลดแบนบริษัท ---
+const handleUnban = async () =>
+⋮----
+onClick=
+⋮----
+{/* แสดงสถานะการแบนปัจจุบัน */}
+⋮----
+{/* ส่วนที่ 2: การแบน หรือ ปลดแบน (Ban / Unban) */}
+⋮----
+// ถ้าโดนแบนอยู่ให้แสดงปุ่มปลดแบน
+⋮----
+// ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
+⋮----
+{/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
+</file>
+
+<file path="app/user/userProfileCompany/[id]/SaveAndReportCompanyBttn.tsx">
+import { useState, useRef, useEffect } from "react";
+⋮----
+import styles from "./saveAndreportBttn.module.css";
+⋮----
+//  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ
+interface ProfileActionsProps {
+  userId: number;
+  companyId: number;
+}
+⋮----
+type ReportType =
+  | "identity_fraud"
+  | "job_no_show"
+  | "harassment_to_staff"
+  | "other";
+⋮----
+// ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+const openReportModal = () =>
+⋮----
+setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
+⋮----
+const handleReport = async (reportType: ReportType, description: string) =>
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+setIsOpen(false); // ปิดเมนูสามจุด
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+⋮----
+const checkReport = async () =>
+⋮----
+onClick=
+⋮----
+{/* Dropdown เมนูย่อย */}
+⋮----
+onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
+⋮----
+{/* หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.5)", // พื้นหลังมืดโปร่งแสง
+⋮----
+zIndex: 9999, // ให้อยู่ชั้นบนสุดของหน้าจอเสมอ
+⋮----
+{/* หัวข้อโมดอล */}
+⋮----
+onClick={() => setIsModalOpen(false)} // ปุ่มกากบาทปิดโมดอล
+⋮----
+{/* ฟอร์มเลือกประเภท */}
+⋮----
+{/* ฟอร์มพิมพ์รายละเอียด */}
+⋮----
+backgroundColor: "#d93025", // สีแดง
+</file>
+
+<file path="app/home.module.css">
+
+</file>
+
+<file path="app/not-found.tsx">
+import Link from "next/link";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+⋮----
+interface CustomJwtPayload extends JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+}
+⋮----
+// เปลี่ยนเป็นพื้นหลังสว่าง (Light Theme)
+⋮----
+{/* รูปแบบ 404 แบบคลีนๆ ใช้สีฟ้า */}
+⋮----
+{/* หัวข้อ */}
+⋮----
+{/* คำอธิบาย */}
+⋮----
+{/* ส่วนปุ่มกด: ปรับให้ใหญ่ขึ้นและกว้างขึ้น 
+          - w-full sm:w-auto: ในมือถือเต็มจอ, ในจอใหญ่ปรับตามเนื้อหา
+          - px-12 py-5: เพิ่ม Padding ทั้งแนวตั้งและแนวนอนให้ปุ่มดูอ้วนและใหญ่ขึ้น (ตรงตามที่คุณต้องการ)
+          - text-lg: ตัวอักษรใหญ่ขึ้น
+        */}
+⋮----
+{/* ไอคอนบ้าน */}
+⋮----
+{/* ไอคอนบ้าน */}
+</file>
+
+<file path="components/footer.tsx">
+import { useEffect, useState } from "react";
+import styles from "./footer.module.css";
+⋮----
+interface FooterStats {
+  total_users: number;
+  general_users: number;
+  companies: number;
+  all_jobs: number;
+  visitors: number;
+}
+⋮----
+const Footer = () =>
+⋮----
+const fetchFooterStats = async () =>
+⋮----
+{/* Column 1: User Stats */}
+⋮----
+{/* Column 2: Job Stats */}
+⋮----
+{/* Column 3: Visitor Stats */}
+</file>
+
+<file path="lib/vectorSimilarity.ts">
+import { pipeline } from "@xenova/transformers";
+⋮----
+export async function getEmbedding(text: string): Promise<number[]>
+⋮----
+// โหลดโมเดลสำหรับเปลี่ยนข้อความเป็น Vector (รองรับภาษาอังกฤษและไทยได้ดี)
+⋮----
+// แปลงข้อความให้เป็น Vector Array
+⋮----
+// ฟังก์ชันคำนวณความใกล้เคียงระหว่าง Vector 2 ตัว (ผลลัพธ์ 0 ถึง 1)
+export function cosineSimilarity(vecA: number[], vecB: number[]): number
+⋮----
+// const similarity = dotProduct / (normA * normB);
+// console.log(`Cosine Similarity: ${similarity}`);
+</file>
+
+<file path="app/admin/Feedbacks/page.tsx">
+import { useState, useEffect, useMemo } from "react";
+import { IFeedback, ApiResponse } from "@/app/api/admin/feedbacks/route";
+import styles from "./AdminFeedback.module.css";
+⋮----
+// แผนผังแสดงประเภทสถานะ (Status Badge Config)
+⋮----
+// ตัวกรอง (Filters)
+⋮----
+const fetchFeedbacks = async () =>
+⋮----
+// แปลงฟอร์แมตวันที่ (DD/MM/YYYY HH:mm)
+const formatDate = (dateStr: string) =>
+⋮----
+const handleReplySubmit = async (item: IFeedback) =>
+⋮----
+const handleDeleteFeedback = async (
+    feedback_id: number,
+    source_type: string
+): Promise<void> =>
+⋮----
+{/* ส่วนหัว Dashboard */}
+⋮----
+{/* ส่วนตัวกรอง (Control Bar) */}
+⋮----
+{/* รายการ Feedbacks */}
+⋮----
+
+⋮----
+{/* 1. ส่วนข้อมูลผู้ใช้และเวลา */}
+⋮----
+{/* 2. ส่วนเนื้อหา Feedback & แบบฟอร์มตอบกลับ */}
+⋮----
+{/* Speech Bubble ข้อความฝั่งผู้ใช้ */}
+⋮----
+{/* ประวัติการตอบกลับเดิมของแอดมิน */}
+⋮----
+<small>ตอบเมื่อ:
+⋮----
+{/* ฟอร์มพิมพ์ข้อความตอบกลับ */}
+⋮----
+onClick=
+⋮----
+{/* 3. ปุ่ม Remove สไตล์แคปซูลสีแดง */}
+</file>
+
+<file path="app/admin/home/page.tsx">
+import styles from "./home.module.css";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+⋮----
+interface PendingCompany {
+  company_id: number;
+  company_name: string;
+  logo_image: string | null;
+  dbd_file: string | null;
+  verification_status: string;
+  verification_comment: string | null;
+}
+⋮----
+// ─── ดึงรายชื่อบริษัทที่ "รอตรวจสอบ" จาก backend จริง ───
+const fetchPendingCompanies = async () =>
+⋮----
+// ─── อนุมัติบริษัท ───
+const handleApprove = async (id: number) =>
+⋮----
+// เอาบริษัทที่อนุมัติแล้วออกจากลิสต์ "รอตรวจสอบ" ทันที
+⋮----
+// ─── ปฏิเสธบริษัท (ต้องระบุเหตุผล) ───
+const handleReject = async (id: number) =>
+⋮----
+if (!comment) return; // ยกเลิกถ้าไม่กรอกเหตุผล
+⋮----
+{/* ส่วนชื่อและโลโก้ */}
+⋮----
+{/* ส่วนกลุ่มปุ่มจัดการ */}
+⋮----
+onClick=
+</file>
+
+<file path="app/api/auth/login/route.ts">
+import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import db from '@/lib/db';
+import { createSession } from '@/lib/session';
+⋮----
+export async function POST(request: Request)
+⋮----
+// 1. ค้นหาในตาราง User
+⋮----
+// 🎯 แก้ไข: ดึงสิทธิ์จากคอลัมน์ role ใน DB จริง (เช่น admin, seeker) ไม่ฮาร์ดโค้ดเป็น seeker อย่างเดียว
+⋮----
+// 2. ค้นหาในตาราง company
+⋮----
+// ถ้าไม่พบอีเมลในทั้งสองตาราง
+⋮----
+// 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) ---
+// if (user.banned_until) {
+//     const banEndDate = new Date(user.banned_until);
+//     const currentDate = new Date();
+⋮----
+//     if (banEndDate > currentDate) {
+//         const formattedBanDate = banEndDate.toLocaleString('th-TH');
+//         return NextResponse.json({
+//             message: `บัญชีของคุณถูกระงับการใช้งานจนถึง ${formattedBanDate}`
+//         }, { status: 403 });
+//     }
+// }
+⋮----
+// 3. ตรวจสอบรหัสผ่าน
+⋮----
+// ลบรหัสผ่านทิ้งก่อนส่งกลับเพื่อความปลอดภัย
+⋮----
+// 🔐 สร้าง Session ให้ตรงกับ ID ของแต่ละตาราง
+</file>
+
+<file path="app/api/test-db/route.ts">
+// app/api/posts/seed/route.ts
+//
+// API สำหรับ seed ข้อมูลปลอมลงตาราง `posts` จำนวน 50 แถว
+// ⚠️ ไม่มีการเช็ค session / JWT ใด ๆ ทั้งสิ้น ยิงเข้า DB ตรง ๆ
+// ⚠️ ใช้สำหรับ dev/test เท่านั้น — ห้าม deploy ขึ้น production เด็ดขาด
+//    เพราะใครก็สามารถเรียก endpoint นี้เพื่อยัดข้อมูลลง DB ได้โดยไม่ต้อง login
+//
+// เรียกใช้: POST /api/posts/seed
+⋮----
+import { NextResponse } from "next/server";
+import db from "@/lib/db";
+⋮----
+// ---------- Mock data pools ----------
+⋮----
+// --- Tech & Software Development ---
+⋮----
+// --- Product & Design ---
+⋮----
+// --- Business, Marketing & Supporting ---
+⋮----
+// ---------- Helpers ----------
+function randItem<T>(arr: T[]): T
+⋮----
+function randInt(min: number, max: number): number
+⋮----
+// company_id ฟิกให้เป็นแค่ 1 หรือ 10 เท่านั้น
+function randCompanyId(): number
+⋮----
+function randFutureDate(): string
+⋮----
+export async function POST(request: Request)
+⋮----
+randCompanyId(),               // 1. company_id
+randItem(jobPositions),         // 2. job_position
+randItem(provinces),            // 3. province ✨ (เพิ่มตรงนี้)
+randItem(workLocations),        // 4. work_location
+randInt(1, 10),                 // 5. vacancy
+randItem(jobTypes),              // 6. job_type
+randFutureDate(),               // 7. application_dates
+randItem(jobDescriptionPool),    // 8. job_description
+randItem(qualificationsPool),    // 9. preferred_qualifications
+randItem(benefitsPool),          // 10. benefits
+randItem(howToApplyPool),        // 11. how_to_apply
+randItem(contactPool),           // 12. contact
+randItem(statuses),              // 13. status
+now,                             // 14. created_at
+salary_min,                      // 15. salary_min
+salary_max,                      // 16. salary_max
+age_min,                         // 17. age_min
+age_max,                         // 18. age_max
+</file>
+
+<file path="app/api/user/getUserAndJobtitle/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function GET()
+</file>
+
+<file path="app/api/user/getUserById/[id]/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db';
+⋮----
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+)
+⋮----
+// 1. ดึงข้อมูล user หลัก
+⋮----
+// 2. ดึงข้อมูลตารางที่เกี่ยวข้องพร้อมกัน (ชื่อตรงตาม schema จริง)
+⋮----
+// Image 1: table = JobTitle, cols = jobtitle_id, job_name, user_id
+⋮----
+// Image 2: table = education, cols = education_id, user_id, level, institution, faculty, major, year_start, year_end
+⋮----
+// Image 5: table = skills, cols = skill_id, user_id, skill_name, skill_category, skill_detail
+⋮----
+// Image 6: table = typing_speed, cols = typing_id, user_id, typing_language, typing_wpm
+⋮----
+// Image 3: table = experiences, cols = experience_id, user_id, ex_title, ex_description, type, start_date, end_date
+⋮----
+// Image 7: table = language_proficiency, cols = lang_id, user_id, language_type, level, test_name, score
+⋮----
+// Image 4: table = files, cols = file_id, user_id, file_path, file_name, file_type, uploaded_at, file_category
+⋮----
+console.error('Fetch profile error:', error.message); // ดู error จริงใน terminal
+</file>
+
+<file path="app/company/post-job/postjob.module.css">
+.postContainer {
+⋮----
+.postHeader {
+⋮----
+.nextBtn {
+⋮----
+background-color: #00ffff; /* สีฟ้า Cyan ตามรูป */
+⋮----
+box-shadow: 2px 2px 0px #000; /* เงาแบบก้อนๆ สไตล์ Neubrutalism */
+⋮----
+.nextBtn:hover {
+⋮----
+.nextBtn:active {
+⋮----
+.postForm {
+⋮----
+grid-template-columns: 1fr 1fr; /* แบ่ง 2 ฝั่ง */
+gap: 100px; /* ระยะห่างระหว่างฝั่งซ้าย-ขวา */
+⋮----
+.formColumn {
+⋮----
+/* สำหรับช่องที่ Label อยู่ข้าง Input */
+.inputGroupInline {
+⋮----
+.inputGroupInline label {
+⋮----
+.inputGroupInline input {
+.inputGroupFull {
+.inputGroupFull label {
+.inputGroupFull textarea {
+.inputGroupFull2 {
+⋮----
+grid-template-columns: 0.4fr 1fr; /* แบ่ง 2 ฝั่ง */
+⋮----
+.inputGroupFull2 label {
+.inputGroupFull2 textarea {
+⋮----
+/* ปรับให้รองรับหน้าจอเล็กลง */
+⋮----
+.selectInput {
+⋮----
+appearance: none; /* ลบลูกศรเดิมของ Browser บางตัว */
+⋮----
+.selectInput:focus {
+⋮----
+border-color: #0070f3; /* สี Highlight เวลาคลิก */
+⋮----
+.dateInput {
+⋮----
+font-family: inherit; /* ใช้ font เดียวกับหน้าเว็บ */
+⋮----
+.dateInput:focus {
+⋮----
+box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1); /* เพิ่มแสงเงาจางๆ เวลาคลิก */
+⋮----
+/* ปรับแต่งไอคอนปฏิทิน (สำหรับ Chrome/Edge) */
+.dateInput::-webkit-calendar-picker-indicator {
+⋮----
+.dateInput::-webkit-calendar-picker-indicator:hover {
+⋮----
+/* ===== MY POSTS SECTION ===== */
+.myPostsSection {
+⋮----
+.myPostsTitle {
+⋮----
+/* เส้นขีดใต้ title */
+.myPostsTitle::after {
+⋮----
+.item {
+⋮----
+.item::-webkit-scrollbar {
+.item::-webkit-scrollbar-track {
+.item::-webkit-scrollbar-thumb {
+⋮----
+.postMiniCard {
+⋮----
+min-height: 120px; /* ← ใช้ min-height แทน height */
+⋮----
+.postMiniCard:hover {
+⋮----
+.postMiniCard img {
+⋮----
+.postMiniCardInfo {
+⋮----
+.bold {
+⋮----
+.subText {
+⋮----
+.statusBadge {
+⋮----
+/* status สี */
+.open {
+⋮----
+.closed {
+⋮----
+.emptyText {
+⋮----
+.cardFooter {
+⋮----
+.detailBtn {
+⋮----
+.detailBtn:hover {
+⋮----
+.detailBtn:active {
+⋮----
+.DeleteBtn {
+⋮----
+.DeleteBtn:hover {
+⋮----
+.DeleteBtn:active {
+⋮----
+.container {
+⋮----
+.headerRow {
+⋮----
+.instruction {
+⋮----
+.postBtn {
+⋮----
+.questionBlock {
+⋮----
+.inputWrapper {
+⋮----
+.questionNumber {
+⋮----
+.mainInput {
+⋮----
+box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25); /* เงาใต้กล่อง */
+⋮----
+.optionsBox {
+⋮----
+.optionRow {
+⋮----
+.radioCircle {
+⋮----
+.radioCircleActive {
+⋮----
+border: 5px solid #000; /* ให้ดูหนาเหมือนถูกเลือก */
+⋮----
+.optionInput {
+⋮----
+.addWrapper {
+⋮----
+.addBtn {
+⋮----
+.addBtn:hover {
+</file>
+
+<file path="app/company/profile/page.tsx">
+// 📂 app/company/profile/CompanyProfile.tsx
+⋮----
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+import styles from "./companyProfile.module.css";
+import Link from "next/link";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/lib/firebase";
+import ProvinceSelect from "@/components/ProvinceSelect";
+type LeafletMapProps = {
+  lat: number | string | null;
+  lng: number | string | null;
+  isEditMode: boolean;
+  onChangeLocation: (newLat: number, newLng: number) => void;
+};
+⋮----
+// State สำหรับเปิด/ปิด Popup พรีวิวไฟล์
+⋮----
+// 🆕 State สำหรับระบบ Drag and Drop และการเลือกไฟล์ใหม่
+⋮----
+const fetchSessionUser = async () =>
+⋮----
+const fetchCompanyProfile = async (companyId: string) =>
+⋮----
+const handleFieldChange = (field: string, value: any)
+⋮----
+const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    targetField: "logo_image" | "cover_image",
+) =>
+⋮----
+// 🆕 จัดการการเลือกไฟล์ผ่านคลิกปุ่ม
+const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+⋮----
+// 🆕 จัดการโซนลากไฟล์มาวาง (Drag & Drop Events)
+const handleDragOver = (e: React.DragEvent) =>
+⋮----
+const handleDragLeave = () =>
+⋮----
+const handleDrop = (e: React.DragEvent) =>
+⋮----
+// 🆕 ฟังก์ชันกดส่งไฟล์ (ปุ่ม Send) ทำงานผ่านการคลิกแยกส่วนชัดเจน
+const handleCertUpload = async () =>
+⋮----
+setSelectedCertFile(null); // เคลียร์ไฟล์เก่าออกหลังอัปโหลดเสร็จเรียบร้อย
+⋮----
+const handleSaveChanges = async () =>
+⋮----
+const fmt = (val: any)
+⋮----
+{/* ส่วน Modal Preview ไฟล์ */}
+⋮----
+{/* ฝั่งซ้าย: ข้อมูลบริษัท */}
+⋮----
+// borderRadius: "50%",
+backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+⋮----
+onChange=
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+⋮----
+<p>
+⋮----
+<p>Tel:
+⋮----
+handleFieldChange("contact_information", e.target.value)
+⋮----
+handleFieldChange("company_latitude", e.target.value)
+⋮----
+handleFieldChange("company_longitude", e.target.value)
+⋮----
+handleFieldChange("mobile_phone", e.target.value)
+⋮----
+Email:
+⋮----
+setEditMode(false);
+setEditForm(JSON.parse(JSON.stringify(company)));
+⋮----
+if (editMode)
+handleFieldChange("company_latitude", newLat);
+handleFieldChange("company_longitude", newLng);
+⋮----
+{/* ฝั่งขวา: ตำแหน่งงานและรีวิว */}
+⋮----
+{/* 🆕 ส่วนแสดงผล UI อัปโหลดตามตัวอย่างรูปภาพของคุณ */}
+⋮----
+{/* โซนลากไฟล์และคลิกเลือกไฟล์ ดีไซน์แบบวงรี มีเส้นประสีดำ */}
+⋮----
+{/* ปุ่มกด Send ส่งข้อมูลยืนยัน */}
+⋮----
+{/* งานและรีวิว */}
+⋮----
+<h2>
+⋮----
+<strong>Salary:</strong> THB
+</file>
+
+<file path="app/company/savedSeeker/savedSeekerClient.tsx">
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./savedSeeker.module.css";
+⋮----
+interface SeekerDetails {
+  gender: string;
+  age: number;
+  militaryStatus: string;
+  dateOfBirth: string;
+  nationality: string;
+  religion: string;
+  weight: string;
+  height: string;
+}
+⋮----
+interface Seeker {
+  uid: number;
+  name: string;
+  jobtitle: string;
+  image: string;
+  details: SeekerDetails | null;
+}
+⋮----
+interface ClientProps {
+  companyId: number;
+}
+⋮----
+const fetchSeekers = async () =>
+⋮----
+// 🌟 ป้องกัน Key ซ้ำโดยนำ index มาร่วมต่อ String ด้วยตามข้อผิดพลาดก่อนหน้า
+⋮----
+{/* Image Section */}
+⋮----
+{/* Info Section */}
+⋮----
+{/* Button Section */}
+</file>
+
+<file path="app/company/seeker-profile/[id]/apply-seeker.tsx">
+import { useEffect, useState } from 'react';
+import styles from './applySeeker.module.css'
+import ApplyModal from '@/components/ApplyModal';
+import { apiUrl } from '@/lib/hostURL';
+⋮----
+interface JobOption {
+  post_id: number;
+  job_position: string;
+}
+⋮----
+interface ContactModalProps {
+  mode: 'apply' | 'invite';
+  postId: number,
+  userId: number,
+  companyId: number;
+  companyName: string,
+  seekerName: string,
+  jobTitle: string,
+  seekerEmail: string,
+  companyEmail: string
+  companyJobs?: any[]
+}
+⋮----
+export default function ApplySeeker({
+  mode,
+  postId,
+  userId,
+  companyId,
+  companyName,
+  seekerName,
+  jobTitle,
+  seekerEmail,
+  companyEmail,
+  companyJobs = [],
+}: ContactModalProps)
+⋮----
+// LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
+⋮----
+// check รายการสมัครซ้ำ ทำroute แล้ว เหลือเทศ
+const checkApplied = async () =>
+⋮----
+{/* ปุ่มกด Apply Now */}
+⋮----
+{/* <p className="text-lg">Job Title: {jobData.title}</p> */}
+⋮----
+{/* เรียกใช้งาน Modal Component */}
+</file>
+
+<file path="app/user/savedCompany/page.tsx">
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import SaveCompanyClient from "./savedCompanyClient"; // นำเข้าไฟล์ Client
+import styles from "./savedCompany.module.css";
+⋮----
+interface CustomJwtPayload {
+  id: number;
+  email: string;
+  role: string;
+}
+⋮----
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ cid: string }>;
+})
+</file>
+
+<file path="app/user/user-detail-job/[id]/detailjob.module.css">
+.container {
+⋮----
+.backBtn {
+⋮----
+/* เพิ่มตรงนี้เพื่อให้ตอนเด้งดูสมูท ไม่กระตุก */
+⋮----
+box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05); /* เงาบางๆ ตอนปกติ */
+⋮----
+.backBtn:hover {
+⋮----
+.card {
+⋮----
+.header {
+⋮----
+.logo {
+⋮----
+.companyName {
+⋮----
+.applyBtn {
+⋮----
+.contentGrid {
+⋮----
+grid-template-columns: 1.2fr 1fr; /* แบ่งซ้ายขวา */
+⋮----
+.sectionTitle {
+⋮----
+.infoTable {
+⋮----
+.infoTable td {
+⋮----
+.label {
+⋮----
+.list {
+⋮----
+.list li {
+.linkCard1 {
+⋮----
+.linkCard1:hover {
+⋮----
+.linkCard1:hover .companyName {
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/footer";
+import { GoogleAnalytics } from "@next/third-parties/google"; // นำเข้า GoogleAnalytics component
+⋮----
+{/* นำตัวแปรฟอนต์ และ Class สำหรับตกแต่งพื้นหลังมารวมกันที่ tag body */}
+⋮----
+<Navbar /> {/* ใส่ Navbar ไว้ด้านบนสุด */}
+{/* ให้ children (เนื้อหาของหน้าเว็บต่างๆ) อยู่ตรงนี้ */}
+⋮----
+{/* ใส่ Google Analytics */}
+</file>
+
+<file path="components/navbar.css">
+/* =========================
+   GLOBAL & NAVBAR
+========================= */
+⋮----
+:root {
+⋮----
+* {
+⋮----
+.navbar {
+⋮----
+.nav-container {
+⋮----
+.brand {
+⋮----
+/* 🟢 แสดงปุ่ม Hamburger บนทุกหน้าจอ (ทั้ง PC และ มือถือ) */
+.menu-icon {
+⋮----
+.menu-icon:hover {
+⋮----
+.logo-text {
+⋮----
+/* =========================
+   DESKTOP MENU
+========================= */
+.desktop-menu {
+⋮----
+.nav-item {
+⋮----
+.nav-item:hover,
+⋮----
+/* =========================
+   BUTTONS & BADGES
+========================= */
+.nav-btn-outline {
+⋮----
+.nav-btn-outline:hover {
+⋮----
+.nav-btn-primary {
+⋮----
+.nav-btn-primary:hover {
+⋮----
+.nav-btn-logout {
+⋮----
+.nav-btn-logout:hover {
+⋮----
+.nav-feedback-link {
+⋮----
+.shock-badge {
+⋮----
+.side-item .shock-badge {
+⋮----
+/* =========================
+   SIDEBAR & DRAWER (PC + MOBILE)
+========================= */
+.menu-overlay {
+⋮----
+.sidebar-menu {
+⋮----
+width: 340px; /* ปรับขนาดกว้างขึ้นเล็กน้อยเพื่อรองรับตาราง/การ์ดนัดสัมภาษณ์ */
+⋮----
+.sidebar-menu.open {
+⋮----
+.sidebar-header {
+⋮----
+.close-btn {
+⋮----
+.sidebar-links {
+⋮----
+.user-info {
+⋮----
+.u-name {
+⋮----
+.sidebar-divider {
+⋮----
+/* 📅 ส่วนการ์ดวันเวลานัดสัมภาษณ์ (Interview Schedule) */
+.sidebar-section-title {
+⋮----
+.interview-card {
+⋮----
+.interview-company {
+⋮----
+.interview-position {
+⋮----
+.interview-time {
+⋮----
+.interview-empty {
+⋮----
+/* สไตล์ลิงก์อื่นๆ ใน Sidebar */
+.side-item {
+⋮----
+.side-item:hover,
+⋮----
+.side-item.highlight {
+⋮----
+.side-btn-logout {
+⋮----
+.side-btn-logout:hover {
+⋮----
+/* Responsive Hide Desktop Menu */
+⋮----
+/* ซ่อนรายการเมนูด้านล่างเมื่อดูบนหน้าจอ PC */
+.mobile-only-links {
+⋮----
+/* แสดงรายการเมนูด้านล่างเฉพาะบนหน้าจอมือถือ */
+</file>
+
+<file path="app/api/posts/getallPosts/route.ts">
+import { NextResponse } from 'next/server';
+import db from '@/lib/db'; // อ้างอิงไฟล์ db ของคุณ
+⋮----
+export async function GET()
+⋮----
+// ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน
+</file>
+
+<file path="app/company/company-home/page.tsx">
+import { useState, useEffect, useMemo } from "react";
+import styles from "./companyhome.module.css";
+import Link from "next/link";
+import { EDUCATION_LEVELS } from "@/lib/educationLevels";
+import ProvinceSelect from "./province";
+⋮----
+// ตัวเลือกรูปแบบการทำงานแบบ Fixed
+⋮----
+// Suggested seekers
+⋮----
+// State สำหรับ Filters
+⋮----
+// State สำหรับ Age Range Slider
+⋮----
+// Filter เรียงลำดับเวลา
+const [sortBy, setSortBy] = useState("relevance"); // default เป็น relevance หรือ newest
+⋮----
+// State สำหรับ Pagination
+⋮----
+// ดึงข้อมูล Suggested Seekers ครั้งแรก
+⋮----
+// Debounce Search Effect สำหรับ Hybrid Search API
+⋮----
+}, 400); // ชะลอ 400ms ก่อนยิง API Search
+⋮----
+// ฟังก์ชันดึงผู้ใช้ปกติ (กรณีไม่มีการค้นหา)
+const fetchUsers = async () =>
+⋮----
+// ฟังก์ชันยิง Hybrid Search API (Keyword + AI Vector)
+const performHybridSearch = async (query: string) =>
+⋮----
+const fetchSuggestedSeekers = async () =>
+⋮----
+function getTimeAgo(dateString: string | Date): string
+⋮----
+// ฟังก์ชันกรองข้อมูลแบบรายละเอียดบน Client-side
+⋮----
+// เรียงลำดับข้อมูล
+⋮----
+// ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี
+⋮----
+// Pagination Logic
+⋮----
+const handleFilterChange = (setter: Function, value: any) =>
+⋮----
+const handleMinAgeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+⋮----
+const handleMaxAgeChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+⋮----
+const handleResetFilters = () =>
+⋮----
+onChange=
+⋮----
+{/* Dynamic Filters */}
+⋮----
+{/* Age Range Slider Box */}
+⋮----
+{/* ===== ฝั่งขวา 70%: ผู้สมัครงานทั้งหมด ===== */}
+⋮----
+{/* Pagination Controls */}
+⋮----
+onClick=
+</file>
+
+<file path="app/company/detail/[id]/detail.module.css">
+.container {
+⋮----
+.card {
+⋮----
+.header {
+⋮----
+.logo {
+⋮----
+.companyName {
+⋮----
+.applyBtn {
+⋮----
+.contentGrid {
+⋮----
+grid-template-columns: 1.2fr 1fr; /* แบ่งซ้ายขวา */
+⋮----
+.sectionTitle {
+⋮----
+.infoTable {
+⋮----
+.infoTable td {
+⋮----
+.label {
+⋮----
+.list {
+⋮----
+.list li {
+⋮----
+/* คลาสสำหรับคลุม (ถ้าต้องการจัด gap หรือ flex) */
+.editInputWrapper {
+⋮----
+width: 100%; /* ให้เต็มความกว้างของ td */
+⋮----
+/* คลาสสำหรับตัว input โดยตรง */
+.inputField {
+⋮----
+.inputField:focus {
+⋮----
+border-color: #2563eb; /* เพิ่มสีตอนกดเพื่อความสวยงาม */
+⋮----
+.headerButton {
+.selectInput {
+⋮----
+.selectInput:focus {
+/* ===== Test Editor ===== */
+/* Container ครอบพื้นที่ Test Editor ทั้งหมด */
+⋮----
+/* ส่วนหัว: ข้อความแนะนำ + ปุ่มบันทึกข้อสอบ */
+.headerRow {
+⋮----
+.instruction {
+⋮----
+/* ปุ่มบันทึก (สไตล์สีฟ้า Cyan เส้นขอบและเงาดำหนา) */
+.postBtn {
+⋮----
+white-space: nowrap; /* ป้องกันปุ่มตัวหนังสือแตกแถว */
+⋮----
+.postBtn:disabled {
+⋮----
+/* บล็อกของข้อสอบแต่ละข้อ */
+.questionBlock {
+⋮----
+/* ส่วนแถวของคำถาม (เลขข้อ + ช่องกรอก + ปุ่มลบ) */
+.inputWrapper {
+⋮----
+.questionNumber {
+⋮----
+/* ช่องกรอกคำถามหลัก (เงาใต้กล่องหนา) */
+.mainInput {
+⋮----
+/* ปุ่มลบคำถาม (เพิ่มเข้าไปให้แมตช์กับ JSX ของคุณ) */
+.deleteQBtn {
+.deleteQBtn:hover {
+⋮----
+/* กล่องครอบตัวเลือก (ล็อกขนาดไว้ที่ 350px ตามที่คุณต้องการ ไม่โย้ไปฝั่งขวาแน่นอน) */
+.optionsBox {
+⋮----
+.optionRow {
+⋮----
+/* วงกลม Radio ปกติ */
+.radioCircle {
+⋮----
+/* วงกลม Radio เมื่อถูกเลือก (เส้นขอบหนา 5px ตามที่คุณเขียนมา) */
+.radioCircleActive {
+⋮----
+/* ช่องกรอกข้อความตัวเลือก (เส้นใต้สีเทา) */
+.optionInput {
+.optionInput:focus {
+⋮----
+/* ปุ่มลบตัวเลือกกากบาท (เพิ่มเพื่อให้เข้าชุดกัน) */
+.deleteOptBtn {
+.deleteOptBtn:hover {
+⋮----
+/* ท้ายการ์ดตัวเลือก (สำหรับแสดงข้อความเตือนและปุ่มเพิ่มตัวเลือก) */
+.cardFooter {
+⋮----
+width: 350px; /* บังคับให้กว้างเท่ากับกล่องตัวเลือกพอดี */
+⋮----
+/* ปุ่มเพิ่มตัวเลือกเล็กๆ */
+.addOptBtn {
+.addOptBtn:hover {
+⋮----
+/* ปุ่มเพิ่มข้อสอบใหญ่ด้านล่างสุด (อิงตาม .addWrapper และ .addBtn ของคุณ) */
+.addQuestionBtn {
+⋮----
+max-width: 395px; /* คุมระยะให้พอดีแนวเดียวกับกล่องตัวเลือก */
+⋮----
+.addQuestionBtn:hover {
+⋮----
+/*  css button  */
+/* detail.module.css */
+/* เอาแค่นี้พอ เข้ากับ web style */
+.btntoggle {
+⋮----
+background: #2563eb; /* หรือ #047011 ถ้า active */
+⋮----
+.btntoggle:hover {
+.btntoggle:active {
+⋮----
+.backBtn {
+⋮----
+.backBtn .spanMother {
+⋮----
+.backBtn:hover .spanMother {
+⋮----
+.backBtn:hover .spanMother span {
+⋮----
+.backBtn .spanMother span:nth-child(1) {
+⋮----
+.backBtn .spanMother span:nth-child(2) {
+⋮----
+.backBtn .spanMother span:nth-child(3) {
+⋮----
+.backBtn .spanMother span:nth-child(4) {
+⋮----
+.backBtn .spanMother span:nth-child(5) {
+⋮----
+.backBtn .spanMother span:nth-child(6) {
+⋮----
+.backBtn .spanMother2 {
+⋮----
+.backBtn .spanMother2 span {
+⋮----
+.backBtn:hover .spanMother2 span {
+⋮----
+.backBtn .spanMother2 span:nth-child(2) {
+⋮----
+.backBtn .spanMother2 span:nth-child(3) {
+⋮----
+.backBtn .spanMother2 span:nth-child(4) {
+⋮----
+.backBtn .spanMother2 span:nth-child(5) {
+⋮----
+.backBtn .spanMother2 span:nth-child(6) {
+</file>
+
+<file path="app/user/savedCompany/savedCompanyClient.tsx">
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./savedCompany.module.css";
+⋮----
+interface Company {
+  cid: number;
+  post_id: number;
+  name: string;
+  job_title: string;
+  logo: string;
+}
+⋮----
+interface ClientProps {
+  userId: number;
+}
+⋮----
+const fetchSeekers = async () =>
+⋮----
+// console.log("data in page:", data);
+⋮----
+{/* Image Section */}
+⋮----
+{/* Info Section */}
+⋮----
+{/* Button Section */}
+⋮----
+// onClick={() => console.log("text = ", company.post_id)}
+</file>
+
+<file path="app/user/user-home/userhome-client.module.css">
+.container {
+⋮----
+/* Search Section */
+.searchSection {
+⋮----
+.searchBarWrapper {
+⋮----
+.searchInput {
+⋮----
+.searchBtnMain {
+⋮----
+.filters {
+⋮----
+align-items: center; /* 📌 เพิ่มเพื่อให้ปุ่มทุกตัวจัดกึ่งกลางแนวนอนเท่ากัน */
+⋮----
+.filters select {
+⋮----
+/* ================= LAYOUT 30% / 70% ================= */
+.mainLayout {
+⋮----
+/* ฝั่งซ้าย 30% */
+.leftSidebar {
+⋮----
+/* ฝั่งขวา 70% */
+.rightContent {
+⋮----
+.suggestContent {
+⋮----
+.suggestContent h3 {
+⋮----
+/* ซ้าย: เรียงลงมาแนวตั้ง */
+.verticalList {
+⋮----
+/* ขวา: แสดงแบบ Grid สองคอลัมน์ หรือยืดหยุ่นตามหน้าจอ */
+.suggestGrid {
+⋮----
+/* ================= CARDS & ITEMS ================= */
+.suggestMiniCard {
+⋮----
+.cardImg {
+⋮----
+.suggestMiniCardInfo {
+⋮----
+.cardHeader {
+⋮----
+.bold {
+⋮----
+.subText {
+⋮----
+.addressText {
+⋮----
+.statusBadge {
+⋮----
+.btnWrapper {
+⋮----
+.detailsBtn {
+⋮----
+.detailsBtn:hover {
+⋮----
+.noData {
+⋮----
+/* ================= SKELETON ================= */
+.skeletonWrapper {
+⋮----
+.skeletonBlock {
+⋮----
+/* รองรับมือถือ ปรับกลับเป็นคอลัมน์เดียว */
+⋮----
+.leftSidebar,
+⋮----
+/* ================= PAGINATION BUTTONS ================= */
+.paginationWrapper {
+⋮----
+.pageBtn {
+⋮----
+.pageBtn:hover:not(:disabled) {
+⋮----
+.pageBtn:disabled {
+⋮----
+.pageInfo {
+.resetBtn {
+⋮----
+.resetBtn:hover {
+⋮----
+.jobPositionText {
+⋮----
+.headerTitleRow {
+</file>
+
+<file path="app/admin/admin-report/adminReport.module.css">
+/* --- Global Container --- */
+.container {
+⋮----
+/* --- Card หลัก --- */
+.reportCard {
+⋮----
+.title {
+⋮----
+/* --- ส่วน Filter Bar --- */
+.filterContainer {
+⋮----
+.filterGroup {
+⋮----
+.filterLabel {
+⋮----
+.filterSelect {
+⋮----
+.filterSelect:hover {
+⋮----
+.filterSelect:focus {
+⋮----
+/* --- ส่วนตาราง Scroll แนวนอน --- */
+.tableWrapper {
+⋮----
+.tableWrapper::-webkit-scrollbar {
+.tableWrapper::-webkit-scrollbar-track {
+.tableWrapper::-webkit-scrollbar-thumb {
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+⋮----
+.tableHeader,
+⋮----
+/* --- Header ตาราง (สีเขียวดั้งเดิม #4dfc50) --- */
+.tableHeader {
+⋮----
+.headerCell {
+⋮----
+/* --- Row แถวข้อมูล --- */
+.reportRow {
+⋮----
+border-bottom: 1px solid #f1f5f9; /* ใช้เส้นแบ่งแถวอ่อนๆ แทน */
+⋮----
+.reportRow:hover {
+⋮----
+.cell {
+⋮----
+.cellLink {
+⋮----
+/* --- ปรับแต่งตัวอักษรธรรมดา (ถอดขอบและพื้นหลังสีเทาออก) --- */
+.badgeGray {
+⋮----
+/* ปรับแต่งส่วนนี้เพื่อให้ตัดขึ้นบรรทัดใหม่อย่างสวยงาม */
+white-space: normal;       /* อนุญาตให้ขึ้นบรรทัดใหม่ */
+word-break: break-word;     /* ตัดคำตามความเหมาะสม */
+line-height: 1.4;          /* เพิ่มระยะห่างระหว่างบรรทัดให้น่าอ่าน */
+⋮----
+.nextLink {
+⋮----
+.nextLink:hover {
+⋮----
+background-color: #f0f4ff; /* พื้นหลังสีฟ้าอ่อนมากๆ จางๆ ออกมาจากความว่างเปล่า */
+⋮----
+.detailBubble {
+⋮----
+/* --- ปุ่มสถานะ (คงไว้ปุ่มเดียว) --- */
+.statusBtn {
+⋮----
+.suspend {
+⋮----
+.warn {
+⋮----
+.review {
+⋮----
+.statusBtn:hover {
+⋮----
+/* ==========================================
+   Responsive สำหรับ Mode Mobile
+   ========================================== */
+</file>
+
+<file path="app/admin/admin-report/page.tsx">
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./adminReport.module.css";
+⋮----
+// States สำหรับตัวกรอง (คง value ภาษาอังกฤษดั้งเดิมไว้)
+⋮----
+// แปลงสถานะรายการจาก DB เป็นภาษาไทยเพื่อแสดงผลบน UI
+const getStatusText = (statusCode: any) =>
+⋮----
+// ดึง Class CSS สำหรับสีปุ่มสถานะตามรหัส
+const getStatusClass = (statusCode: any) =>
+⋮----
+// แปลงหัวข้อประเภทการรายงานเป็นภาษาไทย
+const getReportTypeText = (type: string) =>
+⋮----
+const getTargetLink = (source: string, targetId: number) =>
+⋮----
+const getReportLink = (role: string, reporterId: number) =>
+⋮----
+const fetchReports = async () =>
+⋮----
+{/* --- ส่วน Filter --- */}
+⋮----
+{/* --- ตารางแสดงข้อมูล --- */}
+⋮----
+href=
+</file>
+
+<file path="app/user/userProfileCompany/[id]/userProfileCompany.module.css">
+.container {
+⋮----
+grid-template-columns: 1fr 1fr; /* แบ่งครึ่งซ้าย-ขวา */
+⋮----
+.backBtnWrapper {
+⋮----
+.backBtn {
+⋮----
+.backBtn:hover {
+⋮----
+.backBtn:active {
+⋮----
+.leftSection {
+⋮----
+.profileCard {
+⋮----
+.banner {
+⋮----
+.logoWrapper {
+⋮----
+margin-top: -60px; /* ให้โลโก้ลอยทับแบนเนอร์ */
+⋮----
+.logo {
+⋮----
+.infoArea {
+⋮----
+.companyName {
+⋮----
+display: flex; /* เปิดใช้งาน Flexbox */
+align-items: flex-start; /* จัดให้ไอคอนกับชื่ออยู่กึ่งกลางบรรทัดเดียวกัน */
+gap: 8px; /* เพิ่มระยะห่างระหว่างชื่อกับไอคอน */
+font-size: 24px; /* ปรับขนาดตามต้องการ */
+⋮----
+.material-symbols-outlined {
+⋮----
+.mapWrapper {
+⋮----
+/* --- ฝั่งขวา (Right Column) --- */
+.rightSection {
+⋮----
+.VerifiedConfirm {
+⋮----
+.jobScrollArea {
+⋮----
+height: 500px; /* กำหนดความสูงเพื่อให้ Scroll ได้แบบในภาพ */
+⋮----
+.jobCard {
+⋮----
+align-items: flex-start; /* <--- ตัวนี้จะป้องกันไม่ให้รูปถูกยืดตามความสูงของข้อความ */
+⋮----
+.jobCard img {
+⋮----
+object-fit: contain; /* หรือใช้ 'cover' ถ้าอยากให้รูปเต็มกรอบสี่เหลี่ยมจัตุรัส */
+flex-shrink: 0; /* ป้องกันไม่ให้รูปถูกบีบให้เล็กลงเวลาหน้าจอแคบ */
+align-self: flex-start; /* ให้รูปชิดขอบบน ไม่ยืดตามความสูงของกล่อง */
+⋮----
+.detailBtn {
+⋮----
+/* คลุมส่วน Contact ทั้งหมด */
+.contactGroup {
+⋮----
+.contactGroup h3 {
+⋮----
+.contactGroup p {
+⋮----
+/* ------------------------------------- */
+/* Modal Preview Styles */
+⋮----
+.modalOverlay {
+⋮----
+.modalContent {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.closeModalBtn {
+⋮----
+.closeModalBtn:hover {
+⋮----
+.modalBody {
+</file>
+
+<file path="app/company/detail/[id]/page.tsx">
+import React, { useCallback, useEffect, useState } from "react";
+import styles from "./detail.module.css";
+import { useParams, useRouter } from "next/navigation";
+import ProvinceSelect from "@/components/ProvinceSelect";
+⋮----
+const [isMode, setIsMode] = useState(true); // true = แก้ไขงาน, false = แก้ไขข้อสอบ
+⋮----
+// ประกาศตัวแปรเตรียมไว้ก่อน
+⋮----
+const blockInvalidKeys = (e:
+// เช็คว่าโหลดข้อมูล job มาเสร็จแล้ว และมี ban_until ค่อยเริ่มคำนวณ
+⋮----
+// ฟอร์แมตวันที่เป็น ค.ศ.
+⋮----
+// คำนวณเวลาที่เหลือ (วัน / ชั่วโมง / นาที)
+⋮----
+isBanned = true; // ตั้งสถานะว่าโดนแบนอยู่
+⋮----
+isBanned = false; // หมดเวลาแบนแล้ว
+⋮----
+// คำนวณสถานะการแบน (replace " " เป็น "T" เพื่อป้องกัน Invalid Date ในบาง Browser)
+// const isBanned =
+//   job?.ban_until && new Date(job.ban_until.replace(" ", "T")) > new Date();
+⋮----
+{/* แบนเนอร์แจ้งเตือนการแบน (เปลี่ยนเป็นแบบ Popup กลางจอ) */}
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.5)", // ฉากหลังมืด
+⋮----
+zIndex: 9999, // ให้อยู่บนสุดของหน้าจอ
+⋮----
+setShowBanPopup(false);
+router.back();
+⋮----
+{/* ===== Unified Header Row (แถวควบคุมบนสุดระดับสากล) ===== */}
+⋮----
+{/* ตรงกลาง: แท็บสลับโหมดบอกสถานะชัดเจน */}
+⋮----
+// 4. เพิ่ม isBanned เข้าไปในเงื่อนไข disabled
+⋮----
+// ปรับสีให้จางลงเมื่อถูกล็อก
+⋮----
+{/* ===== เนื้อหาด้านล่างเปลี่ยนตามโหมด (Content Area) ===== */}
+⋮----
+{/* ข้อมูลบริษัทพื้นฐาน */}
+⋮----
+...getStatusStyle(job.status),
+⋮----
+{/* <hr /> */}
+⋮----
+{/* <hr /> */}
+⋮----
+{/* <hr /> */}
+⋮----
+{/* <hr /> */}
+⋮----
+value=
+⋮----
+handleOptionChange(
+</file>
+
+<file path="app/user/user-detail-job/[id]/apply-company.tsx">
+import { useEffect, useState } from 'react';
+import styles from './applyCompany.module.css'
+import ApplyModal from '@/components/ApplyModal';
+import { apiUrl } from '@/lib/hostURL';
+⋮----
+interface ApplyCompanyProps {
+  mode?:'apply'|'invite';
+  isOpen?:boolean;
+  onClose?:() => void;
+  postId: number,
+  userId: number,
+  companyName: string,
+  seekerName: string,
+  jobTitle: string,
+  seekerEmail: string,
+  companyEmail: string
+}
+⋮----
+// LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
+// console.log('--- ApplyCompany Props ---', {
+//   jobTitle,
+//   companyName,
+//   companyEmail,
+//   seekerName,
+//   seekerEmail,
+//   postId,
+//   userId
+// });
+⋮----
+const checkApplied = async () =>
+⋮----
+{/* <h1 className="text-3xl font-bold">{jobData.company}</h1> */}
+⋮----
+{/* ปุ่มกด Apply Now */}
+⋮----
+{/* <p className="text-lg">Job Title: {jobData.title}</p> */}
+⋮----
+{/* เรียกใช้งาน Modal Component */}
+</file>
+
+<file path="app/user/userProfileCompany/[id]/page.tsx">
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import styles from "./userProfileCompany.module.css";
+⋮----
+import BackButton from "./backBttn";
+import AdminButton from "./adminbutton";
+import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
+import CompanyMapSection from "./map";
+import { getSession, CustomJwtPayload } from "./getSession";
+import BanPopup from "./BanPopup";
+⋮----
+// โหลด session ของผู้ใช้ที่กำลังดูหน้านี้ (เพื่อเช็คสิทธิ์ admin / ผู้รายงาน)
+⋮----
+async function fetchSession()
+⋮----
+// โหลดข้อมูลบริษัทและรายการตำแหน่งงาน
+⋮----
+async function fetchCompanyProfile()
+⋮----
+const fmt = (val: any)
+⋮----
+// สถานะกำลังโหลด
+⋮----
+// กรณีไม่พบข้อมูลบริษัท หรือเกิด error
+⋮----
+
+⋮----
+id=
+⋮----
+{/* แผนที่ย่อย */}
+⋮----
+{/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
+⋮----
+<h2>
+⋮----
+<strong>Salary:</strong> THB
+</file>
+
+<file path="app/page.tsx">
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import UserHomeClient from "./user/user-home/userhome-client";
+import CompanyHomeClient from "./company/company-home/page";
+⋮----
+interface HomeSwitcherProps {
+  initialUser?: User;
+}
+⋮----
+interface User {
+  role?: string;
+  [key: string]: unknown;
+}
+⋮----
+const checkSessionAndRedirect = async () =>
+⋮----
+// เช็ค Role แล้วพาแยกไปหน้าตามบทบาททันที
+⋮----
+const handleToggleChange = (checked: boolean) =>
+⋮----
+// แสดงหน้า Loading ชั่วคราวก่อนย้ายหน้า เพื่อป้องกันหน้าจอกระตุก
+⋮----
+// กรณีที่เป็น Guest (ไม่ได้ Login) ให้แสดงหน้า Switcher/Landing ตามปกติ
+</file>
+
+<file path="package.json">
+{
+  "name": "next-bigjobs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@next/third-parties": "^16.2.10",
+    "@xenova/transformers": "^2.17.2",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "firebase": "^12.14.0",
+    "google-auth-library": "^10.6.2",
+    "jsonwebtoken": "^9.0.3",
+    "leaflet": "^1.9.4",
+    "material-symbols": "^0.45.5",
+    "mysql2": "^3.20.0",
+    "next": "^16.3.2",
+    "nodemailer": "^8.0.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-google-recaptcha": "^3.1.0",
+    "react-leaflet": "^5.0.0",
+    "sass": "^1.99.0",
+    "swr": "^2.4.1"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^16.2.2",
+    "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="app/company/seeker-profile/[id]/ProfileActionsButton.tsx">
+import { useState, useRef, useEffect } from "react";
+⋮----
+import styles from "./profile.module.css";
+⋮----
+//  แก้พรอพให้รับเฉพาะสิ่งที่ส่งมาจากหน้าหลักจริง ๆ
+interface ProfileActionsProps {
+  userId: number;
+  companyId: number;
+}
+⋮----
+type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
+⋮----
+// ปิดเมนูเมื่อคลิกพื้นที่ด้านนอก
+⋮----
+function handleClickOutside(event: MouseEvent)
+⋮----
+// โค้ดสำหรับเซฟ/บุ๊กมาร์ก
+const handleBookmark = async () =>
+⋮----
+const handleDeleteBookmark = async () =>
+⋮----
+const checkSaved = async () =>
+⋮----
+const handleDeleteSaved = async (userId: number, companyId: number) =>
+⋮----
+const openReportModal = () =>
+⋮----
+setIsOpen(false); // ปิดเมนูสามจุดไปด้วยเลย
+⋮----
+const handleReport = async (reportType: ReportType, description: string) =>
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+setIsOpen(false);      // ปิดเมนูสามจุด
+⋮----
+setIsReported(true); //  แก้ไขชื่อตัวแปรให้ตรงกับ State
+⋮----
+setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
+⋮----
+const checkReport = async () =>
+⋮----
+// alert("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
+⋮----
+onClick=
+⋮----
+{/* Dropdown เมนูย่อย */}
+⋮----
+onClick={openReportModal} //  เปลี่ยนมาเรียก Flow กรอกข้อมูลก่อนส่ง
+⋮----
+// disabled={isReported}
+⋮----
+{/* หน้าต่าง MODAL POPUP (จะแสดงผลเมื่อคลิก Report เท่านั้น) */}
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.5)", // พื้นหลังมืดโปร่งแสง
+⋮----
+zIndex: 9999, // ให้อยู่ชั้นบนสุดของหน้าจอเสมอ
+⋮----
+{/* หัวข้อโมดอล */}
+⋮----
+onClick={() => setIsModalOpen(false)} // ปุ่มกากบาทปิดโมดอล
+⋮----
+{/* ฟอร์มเลือกประเภท */}
+⋮----
+{/* ฟอร์มพิมพ์รายละเอียด */}
+⋮----
+{/* ปุ่มกดยืนยันหรือยกเลิก */}
+⋮----
+backgroundColor: "#d93025", // สีแดง
+</file>
+
+<file path="app/user/user-home/userhome-client.tsx">
+import { useState, useEffect, useMemo } from "react";
+import styles from "./userhome-client.module.css";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import ProvinceSelect from "./province";
+⋮----
+// Suggested Posts State
+⋮----
+// Search & Filter State
+⋮----
+// Sort State (ค่าเริ่มต้นเรียงตามความเกี่ยวข้อง AI Match)
+⋮----
+// Pagination State
+⋮----
+// 1. ดึงข้อมูล Suggested Posts ครั้งแรก
+⋮----
+// 2. Debounce Search Effect สำหรับ AI Hybrid Search API
+⋮----
+}, 400); // ชะลอ 400ms ก่อนยิง API
+⋮----
+// ฟังก์ชันดึงโพสต์งานปกติ (กรณีไม่มีคำค้นหา)
+const fetchPosts = async () =>
+⋮----
+// ฟังก์ชันยิง AI Hybrid Search API
+const performHybridSearch = async (query: string) =>
+⋮----
+const fetchSuggestedPosts = async () =>
+⋮----
+function getTimeAgo(dateString: string | Date): string
+⋮----
+// ฟังก์ชันกรองและเรียงลำดับโพสต์งานบน Client-Side
+⋮----
+// ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี (กรณีค้นหาด้วย Hybrid Search)
+⋮----
+// Pagination Calculations
+⋮----
+const handleFilterChange = (setter: Function, value: string) =>
+⋮----
+const handleResetFilters = () =>
+⋮----
+const handleNextPage = () =>
+⋮----
+const handlePrevPage = () =>
+⋮----
+const getStatusStyle = (status: string) =>
+⋮----
+const formatSalary = (min?: number, max?: number) =>
+⋮----
+{/* Header Search & Filters */}
+⋮----
+onChange=
+⋮----
+{/* Dynamic Filters */}
+⋮----
+{/* Standalone Province Select Component */}
+⋮----
+{/* <option value="relevance">
+              เรียงตาม: ความเกี่ยวข้อง (AI Match)
+            </option> */}
+⋮----
+{/* Main Layout 30% / 70% */}
+⋮----
+{/* แสดง AI Match Score เปอร์เซ็นต์เมื่อมีการค้นหา */}
+{/* {typeof post.matchScore === "number" && 
+                            <span className={styles.matchBadge}>
+                              {Math.min(100, Math.round(post.matchScore * 100))}% Match
+                            </span>
+                          )} */}
+</file>
+
+<file path="app/user/user-profile/page.tsx">
+import React, { useEffect, useRef, useState } from "react";
+import styles from "./seekerProfile.module.css";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { storage } from "@/lib/firebase";
+import ProvinceSelect from "./province";
+import LevelSelect from "./levelSelect";
+⋮----
+// สถานะ loading เฉพาะตอนกดปุ่มเปิด/ปิดการมองเห็นโปรไฟล์
+⋮----
+// สร้าง Array ปี (ปีปัจจุบัน + 5 ย้อนหลังไป 50 ปี)
+⋮----
+// อ้างอิงอินพุตไฟล์ของรูปอวาตาร์
+⋮----
+// สถานะควบคุมไฟล์และ Popup
+⋮----
+// อ้างอิง Input File ตามหมวดหมู่
+⋮----
+const fetchSessionUser = async () =>
+⋮----
+const fetchUserProfile = async (userId: string) =>
+⋮----
+// ─── อัปโหลดรูปอวาตาร์ ───
+const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+) =>
+⋮----
+// 1. อัปโหลดรูปภาพไปยัง Firebase Storage
+⋮----
+// 2. ยิง API บันทึก URL รูปภาพใหม่ลงในฐานข้อมูลทันที
+⋮----
+...profile, // ส่งข้อมูลเดิมไปด้วยป้องกันตารางอื่นหลุด
+profile_image: downloadURL, // เปลี่ยนเฉพาะ URL รูปโปรไฟล์
+⋮----
+// 3. อัปเดตสถานะ (State) บนหน้าจอทันทีเพื่อให้รูปภาพเปลี่ยนตาม
+⋮----
+// ─── อัปโหลดเอกสารอิสระทันที ───
+const onInstantFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    category: string,
+) =>
+⋮----
+// ─── ลบเอกสารอิสระทันที ───
+const onInstantFileDelete = async (fileId: number, filePath: string) =>
+⋮----
+const getFilesByCategory = (category: string) =>
+⋮----
+// ─── บันทึกข้อมูลส่วนตัว (ฟอร์มหลัก) ───
+const handleSaveChanges = async () =>
+⋮----
+// ─── เปิด/ปิดการมองเห็นโปรไฟล์ (ยิง API ทันที ไม่ต้องกด Save) ───
+const handleToggleVisibility = async () =>
+⋮----
+const handleFieldChange = (field: string, value: any)
+const handleArrayFieldChange = (
+    arrayName: string,
+    index: number,
+    field: string,
+    value: any,
+) =>
+const addArrayItem = (arrayName: string, defaultObj: any)
+const removeArrayItem = (arrayName: string, index: number)
+⋮----
+const handleToggleTypeOfWork = (type: string) =>
+⋮----
+const fmt = (val: any)
+const formatDate = (dateStr: string | null) =>
+⋮----
+{/* ── Column 1: Personal Info ── */}
+⋮----
+{/* ── ปุ่มเปิด/ปิดการมองเห็นโปรไฟล์ (คลิกแล้วยิง API ทันที) ── */}
+⋮----
+// ตาเปิด (มองเห็นได้)
+⋮----
+// ตาปิด (ถูกซ่อน)
+⋮----
+onClick={() => avatarInputRef.current?.click()} // คลิกตรงไหนในกล่องก็เปิดหน้าต่างเลือกไฟล์
+⋮----
+{/* ตัวซ่อน Input File ดั้งเดิมเอาไว้ */}
+⋮----
+{/* แสดงรูปโปรไฟล์ปัจจุบัน */}
+⋮----
+// เช็คก่อนว่ามีรูปในระบบไหม (ดึงจาก editForm ถ้าแก้กดอยู่ หรือ profile ในโหมดปกติ)
+⋮----
+//  ถ้าไม่มีรูปจริง ให้ใช้ UI Avatars เป็นค่าเริ่มต้น
+⋮----
+{/* ตัวครอบเอฟเฟกต์ Overlay ปรากฏขึ้นเมื่อนำเมาส์มา Hover รูปภาพ */}
+⋮----
+backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+⋮----
+onChange=
+⋮----
+{/* เอา address กับ postal_code ออกตามที่คอมเมนต์ไว้ในลูปเดิม */}
+⋮----
+// <input
+//   style={{
+//     minWidth: "120px",
+//     padding: "0.3rem",
+//     borderRadius: "4px",
+//     border: "1px solid #ccc",
+//   }}
+//   type="text"
+//   value={editForm.province ?? ""}
+//   onChange={(e) =>
+//     handleFieldChange("province", e.target.value)
+//   }
+// />
+⋮----
+{/* ── ปุ่ม Edit Profile / Save+Cancel (ย้ายมาไว้ด้านล่างสุดของคอลัมน์ Personal Information) ── */}
+⋮----
+{/* ── Column 2: Job Preferences ── */}
+⋮----
+
+⋮----
+maxWidth: "460px", // ขยายพื้นที่เพิ่มให้ไม่ดูอึดอัด
+⋮----
+backgroundColor: "#ffffff", // เพิ่มพื้นหลังสีขาวเพื่อให้เด่นขึ้นมาจาก Educontainer สีเทา
+⋮----
+{/* ระดับการศึกษา */}
+⋮----
+{/* สถาบันการศึกษา */}
+⋮----
+{/* กลุ่มของปี (แบ่งครึ่งซ้าย-ขวาอย่างสมดุล) */}
+⋮----
+{/* ปีที่เริ่ม */}
+⋮----
+{/* ── Column 3: Skills ── */}
+⋮----
+backgroundColor: "#ffffff", // พื้นหลังขาวตัดกับพื้นเทา
+⋮----
+{/* ชื่อโครงการ / ประสบการณ์ */}
+⋮----
+{/* รายละเอียดโครงการ / ประสบการณ์ */}
+⋮----
+{/* ปุ่มสำหรับกดเพิ่มประวัติโครงการ/ประสบการณ์ใหม่ */}
+⋮----
+-
+⋮----
+{/* ── Column 4: Files (อัปโหลดอิสระ ไม่สน EditMode) ── */}
+⋮----
+].current?.click()
+⋮----
+{/* ─── POPUP MODAL พรีวิวไฟล์ ─── */}
+</file>
+
+<file path="components/ApplyModal.tsx">
+import { useEffect, useState } from 'react';
+import styles from './ApplyModel.module.css'
+⋮----
+// interface ApplyModalProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   postId:number;
+//   userId:number;
+//   seekerEmail:string;
+//   seekerName:string;
+//   companyName: string;
+//   companyEmail: string;
+//   jobTitle: string;
+// }
+⋮----
+interface  jobOption{
+  post_id:number;
+  job_position:string;
+}
+⋮----
+interface ContactModalProps {
+  mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
+  isOpen: boolean;
+  onClose: () => void;
+  postId?: number;           // ใส่หรือไม่ใส่ก็ได้
+  userId: number;            // ID ผู้สมัคร
+  companyId?: number;        // ID บริษัท (ถ้ามี)
+  seekerEmail: string;
+  seekerName: string;
+  companyName: string;
+  companyEmail: string;
+  jobTitle?: string;         // ใส่หรือไม่ใส่ก็ได้
+  companyJobs: jobOption[];
+}
+⋮----
+mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
+⋮----
+postId?: number;           // ใส่หรือไม่ใส่ก็ได้
+userId: number;            // ID ผู้สมัคร
+companyId?: number;        // ID บริษัท (ถ้ามี)
+⋮----
+jobTitle?: string;         // ใส่หรือไม่ใส่ก็ได้
+⋮----
+// derive initial values from props to avoid undefined identifier errors
+⋮----
+// State สำหรับจัดการงานที่เลือก
+⋮----
+// เมื่อมีการเลือก Job ใหม่จาก Dropdown
+const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) =>
+⋮----
+// Sync state เมื่อ Prop เปลี่ยน
+⋮----
+const handleSubmit = async (e: React.FormEvent) =>
+⋮----
+// ปิด modal หลังส่งสำเร็จ 1.5 วินาที
+⋮----
+{/* <label>ข้อความถึง HR</label> */}
+</file>
+
+<file path="app/company/post-job/page.tsx">
+import { FormEvent, useEffect, useState } from "react";
+import styles from "./postjob.module.css";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getSession } from "./getSession";
+import ProvinceSelect from "@/components/ProvinceSelect";
+⋮----
+interface Question {
+  id: string;
+  text: string;
+  options: string[];
+  correctIndex: number | null;
+}
+⋮----
+// เพิ่ม State สำหรับเก็บสถานะการยืนยันตัวตน (ค่าเริ่มต้นเป็นเท็จก่อนโหลดข้อมูลเสร็จ)
+⋮----
+const blockInvalidKeys = (e:
+⋮----
+// ── ดึงข้อมูลสถานะและโพสต์เก่า ─────────────────────────────────
+const fetchData = async () =>
+⋮----
+// 1. ดึงข้อมูลโพสต์เก่า (เพิ่มการเช็ค postResponse.ok ป้องกัน Error)
+⋮----
+// ระบุ ID ให้ตรงกับ Route ที่คุณมี (เช่น ดึงจาก Session/Context หรือ LocalStorage)
+// สมมติว่าบริษัทที่ล็อกอินอยู่คือ ID: 1
+// const companyId = 1;
+⋮----
+// หากไม่มีข้อมูล Session ให้หยุดการทำงานและล็อกฟอร์ม
+⋮----
+//  เช็คก่อนแปลงเป็น JSON ว่าไม่ได้ส่ง HTML Error กลับมา
+⋮----
+// เช็คว่าสถานะเป็น Approved หรือไม่
+⋮----
+setIsApproved(false); // ล็อกหน้าไว้ก่อนถ้าดึงข้อมูลไม่สำเร็จ
+⋮----
+// ── Form handlers (🔓 ทำงานเมื่อ Approved เท่านั้น) ──────────────────────────────
+const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+) =>
+⋮----
+if (!isApproved) return; // ล็อกถ้าไม่ Approved
+⋮----
+const handleNext = () =>
+⋮----
+const handleSubmit = async () =>
+⋮----
+// รีเฟรชรายการโพสต์หลังจากสร้างเสร็จ
+// setIsNext(false);
+⋮----
+// โค้ดส่งข้อมูลไปหลังบ้านของคุณ
+⋮----
+const handleDelete = async (id: number) =>
+⋮----
+// อัปเดตรายการโพสต์หลังจากลบ
+⋮----
+// โค้ดลบประกาศงานของคุณ
+⋮----
+// ── Question handlers (🔓 ทำงานเมื่อ Approved เท่านั้น) ──────────────────────────
+const addQuestion = () =>
+⋮----
+const deleteQuestion = (qId: string) =>
+⋮----
+const updateQuestionText = (qId: string, text: string) =>
+⋮----
+const addOption = (qId: string) =>
+⋮----
+const deleteOption = (qId: string, optIndex: number) =>
+⋮----
+const updateOptionText = (qId: string, optIndex: number, text: string) =>
+⋮----
+const setCorrectAnswer = (qId: string, optIndex: number) =>
+⋮----
+// ── Dynamic Styles ───────────────────────────────────────────
+⋮----
+{/* My Posts */}
+⋮----
+{/* Create Post */}
+⋮----
+{/* ⚠️ แสดงข้อความเตือนเฉพาะตอนที่สถานะ "ไม่ใช่ Approved" */}
+⋮----
+{/* Step 2: Questions */}
+⋮----
+onChange=
+⋮----
+updateOptionText(q.id, optIndex, e.target.value)
+⋮----
+/* Step 1: Job Form */
+</file>
+
+<file path="app/company/seeker-profile/[id]/page.tsx">
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import styles from "./seekerProfile.module.css";
+import FilePreviewButton from "./FilePreviewButton";
+import BackButton from "./BackButton";
+import ProfileActionsButton from "./ProfileActionsButton";
+import AdminButton from "./adminbutton";
+import BanPopup from "./BanPopup";
+import ApplySeeker from "./apply-seeker";
+import { apiUrl } from "@/lib/hostURL";
+⋮----
+interface CustomJwtPayload extends JwtPayload {
+  id: number;
+  email: string;
+  role: string;
+  company_name:string;
+}
+⋮----
+interface PageProps{
+   params: Promise<{ id: string }>;
+}
+⋮----
+async function getSeekerProfile(userId: string)
+⋮----
+const fmt = (val: any)
+⋮----
+const formatDate = (dateStr: string | null) =>
+⋮----
+{/* ── ปุ่มย้อนกลับ ── */}
+{/* ── ปุ่มย้อนกลับ และ ปุ่ม Admin ── */}
+⋮----
+marginBottom: "15px", // ปรับระยะห่างด้านล่างตามความเหมาะสม
+⋮----
+{/* ── Column 1: Personal Info ── */}
+⋮----
+position: "relative", // เพิ่มความปลอดภัยในการจัดตำแหน่ง
+⋮----
+{/* 1. สร้างกล่องว่างขึ้นมาฝั่งซ้าย เพื่อถ่วงน้ำหนักให้ข้อความอยู่ตรงกลางพอดี */}
+⋮----
+{/* 2. ข้อความหัวข้อจะอยู่ตรงกลาง */}
+⋮----
+{/* 3. ปุ่มสามจุดจะถูกดันไปชิดขวาสุดพอดี */}
+⋮----
+userId=
+⋮----
+src={profile.profile_image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`}
+⋮----
+// { label: "Address", key: "address" },
+⋮----
+// { label: "Postal Code", key: "postal_code" },
+⋮----
+{/* ── Column 2: Job Preferences ── */}
+⋮----
+{/* ── Column 3: Skills ── */}
+⋮----
+
+⋮----
+-
+⋮----
+{/* ── Column 4: Files ── */}
+⋮----
+{/* ── Client Component สำหรับ popup ── */}
+</file>
+
+<file path="app/user/user-detail-job/[id]/page.tsx">
+import styles from "./detailjob.module.css";
+import Link from "next/link";
+import SaveAndReport from "../saveAndreportBttn";
+import { cookies } from "next/headers";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import BackButton from "./backBttn";
+import AdminButton from "./adminbutton";
+import BanPopup from "./BanPopup";
+import ApplyCompany from "./apply-company";
+import { apiUrl } from "@/lib/hostURL";
+⋮----
+interface CustomJwtPayload extends JwtPayload {
+  id: number;
+  role?: string;
+  fullname?: string;
+  email?: string;
+}
+⋮----
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+⋮----
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+⋮----
+// console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
+⋮----
+// console.log(seekerEmail+ seekerName+"ok naka ");
+⋮----
+// ปรับเปลี่ยนจาก console.error เป็น warning หรือใช้ค่า fallback จาก JWT
+⋮----
+// ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default ป้องกัน string ว่าง
+⋮----
+// เช็กว่าเป็น admin หรือ superadmin
+⋮----
+// 3. Fetch ข้อมูล Job Post
+⋮----
+// 4. Fetch ข้อมูล Company Email
+⋮----
+// กรณีไม่พบข้อมูลงาน
+⋮----
+// ฟังก์ชันกำหนดสีของ Status
+⋮----
+{/* ปุ่ม Apply พร้อมส่ง Props ที่อัปเดตแล้ว */}
+⋮----
+id=
+⋮----
+{/* --- ส่วนเนื้อหา (Grid) --- */}
+⋮----
+{/* ฝั่งซ้าย: ข้อมูลงาน */}
+</file>
+
+<file path="components/Navbar.tsx">
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+⋮----
+// State สำหรับจัดการ Popup การแบน
+⋮----
+// ดึงข้อมูล Session
+⋮----
+const fetchSession = async () =>
+⋮----
+const resetUserState = () =>
+⋮----
+// ฟังก์ชันตรวจสอบการแบน
+const checkBanStatus = async (uid: string, role: string) =>
+⋮----
+// คำนวณวันหมดอายุการแบน
+const calculateBan = (bannedUntil: string) =>
+⋮----
+// Notification Badge
+const fetchNotificationBadge = async (uid: string, role: string) =>
+⋮----
+const handleRefreshNotifications = () =>
+⋮----
+const toggleMenu = ()
+const closeMenu = ()
+⋮----
+const onLogout = async () =>
+⋮----
+const forceLogout = async () =>
+⋮----
+const getDashboardRoute = () =>
+⋮----
+const isActive = (path: string)
+⋮----
+{/* ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
+⋮----
+setIsBanned(false);
+forceLogout();
+⋮----
+{/* Desktop Menu */}
+⋮----
+{/* Mobile Drawer / Sidebar */}
+⋮----
+{/* ข้อมูลผู้ใช้ */}
+⋮----
+{/* ครอบด้วย mobile-only-links: แสดงเมนูพวกนี้เฉพาะบนมือถือเท่านั้น */}
+</file>
+
+</files>
