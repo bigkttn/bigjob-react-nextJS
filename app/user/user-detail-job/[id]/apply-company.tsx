@@ -11,6 +11,7 @@ interface ApplyCompanyProps {
   onClose?:() => void;
   postId: number,
   userId: number,
+  companyId:number,
   companyName: string,
   seekerName: string,
   jobTitle: string,
@@ -25,7 +26,8 @@ export default function ApplyCompany({
    seekerName,
    jobTitle,
    seekerEmail,
-   companyEmail
+   companyEmail,
+   companyId
   }:ApplyCompanyProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isReported, setIsReported] = useState(false);
@@ -37,20 +39,15 @@ export default function ApplyCompany({
   //   seekerName,
   //   seekerEmail,
   //   postId,
-  //   userId
+  //   userId,
+  //   companyId,
   // });
 
 
-  useEffect(() => {
-    if (userId) {
-      checkApplied();
-    }
-  }
-    , [userId, postId]);
-
-const checkApplied = async () => {
+  const checkApplied = async () => {
+    if(!userId || !postId) return;
     try {
-      const response = await fetch(`${apiUrl}/api/user/check_interview_seeker/`, {
+      const response = await fetch(`${apiUrl}/api/interview_tracking/check-repeat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -58,18 +55,43 @@ const checkApplied = async () => {
           post_id: Number(postId),
         }),
       });
-      const data = await response.json();
-      if (data && data.rows && data.rows.length > 0) {
-        setIsReported(true);
-      } else {
-        setIsReported(false);
+
+      if(!response.ok){
+        console.error("API Error Status:",response.status);
       }
+
+      const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
+     
+      console.log("Check Applied Response:", data);
+
+      const isAlreadyApplied = 
+        Boolean(data?.exists) || 
+        (Array.isArray(data?.rows) && data.rows.length > 0) ||
+        (Array.isArray(data?.data) && data.data.length > 0);
+
+      setIsReported(isAlreadyApplied);
+
     } catch (error) {
       console.error("Error in checkSaved:", error);
     }
   };
 
-  
+  useEffect(() => {
+    if (!userId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      void checkApplied();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [userId, postId]);
+
+  const handleCloseModal = () => {
+     checkApplied();     
+    setIsModalOpen(false); 
+   
+  };
 
   return (
     <main className="p-8 max-w-4xl mx-auto">
@@ -77,18 +99,13 @@ const checkApplied = async () => {
         {/* <h1 className="text-3xl font-bold">{jobData.company}</h1> */}
         
         {/* ปุ่มกด Apply Now */}
-        <button
+        
+       <button
           onClick={() => setIsModalOpen(true)}
-          className={styles.applyBtn}
+          className={`${styles.applyBtn} ${isReported ? styles.invitedBtn : ''}`}
+          disabled={isReported}
         >
-          Apply Now
-        </button>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className={styles.applyBtn}
-          disabled={isReported} >
-
-          {isReported ? 'Applied' : ' Apply Now'}
+          {isReported ? 'สมัครแล้ว' : 'สมัคร'}
         </button>
       </div>
 
@@ -98,7 +115,7 @@ const checkApplied = async () => {
       <ApplyModal
         mode="apply"
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         postId={Number(postId)}
         userId={userId}
         companyName={companyName}

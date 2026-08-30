@@ -1,12 +1,32 @@
+/* ปุ่มปกติ (เชิญ) - สีดำ */
 .applyBtn {
-  /* position: absolute; */
-  top: 40px;
-  right: 40px;
-  background: black;
-  color: white;
-  padding: 10px 25px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
+  background-color: #000000;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 9999px; /* หรือความโค้งตามต้องการ */
   border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: medium;
+}
+
+.applyBtn:hover {
+  background-color: #222222;
+}
+
+/* ปุ่มสถานะ Disabled (เชิญแล้ว) - สีเทาเข้ม */
+.applyBtn:disabled {
+  background-color: #6c757d; /* สีเทาเข้ม (หรือใช้ #4a5568 / #555555) */
+  color: #e2e8f0;            /* ตัวหนังสือสีเทาอ่อน/ขาว */
+  cursor: not-allowed;       /* เปลี่ยน Cursor เป็นรูปห้ามกด */
+  opacity: 0.9;
+}
+
+.invitedBtn {
+  background-color: #6c757d !important; /* สีเทาเข้ม */
+  color: #ffffff !important;
+  cursor: not-allowed;
+  font-size: medium;
+
 }

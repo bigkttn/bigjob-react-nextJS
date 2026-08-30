@@ -1,37 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from './ApplyModel.module.css'
+import styles from './ApplyModel.module.css';
 
-// interface ApplyModalProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   postId:number;
-//   userId:number;
-//   seekerEmail:string;
-//   seekerName:string;
-//   companyName: string;
-//   companyEmail: string;
-//   jobTitle: string;
-// }
-
-interface  jobOption{
-  post_id:number;
-  job_position:string;
+interface jobOption {
+  post_id: number;
+  job_position: string;
 }
 
 interface ContactModalProps {
   mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
   isOpen: boolean;
   onClose: () => void;
-  postId?: number;           // ใส่หรือไม่ใส่ก็ได้
-  userId: number;            // ID ผู้สมัคร
-  companyId?: number;        // ID บริษัท (ถ้ามี)
+  postId?: number;
+  userId: number;
+  companyId?: number;
   seekerEmail: string;
   seekerName: string;
   companyName: string;
   companyEmail: string;
-  jobTitle?: string;         // ใส่หรือไม่ใส่ก็ได้
+  jobTitle?: string;
   companyJobs: jobOption[];
 }
 
@@ -41,81 +29,92 @@ export default function ApplyModal({
   onClose,
   postId,
   userId,
-  companyName, 
+  companyName,
   seekerName,
   jobTitle,
   seekerEmail,
   companyEmail,
-  companyJobs = []
+  companyJobs = [],
 }: ContactModalProps) {
-  // derive initial values from props to avoid undefined identifier errors
-  const initialPostId = postId;
-  const initialJobTitle = jobTitle;
-  // State สำหรับจัดการงานที่เลือก
-  const [selectedPostId, setSelectedPostId] = useState<number | undefined>(initialPostId);
-  const [selectedJobTitle, setSelectedJobTitle] = useState<string>(initialJobTitle || '');
+  const [selectedPostId, setSelectedPostId] = useState<number | undefined>(postId);
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>(jobTitle || '');
 
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
- const indent = "\u00A0".repeat(109);
- const indenttwo = "\u00A0".repeat(95);
+  // const indent = "\u00A0".repeat(109);
 
- 
+  // 🟢 ฟังก์ชันสร้าง Template ข้อความ
+  const generateMessage = (currentJobTitle: string) => {
+    if (mode === 'apply') {
+      return `เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName}
 
- // เมื่อมีการเลือก Job ใหม่จาก Dropdown
-  const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const pId = Number(e.target.value);
-    const job = companyJobs.find((j) => j.post_id === pId);
-    if (job) {
-      setSelectedPostId(job.post_id);
-      setSelectedJobTitle(job.job_position);
-    }
-  };
-
-  // Sync state เมื่อ Prop เปลี่ยน
-  useEffect(() => {
-    if (initialPostId) setSelectedPostId(initialPostId);
-    if (initialJobTitle) setSelectedJobTitle(initialJobTitle);
-  }, [initialPostId, initialJobTitle]);
-  
-  useEffect(() => {
-    if (!isOpen) return;
-    if(mode === 'apply') {
-      
-      setMessage(`เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName}
-
-ข้าพเจ้า ${seekerName} มีความประสงค์ขอสมัครงานในตำแหน่ง ${jobTitle}
+ข้าพเจ้า ${seekerName} มีความประสงค์ขอสมัครงานในตำแหน่ง ${currentJobTitle}
 
 เนื่องด้วยข้าพเจ้า มีความสนใจในสายงานนี้ และเชื่อมั่นว่าทักษะ รวมถึงประสบการณ์ที่มีจะสามารถนำมาประยุกต์ใช้เพื่อร่วมสร้างประโยชน์ให้แก่องค์กรของท่านได้เป็นอย่างดี
 
 ทั้งนี้ หากต้องการข้อมูลเพิ่มเติมหรือประสงค์นัดสัมภาษณ์งาน สามารถติดต่อกลับได้ผ่านอีเมลนี้
 
-${indent}ขอแสดงความนับถือ
-${indent}${seekerName}`);
-    } else  if (mode === 'invite'){
-      setMessage(`เรียนคุณ ${seekerName}
-     ทางบริษัท ${companyName} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
+ขอแสดงความนับถือ
+${seekerName}`;
+    } else {
+      return `เรียนคุณ ${seekerName}
 
-จึงขออนุญาตติดต่อเพื่อสอบถามความสนใจ และเรียนเชิญพูดคุยรายละเอียดเกี่ยวกับโอกาสในการมารร่วมงานกับเราค่ะ
+  ทางบริษัท ${companyName} ได้รับชมโปรไฟล์ของคุณแล้ว มีความสนใจในประสบการณ์และทักษะของคุณเป็นอย่างมาก 
 
-ทั้งนี้หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ
+  จึงขอเรียนเชิญคุณ ${seekerName} มาสัมภาษณ์ในตำแหน่ง ${currentJobTitle}
 
-${indent}ขอแสดงความนับถือ
-${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`);
-      }
-},[isOpen, companyName, seekerName,jobTitle,seekerEmail,companyEmail]);
+จึงขออนุญาตติดต่อเพื่อสอบถามความสนใจ และเรียนเชิญพูดคุยรายละเอียดเกี่ยวกับโอกาสในการมาร่วมงานกับเราค่ะ
+
+ทั้งนี้ หากสะดวก สามารถติดต่อกลับได้ผ่านอีเมลนี้ค่ะ 
+
+ขอแสดงความนับถือ
+ฝ่ายทรัพยากรบุคคล ${companyName}`;
+    }
+  };
+
+
+  const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newPostId = Number(e.target.value);
+    setSelectedPostId(newPostId);
+
+    // 1. ค้นหา Job ที่ถูกเลือก
+    const selectedJob = companyJobs.find(
+      (job) => Number(job.post_id) === newPostId
+    );
+
+    const newTitle = selectedJob?.job_position || '';
+    setSelectedJobTitle(newTitle);
+
+    // 2. ถ้าเป็น Mode Invite ให้อัปเดต Template ข้อความใหม่ทันที
+    if (mode === 'invite' && newTitle) {
+      setMessage(generateMessage(newTitle));
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const initialPostId = postId || (companyJobs.length > 0 ? companyJobs[0].post_id : undefined);
+    const initialJobTitle =
+      jobTitle || (companyJobs.length > 0 ? companyJobs[0].job_position : '');
+
+    setSelectedPostId(initialPostId);
+    setSelectedJobTitle(initialJobTitle);
+
+  
+    setMessage(generateMessage(initialJobTitle));
+  }, [isOpen, postId, jobTitle, companyName, seekerName, mode, companyJobs]);
 
   if (!isOpen) return null;
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setStatusMsg({ type: '', text: '' });
 
-    const endpoint = 
-    mode === 'apply'
+    const endpoint =
+      mode === 'apply'
         ? '/api/interview_tracking/apply-company'
         : '/api/interview_tracking/invite-seeker';
 
@@ -124,14 +123,14 @@ ${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`)
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-        postId:selectedPostId,
-        userId,
-        companyName,
-        seekerName,
-        jobTitle:selectedJobTitle,
-        seekerEmail,
-        companyEmail,
-        message,
+          postId: selectedPostId,
+          userId,
+          companyName,
+          seekerName,
+          jobTitle: selectedJobTitle,
+          seekerEmail,
+          companyEmail,
+          message,
         }),
       });
 
@@ -141,25 +140,30 @@ ${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`)
         throw new Error(data.message || 'เกิดข้อผิดพลาดในการส่ง');
       }
 
-      setStatusMsg({ type: 'success', 
-        text: mode === 'apply' ? 'ส่งใบสมัครสำเร็จแล้ว!': 'ส่งข้อความเชิญชวนสำเร็จแล้ว!', });
-    
+      setStatusMsg({
+        type: 'success',
+        text: mode === 'apply' ? 'ส่งใบสมัครสำเร็จแล้ว!' : 'ส่งข้อความเชิญชวนสำเร็จแล้ว!',
+      });
+
       // ปิด modal หลังส่งสำเร็จ 1.5 วินาที
       setTimeout(() => {
         onClose();
         setStatusMsg({ type: '', text: '' });
       }, 1500);
-
-    } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการส่ง';
+      setStatusMsg({ type: 'error', text: errorMessage });
     } finally {
       setLoading(false);
     }
   };
 
-  const titleText = mode === 'apply'? `สมัครงานตำแหน่ง ${jobTitle || ''}` : `ส่งข้อความติดต่อคุณ ${seekerName}`;
+  const titleText =
+    mode === 'apply'
+      ? `สมัครงานตำแหน่ง ${jobTitle || ''}`
+      : `ส่งข้อความติดต่อคุณ ${seekerName}`;
 
- return (
+  return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContainer}>
         <h3 className={styles.modalTitle}>{titleText}</h3>
@@ -175,30 +179,39 @@ ${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`)
         )}
 
         <form onSubmit={handleSubmit} className={styles.formGroup}>
-
-        {mode === 'invite' && companyJobs.length>0 && (
-          <div className={styles.formItem} style={{marginBottom:'15px'}}>
-            <label style={{fontWeight:'bold',display:'block',marginBottom:'5px'}}>
-              เลือกตำแหน่งงานที่ต้องการเสนอ:
-            </label>
-            <select value={selectedPostId || ''} onChange={handleJobChange} style={{width:'100%', padding:'8px 12px',borderRadius:'6px',border:'1px solid #ccc'}}>
-              <option value="" disabled>--เลือกตำแหน่งงาน--</option>
-              {companyJobs.map((job)=>(
-                <option value={job.post_id} key={job.post_id}>
-                  {job.job_position}
+          {mode === 'invite' && companyJobs.length > 0 && (
+            <div className={styles.formItem} style={{ marginBottom: '15px' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>
+                เลือกตำแหน่งงานที่ต้องการเสนอ
+              </label>
+              <select
+                value={selectedPostId || ''}
+                onChange={handleJobChange}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                }}
+              >
+                <option value="" disabled>
+                  เลือกตำแหน่งงาน
                 </option>
-              ))}
-            </select>
-          </div>
-        )}
+                {companyJobs.map((job) => (
+                  <option value={job.post_id} key={job.post_id}>
+                    {job.job_position}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className={styles.formItem}>
-            {/* <label>ข้อความถึง HR</label> */}
             <textarea
               rows={8}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              style={{width:'100%',padding:'10px'}}
+              style={{ width: '100%', padding: '10px' }}
             />
           </div>
 
@@ -216,7 +229,7 @@ ${indenttwo}ฝ่ายทรัพยากรบุคคล ${companyName}`)
               disabled={loading}
               className={styles.btnSubmit}
             >
-              {loading ? 'กำลังส่ง...' : mode === 'apply' ? 'ส่งใบสมัคร':'ส่งข้อความ'}
+              {loading ? 'กำลังส่ง...' : mode === 'apply' ? 'ส่งใบสมัคร' : 'ส่งข้อความ'}
             </button>
           </div>
         </form>

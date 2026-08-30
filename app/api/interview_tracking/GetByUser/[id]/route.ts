@@ -17,7 +17,7 @@ export async function GET(
         comp.company_name,
         comp.logo_image 
       FROM interview_tracking interview
-      JOIN posts ON interview.post_id = posts.post_id  -- ✅ แก้ไขตรงนี้เป็น interview.post_id
+      JOIN posts ON interview.post_id = posts.post_id 
       LEFT JOIN company comp ON posts.company_id = comp.company_id
       WHERE interview.user_id = ?
     `;
