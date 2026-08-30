@@ -70,7 +70,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     try {
       setIsSearching(true);
       const res = await fetch(
-        `/api/posts/user-search-post?q=${encodeURIComponent(query)}`
+        `/api/posts/user-search-post?q=${encodeURIComponent(query)}`,
       );
       const data = await res.json();
       if (data.success) {
@@ -108,7 +108,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
     const createdDate = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor(
-      (now.getTime() - createdDate.getTime()) / 1000
+      (now.getTime() - createdDate.getTime()) / 1000,
     );
 
     if (diffInSeconds < 60) return "เมื่อสักครู่";
@@ -163,18 +163,15 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
         return timeB - timeA;
       }
       // ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี (กรณีค้นหาด้วย Hybrid Search)
-      if (typeof b.matchScore === "number" && typeof a.matchScore === "number") {
+      if (
+        typeof b.matchScore === "number" &&
+        typeof a.matchScore === "number"
+      ) {
         return b.matchScore - a.matchScore;
       }
       return timeB - timeA;
     });
-  }, [
-    posts,
-    selectedJobType,
-    selectedProvince,
-    selectedStatus,
-    sortBy,
-  ]);
+  }, [posts, selectedJobType, selectedProvince, selectedStatus, sortBy]);
 
   // Pagination Calculations
   const indexOfLastPost = currentPage * postsPerPage;
@@ -351,7 +348,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                       src={
                         post.logo_image ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          post.company_name || "Company"
+                          post.company_name || "Company",
                         )}&background=random`
                       }
                       alt={post.company_name}
@@ -419,8 +416,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                   <div key={post.post_id} className={styles.suggestMiniCard}>
                     <img
                       src={
-                        post.logo_image ||`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          post.company_name || "Company"
+                        post.logo_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          post.company_name || "Company",
                         )}&background=random`
                       }
                       alt={post.company_name}

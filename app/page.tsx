@@ -5,17 +5,27 @@ import { useRouter } from "next/navigation";
 import UserHomeClient from "./user/user-home/userhome-client";
 import CompanyHomeClient from "./company/company-home/page";
 
-interface HomeSwitcherProps {
-  initialUser?: any;
+interface User {
+  role: string;
+  [key: string]: unknown;
 }
+
+interface HomeSwitcherProps {
+  initialUser?: User;
+}
+
+type AppMode = "user" | "company";
+
+const MODE_OPTIONS: { key: AppMode; label: string }[] = [
+  { key: "user", label: "ผู้หางาน" },
+  { key: "company", label: "บริษัท" },
+];
 
 export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(initialUser || null);
-  const [mode, setMode] = useState<"user" | "company">("user");
-
-  const particles = ["30deg", "60deg", "90deg", "120deg", "150deg", "180deg"];
+  const [user, setUser] = useState<User | null>(initialUser || null);
+  const [mode, setMode] = useState<AppMode>("user");
 
   useEffect(() => {
     const checkSessionAndRedirect = async () => {
@@ -53,10 +63,6 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
     checkSessionAndRedirect();
   }, [router]);
 
-  const handleToggleChange = (checked: boolean) => {
-    setMode(checked ? "company" : "user");
-  };
-
   // แสดงหน้า Loading ชั่วคราวก่อนย้ายหน้า เพื่อป้องกันหน้าจอกระตุก
   if (loading) {
     return (
@@ -69,40 +75,31 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
   // กรณีที่เป็น Guest (ไม่ได้ Login) ให้แสดงหน้า Switcher/Landing ตามปกติ
   return (
     <main className="relative min-h-screen">
-      <div className="floating-mode-switcher">
-        <span className="mode-label">
-          {mode === "company" ? "COMPANY MODE" : "USER MODE"}
-        </span>
+      {/* ---------- ปุ่มสลับโหมด ----------
+       * ทรง segmented แทนสวิตช์เลื่อน เพราะผู้หางานกับบริษัทเป็นสองโหมด
+       * ที่เท่ากัน ไม่มีอันไหนเป็นค่า "ปิด" ผู้ใช้จึงเห็นตัวเลือกทั้งคู่พร้อมกัน
+       * และรู้ทันทีว่าอยู่โหมดไหน ไม่ต้องเดาว่าเลื่อนแล้วจะไปทางไหน
+       */}
+      <div className="mode-switcher">
+        <span className="mode-label">MODE</span>
 
-        <label className="cosmic-toggle">
-          <input
-            className="toggle"
-            type="checkbox"
-            checked={mode === "company"}
-            onChange={(e) => handleToggleChange(e.target.checked)}
-          />
-          <div className="slider">
-            <div className="cosmos"></div>
-            <div className="energy-line"></div>
-            <div className="energy-line"></div>
-            <div className="energy-line"></div>
-
-            <div className="toggle-orb">
-              <div className="inner-orb"></div>
-              <div className="ring"></div>
-            </div>
-
-            <div className="particles">
-              {particles.map((angle, index) => (
-                <div
-                  key={index}
-                  className="particle"
-                  style={{ "--angle": angle } as React.CSSProperties}
-                />
-              ))}
-            </div>
-          </div>
-        </label>
+        <div
+          className="mode-group"
+          role="group"
+          aria-label="เลือกโหมดการใช้งาน"
+        >
+          {MODE_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              className="mode-option"
+              aria-pressed={mode === opt.key}
+              onClick={() => setMode(opt.key)}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {mode === "user" ? (
@@ -112,264 +109,88 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
       )}
 
       <style jsx global>{`
-        .floating-mode-switcher {
+        /* ---------- ปุ่มสลับโหมด ----------
+         * อ้างอิงจากองค์ประกอบที่มีอยู่ในหน้า
+         *   พื้นดำ #111111 เหมือน dropdown ในแถบฟิลเตอร์และปุ่ม Details
+         *   มุมมน 10px
+         *   สูง 44px เท่าแถวฟิลเตอร์ ปุ่มจะได้ไม่โดดออกมา
+         */
+        .mode-switcher {
           position: absolute;
           top: 20px;
-          display: flex;
-          left: 10px;
-          align-items: center;
-          gap: 12px;
-          background: rgba(15, 23, 42, 0.9);
-          backdrop-filter: blur(8px);
-          padding: 6px 14px;
-          border-radius: 40px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+          left: 16px;
           z-index: 50;
+          display: flex;
+          align-items: center;
+          gap: 10px;
         }
 
         .mode-label {
-          color: #ffffff;
-          font-size: 0.85rem;
+          font-size: 0.8125rem;
           font-weight: 700;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.06em;
+          color: #4a4a4a;
           white-space: nowrap;
         }
 
-        .cosmic-toggle {
-          position: relative;
-          width: 80px;
-          height: 40px;
-          transform-style: preserve-3d;
-          perspective: 500px;
-          display: inline-block;
+        .mode-group {
+          display: inline-flex;
+          align-items: center;
+          height: 44px;
+          padding: 4px;
+          gap: 2px;
+          background: #111111;
+          border-radius: 10px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
         }
 
-        .toggle {
-          opacity: 0;
-          width: 0;
-          height: 0;
-          position: absolute;
-        }
-
-        .slider {
-          position: absolute;
+        .mode-option {
+          appearance: none;
+          border: none;
           cursor: pointer;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(45deg, #1a1a2e, #16213e);
-          border-radius: 20px;
-          transition: 0.5s;
-          transform-style: preserve-3d;
-          box-shadow:
-            0 0 15px rgba(0, 0, 0, 0.5),
-            inset 0 0 10px rgba(255, 255, 255, 0.05);
-          overflow: hidden;
+          height: 36px;
+          padding: 0 16px;
+          border-radius: 7px;
+          background: transparent;
+          color: rgba(255, 255, 255, 0.66);
+          font-family: inherit;
+          font-size: 0.8125rem;
+          font-weight: 600;
+          white-space: nowrap;
+          transition:
+            background-color 180ms ease,
+            color 180ms ease;
         }
 
-        .cosmos {
-          position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(1px 1px at 10% 10%, #fff 100%, transparent),
-            radial-gradient(1px 1px at 30% 30%, #fff 100%, transparent),
-            radial-gradient(1px 1px at 50% 50%, #fff 100%, transparent),
-            radial-gradient(1px 1px at 70% 70%, #fff 100%, transparent),
-            radial-gradient(1px 1px at 90% 90%, #fff 100%, transparent);
-          background-size: 200% 200%;
-          opacity: 0.2;
-          transition: 0.5s;
+        .mode-option:hover {
+          color: #ffffff;
+          background: rgba(255, 255, 255, 0.1);
         }
 
-        .toggle-orb {
-          position: absolute;
-          height: 32px;
-          width: 32px;
-          left: 4px;
-          bottom: 4px;
-          background: linear-gradient(145deg, #ff6b6b, #4ecdc4);
-          border-radius: 50%;
-          transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-          transform-style: preserve-3d;
-          z-index: 2;
+        .mode-option:focus-visible {
+          outline: 2px solid #ffffff;
+          outline-offset: 2px;
         }
 
-        .inner-orb {
-          position: absolute;
-          inset: 3px;
-          border-radius: 50%;
-          background: linear-gradient(145deg, #fff, #e6e6e6);
-          transition: 0.5s;
-          overflow: hidden;
+        /* ตัวที่เลือกอยู่ = พื้นขาวตัวหนังสือดำ ตัดกันชัดที่สุดบนพื้นดำ */
+        .mode-option[aria-pressed="true"] {
+          background: #ffffff;
+          color: #111111;
         }
 
-        .inner-orb::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: repeating-conic-gradient(
-            from 0deg,
-            transparent 0deg,
-            rgba(0, 0, 0, 0.1) 10deg,
-            transparent 20deg
-          );
-          animation: patternRotate 10s linear infinite;
-        }
-
-        .ring {
-          position: absolute;
-          inset: -2px;
-          border: 2px solid rgba(255, 255, 255, 0.15);
-          border-radius: 50%;
-          transition: 0.5s;
-        }
-
-        .toggle:checked + .slider {
-          background: linear-gradient(45deg, #16213e, #0f172a);
-        }
-
-        .toggle:checked + .slider .toggle-orb {
-          transform: translateX(40px) rotate(360deg);
-          background: linear-gradient(145deg, #4ecdc4, #45b7af);
-        }
-
-        .toggle:checked + .slider .inner-orb {
-          background: linear-gradient(145deg, #45b7af, #3da89f);
-          transform: scale(0.9);
-        }
-
-        .toggle:checked + .slider .ring {
-          border-color: rgba(78, 205, 196, 0.4);
-          animation: ringPulse 2s infinite;
-        }
-
-        .energy-line {
-          position: absolute;
-          width: 100%;
-          height: 2px;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(78, 205, 196, 0.5),
-            transparent
-          );
-          transform-origin: left;
-          opacity: 0;
-          transition: 0.5s;
-        }
-
-        .energy-line:nth-of-type(1) {
-          top: 20%;
-          transform: rotate(15deg);
-        }
-        .energy-line:nth-of-type(2) {
-          top: 50%;
-          transform: rotate(0deg);
-        }
-        .energy-line:nth-of-type(3) {
-          top: 80%;
-          transform: rotate(-15deg);
-        }
-
-        .toggle:checked + .slider .energy-line {
-          opacity: 1;
-          animation: energyFlow 2s linear infinite;
-        }
-
-        .particles {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-        }
-
-        .particle {
-          position: absolute;
-          width: 3px;
-          height: 3px;
-          background: #4ecdc4;
-          border-radius: 50%;
-          opacity: 0;
-        }
-
-        .toggle:checked + .slider .particle {
-          animation: particleBurst 1s ease-out infinite;
-        }
-
-        .particle:nth-child(1) {
-          left: 20%;
-          animation-delay: 0s;
-        }
-        .particle:nth-child(2) {
-          left: 40%;
-          animation-delay: 0.2s;
-        }
-        .particle:nth-child(3) {
-          left: 60%;
-          animation-delay: 0.4s;
-        }
-        .particle:nth-child(4) {
-          left: 80%;
-          animation-delay: 0.6s;
-        }
-        .particle:nth-child(5) {
-          left: 30%;
-          animation-delay: 0.8s;
-        }
-        .particle:nth-child(6) {
-          left: 70%;
-          animation-delay: 1s;
-        }
-
-        @keyframes ringPulse {
-          0%,
-          100% {
-            transform: scale(1);
-            opacity: 0.3;
+        @media (max-width: 640px) {
+          .mode-label {
+            display: none;
           }
-          50% {
-            transform: scale(1.1);
-            opacity: 0.6;
-          }
-        }
 
-        @keyframes patternRotate {
-          0% {
-            transform: rotate(0deg);
+          .mode-group {
+            height: 40px;
           }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
 
-        @keyframes energyFlow {
-          0% {
-            transform: scaleX(0) translateX(0);
-            opacity: 0;
-          }
-          50% {
-            transform: scaleX(1) translateX(50%);
-            opacity: 1;
-          }
-          100% {
-            transform: scaleX(0) translateX(100%);
-            opacity: 0;
-          }
-        }
-
-        @keyframes particleBurst {
-          0% {
-            transform: translate(0, 0) scale(1);
-            opacity: 1;
-          }
-          100% {
-            transform: translate(
-                calc(cos(var(--angle)) * 25px),
-                calc(sin(var(--angle)) * 25px)
-              )
-              scale(0);
-            opacity: 0;
+          .mode-option {
+            height: 32px;
+            padding: 0 12px;
+            font-size: 0.75rem;
           }
         }
       `}</style>
