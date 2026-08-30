@@ -1,340 +1,307 @@
-/* Container & Layout */
 .container {
-  min-height: 100vh;
-  background-color: #e5e5e5;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #333;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f7;
+  font-family: Arial, sans-serif;
 }
 
-/* Header Navbar */
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #000;
-  color: #fff;
-  padding: 12px 24px;
-}
-
-.navLeft {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.hamburgerBtn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.brandLogo {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.navRight {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.navLink {
-  color: #fff;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.navLink.active {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.logoutBtn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Main Content Area Layout */
 .mainContent {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 320px 1fr;
   gap: 20px;
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
-/* Left Sidebar - Applicant Cards */
+/* Sidebar ด้านซ้าย */
 .sidebar {
-  background-color: #f2f2f2;
-  border-radius: 20px;
-  padding: 16px;
-  border: 1px solid #dcdcdc;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
 }
 
 .jobCard {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  background-color: #e2e2e2;
-  border-radius: 16px;
-  padding: 12px 16px;
+  align-items: center;
+  padding: 12px;
+  background: #e0e0e0;
+  border-radius: 12px;
   cursor: pointer;
   border: 2px solid transparent;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
 }
 
 .jobCard.selected {
-  background-color: #ffffff;
-  border-color: #111;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-color: #333;
 }
 
 .cardLeft {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .companyLogo {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 10px;
   object-fit: cover;
-  background-color: #ccc;
 }
 
 .cardDetails h4 {
   margin: 0;
   font-size: 16px;
-  font-weight: 700;
-  color: #111;
+  font-weight: bold;
 }
 
 .cardDetails p {
-  margin: 4px 0 0 0;
+  margin: 2px 0 0;
   font-size: 13px;
   color: #555;
 }
 
-/* Status Badges */
 .statusBadge {
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  text-align: center;
-  text-transform: capitalize;
+  font-size: 11px;
+  font-weight: bold;
 }
 
-.statusScreening,
-.statusInterview {
-  background-color: #eab308;
-  color: #000;
-}
+.statusPending { background: #dcdcdc; color: #333; }
+.statusOffer { background: #d1e7dd; color: #0f5132; }
+.statusInterview { background: #fff3cd; color: #664d03; }
+.statusRejected { background: #f8d7da; color: #842029; }
 
-.statusRejected,
-.statusClosed {
-  background-color: #d32f2f;
-}
-
-.statusOffer,
-.statusAppointment,
-.statusApplied {
-  background-color: #2e7d32;
-}
-
-.statusPending {
-  background-color: #757575;
-}
-
-/* Right Content Area */
+/* Detail Panel ด้านขวา */
 .rightPanel {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* Tracker Section */
 .trackerBox {
-  background-color: #f2f2f2;
-  border-radius: 20px;
-  padding: 24px;
-  border: 1px solid #dcdcdc;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  margin: 15px 15px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
 }
 
 .stepperContainer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 650px;
-  margin: 0 auto;
-  width: 100%;
-  position: relative;
+  margin-bottom: 15px;
 }
 
 .step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  z-index: 1;
+  position: relative;
 }
 
 .stepIcon {
-  width: 48px;
-  height: 48px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  background-color: #e0e0e0;
+  background: #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  color: #333;
 }
 
 .step.active .stepIcon {
-  background-color: #eab308;
-  color: #000;
-}
-
-.step.completed .stepIcon {
-  background-color: #2e7d32;
-  color: #fff;
+  background: #ffcc00;
 }
 
 .stepLabel {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: capitalize;
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: bold;
 }
 
 .stepLine {
   flex: 1;
   height: 3px;
-  background-color: #bbb;
-  margin: 0 -10px;
-  margin-bottom: 24px;
+  background: #ccc;
+  margin: 0 10px;
+  margin-bottom: 20px;
 }
 
+/* ปุ่มอ่าน / ปฏิเสธ */
+.actionBtnGroup {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.btnRead {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btnReject {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Meeting Date Row */
 .datePickerRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 8px;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.dateInputGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dateInputGroup label {
+  font-size: 11px;
+  color: #444;
 }
 
 .inputField {
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 4px 8px;
   border: 1px solid #ccc;
-  font-size: 13px;
+  border-radius: 4px;
+  font-size: 11px;
 }
 
-/* Applicant Detail Section */
-.detailBox {
-  background-color: #f2f2f2;
-  border-radius: 20px;
-  padding: 24px;
-  border: 1px solid #dcdcdc;
+.btnSetDate {
+  padding: 4px 12px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 11px;
+  cursor: pointer;
 }
 
-.detailHeader {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.detailLogo {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.detailHeader h2 {
-  margin: 0;
-  font-size: 24px;
-}
-
+/* 3 Columns Layout */
 .detailGrid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  font-size: 13px;
-  line-height: 1.6;
+  gap: 15px;
 }
 
-.gridColumn {
+/* Column 1: Profile */
+.columnProfile {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  padding: 10px;
 }
 
-.infoTable {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.infoTable td {
-  padding: 4px 0;
-  vertical-align: top;
-}
-
-.infoTable td:first-child {
-  font-weight: bold;
-  width: 110px;
-  color: #555;
-}
-
-.sectionTitle {
-  font-weight: bold;
-  font-size: 15px;
-  margin-bottom: 8px;
-  color: #111;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 4px;
-}
-
-.pdfButton {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 6px 16px;
-  background-color: #666;
-  color: white;
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 12px;
+.avatarWrapper {
   text-align: center;
-  width: fit-content;
+  margin-bottom: 15px;
+}
+
+.profileAvatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+}
+
+.avatarWrapper h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.emailLink {
+  font-size: 12px;
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.personalInfoList {
+  width: 100%;
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.personalInfoList p {
+  margin: 4px 0;
+  line-height: 1.3;
+}
+
+.personalInfoList span {
+  color: #666;
+}
+
+.pdfDownloadBtn {
+  display: inline-block;
+  padding: 6px 16px;
+  background-color: #777;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+/* Column 2 & 3 Cards */
+.columnCard {
+  background: #e0e0e0;
+  border-radius: 16px;
+  padding: 16px;
+  font-size: 11px;
+}
+
+.columnCard h2 {
+  font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.cardSection {
+  margin-bottom: 12px;
+}
+
+.cardSection label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+  color: #444;
+}
+
+.cardSection p, .cardSection ol, .cardSection ul {
+  margin: 0;
+  padding-left: 15px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.badgePill {
+  display: inline-block;
+  padding: 2px 10px;
+  background: #000;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 10px;
 }
 
 .emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  font-size: 18px;
-  color: #777;
+  text-align: center;
+  padding: 50px;
+  background: #e0e0e0;
+  border-radius: 16px;
 }

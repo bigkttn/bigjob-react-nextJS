@@ -1,22 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styles from './applySeeker.module.css';
 import ApplyModal from '@/components/ApplyModal';
 import { apiUrl } from '@/lib/hostURL';
-import { useRouter } from 'next/navigation';
+
+interface CompanyJob {
+  post_id: number;
+  job_position: string;
+}
 
 interface ContactModalProps {
   mode: 'apply' | 'invite';
-  postId: number;
+  postId?: number;
   userId: number;
   companyId: number;
   companyName: string;
   seekerName: string;
-  jobTitle: string;
+  jobTitle?: string;
   seekerEmail: string;
   companyEmail: string;
-  companyJobs?: any[];
+  companyJobs?: CompanyJob[];
 }
 
 export default function ApplySeeker({
@@ -26,52 +30,82 @@ export default function ApplySeeker({
   companyId,
   companyName,
   seekerName,
-  jobTitle,
+  jobTitle = '',
   seekerEmail,
   companyEmail,
   companyJobs = [],
 }: ContactModalProps) {
-  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReported, setIsReported] = useState(false);
+  const [isActioned, setIsActioned] = useState(false);
+  const [existingPostIds, setExistingPostIds] = useState<number[]>([]);
 
-  useEffect(() => {
-    if (userId && postId) {
-      checkApplied();
-    }
-  }, [userId, postId]);
+  const checkStatus = useCallback(async () => {
+    if (!userId) return;
 
-  const checkApplied = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/company/check_interview_company/`, {
+      const response = await fetch(`${apiUrl}/api/company/check-repeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         body: JSON.stringify({
           user_id: Number(userId),
-          post_id: Number(postId),
+          post_id: postId ? Number(postId) : undefined,
+          company_id: Number(companyId),
+          role: mode === 'apply' ? 'seeker' : 'company',
         }),
       });
 
+      if (!response.ok) {
+        setIsActioned(false);
+        return;
+      }
+
       const data = await response.json();
-      console.log('Check Applied Response:', data);
 
-      const isExist =
-        (Array.isArray(data) && data.length > 0) ||
-        Boolean(data?.exists) ||
-        (Array.isArray(data?.rows) && data.rows.length > 0);
+      if (data.exists && Array.isArray(data.rows)) {
+        // เก็บรายชื่อ post_id ทั้งหมดที่เคยมีการสร้าง record ไว้อยู่แล้ว
+        const takenPostIds = data.rows.map((item: { post_id: number | string }) => Number(item.post_id));
+        setExistingPostIds(takenPostIds);
 
-      setIsReported(isExist);
+        // เช็กว่า postId ปัจจุบัน ถูกใช้ไปแล้วหรือยัง
+        if (postId && takenPostIds.includes(Number(postId))) {
+          setIsActioned(true);
+        } else {
+          setIsActioned(false);
+        }
+      } else {
+        setIsActioned(false);
+        setExistingPostIds([]);
+      }
     } catch (error) {
-      console.error('Error in checkApplied:', error);
-      setIsReported(false);
+      console.error('Error in checkStatus:', error);
+      setIsActioned(false);
     }
-  };
+  }, [userId, postId, companyId, mode]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void checkStatus();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [userId, postId, checkStatus]);
 
   const handleCloseModal = () => {
-     checkApplied();     
-    setIsModalOpen(false); 
-   
+    void checkStatus();
+    setIsModalOpen(false);
+  };
+
+  // กรองเฉพาะตำแหน่งงานที่ยังไม่เคยสมัคร/เชิญ ส่งไปให้ Modal เลือก
+  const availableCompanyJobs = companyJobs.filter(
+    (job) => !existingPostIds.includes(Number(job.post_id))
+  );
+
+  const getButtonText = () => {
+    if (mode === 'apply') {
+      return isActioned ? 'สมัครแล้ว' : 'สมัครงาน';
+    }
+    return isActioned ? 'เชิญแล้ว' : 'เชิญสัมภาษณ์';
   };
 
   return (
@@ -79,17 +113,18 @@ export default function ApplySeeker({
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={() => setIsModalOpen(true)}
-          className={`${styles.applyBtn} ${isReported ? styles.invitedBtn : ''}`}
-          disabled={isReported}
+          className={`${styles.applyBtn} ${isActioned ? styles.invitedBtn : ''}`}
+          disabled={isActioned}
         >
-          {isReported ? 'เชิญแล้ว' : 'เชิญ'}
+          {getButtonText()}
         </button>
       </div>
 
       <ApplyModal
         mode={mode}
         isOpen={isModalOpen}
-       onClose={handleCloseModal}
+        onClose={handleCloseModal}
+        postId={postId || 0}
         userId={userId}
         companyId={companyId}
         companyName={companyName}
@@ -97,7 +132,7 @@ export default function ApplySeeker({
         jobTitle={jobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
-        companyJobs={companyJobs}
+        companyJobs={availableCompanyJobs} // ส่งเฉพาะตำแหน่งที่ยังไม่ได้กด
       />
     </main>
   );

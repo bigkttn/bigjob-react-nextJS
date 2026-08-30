@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import styles from "./company_tracking.module.css";
+import { apiUrl } from "@/lib/hostURL";
 
 export interface Applicant {
   tracking_id: number;
@@ -46,10 +45,13 @@ interface ComponentProps {
 }
 
 export default function CompanyApplication({ initialJobs, companyId }: ComponentProps) {
-  const [jobs] = useState<Applicant[]>(initialJobs || []);
+  const [jobs, setJobs] = useState<Applicant[]>(initialJobs || []);
   const [selectedJob, setSelectedJob] = useState<Applicant | null>(
     initialJobs && initialJobs.length > 0 ? initialJobs[0] : null
   );
+
+  const [meetingDate, setMeetingDate] = useState("");
+  const [meetingTime, setMeetingTime] = useState("");
 
   const getStatusClass = (status: string = "pending") => {
     switch (status.toLowerCase()) {
@@ -69,20 +71,48 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
   const steps = ["pending", "Applied", "Interview", "Appointment"];
 
   const getStepStatus = (stepName: string, currentStatus: string = "pending") => {
-    const stepIndex = steps.findIndex(s => s.toLowerCase() === stepName.toLowerCase());
-    const currentIndex = steps.findIndex(s => s.toLowerCase() === currentStatus.toLowerCase());
-    
+    const stepIndex = steps.findIndex((s) => s.toLowerCase() === stepName.toLowerCase());
+    const currentIndex = steps.findIndex((s) => s.toLowerCase() === currentStatus.toLowerCase());
+
     if (currentIndex === -1) return "";
     if (stepIndex === currentIndex) return styles.active;
     if (stepIndex < currentIndex) return styles.completed;
     return "";
   };
 
+  const handleUpdateStatus = async (trackingId: number, newStatus: string) => {
+    try {
+      const response = await fetch(`${apiUrl}/api/interview_tracking/update_status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tracking_id: trackingId,
+          status: newStatus,
+          meeting_date: meetingDate,
+          meeting_time: meetingTime,
+        }),
+      });
+
+      if (response.ok) {
+        setJobs((prevJobs) =>
+          prevJobs.map((job) =>
+            job.tracking_id === trackingId ? { ...job, status: newStatus } : job
+          )
+        );
+
+        if (selectedJob && selectedJob.tracking_id === trackingId) {
+          setSelectedJob((prev) => (prev ? { ...prev, status: newStatus } : null));
+        }
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
+
   return (
     <div className={styles.container}>
-      {/* Main Grid Content */}
       <main className={styles.mainContent}>
-        {/* Left Candidate List */}
+        {/* รายการผู้สมัครด้านซ้าย */}
         <aside className={styles.sidebar}>
           {jobs.length === 0 ? (
             <p style={{ textAlign: "center", padding: "20px" }}>ไม่พบข้อมูลผู้สมัคร</p>
@@ -117,9 +147,10 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
           )}
         </aside>
 
-        {/* Right Detail Panel */}
+        {/* รายละเอียดผู้สมัครด้านขวา */}
         <section className={styles.rightPanel}>
-          {selectedJob ? (
+         <div style={{ width: '54rem', backgroundColor: '#D9D9D9' }}>
+             {selectedJob ? (
             <>
               {/* Stepper Status Box */}
               <div className={styles.trackerBox}>
@@ -134,160 +165,188 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                           {step === "Appointment" && "💼"}
                         </div>
                         <span className={styles.stepLabel}>{step}</span>
+
+                        {/* ปุ่มเปิดอ่าน/ปฏิเสธ ใต้ Step Applied */}
+                        {step === "Applied" && selectedJob.status.toLowerCase() === "applied" && (
+                          <div className={styles.actionBtnGroup}>
+                            <button
+                              onClick={() => handleUpdateStatus(selectedJob.tracking_id, "screening")}
+                              className={styles.btnRead}
+                            >
+                              อ่าน
+                            </button>
+                            <button
+                              onClick={() => handleUpdateStatus(selectedJob.tracking_id, "rejected")}
+                              className={styles.btnReject}
+                            >
+                              ปฏิเสธ
+                            </button>
+                          </div>
+                        )}
                       </div>
                       {idx < steps.length - 1 && <div className={styles.stepLine} />}
                     </React.Fragment>
                   ))}
                 </div>
 
-                {/* Optional Meeting Date Inputs */}
+                {/* แถบเลือกวันและเวลานัดหมายสัมภาษณ์ */}
                 <div className={styles.datePickerRow}>
-                  <div>
-                    <label style={{ fontSize: "12px", marginRight: "6px" }}>Meeting date:</label>
-                    <input type="date" className={styles.inputField} />
+                  <div className={styles.dateInputGroup}>
+                    <label>Meeting date</label>
+                    <input
+                      type="date"
+                      value={meetingDate}
+                      onChange={(e) => setMeetingDate(e.target.value)}
+                      className={styles.inputField}
+                    />
                   </div>
-                  <div>
-                    <label style={{ fontSize: "12px", marginRight: "6px" }}>Meeting time:</label>
-                    <input type="time" className={styles.inputField} />
+                  <div className={styles.dateInputGroup}>
+                    <label>Meeting time</label>
+                    <input
+                      type="time"
+                      value={meetingTime}
+                      onChange={(e) => setMeetingTime(e.target.value)}
+                      className={styles.inputField}
+                    />
                   </div>
+                  <button
+                    onClick={() => handleUpdateStatus(selectedJob.tracking_id, "Interview")}
+                    className={styles.btnSetDate}
+                  >
+                    date
+                  </button>
                 </div>
               </div>
 
-              {/* Applicant Profile Information */}
-              <div className={styles.detailBox}>
-                <div className={styles.detailHeader}>
-                  <img
-                    src={selectedJob.profile_image || "/default-avatar.png"}
-                    alt="Applicant Avatar"
-                    className={styles.detailLogo}
-                    onError={(e) => {
-                      (e.target as HTMLElement).setAttribute("src", "https://via.placeholder.com/64");
-                    }}
-                  />
-                  <div>
-                    <h2>{selectedJob.fullname || "ไม่ระบุชื่อ"}</h2>
-                    <p style={{ color: "#0066cc", margin: "2px 0 0 0" }}>
-                      {selectedJob.email || "-"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className={styles.detailGrid}>
-                  {/* Column 1: Personal Info */}
-                  <div className={styles.gridColumn}>
-                    <table className={styles.infoTable}>
-                      <tbody>
-                        <tr>
-                          <td>Gender:</td>
-                          <td>{selectedJob.gender || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Age:</td>
-                          <td>{selectedJob.age || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Military Status:</td>
-                          <td>{selectedJob.military_status || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Date of Birth:</td>
-                          <td>{selectedJob.date_of_birth || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Nationality:</td>
-                          <td>{selectedJob.nationality || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Religion:</td>
-                          <td>{selectedJob.religion || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Weight/Height:</td>
-                          <td>
-                            {selectedJob.weight ? `${selectedJob.weight} kg` : "-"} /{" "}
-                            {selectedJob.height ? `${selectedJob.height} cm` : "-"}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Marital Status:</td>
-                          <td>{selectedJob.marital_status || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Mobile Phone:</td>
-                          <td>{selectedJob.mobile_phone || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>LINE ID:</td>
-                          <td>{selectedJob.line_id || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Current Address:</td>
-                          <td>
-                            {[
-                              selectedJob.address,
-                              selectedJob.sub_district,
-                              selectedJob.district,
-                              selectedJob.province,
-                              selectedJob.postal_code,
-                            ]
-                              .filter(Boolean)
-                              .join(" ") || "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <a href="#" className={styles.pdfButton}>
-                      {selectedJob.fullname?.toLowerCase().replace(/\s+/g, "") || "resume"}.pdf
+              {/* ข้อมูลโปรไฟล์ผู้สมัคร 3 คอลัมน์ */}
+              <div className={styles.detailGrid}>
+                {/* คอลัมน์ที่ 1: Profile ส่วนตัว */}
+                <div className={styles.columnProfile}>
+                  <div className={styles.avatarWrapper}>
+                    <img
+                      src={selectedJob.profile_image || "/default-avatar.png"}
+                      alt="Applicant Avatar"
+                      className={styles.profileAvatar}
+                      onError={(e) => {
+                        (e.target as HTMLElement).setAttribute("src", "https://via.placeholder.com/100");
+                      }}
+                    />
+                    <h3>{selectedJob.fullname || "Ruben amorim"}</h3>
+                    <a href={`mailto:${selectedJob.email}`} className={styles.emailLink}>
+                      {selectedJob.email || "rubenamorim@gamil.com"}
                     </a>
                   </div>
 
-                  {/* Column 2: Job Preferences */}
-                  <div className={styles.gridColumn}>
-                    <div className={styles.sectionTitle}>Job Preferences</div>
-                    <table className={styles.infoTable}>
-                      <tbody>
-                        <tr>
-                          <td>Job Title:</td>
-                          <td>{selectedJob.job_position || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Type Of Work:</td>
-                          <td>{selectedJob.type_of_work || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Desired Salary:</td>
-                          <td>{selectedJob.desired_salary || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Desired Location:</td>
-                          <td>{selectedJob.desired_work_location || "-"}</td>
-                        </tr>
-                        <tr>
-                          <td>Available Start Date:</td>
-                          <td>{selectedJob.available_start_date || "-"}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div className={styles.personalInfoList}>
+                    <p><span>Gender:</span> {selectedJob.gender || "Male"}</p>
+                    <p><span>Age:</span> {selectedJob.age || "40"}</p>
+                    <p><span>Military Status:</span> {selectedJob.military_status || "Completed military service"}</p>
+                    <p><span>Date of Birth:</span> {selectedJob.date_of_birth || "27 January 1985"}</p>
+                    <p><span>Nationality:</span> {selectedJob.nationality || "Portuguese"}</p>
+                    <p><span>Religion:</span> {selectedJob.religion || "Christian"}</p>
+                    <p><span>Weight:</span> {selectedJob.weight || "73"} kg</p>
+                    <p><span>Height:</span> {selectedJob.height || "178"} cm</p>
+                    <p><span>Disability Status:</span> {selectedJob.disability_status || "None"}</p>
+                    <p><span>Marital Status:</span> {selectedJob.marital_status || "Married"}</p>
+                    <p><span>Mobile Phone:</span> {selectedJob.mobile_phone || "093432342"}</p>
+                    <p><span>LINE ID:</span> {selectedJob.line_id || "ruben178"}</p>
+                    <p><span>Country:</span> {selectedJob.country || "United Kingdom"}</p>
+                    <p>
+                      <span>Current Address:</span>{" "}
+                      {[
+                        selectedJob.address || "12/3 Soi Greenfield, Sukhumvit Road",
+                        selectedJob.province || "Bangkok",
+                        selectedJob.district || "Bang Na",
+                        selectedJob.postal_code || "10260",
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
                   </div>
 
-                  {/* Column 3: Skills & Experiences */}
-                  <div className={styles.gridColumn}>
-                    <div className={styles.sectionTitle}>Skills</div>
-                    <div style={{ fontSize: "12px", color: "#444" }}>
-                      <p style={{ margin: "0 0 6px 0", fontWeight: "bold" }}>Specific Skills:</p>
-                      <ul style={{ paddingLeft: "16px", margin: "0 0 12px 0" }}>
-                        <li>Tactical Awareness</li>
-                        <li>Player Development Skills</li>
-                        <li>Game Analysis & Performance</li>
-                      </ul>
+                  <a href="#" className={styles.pdfDownloadBtn}>
+                    {selectedJob.fullname?.toLowerCase().replace(/\s+/g, "") || "rubenamorim"}.pdf
+                  </a>
+                </div>
 
-                      <p style={{ margin: "0 0 6px 0", fontWeight: "bold" }}>Language Proficiency:</p>
-                      <ul style={{ paddingLeft: "16px", margin: 0 }}>
-                        <li>English: Fluent</li>
-                        <li>Thai: Intermediate</li>
-                      </ul>
-                    </div>
+                {/* คอลัมน์ที่ 2: Job Preferences */}
+                <div className={styles.columnCard}>
+                  <h2>Job Preferences</h2>
+                  <div className={styles.cardSection}>
+                    <label>Job Title</label>
+                    <ol>
+                      <li>{selectedJob.job_position || "Head Coach"}</li>
+                      <li>-</li>
+                      <li>-</li>
+                    </ol>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Type Of Work</label>
+                    <ol>
+                      <li>{selectedJob.type_of_work || "Full-time"}</li>
+                    </ol>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Type of Employment</label>
+                    <div className={styles.badgePill}>Full-time</div>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Desired salary (baht)</label>
+                    <p>{selectedJob.desired_salary || "300,000 - 500,000"}</p>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Desired work location</label>
+                    <p>{selectedJob.desired_work_location || "United kingdom"}</p>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Available start date</label>
+                    <p>{selectedJob.available_start_date || "1 October 2025"}</p>
+                  </div>
+                </div>
+
+                {/* คอลัมน์ที่ 3: Skills */}
+                <div className={styles.columnCard}>
+                  <h2>Skills</h2>
+                  <div className={styles.cardSection}>
+                    <label>specific skills</label>
+                    <ol>
+                      <li>Tactical Awareness</li>
+                      <li>Player Development Skills</li>
+                      <li>Game Analysis and Performance Evaluation</li>
+                    </ol>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Typing speed in Thai (wpm)</label>
+                    <p>-Thai – 45 wpm</p>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Typing speed in English (wpm)</label>
+                    <p>-English – 60 wpm</p>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Projects, Achievements, and Other Experiences</label>
+                    <ul>
+                      <li>Successfully led a team project to develop a mobile app used by over 10,000 users.</li>
+                      <li>Received Employee of the Year award in 2023.</li>
+                      <li>Volunteered as a community organizer for local environmental campaigns.</li>
+                    </ul>
+                  </div>
+
+                  <div className={styles.cardSection}>
+                    <label>Language Proficiency</label>
+                    <ul>
+                      <li>English: Fluent (IELTS 7.5)</li>
+                      <li>Portuguese: Native</li>
+                      <li>Thai: Intermediate (spoken and written)</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -297,6 +356,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
               <p>กรุณาเลือกผู้สมัครจากรายการด้านซ้าย</p>
             </div>
           )}
+          </div>
         </section>
       </main>
     </div>

@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     
     const jobLink = `${apiUrl}/jobs/${post_id}`;
 
-    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'invited', ? )`;
+    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'pending', ? )`;
     await db.query(sql, [post_id, user_id, message || null]);
 
     // ส่งอีเมลไปหาผู้สมัคร (Seeker)
@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ message: "ส่งคำเชิญเรียบร้อยแล้ว!" }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending Invitation:", error);
-    return NextResponse.json({ message: "เกิดข้อผิดพลาดในการส่งคำเชิญ", error: error.message }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ message: "เกิดข้อผิดพลาดในการส่งคำเชิญ", error: errorMessage }, { status: 500 });
   }
 }

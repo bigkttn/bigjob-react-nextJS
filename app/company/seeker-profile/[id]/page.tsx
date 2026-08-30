@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Image from "next/image";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import styles from "./seekerProfile.module.css";
 import FilePreviewButton from "./FilePreviewButton";
@@ -18,6 +19,47 @@ interface CustomJwtPayload extends JwtPayload {
 
 interface PageProps{
    params: Promise<{ id: string }>;
+}
+
+interface Education {
+  level?: unknown;
+  major?: unknown;
+  institution?: unknown;
+  year_start?: unknown;
+  year_end?: unknown;
+}
+
+interface Skills {
+  skill_name?: unknown;
+}
+
+interface TypingSpeed {
+  typing_language?: unknown;
+  typing_wpm?: unknown;
+}
+
+interface Experiences {
+  ex_title?: unknown;
+  ex_description?: unknown;
+  start_date?: string|null;
+  end_date?: string|null;
+}
+interface Language{
+  language_type?:string;
+  test_name?:string|null;
+  level?:string|null;
+  score?:number|0;
+}
+
+interface FileRecord {
+  file_id?: string | number;
+  file_name?: string;
+  file_category?: string;
+  file_path?: string;
+}
+
+interface CompanyProfile {
+  company_name?: string | null;
 }
 
 
@@ -53,10 +95,10 @@ async function getCompanyProfile(companyId: number, token?: string) {
 
 }
 
-const fmt = (val: any) =>
+const fmt = (val: unknown) =>
   val !== null && val !== undefined ? String(val) : "-";
 
-const formatDate = (dateStr: string | null) => {
+const formatDate = (dateStr: string | null|undefined) => {
   if (!dateStr) return "-";
   return new Date(dateStr).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -92,7 +134,7 @@ export default async function SeekerProfilePage({params}:PageProps)
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
   const profile = await getSeekerProfile(userId);
  
-  let company: any = null;
+  let company: CompanyProfile | null = null;
   let jobTitle = "";
   let postId: number | null = null;
   let companyJobs = [];
@@ -221,10 +263,13 @@ export default async function SeekerProfilePage({params}:PageProps)
             </div>
             <div className={styles.personalInfoContent}>
               <div className={styles.avatarWrapper}>
-                <img
+                <Image
                   src={profile.profile_image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`}
                   alt="avatar"
                   className={styles.avatar}
+                  width={150}
+                  height={150}
+                  unoptimized
                 />
               </div>
               <strong>
@@ -288,7 +333,7 @@ export default async function SeekerProfilePage({params}:PageProps)
               <section className={styles.section}>
                 <h4>Job Title</h4>
                 <ol className={styles.plainList}>
-                  {profile.job_titles?.map((job: any, i: number) => (
+                  {profile.job_titles?.map((job: {job_name:string}, i: number) => (
                     <li key={i}>{fmt(job.job_name)}</li>
                   ))}
                 </ol>
@@ -327,7 +372,7 @@ export default async function SeekerProfilePage({params}:PageProps)
                 <h4 style={{ marginBottom: "1rem" }}>Education</h4>
                 <div className={styles.timeline}>
                   <div className={styles.centralLine} />
-                  {profile.educations?.map((item: any, index: number) => (
+                  {profile.educations?.map((item: Education, index: number) => (
                     <div
                       key={index}
                       className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
@@ -355,7 +400,7 @@ export default async function SeekerProfilePage({params}:PageProps)
               <section className={styles.section}>
                 <h4>Specific Skills</h4>
                 <ol className={styles.plainList}>
-                  {profile.skills?.map((s: any, i: number) => (
+                  {profile.skills?.map((s: Skills, i: number) => (
                     <li key={i}>{fmt(s.skill_name)}</li>
                   ))}
                 </ol>
@@ -363,7 +408,7 @@ export default async function SeekerProfilePage({params}:PageProps)
 
               <section className={styles.section}>
                 <h4>Typing Speed</h4>
-                {profile.typing_speeds?.map((t: any, i: number) => (
+                {profile.typing_speeds?.map((t: TypingSpeed, i: number) => (
                   <ul key={i} className={styles.plainUl}>
                     <li>
                       <strong>{fmt(t.typing_language)}</strong>
@@ -375,7 +420,7 @@ export default async function SeekerProfilePage({params}:PageProps)
 
               <section className={styles.section}>
                 <h4>Projects & Experiences</h4>
-                {profile.experiences?.map((exp: any, i: number) => (
+                {profile.experiences?.map((exp: Experiences, i: number) => (
                   <ul key={i} className={styles.plainUl}>
                     <li>
                       – <strong>{fmt(exp.ex_title)}</strong>
@@ -390,7 +435,7 @@ export default async function SeekerProfilePage({params}:PageProps)
 
               <section className={styles.section}>
                 <h4>Language Proficiency</h4>
-                {profile.languages?.map((exp: any, i: number) => (
+                {profile.languages?.map((exp: Language, i: number) => (
                   <ul key={i} style={{ marginBottom: "1rem" }}>
                     <li>
                       <h4>{fmt(exp.language_type)}</h4>
@@ -413,8 +458,8 @@ export default async function SeekerProfilePage({params}:PageProps)
             <div className={styles.fileGroup}>
               {["transcript", "resume", "portfolio", "certificate"].map(
                 (cat) => {
-                  const files: any[] = (profile.files ?? []).filter(
-                    (f: any) => f.file_category?.toLowerCase() === cat,
+                  const files: FileRecord[] = (profile.files ?? []).filter(
+                    (f: FileRecord) => f.file_category?.toLowerCase() === cat,
                   );
                   return (
                     <div key={cat} className={styles.fileItem}>
@@ -425,10 +470,10 @@ export default async function SeekerProfilePage({params}:PageProps)
                         {files.length === 0 && (
                           <p className={styles.noFile}>No files</p>
                         )}
-                        {files.map((file: any) => {
+                        {files.map((file: FileRecord) => {
                           const shortName =
-                            file.file_name?.length > 15
-                              ? file.file_name.substring(0, 13) + "..."
+                            (file.file_name?.length??0) > 15
+                              ? (file.file_name?? "").substring(0, 13) + "..."
                               : file.file_name || "File";
                           return (
                             <div
@@ -443,8 +488,8 @@ export default async function SeekerProfilePage({params}:PageProps)
                               </div>
                               {/* ── Client Component สำหรับ popup ── */}
                               <FilePreviewButton
-                                filePath={file.file_path}
-                                fileName={file.file_name}
+                                filePath={file.file_path??""}
+                                fileName={file.file_name??""}
                               />
                             </div>
                           );

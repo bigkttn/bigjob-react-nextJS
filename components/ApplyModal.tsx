@@ -80,10 +80,10 @@ ${seekerName}`;
 
     // 1. ค้นหา Job ที่ถูกเลือก
     const selectedJob = companyJobs.find(
-      (job: any) => Number(job.post_id || job.id) === newPostId
+      (job) => Number(job.post_id) === newPostId
     );
 
-    const newTitle = selectedJob?.job_position || (selectedJob as any)?.title || '';
+    const newTitle = selectedJob?.job_position || '';
     setSelectedJobTitle(newTitle);
 
     // 2. ถ้าเป็น Mode Invite ให้อัปเดต Template ข้อความใหม่ทันที
@@ -150,8 +150,9 @@ ${seekerName}`;
         onClose();
         setStatusMsg({ type: '', text: '' });
       }, 1500);
-    } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการส่ง';
+      setStatusMsg({ type: 'error', text: errorMessage });
     } finally {
       setLoading(false);
     }

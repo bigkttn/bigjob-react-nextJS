@@ -12,7 +12,15 @@ interface PageProps{
   params: Promise<{id:string}>;
 }
 
-export default async function SeekerTracking({params}:PageProps) {
+interface Applicant {
+  tracking_id: number;
+  post_id: number;
+  user_id: number;
+  status: string;
+  [key: string]: unknown;
+}
+
+export default async function CompanyTracking({params}:PageProps) {
   const resParams = await params;
   const companyId = resParams.id;
   console.log("companyId",companyId);
@@ -37,7 +45,7 @@ export default async function SeekerTracking({params}:PageProps) {
       </div>
     );
   }
-  let trackingList:any[]=[];
+  let trackingList: Applicant[] = [];
   try {
     const res = await fetch(`${apiUrl}/api/interview_tracking/GetByCompany/${companyId}`, {
       cache: "no-store",
@@ -48,7 +56,7 @@ export default async function SeekerTracking({params}:PageProps) {
 
      const data = await res.json();
     if(res.ok){
-      trackingList = Array.isArray (data)? data: (data.rows || []);
+      trackingList = (Array.isArray(data) ? data : data.rows || []) as Applicant[];
       console.log("data หน้าcompany tracking:",trackingList);
     }
     
