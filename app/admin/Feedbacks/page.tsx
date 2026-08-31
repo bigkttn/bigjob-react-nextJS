@@ -1,9 +1,16 @@
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
 import { IFeedback, ApiResponse } from "@/app/api/admin/feedbacks/route";
 import styles from "./AdminFeedback.module.css";
+import { useRouter } from "next/navigation"; // --- TypeScript Interfaces ---
+
+interface UserPayload {
+  id?: number | string;
+  role?: string;
+  email?: string;
+  [key: string]: unknown;
+}
 
 // แผนผังแสดงประเภทสถานะ (Status Badge Config)
 const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
@@ -25,6 +32,46 @@ export default function AdminFeedbackPage() {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const router = useRouter();
+  const [user, setUser] = useState<UserPayload | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkSessionAndFetch = async () => {
+      try {
+        // 1. เรียก API Route ที่คุณสร้างไว้ (เปลี่ยน Path ให้ตรงกับที่คุณเซ็ตไว้)
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+
+        // 2. ถ้าไม่มี User ล็อกอิน หรือ Role ไม่ใช่ admin ให้ Re-direct ไปหน้าหลัก
+        if (!data.user || data.user.role !== "admin") {
+          router.push("/");
+          return;
+        }
+
+        if (isMounted) {
+          setUser(data.user);
+        }
+
+        // 3. (ถ้ามี) ดึงข้อมูลรายงานต่อ...
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการตรวจสอบ Session:", error);
+        router.push("/");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkSessionAndFetch();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -104,22 +151,22 @@ export default function AdminFeedbackPage() {
 
   const handleDeleteFeedback = async (
     feedback_id: number,
-    source_type: string
+    source_type: string,
   ): Promise<void> => {
     if (!confirm("คุณต้องการลบ Feedback นี้ใช่หรือไม่?")) return;
 
     try {
       const res = await fetch(
         `/api/admin/feedbacks?id=${feedback_id}&type=${source_type}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (res.ok) {
         setFeedbacks((prev) =>
           prev.filter(
             (f) =>
-              !(f.feedback_id === feedback_id && f.source_type === source_type)
-          )
+              !(f.feedback_id === feedback_id && f.source_type === source_type),
+          ),
         );
       } else {
         alert("ลบไม่สำเร็จ");
@@ -237,9 +284,7 @@ export default function AdminFeedbackPage() {
                     {formatDate(item.created_at)}
                   </span>
 
-                  <span
-                    className={`${styles.statusBadge} ${statusInfo.class}`}
-                  >
+                  <span className={`${styles.statusBadge} ${statusInfo.class}`}>
                     <span className={styles.statusDot}></span>
                     {statusInfo.label}
                   </span>
@@ -312,10 +357,7 @@ export default function AdminFeedbackPage() {
                   <button
                     className={styles.removeBtn}
                     onClick={() =>
-                      handleDeleteFeedback(
-                        item.feedback_id,
-                        item.source_type
-                      )
+                      handleDeleteFeedback(item.feedback_id, item.source_type)
                     }
                   >
                     remove

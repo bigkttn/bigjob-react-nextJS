@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./adminCompanyDetail.module.css";
 
@@ -7,31 +8,96 @@ interface Props {
   companyId: string;
 }
 
+interface UserPayload {
+  id?: number | string;
+  role?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+interface CompanyData {
+  company_name?: string;
+  verification_status?: string | null;
+  verification_comment?: string | null;
+  logo_image?: string | null;
+  business_type?: string | null;
+  contact_information?: string | null;
+  mobile_phone?: string | null;
+  company_email?: string | null;
+  full_address?: string | null;
+  province?: string | null;
+  postcode?: string | null;
+  brief_history?: string | null;
+  dbd_file?: string | null;
+}
+
 const AdminCompanyDetail = ({ companyId }: Props) => {
   const router = useRouter();
-  const [company, setCompany] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [company, setCompany] = useState<CompanyData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [acting, setActing] = useState(false);
+  const [acting, setActing] = useState<boolean>(false);
+  const [, setUser] = useState<UserPayload | null>(null);
 
-  const fetchCompany = async () => {
+  // ตรวจสอบ Session ผู้ใช้งาน
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkSessionAndFetch = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+
+        if (!data.user || data.user.role !== "admin") {
+          router.push("/");
+          return;
+        }
+
+        if (isMounted) {
+          setUser(data.user);
+        }
+      } catch (err: unknown) {
+        console.error("เกิดข้อผิดพลาดในการตรวจสอบ Session:", err);
+        router.push("/");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkSessionAndFetch();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  // ดึงข้อมูลบริษัทด้วย useCallback
+  const fetchCompany = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`/api/company/getCompanyById/${companyId}`);
       const data = await res.json();
-      if (res.ok) setCompany(data.company);
-      else setError(data.error || "Failed to fetch company");
-    } catch (err: any) {
-      setError(err.message);
+      if (res.ok) {
+        setCompany(data.company);
+      } else {
+        setError(data.error || "Failed to fetch company");
+      }
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการโหลดข้อมูล";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [companyId]);
 
   useEffect(() => {
     fetchCompany();
-  }, [companyId]);
+  }, [fetchCompany]);
 
+  // จัดการการอนุมัติ
   const handleApprove = async () => {
     if (!confirm("ยืนยันอนุมัติบริษัทนี้?")) return;
     try {
@@ -43,18 +109,21 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
       });
       if (res.ok) {
         alert("อนุมัติเรียบร้อยแล้ว");
-        fetchCompany();
+        await fetchCompany();
       } else {
         const data = await res.json();
         alert(data.error || "ไม่สามารถอนุมัติได้");
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
+      alert(errorMessage);
     } finally {
       setActing(false);
     }
   };
 
+  // จัดการการปฏิเสธ
   const handleReject = async () => {
     const comment = prompt("ระบุเหตุผลที่ปฏิเสธบริษัทนี้:");
     if (!comment) return;
@@ -70,13 +139,15 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
       });
       if (res.ok) {
         alert("ปฏิเสธเรียบร้อยแล้ว");
-        fetchCompany();
+        await fetchCompany();
       } else {
         const data = await res.json();
         alert(data.error || "ไม่สามารถปฏิเสธได้");
       }
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
+      alert(errorMessage);
     } finally {
       setActing(false);
     }
@@ -86,10 +157,10 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
   if (error) return <p style={{ padding: 30 }}>Error: {error}</p>;
   if (!company) return <p style={{ padding: 30 }}>No company data</p>;
 
-  const fmt = (val: any) =>
+  const fmt = (val: unknown): string =>
     val !== null && val !== undefined && val !== "" ? String(val) : "-";
 
-  const status = company.verification_status as string | null;
+  const status = company.verification_status ?? null;
   const statusColor =
     status === "Approved"
       ? "#1a8a2a"
@@ -103,9 +174,10 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   return (
     <div className={styles.container}>
-      {/* 🟢 ปุ่มย้อนกลับรูปแบบใหม่สไตล์โมเดิร์น */}
+      {/* 🟢 ปุ่มย้อนกลับ */}
       <div className={styles.topBar}>
         <button
+          type="button"
           className={styles.backButtonCustom}
           onClick={() => router.push("/admin/home")}
         >
@@ -119,8 +191,8 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
           </svg>
           <span>กลับหน้ารายการ</span>
         </button>
@@ -176,7 +248,11 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         {!company.dbd_file ? (
           <p style={{ color: "#888" }}>บริษัทนี้ยังไม่ได้อัปโหลดไฟล์</p>
         ) : isPdf ? (
-          <iframe src={company.dbd_file} className={styles.filePreview} />
+          <iframe
+            src={company.dbd_file}
+            title="หนังสือรับรองบริษัท"
+            className={styles.filePreview}
+          />
         ) : (
           <img
             src={company.dbd_file}
@@ -185,9 +261,10 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
           />
         )}
 
-        {/* 🟢 ส่วนปุ่มกดที่จัดระเบียบให้แสดงผลชัดเจนขึ้น */}
+        {/* 🟢 ปุ่มอนุมัติ / ปฏิเสธ */}
         <div className={styles.actionRow}>
           <button
+            type="button"
             className={`${styles.btn} ${styles.approve}`}
             onClick={handleApprove}
             disabled={acting || status === "Approved"}
@@ -195,6 +272,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             Approve อนุมัติ
           </button>
           <button
+            type="button"
             className={`${styles.btn} ${styles.reject}`}
             onClick={handleReject}
             disabled={acting || status === "Rejected"}

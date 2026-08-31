@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 const secret = process.env.JWT_SECRET || 'fallback_secret';
 
 // ฟังก์ชันสำหรับสร้าง Session และบันทึกลง Cookie
-export async function createSession(payload: any) {
+export async function createSession(payload: Record<string, unknown>) {
     //  สร้าง Token มีอายุ 1 วัน
     const token = jwt.sign(payload, secret, { expiresIn: '1d' });
 

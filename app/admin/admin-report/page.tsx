@@ -1,125 +1,207 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./adminReport.module.css";
+import { useRouter } from "next/navigation"; // --- TypeScript Interfaces ---
+interface RawReportApiItem {
+  reporter_name?: string;
+  reporter_id: number;
+  reporter_role: string;
+  report_type: string;
+  description: string;
+  target_name?: string;
+  target_id: number;
+  source: string;
+  report_date: string;
+  status: number;
+}
+
+interface ReportItem {
+  id: number;
+  reporter: string;
+  reporterId: number;
+  reporterRole: string;
+  reportType: string;
+  details: string;
+  target: string;
+  targetId: number;
+  source: string;
+  rawDate: number;
+  date: string;
+  status: string;
+  statusClass: string;
+}
+
+// กำหนด Type ของ User ให้ชัดเจน (ไม่ต้องใช้ any)
+interface UserPayload {
+  id?: number | string;
+  role?: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
+// --- Helper Functions (วางไว้นอก Component เพื่อป้องกัน react-hooks/exhaustive-deps) ---
+const getStatusText = (statusCode: number): string => {
+  switch (statusCode) {
+    case 1:
+      return "ระงับการใช้งาน";
+    case 2:
+      return "ตักเตือน";
+    case 0:
+    default:
+      return "รอดำเนินการ";
+  }
+};
+
+const getStatusClass = (statusCode: number): string => {
+  switch (statusCode) {
+    case 1:
+      return styles.suspend;
+    case 2:
+      return styles.warn;
+    case 0:
+    default:
+      return styles.review;
+  }
+};
+
+const getReportTypeText = (type: string): string => {
+  switch (type) {
+    case "identity_fraud":
+      return "ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง";
+    case "job_no_show":
+      return "งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์";
+    case "harassment_to_staff":
+      return "ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง";
+    case "other":
+      return "อื่นๆ (ระบุในรายละเอียด)";
+    default:
+      return type || "-";
+  }
+};
+
+const getTargetLink = (source: string, targetId: number): string => {
+  switch (source) {
+    case "company":
+      return `/user/userProfileCompany/${targetId}`;
+    case "post":
+      return `/user/user-detail-job/${targetId}`;
+    case "user":
+      return `/company/seeker-profile/${targetId}`;
+    default:
+      return "#";
+  }
+};
+
+const getReportLink = (role: string, reporterId: number): string => {
+  if (!reporterId) return "#";
+  switch (role) {
+    case "company":
+      return `/user/userProfileCompany/${reporterId}`;
+    case "user":
+      return `/company/seeker-profile/${reporterId}`;
+    default:
+      return "#";
+  }
+};
 
 const AdminReportPage = () => {
-  const [reportData, setReportData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [reportData, setReportData] = useState<ReportItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // States สำหรับตัวกรอง (คง value ภาษาอังกฤษดั้งเดิมไว้)
-  const [filterAccountType, setFilterAccountType] = useState("ทั้งหมด");
-  const [filterStatus, setFilterStatus] = useState("ทั้งหมด");
-  const [sortOrder, setSortOrder] = useState("desc");
+  // States สำหรับตัวกรอง
+  const [filterAccountType, setFilterAccountType] = useState<string>("ทั้งหมด");
+  const [filterStatus, setFilterStatus] = useState<string>("ทั้งหมด");
+  const [sortOrder, setSortOrder] = useState<string>("desc");
 
-  // แปลงสถานะรายการจาก DB เป็นภาษาไทยเพื่อแสดงผลบน UI
-  const getStatusText = (statusCode: any) => {
-    switch (statusCode) {
-      case 1:
-        return "ระงับการใช้งาน";
-      case 2:
-        return "ตักเตือน";
-      case 0:
-      default:
-        return "รอดำเนินการ";
-    }
-  };
-
-  // ดึง Class CSS สำหรับสีปุ่มสถานะตามรหัส
-  const getStatusClass = (statusCode: any) => {
-    switch (statusCode) {
-      case 1:
-        return styles.suspend;
-      case 2:
-        return styles.warn;
-      case 0:
-      default:
-        return styles.review;
-    }
-  };
-
-  // แปลงหัวข้อประเภทการรายงานเป็นภาษาไทย
-  const getReportTypeText = (type: string) => {
-    switch (type) {
-      case "identity_fraud":
-        return "ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง";
-      case "job_no_show":
-        return "งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์";
-      case "harassment_to_staff":
-        return "ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง";
-      case "other":
-        return "อื่นๆ (ระบุในรายละเอียด)";
-      default:
-        return type || "-";
-    }
-  };
-
-  const getTargetLink = (source: string, targetId: number) => {
-    switch (source) {
-      case "company":
-        return `/user/userProfileCompany/${targetId}`;
-      case "post":
-        return `/user/user-detail-job/${targetId}`;
-      case "user":
-        return `/company/seeker-profile/${targetId}`;
-      default:
-        return "#";
-    }
-  };
-
-  const getReportLink = (role: string, reporterId: number) => {
-    if (!reporterId) return "#";
-    switch (role) {
-      case "company":
-        return `/user/userProfileCompany/${reporterId}`;
-      case "user":
-        return `/company/seeker-profile/${reporterId}`;
-      default:
-        return "#";
-    }
-  };
+  const router = useRouter();
+  const [user, setUser] = useState<UserPayload | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const checkSessionAndFetch = async () => {
+      try {
+        // 1. เรียก API Route ที่คุณสร้างไว้ (เปลี่ยน Path ให้ตรงกับที่คุณเซ็ตไว้)
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+
+        // 2. ถ้าไม่มี User ล็อกอิน หรือ Role ไม่ใช่ admin ให้ Re-direct ไปหน้าหลัก
+        if (!data.user || data.user.role !== "admin") {
+          router.push("/");
+          return;
+        }
+
+        if (isMounted) {
+          setUser(data.user);
+        }
+
+        // 3. (ถ้ามี) ดึงข้อมูลรายงานต่อ...
+      } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการตรวจสอบ Session:", error);
+        router.push("/");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkSessionAndFetch();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  useEffect(() => {
+    let isMounted = true;
+
     const fetchReports = async () => {
       try {
         const response = await fetch("/api/admin/reports");
         const result = await response.json();
 
-        if (response.ok) {
-          const formattedData = result.data.map((item: any, index: number) => ({
-            id: index + 1,
-            reporter: item.reporter_name || "ไม่ทราบชื่อ",
-            reporterId: item.reporter_id,
-            reporterRole: item.reporter_role,
-            reportType: getReportTypeText(item.report_type),
-            details: item.description,
-            target: item.target_name || "ไม่ทราบข้อมูล",
-            targetId: item.target_id,
-            source: item.source,
-            rawDate: new Date(item.report_date).getTime(),
-            date: new Date(item.report_date).toLocaleDateString("th-TH", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
+        if (response.ok && isMounted) {
+          const formattedData: ReportItem[] = result.data.map(
+            (item: RawReportApiItem, index: number) => ({
+              id: index + 1,
+              reporter: item.reporter_name || "ไม่ทราบชื่อ",
+              reporterId: item.reporter_id,
+              reporterRole: item.reporter_role,
+              reportType: getReportTypeText(item.report_type),
+              details: item.description,
+              target: item.target_name || "ไม่ทราบข้อมูล",
+              targetId: item.target_id,
+              source: item.source,
+              rawDate: new Date(item.report_date).getTime(),
+              date: new Date(item.report_date).toLocaleDateString("th-TH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              }),
+              status: getStatusText(item.status),
+              statusClass: getStatusClass(item.status),
             }),
-            status: getStatusText(item.status),
-            statusClass: getStatusClass(item.status),
-          }));
+          );
           setReportData(formattedData);
-        } else {
+        } else if (!response.ok) {
           console.error(result.message);
         }
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchReports();
-  }, []);
+    if (!loading) {
+      fetchReports();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loading]);
 
   const filteredAndSortedData = reportData
     .filter((report) => {
@@ -137,9 +219,8 @@ const AdminReportPage = () => {
     .sort((a, b) => {
       if (sortOrder === "desc") {
         return b.rawDate - a.rawDate;
-      } else {
-        return a.rawDate - b.rawDate;
       }
+      return a.rawDate - b.rawDate;
     });
 
   if (loading) return <div>กำลังโหลดข้อมูลการรายงาน...</div>;
@@ -173,9 +254,9 @@ const AdminReportPage = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
             >
               <option value="ทั้งหมด">ทั้งหมด</option>
-              <option value="Review">รอดำเนินการ</option>
-              <option value="Warn">ตักเตือน</option>
-              <option value="Suspend">ระงับการใช้งาน</option>
+              <option value="รอดำเนินการ">รอดำเนินการ</option>
+              <option value="ตักเตือน">ตักเตือน</option>
+              <option value="ระงับการใช้งาน">ระงับการใช้งาน</option>
             </select>
           </div>
 
@@ -243,6 +324,7 @@ const AdminReportPage = () => {
 
                 <div className={styles.cell}>
                   <button
+                    type="button"
                     className={`${styles.statusBtn} ${report.statusClass}`}
                   >
                     {report.status}
@@ -258,4 +340,3 @@ const AdminReportPage = () => {
 };
 
 export default AdminReportPage;
-
