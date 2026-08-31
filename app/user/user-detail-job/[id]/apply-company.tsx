@@ -16,7 +16,9 @@ interface ApplyCompanyProps {
   seekerName: string,
   jobTitle: string,
   seekerEmail: string,
-  companyEmail: string
+  companyEmail: string,
+  existingPostIds?: number[];
+  
 }
 
 export default function ApplyCompany({
@@ -42,8 +44,7 @@ export default function ApplyCompany({
   //   userId,
   //   companyId,
   // });
-
-
+  
   const checkApplied = async () => {
     if(!userId || !postId) return;
     try {
@@ -118,12 +119,14 @@ export default function ApplyCompany({
         onClose={handleCloseModal}
         postId={Number(postId)}
         userId={userId}
+        companyId={companyId}
         companyName={companyName}
         seekerName={seekerName}
         jobTitle={jobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
         companyJobs={[]}
+        existingPostIds={[]}
       />
 
       

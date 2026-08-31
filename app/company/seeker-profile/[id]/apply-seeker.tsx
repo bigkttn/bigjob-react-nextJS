@@ -21,6 +21,7 @@ interface ContactModalProps {
   seekerEmail: string;
   companyEmail: string;
   companyJobs?: CompanyJob[];
+  existingPostIds?: number[];
 }
 
 export default function ApplySeeker({
@@ -34,10 +35,13 @@ export default function ApplySeeker({
   seekerEmail,
   companyEmail,
   companyJobs = [],
+  existingPostIds: initialExistingPostIds = [],
 }: ContactModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isActioned, setIsActioned] = useState(false);
-  const [existingPostIds, setExistingPostIds] = useState<number[]>([]);
+  const [existingPostIds, setExistingPostIds] = useState<number[]>(
+    initialExistingPostIds.map((id) => Number(id))
+  );
 
   const checkStatus = useCallback(async () => {
     if (!userId) return;
@@ -49,9 +53,8 @@ export default function ApplySeeker({
         cache: 'no-store',
         body: JSON.stringify({
           user_id: Number(userId),
-          post_id: postId ? Number(postId) : undefined,
           company_id: Number(companyId),
-          role: mode === 'apply' ? 'seeker' : 'company',
+          post_id: postId ? Number(postId) : undefined,
         }),
       });
 
@@ -63,13 +66,23 @@ export default function ApplySeeker({
       const data = await response.json();
 
       if (data.exists && Array.isArray(data.rows)) {
-        // เก็บรายชื่อ post_id ทั้งหมดที่เคยมีการสร้าง record ไว้อยู่แล้ว
-        const takenPostIds = data.rows.map((item: { post_id: number | string }) => Number(item.post_id));
+        // ดึงรายการ post_id ทั้งหมดที่เคยมีการติดต่อกันแล้ว
+        const takenPostIds = data.rows.map((item: { post_id: number | string }) =>
+          Number(item.post_id)
+        );
         setExistingPostIds(takenPostIds);
 
-        // เช็กว่า postId ปัจจุบัน ถูกใช้ไปแล้วหรือยัง
-        if (postId && takenPostIds.includes(Number(postId))) {
-          setIsActioned(true);
+        // คำนวณหาตำแหน่งที่บริษัทยังไม่เคยเชิญ
+        const remainingJobs = companyJobs.filter(
+          (job) => !takenPostIds.includes(Number(job.post_id))
+        );
+
+        if (postId) {
+          // หากดูเจาะจงเฉพาะตำแหน่ง
+          setIsActioned(takenPostIds.includes(Number(postId)));
+        } else if (mode === 'invite' && companyJobs.length > 0) {
+          // ปุ่มด้านนอกกลายเป็นสีเทา (isActioned = true) เมื่อเชิญครบทุกตำแหน่งที่มีแล้วเท่านั้น
+          setIsActioned(remainingJobs.length === 0);
         } else {
           setIsActioned(false);
         }
@@ -81,7 +94,7 @@ export default function ApplySeeker({
       console.error('Error in checkStatus:', error);
       setIsActioned(false);
     }
-  }, [userId, postId, companyId, mode]);
+  }, [userId, postId, companyId, mode, companyJobs]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -89,23 +102,11 @@ export default function ApplySeeker({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [userId, postId, checkStatus]);
+  }, [checkStatus]);
 
   const handleCloseModal = () => {
     void checkStatus();
     setIsModalOpen(false);
-  };
-
-  // กรองเฉพาะตำแหน่งงานที่ยังไม่เคยสมัคร/เชิญ ส่งไปให้ Modal เลือก
-  const availableCompanyJobs = companyJobs.filter(
-    (job) => !existingPostIds.includes(Number(job.post_id))
-  );
-
-  const getButtonText = () => {
-    if (mode === 'apply') {
-      return isActioned ? 'สมัครแล้ว' : 'สมัครงาน';
-    }
-    return isActioned ? 'เชิญแล้ว' : 'เชิญสัมภาษณ์';
   };
 
   return (
@@ -116,10 +117,15 @@ export default function ApplySeeker({
           className={`${styles.applyBtn} ${isActioned ? styles.invitedBtn : ''}`}
           disabled={isActioned}
         >
-          {getButtonText()}
+          {isActioned ? (
+            'เชิญแล้ว'
+          ) : (
+            <span className="text-md font-medium whitespace-nowrap">เชิญสัมภาษณ์</span>
+          )}
         </button>
       </div>
 
+      {/* 🟢 ส่ง companyJobs ทั้งหมด และเพิ่ม existingPostIds เข้าไปใน Modal */}
       <ApplyModal
         mode={mode}
         isOpen={isModalOpen}
@@ -132,7 +138,8 @@ export default function ApplySeeker({
         jobTitle={jobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
-        companyJobs={availableCompanyJobs} // ส่งเฉพาะตำแหน่งที่ยังไม่ได้กด
+        companyJobs={companyJobs}
+        existingPostIds={existingPostIds}
       />
     </main>
   );

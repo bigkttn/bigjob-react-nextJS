@@ -21,6 +21,7 @@ interface ContactModalProps {
   companyEmail: string;
   jobTitle?: string;
   companyJobs: jobOption[];
+  existingPostIds?: number[];
 }
 
 export default function ApplyModal({
@@ -35,6 +36,7 @@ export default function ApplyModal({
   seekerEmail,
   companyEmail,
   companyJobs = [],
+  existingPostIds = [],
 }: ContactModalProps) {
   const [selectedPostId, setSelectedPostId] = useState<number | undefined>(postId);
   const [selectedJobTitle, setSelectedJobTitle] = useState<string>(jobTitle || '');
@@ -43,8 +45,12 @@ export default function ApplyModal({
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
   // const indent = "\u00A0".repeat(109);
-
-  // 🟢 ฟังก์ชันสร้าง Template ข้อความ
+  
+// 🟢 เช็กโดยแปลงค่าใน existingPostIds เป็น Number ทุกตัวก่อนเปรียบเทียบ
+const isSelectedJobTaken = selectedPostId !== undefined && selectedPostId !== null
+  ? existingPostIds.map(id => Number(id)).includes(Number(selectedPostId))
+  : false;
+  
   const generateMessage = (currentJobTitle: string) => {
     if (mode === 'apply') {
       return `เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName}
@@ -225,12 +231,18 @@ ${seekerName}`;
               ยกเลิก
             </button>
             <button
-              type="submit"
-              disabled={loading}
-              className={styles.btnSubmit}
-            >
-              {loading ? 'กำลังส่ง...' : mode === 'apply' ? 'ส่งใบสมัคร' : 'ส่งข้อความ'}
-            </button>
+  type="submit"
+  disabled={loading || isSelectedJobTaken}
+  className={`${styles.btnSubmit} ${isSelectedJobTaken ? styles.btnDisabled : ''}`}
+>
+  {loading
+    ? 'กำลังส่ง...'
+    : isSelectedJobTaken
+    ? 'ส่งแล้ว'
+    : mode === 'apply'
+    ? 'ส่งใบสมัคร'
+    : 'ส่งข้อความ'}
+</button>
           </div>
         </form>
       </div>
