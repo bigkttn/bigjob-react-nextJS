@@ -41,9 +41,9 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         const data = await res.json();
         // console.log("data in page:", data);
         setCompanyData(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Fetch Error:", err);
-        setError(err.message || "Something went wrong");
+        setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
         setLoading(false);
       }

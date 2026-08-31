@@ -16,6 +16,26 @@ interface CustomJwtPayload extends JwtPayload {
   email?: string;
 }
 
+interface JobPost {
+  post_id?: number;
+  job_position?: string;
+  company_id?: number;
+  company_name?: string;
+  province?: string;
+  work_location?: string;
+  salary_min?: number;
+  salary_max?: number;
+  age_min?: number;
+  age_max?: number;
+  job_type?: string;
+  vacancy?: number;
+  job_description?: string;
+  logo_image?: string;
+  status?: string;
+  ban_until?: string;
+  [key: string]: unknown;
+}
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -45,55 +65,63 @@ export default async function DetailJob({ params }: PageProps) {
     );
   }
 
-let seekerName = viewer?.fullname || "";
-let seekerEmail = viewer?.email || "";
+  let seekerName = viewer?.fullname || "";
+  let seekerEmail = viewer?.email || "";
 
-// const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  // const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-if (viewer?.id) {
-  // console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
+  if (viewer?.id) {
+    // console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
 
-  try {
-    const seekerRes = await fetch(`${apiUrl}/api/user/getUserById/${viewer.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
+    try {
+      const seekerRes = await fetch(
+        `${apiUrl}/api/user/getUserById/${viewer.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        },
+      );
 
-    if (seekerRes.ok) {
-      const responseData = await seekerRes.json();
-      const seekerData = responseData?.user || responseData?.data || responseData;
+      if (seekerRes.ok) {
+        const responseData = await seekerRes.json();
+        const seekerData =
+          responseData?.user || responseData?.data || responseData;
 
-      seekerEmail = seekerData?.email || seekerEmail;
-      seekerName = seekerData?.fullname || seekerName;
+        seekerEmail = seekerData?.email || seekerEmail;
+        seekerName = seekerData?.fullname || seekerName;
 
-      // console.log(seekerEmail+ seekerName+"ok naka ");
-    } else {
-      // ปรับเปลี่ยนจาก console.error เป็น warning หรือใช้ค่า fallback จาก JWT
-      console.warn(`User profile not found in DB (Status ${seekerRes.status}). Using JWT fallback info.`);
+        // console.log(seekerEmail+ seekerName+"ok naka ");
+      } else {
+        // ปรับเปลี่ยนจาก console.error เป็น warning หรือใช้ค่า fallback จาก JWT
+        console.warn(
+          `User profile not found in DB (Status ${seekerRes.status}). Using JWT fallback info.`,
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching seeker profile:", error);
     }
-  } catch (error) {
-    console.error("Error fetching seeker profile:", error);
   }
-}
 
-
-// ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default ป้องกัน string ว่าง
-seekerEmail = seekerEmail || "invalid seeker email";
-seekerName = seekerName || "invalid seeker name";
+  // ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default ป้องกัน string ว่าง
+  seekerEmail = seekerEmail || "invalid seeker email";
+  seekerName = seekerName || "invalid seeker name";
 
   // เช็กว่าเป็น admin หรือ superadmin
   const isAdmin = viewer.role === "admin" || viewer.role === "superadmin";
 
   // 3. Fetch ข้อมูล Job Post
-  let job: any = null;
+  let job: JobPost | null = null;
 
   try {
-    const jobResponse = await fetch(`${apiUrl}/api/posts/getPostById/${postId}`, {
-      cache: "no-store",
-    });
+    const jobResponse = await fetch(
+      `${apiUrl}/api/posts/getPostById/${postId}`,
+      {
+        cache: "no-store",
+      },
+    );
 
     if (jobResponse.ok) {
       const contentType = jobResponse.headers.get("content-type");
@@ -101,7 +129,10 @@ seekerName = seekerName || "invalid seeker name";
         job = await jobResponse.json();
       } else {
         const textError = await jobResponse.text();
-        console.error("API did not return JSON. Received:", textError.substring(0, 200));
+        console.error(
+          "API did not return JSON. Received:",
+          textError.substring(0, 200),
+        );
       }
     } else {
       console.error(`Failed to fetch job. Status: ${jobResponse.status}`);
@@ -114,11 +145,19 @@ seekerName = seekerName || "invalid seeker name";
   let companyEmail = "";
   if (job?.company_id) {
     try {
-      const companyResponse = await fetch(`${apiUrl}/api/company/getCompanyById/${job.company_id}`, {
-        cache: "no-store",
-      });
+      const companyResponse = await fetch(
+        `${apiUrl}/api/company/getCompanyById/${job.company_id}`,
+        {
+          cache: "no-store",
+        },
+      );
 
-      if (companyResponse.ok && companyResponse.headers.get("content-type")?.includes("application/json")) {
+      if (
+        companyResponse.ok &&
+        companyResponse.headers
+          .get("content-type")
+          ?.includes("application/json")
+      ) {
         const responseData = await companyResponse.json();
         const companyData = responseData.company || responseData;
         companyEmail = companyData?.company_email || "";
@@ -134,7 +173,9 @@ seekerName = seekerName || "invalid seeker name";
       <div className={styles.container}>
         <div className={styles.card}>
           <BackButton />
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}>
+          <div
+            style={{ textAlign: "center", padding: "40px 0", color: "#dc3545" }}
+          >
             <h3>ไม่พบข้อมูลงาน หรือเกิดข้อผิดพลาดในการเชื่อมต่อระบบ</h3>
             <p style={{ color: "#666", fontSize: "0.9rem", marginTop: "8px" }}>
               โปรดตรวจสอบความถูกต้องของ URL หรือสถานะของเซิร์ฟเวอร์ API
@@ -187,7 +228,9 @@ seekerName = seekerName || "invalid seeker name";
             seekerName={seekerName || "invalid seeker Name"}
             jobTitle={job.job_position || "invalid jobTitle"}
             seekerEmail={seekerEmail || "invalid seeker Email"}
-            companyEmail={companyEmail || viewer.email || "invalid companyEmail"}
+            companyEmail={
+              companyEmail || viewer.email || "invalid companyEmail"
+            }
           />
 
           <div className={styles.header}>
@@ -203,12 +246,17 @@ seekerName = seekerName || "invalid seeker name";
                 }}
               >
                 <img
-                  src={job.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`}
+                  src={
+                    job.logo_image ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
+                  }
                   alt="Company Logo"
                   className={styles.logo}
                 />
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <h1 className={styles.companyName}>
                     {job.company_name || "Company Name"}
                   </h1>
@@ -220,7 +268,7 @@ seekerName = seekerName || "invalid seeker name";
                       fontSize: "0.85rem",
                       fontWeight: "bold",
                       border: "1px solid currentColor",
-                      ...getStatusStyle(job.status),
+                      ...getStatusStyle(job.status || ""),
                     }}
                   >
                     {job.status || "ไม่ระบุสถานะ"}
@@ -237,8 +285,8 @@ seekerName = seekerName || "invalid seeker name";
               <AdminButton
                 id={String(viewer?.id || "")}
                 role={viewer?.role || ""}
-                post_id={job.post_id}
-                company_id={job.company_id}
+                post_id={String(job.post_id || "")}
+                company_id={String(job.company_id || "")}
                 ban_until={job.ban_until}
               />
             )}
@@ -260,16 +308,21 @@ seekerName = seekerName || "invalid seeker name";
                   </tr>
                   <tr>
                     <td className={styles.label}>Work Location</td>
-                    <td    style={{
-                      maxWidth: "450px",
-                      whiteSpace: "pre-line",
-                      wordBreak: "break-word",
-                    }}>{job.work_location || "Work Location"}</td>
+                    <td
+                      style={{
+                        maxWidth: "450px",
+                        whiteSpace: "pre-line",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {job.work_location || "Work Location"}
+                    </td>
                   </tr>
                   <tr>
                     <td className={styles.label}>Salary</td>
                     <td>
-                      {job.salary_min || "Salary"} - {job.salary_max || "Salary"} บาท
+                      {job.salary_min || "Salary"} -{" "}
+                      {job.salary_max || "Salary"} บาท
                     </td>
                   </tr>
                   <tr>
@@ -316,7 +369,9 @@ seekerName = seekerName || "invalid seeker name";
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.preferred_qualifications || "No qualifications specified"}
+                    {typeof job.preferred_qualifications === "string"
+                      ? job.preferred_qualifications
+                      : "No qualifications specified"}
                   </li>
                 </ol>
               </div>
@@ -334,7 +389,9 @@ seekerName = seekerName || "invalid seeker name";
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.Benefits || "No benefits specified"}
+                    {typeof job.Benefits === "string"
+                      ? job.Benefits
+                      : "No benefits specified"}
                   </li>
                 </ul>
               </section>
@@ -350,7 +407,9 @@ seekerName = seekerName || "invalid seeker name";
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.how_to_apply || "No application instructions specified"}
+                    {typeof job.how_to_apply === "string"
+                      ? job.how_to_apply
+                      : "No application instructions specified"}
                   </li>
                 </ul>
               </section>
@@ -366,7 +425,9 @@ seekerName = seekerName || "invalid seeker name";
                       wordBreak: "break-word",
                     }}
                   >
-                    {job.contact || "No contact information specified"}
+                    {typeof job.contact === "string"
+                      ? job.contact
+                      : "No contact information specified"}
                   </li>
                 </ul>
               </section>
@@ -399,7 +460,9 @@ seekerName = seekerName || "invalid seeker name";
                     }}
                   >
                     {job.application_dates
-                      ? new Date(job.application_dates).toLocaleDateString("th-TH", {
+                      ? new Date(
+                          job.application_dates as string | number,
+                        ).toLocaleDateString("th-TH", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",

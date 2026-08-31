@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./seekerProfile.module.css";
 import {
   ref,
@@ -10,144 +10,842 @@ import {
 import { storage } from "@/lib/firebase";
 import ProvinceSelect from "./province";
 import LevelSelect from "./levelSelect";
+import CountrySelect from "./CountrySelect";
+
+/* ================= 1) Type ที่ใช้ในหน้าจอ ================= */
+
+interface JobTitle {
+  job_id?: number;
+  job_name: string;
+}
+
+interface Skill {
+  skill_id?: number;
+  skill_name: string;
+  skill_category: string;
+  skill_detail: string;
+}
+
+interface Typing {
+  typing_id?: number;
+  typing_language: string;
+  typing_wpm: string;
+}
+
+interface Education {
+  education_id?: number;
+  level: string;
+  major: string;
+  institution: string;
+  faculty: string;
+  year_start: string;
+  year_end: string;
+}
+
+interface Experience {
+  ex_id?: number;
+  ex_title: string;
+  ex_description: string;
+  type: string;
+  start_date: string;
+  end_date: string;
+}
+
+interface Language {
+  language_id?: number;
+  language_type: string;
+  level: string;
+  test_name: string;
+  score: string;
+}
+
+interface FileRecord {
+  file_id: number;
+  file_path: string;
+  file_name: string;
+  file_type: string;
+  file_category: string;
+}
+
+interface UserProfile {
+  id: string;
+  fullname: string;
+  email: string;
+  profile_image: string;
+  is_visible: number;
+  type_of_work: string;
+  gender: string;
+  military_status: string;
+  date_of_birth: string;
+  nationality: string;
+  religion: string;
+  weight: string;
+  height: string;
+  disability_status: string;
+  marital_status: string;
+  mobile_phone: string;
+  line_id: string;
+  country: string;
+  province: string;
+  district: string;
+  sub_district: string;
+  desired_salary: string;
+  job_titles: JobTitle[];
+  skills: Skill[];
+  typing_speeds: Typing[];
+  educations: Education[];
+  experiences: Experience[];
+  languages: Language[];
+  files: FileRecord[];
+}
+
+/* ================= 2) Type ของข้อมูลที่ API ส่งมา ================= */
+
+interface ApiProfile {
+  id?: string | number;
+  fullname?: string | null;
+  email?: string | null;
+  profile_image?: string | null;
+  is_visible?: number | null;
+  type_of_work?: string | null;
+  gender?: string | null;
+  military_status?: string | null;
+  date_of_birth?: string | null;
+  nationality?: string | null;
+  religion?: string | null;
+  weight?: string | number | null;
+  height?: string | number | null;
+  disability_status?: string | null;
+  marital_status?: string | null;
+  mobile_phone?: string | null;
+  line_id?: string | null;
+  country?: string | null;
+  province?: string | null;
+  district?: string | null;
+  sub_district?: string | null;
+  desired_salary?: string | number | null;
+  job_titles?: { job_id?: number; job_name?: string | null }[] | null;
+  skills?:
+    | {
+        skill_id?: number;
+        skill_name?: string | null;
+        skill_category?: string | null;
+        skill_detail?: string | null;
+      }[]
+    | null;
+  typing_speeds?:
+    | {
+        typing_id?: number;
+        typing_language?: string | null;
+        typing_wpm?: string | number | null;
+      }[]
+    | null;
+  educations?:
+    | {
+        education_id?: number;
+        level?: string | null;
+        major?: string | null;
+        institution?: string | null;
+        faculty?: string | null;
+        year_start?: string | number | null;
+        year_end?: string | number | null;
+      }[]
+    | null;
+  experiences?:
+    | {
+        ex_id?: number;
+        ex_title?: string | null;
+        ex_description?: string | null;
+        type?: string | null;
+        start_date?: string | null;
+        end_date?: string | null;
+      }[]
+    | null;
+  languages?:
+    | {
+        language_id?: number;
+        language_type?: string | null;
+        level?: string | null;
+        test_name?: string | null;
+        score?: string | number | null;
+      }[]
+    | null;
+  files?:
+    | {
+        file_id?: number;
+        file_path?: string | null;
+        file_name?: string | null;
+        file_type?: string | null;
+        file_category?: string | null;
+      }[]
+    | null;
+}
+
+/* ================= 3) ฟังก์ชันช่วยพื้นฐาน ================= */
+
+function toText(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function show(value: string): string {
+  return value === "" ? "-" : value;
+}
+
+function showDate(value: string): string {
+  if (value === "") return "-";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function toDateInput(value: string): string {
+  if (value === "") return "";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().substring(0, 10);
+}
+
+function getErrorText(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return "เกิดข้อผิดพลาด";
+}
+
+function openFilePicker(inputId: string) {
+  const input = document.getElementById(inputId);
+  if (input) input.click();
+}
+
+function cleanProfile(data: ApiProfile): UserProfile {
+  return {
+    id: toText(data.id),
+    fullname: toText(data.fullname),
+    email: toText(data.email),
+    profile_image: toText(data.profile_image),
+    is_visible: data.is_visible === 1 ? 1 : 0,
+    type_of_work: toText(data.type_of_work),
+    gender: toText(data.gender),
+    military_status: toText(data.military_status),
+    date_of_birth: toText(data.date_of_birth),
+    nationality: toText(data.nationality),
+    religion: toText(data.religion),
+    weight: toText(data.weight),
+    height: toText(data.height),
+    disability_status: toText(data.disability_status),
+    marital_status: toText(data.marital_status),
+    mobile_phone: toText(data.mobile_phone),
+    line_id: toText(data.line_id),
+    country: toText(data.country),
+    province: toText(data.province),
+    district: toText(data.district),
+    sub_district: toText(data.sub_district),
+    desired_salary: toText(data.desired_salary),
+
+    job_titles: (data.job_titles ?? []).map((item) => ({
+      job_id: item.job_id,
+      job_name: toText(item.job_name),
+    })),
+
+    skills: (data.skills ?? []).map((item) => ({
+      skill_id: item.skill_id,
+      skill_name: toText(item.skill_name),
+      skill_category: toText(item.skill_category),
+      skill_detail: toText(item.skill_detail),
+    })),
+
+    typing_speeds: (data.typing_speeds ?? []).map((item) => ({
+      typing_id: item.typing_id,
+      typing_language: toText(item.typing_language),
+      typing_wpm: toText(item.typing_wpm),
+    })),
+
+    educations: (data.educations ?? []).map((item) => ({
+      education_id: item.education_id,
+      level: toText(item.level),
+      major: toText(item.major),
+      institution: toText(item.institution),
+      faculty: toText(item.faculty),
+      year_start: toText(item.year_start),
+      year_end: toText(item.year_end),
+    })),
+
+    experiences: (data.experiences ?? []).map((item) => ({
+      ex_id: item.ex_id,
+      ex_title: toText(item.ex_title),
+      ex_description: toText(item.ex_description),
+      type: toText(item.type),
+      start_date: toText(item.start_date),
+      end_date: toText(item.end_date),
+    })),
+
+    languages: (data.languages ?? []).map((item) => ({
+      language_id: item.language_id,
+      language_type: toText(item.language_type),
+      level: toText(item.level),
+      test_name: toText(item.test_name),
+      score: toText(item.score),
+    })),
+
+    files: (data.files ?? []).map((item) => ({
+      file_id: item.file_id ?? 0,
+      file_path: toText(item.file_path),
+      file_name: toText(item.file_name),
+      file_type: toText(item.file_type),
+      file_category: toText(item.file_category),
+    })),
+  };
+}
+
+const emptyProfile: UserProfile = cleanProfile({});
+
+/* ================= 4) Styles & Components สำหรับ UI ================= */
+
+const baseInputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "0.5rem 0.75rem",
+  borderRadius: "6px",
+  border: "1px solid #d1d5db",
+  fontSize: "0.875rem",
+  color: "#111827",
+  backgroundColor: "#ffffff",
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+};
+
+const rowInputStyle: React.CSSProperties = {
+  ...baseInputStyle,
+  width: "auto",
+  minWidth: "140px",
+  padding: "0.35rem 0.6rem",
+};
+
+const editCardStyle: React.CSSProperties = {
+  border: "1px solid #e5e7eb",
+  padding: "1rem",
+  borderRadius: "8px",
+  backgroundColor: "#f9fafb",
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.75rem",
+  width: "100%",
+  boxSizing: "border-box",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontWeight: 600,
+  fontSize: "0.825rem",
+  color: "#374151",
+  marginBottom: "0.2rem",
+  display: "block",
+};
+
+/* --- Component ปุ่มลบแบบ Modern Trash Icon --- */
+const RemoveButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      background: "transparent",
+      border: "none",
+      color: "#9ca3af",
+      cursor: "pointer",
+      padding: "6px",
+      borderRadius: "6px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.15s ease",
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.color = "#ef4444";
+      e.currentTarget.style.backgroundColor = "#fee2e2";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.color = "#9ca3af";
+      e.currentTarget.style.backgroundColor = "transparent";
+    }}
+    title="ลบรายการ"
+  >
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    </svg>
+  </button>
+);
+
+/* --- Component ปุ่มเพิ่มข้อมูลแบบ Modern Gray --- */
+const AddButton = ({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      marginTop: "0.5rem",
+      padding: "0.45rem 0.9rem",
+      fontSize: "0.825rem",
+      fontWeight: 600,
+      color: "#374151",
+      backgroundColor: "#f3f4f6",
+      border: "1px solid #e5e7eb",
+      borderRadius: "6px",
+      cursor: "pointer",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "6px",
+      transition: "all 0.15s ease",
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.backgroundColor = "#e5e7eb";
+      e.currentTarget.style.color = "#111827";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.backgroundColor = "#f3f4f6";
+      e.currentTarget.style.color = "#374151";
+    }}
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    {label}
+  </button>
+);
+
+interface InfoRowProps {
+  label: string;
+  value: string;
+  editing: boolean;
+  onChange: (newValue: string) => void;
+  type?: string;
+  options?: string[];
+}
+
+function InfoRow(props: InfoRowProps) {
+  const { label, value, editing, onChange, type, options } = props;
+
+  if (!editing) {
+    return (
+      <div className={styles.infoRow}>
+        {label}: {type === "date" ? showDate(value) : show(value)}
+      </div>
+    );
+  }
+
+  if (options) {
+    return (
+      <div className={styles.infoRow}>
+        {label}:{" "}
+        <select
+          style={rowInputStyle}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          <option value="">-- เลือก --</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.infoRow}>
+      {label}:{" "}
+      <input
+        style={rowInputStyle}
+        type={type ?? "text"}
+        value={type === "date" ? toDateInput(value) : value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+/* ================= 5) หน้าจอหลัก ================= */
 
 const SeekerProfile = () => {
-  const [sessionUser, setSessionUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [editForm, setEditForm] = useState<any>(null);
+  const [userId, setUserId] = useState("");
+  const [profile, setProfile] = useState<UserProfile>(emptyProfile);
+  const [form, setForm] = useState<UserProfile>(emptyProfile);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
-  // สถานะ loading เฉพาะตอนกดปุ่มเปิด/ปิดการมองเห็นโปรไฟล์
   const [togglingVisibility, setTogglingVisibility] = useState(false);
+  const [uploadingCategory, setUploadingCategory] = useState("");
+  const [previewFile, setPreviewFile] = useState<FileRecord | null>(null);
 
-  // สร้าง Array ปี (ปีปัจจุบัน + 5 ย้อนหลังไป 50 ปี)
   const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from(
-    { length: 50 },
-    (_, idx) => currentYear - idx + 5,
-  );
+  const yearOptions: number[] = [];
 
-  // อ้างอิงอินพุตไฟล์ของรูปอวาตาร์
-  const avatarInputRef = useRef<HTMLInputElement>(null);
+  for (let y = currentYear + 5; y > currentYear - 45; y--) {
+    yearOptions.push(y);
+  }
 
-  // สถานะควบคุมไฟล์และ Popup
-  const [uploadingCategory, setUploadingCategory] = useState<string | null>(
-    null,
-  );
-  const [activePreviewFile, setActivePreviewFile] = useState<{
-    path: string;
-    name: string;
-  } | null>(null);
-
-  // อ้างอิง Input File ตามหมวดหมู่
-  const fileInputRefs = {
-    transcript: useRef<HTMLInputElement>(null),
-    resume: useRef<HTMLInputElement>(null),
-    portfolio: useRef<HTMLInputElement>(null),
-    certificate: useRef<HTMLInputElement>(null),
-  };
-
-  const fetchSessionUser = async () => {
-    try {
-      const res = await fetch("/api/auth/me");
-      const data = await res.json();
-      if (data.user) setSessionUser(data.user);
-      else setLoading(false);
-    } catch (err: any) {
-      setError(err.message);
-      setLoading(false);
-    }
-  };
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const res = await fetch(`/api/user/getUserById/${userId}`);
-      const data = await res.json();
-      if (res.ok) {
-        setProfile(data.user);
-        setEditForm(JSON.parse(JSON.stringify(data.user)));
-      } else {
-        setError(data.error || "Failed to fetch profile");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  /* ---------- โหลดข้อมูล ---------- */
 
   useEffect(() => {
-    fetchSessionUser();
+    async function loadSession() {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data: { user?: { id?: string | number } } = await res.json();
+        if (data.user && data.user.id !== undefined) {
+          setUserId(String(data.user.id));
+        } else {
+          setLoading(false);
+        }
+      } catch (err: unknown) {
+        setError(getErrorText(err));
+        setLoading(false);
+      }
+    }
+    loadSession();
   }, []);
 
   useEffect(() => {
-    if (sessionUser?.id) fetchUserProfile(sessionUser.id);
-  }, [sessionUser?.id]);
+    if (userId !== "") loadProfile(userId);
+  }, [userId]);
 
-  // ─── อัปโหลดรูปอวาตาร์ ───
-  const handleAvatarChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file || !sessionUser?.id) return;
-
+  async function loadProfile(id: string) {
     try {
-      setSaving(true);
-      // 1. อัปโหลดรูปภาพไปยัง Firebase Storage
-      const filePath = `user_avatars/${sessionUser.id}_${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, filePath);
-      const uploadResult = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(uploadResult.ref);
+      const res = await fetch(`/api/user/getUserById/${id}`);
+      const data: { user?: ApiProfile; error?: string } = await res.json();
+      if (res.ok && data.user) {
+        const clean = cleanProfile(data.user);
+        setProfile(clean);
+        setForm(clean);
+      } else {
+        setError(data.error ?? "โหลดข้อมูลไม่สำเร็จ");
+      }
+    } catch (err: unknown) {
+      setError(getErrorText(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      // 2. ยิง API บันทึก URL รูปภาพใหม่ลงในฐานข้อมูลทันที
-      const res = await fetch(`/api/user/updateProfile/${sessionUser.id}`, {
+  /* ---------- แก้ไขช่องเดี่ยว ---------- */
+
+  function changeText(field: string, value: string) {
+    setForm({ ...form, [field]: value });
+  }
+
+  /* ---------- Job Title ---------- */
+
+  function addJob() {
+    setForm({ ...form, job_titles: [...form.job_titles, { job_name: "" }] });
+  }
+
+  function changeJob(index: number, value: string) {
+    const list = [...form.job_titles];
+    list[index] = { ...list[index], job_name: value };
+    setForm({ ...form, job_titles: list });
+  }
+
+  function removeJob(index: number) {
+    setForm({
+      ...form,
+      job_titles: form.job_titles.filter((v, i) => i !== index),
+    });
+  }
+
+  /* ---------- Skill ---------- */
+
+  function addSkill() {
+    const item: Skill = {
+      skill_name: "",
+      skill_category: "General",
+      skill_detail: "",
+    };
+    setForm({ ...form, skills: [...form.skills, item] });
+  }
+
+  function changeSkill(index: number, value: string) {
+    const list = [...form.skills];
+    list[index] = { ...list[index], skill_name: value };
+    setForm({ ...form, skills: list });
+  }
+
+  function removeSkill(index: number) {
+    setForm({ ...form, skills: form.skills.filter((v, i) => i !== index) });
+  }
+
+  /* ---------- Typing ---------- */
+
+  function addTyping() {
+    const item: Typing = { typing_language: "", typing_wpm: "" };
+    setForm({ ...form, typing_speeds: [...form.typing_speeds, item] });
+  }
+
+  function changeTypingLanguage(index: number, value: string) {
+    const list = [...form.typing_speeds];
+    list[index] = { ...list[index], typing_language: value };
+    setForm({ ...form, typing_speeds: list });
+  }
+
+  function changeTypingWpm(index: number, value: string) {
+    const list = [...form.typing_speeds];
+    list[index] = { ...list[index], typing_wpm: value };
+    setForm({ ...form, typing_speeds: list });
+  }
+
+  function removeTyping(index: number) {
+    setForm({
+      ...form,
+      typing_speeds: form.typing_speeds.filter((v, i) => i !== index),
+    });
+  }
+
+  /* ---------- Education ---------- */
+
+  function addEducation() {
+    const item: Education = {
+      level: "",
+      major: "",
+      institution: "",
+      faculty: "",
+      year_start: "",
+      year_end: "",
+    };
+    setForm({ ...form, educations: [...form.educations, item] });
+  }
+
+  function changeEducation(index: number, field: string, value: string) {
+    const list = [...form.educations];
+    list[index] = { ...list[index], [field]: value };
+    setForm({ ...form, educations: list });
+  }
+
+  function removeEducation(index: number) {
+    setForm({
+      ...form,
+      educations: form.educations.filter((v, i) => i !== index),
+    });
+  }
+
+  /* ---------- Experience ---------- */
+
+  function addExperience() {
+    const item: Experience = {
+      ex_title: "",
+      ex_description: "",
+      type: "",
+      start_date: "",
+      end_date: "",
+    };
+    setForm({ ...form, experiences: [...form.experiences, item] });
+  }
+
+  function changeExperience(index: number, field: string, value: string) {
+    const list = [...form.experiences];
+    list[index] = { ...list[index], [field]: value };
+    setForm({ ...form, experiences: list });
+  }
+
+  function removeExperience(index: number) {
+    setForm({
+      ...form,
+      experiences: form.experiences.filter((v, i) => i !== index),
+    });
+  }
+
+  /* ---------- Language ---------- */
+
+  function addLanguage() {
+    const item: Language = {
+      language_type: "",
+      level: "",
+      test_name: "",
+      score: "",
+    };
+    setForm({ ...form, languages: [...form.languages, item] });
+  }
+
+  function changeLanguage(index: number, field: string, value: string) {
+    const list = [...form.languages];
+    list[index] = { ...list[index], [field]: value };
+    setForm({ ...form, languages: list });
+  }
+
+  function removeLanguage(index: number) {
+    setForm({
+      ...form,
+      languages: form.languages.filter((v, i) => i !== index),
+    });
+  }
+
+  /* ---------- Type of work ---------- */
+
+  function toggleTypeOfWork(type: string) {
+    const list = form.type_of_work
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s !== "");
+
+    let newList: string[];
+    if (list.includes(type)) {
+      newList = list.filter((t) => t !== type);
+    } else {
+      newList = [...list, type];
+    }
+    setForm({ ...form, type_of_work: newList.join(", ") });
+  }
+
+  /* ---------- บันทึก / ยกเลิก ---------- */
+
+  async function saveProfile() {
+    if (userId === "") return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/user/updateProfile/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...profile, // ส่งข้อมูลเดิมไปด้วยป้องกันตารางอื่นหลุด
-          profile_image: downloadURL, // เปลี่ยนเฉพาะ URL รูปโปรไฟล์
-        }),
+        body: JSON.stringify(form),
       });
 
       if (res.ok) {
-        // 3. อัปเดตสถานะ (State) บนหน้าจอทันทีเพื่อให้รูปภาพเปลี่ยนตาม
-        setProfile((prev: any) => ({ ...prev, profile_image: downloadURL }));
-        setEditForm((prev: any) => ({ ...prev, profile_image: downloadURL }));
+        setProfile(form);
+        setEditMode(false);
+        alert("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
+        window.location.reload();
+      } else {
+        const data: { error?: string } = await res.json();
+        alert(data.error ?? "เกิดข้อผิดพลาดในการบันทึก");
+      }
+    } catch (err: unknown) {
+      alert(getErrorText(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function cancelEdit() {
+    setForm(profile);
+    setEditMode(false);
+  }
+
+  /* ---------- เปิด/ปิดการมองเห็นโปรไฟล์ ---------- */
+
+  async function toggleVisibility() {
+    if (userId === "") return;
+    const newValue = profile.is_visible === 1 ? 0 : 1;
+
+    try {
+      setTogglingVisibility(true);
+      const res = await fetch(`/api/user/toggleVisibility/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_visible: newValue }),
+      });
+
+      if (res.ok) {
+        setProfile({ ...profile, is_visible: newValue });
+        setForm({ ...form, is_visible: newValue });
+      } else {
+        const data: { error?: string } = await res.json();
+        alert(data.error ?? "ไม่สามารถเปลี่ยนสถานะการมองเห็นได้");
+      }
+    } catch (err: unknown) {
+      alert(`เกิดข้อผิดพลาด: ${getErrorText(err)}`);
+    } finally {
+      setTogglingVisibility(false);
+    }
+  }
+
+  /* ---------- รูปโปรไฟล์ ---------- */
+
+  async function uploadAvatar(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (!file || userId === "") return;
+
+    try {
+      setSaving(true);
+      const path = `user_avatars/${userId}_${Date.now()}_${file.name}`;
+      const result = await uploadBytes(ref(storage, path), file);
+      const url = await getDownloadURL(result.ref);
+
+      const res = await fetch(`/api/user/updateProfile/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...profile, profile_image: url }),
+      });
+
+      if (res.ok) {
+        setProfile({ ...profile, profile_image: url });
+        setForm({ ...form, profile_image: url });
         alert("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว! 📷✨");
       } else {
         alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
       }
-    } catch (err: any) {
-      alert(`อัปโหลดล้มเหลว: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  // ─── อัปโหลดเอกสารอิสระทันที ───
-  const onInstantFileUpload = async (
+  /* ---------- ไฟล์เอกสาร ---------- */
+
+  function getFilesByCategory(category: string): FileRecord[] {
+    return profile.files.filter(
+      (f) => f.file_category.toLowerCase() === category.toLowerCase(),
+    );
+  }
+
+  async function uploadFile(
     event: React.ChangeEvent<HTMLInputElement>,
     category: string,
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file || !sessionUser?.id) return;
+  ) {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (!file || userId === "") return;
     event.target.value = "";
 
     try {
       setUploadingCategory(category);
-      const filePath = `user_documents/${sessionUser.id}/${category.toLowerCase()}_${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, filePath);
-      const uploadResult = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(uploadResult.ref);
+      const path = `user_documents/${userId}/${category}_${Date.now()}_${file.name}`;
+      const result = await uploadBytes(ref(storage, path), file);
+      const url = await getDownloadURL(result.ref);
 
       const res = await fetch("/api/user/saveFileRecord", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: parseInt(sessionUser.id),
-          file_path: downloadURL,
+          user_id: Number(userId),
+          file_path: url,
           file_name: file.name,
           file_type: file.type,
           file_category: category,
@@ -155,182 +853,68 @@ const SeekerProfile = () => {
       });
 
       if (res.ok) {
-        fetchUserProfile(sessionUser.id);
+        loadProfile(userId);
       } else {
-        const errData = await res.json();
-        alert(`เกิดข้อผิดพลาดคลังข้อมูล: ${errData.error}`);
+        const data: { error?: string } = await res.json();
+        alert(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
       }
-    } catch (err: any) {
-      alert(`อัปโหลดล้มเหลว: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
-      setUploadingCategory(null);
+      setUploadingCategory("");
     }
-  };
+  }
 
-  // ─── ลบเอกสารอิสระทันที ───
-  const onInstantFileDelete = async (fileId: number, filePath: string) => {
-    if (!confirm("คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร? ❌"))
-      return;
+  async function deleteFile(fileId: number, filePath: string) {
+    const ok = confirm("คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร? ❌");
+    if (!ok) return;
+
     try {
-      try {
-        const storageRef = ref(storage, filePath);
-        await deleteObject(storageRef);
-      } catch (e) {
-        console.warn("ลบไฟล์คลาวด์ไม่ได้", e);
-      }
+      await deleteObject(ref(storage, filePath));
+    } catch (err: unknown) {
+      console.warn("ลบไฟล์คลาวด์ไม่ได้", err);
+    }
 
+    try {
       const res = await fetch(`/api/user/deleteFileRecord?file_id=${fileId}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        fetchUserProfile(sessionUser.id);
+        loadProfile(userId);
       } else {
         alert("ไม่สามารถลบแถวข้อมูลได้");
       }
-    } catch (err: any) {
-      alert(`การลบล้มเหลว: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`การลบล้มเหลว: ${getErrorText(err)}`);
     }
-  };
-
-  const getFilesByCategory = (category: string) => {
-    if (!profile?.files || !Array.isArray(profile.files)) return [];
-    return profile.files.filter(
-      (f: any) => f.file_category?.toLowerCase() === category.toLowerCase(),
-    );
-  };
-
-  // ─── บันทึกข้อมูลส่วนตัว (ฟอร์มหลัก) ───
-  const handleSaveChanges = async () => {
-    if (!sessionUser?.id) return;
-    setSaving(true);
-    try {
-      const res = await fetch(`/api/user/updateProfile/${sessionUser.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
-      });
-
-      if (res.ok) {
-        setProfile(JSON.parse(JSON.stringify(editForm)));
-        setEditMode(false);
-        alert("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
-        window.location.reload();
-      } else {
-        const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาดในการบันทึก");
-      }
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ─── เปิด/ปิดการมองเห็นโปรไฟล์ (ยิง API ทันที ไม่ต้องกด Save) ───
-  const handleToggleVisibility = async () => {
-    if (!sessionUser?.id || !profile) return;
-    const newValue = profile.is_visible === 1 ? 0 : 1;
-
-    try {
-      setTogglingVisibility(true);
-      const res = await fetch(`/api/user/toggleVisibility/${sessionUser.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_visible: newValue }),
-      });
-
-      if (res.ok) {
-        setProfile((prev: any) => ({ ...prev, is_visible: newValue }));
-        setEditForm((prev: any) => ({ ...prev, is_visible: newValue }));
-      } else {
-        const data = await res.json();
-        alert(data.error || "ไม่สามารถเปลี่ยนสถานะการมองเห็นได้");
-      }
-    } catch (err: any) {
-      alert(`เกิดข้อผิดพลาด: ${err.message}`);
-    } finally {
-      setTogglingVisibility(false);
-    }
-  };
-
-  const handleFieldChange = (field: string, value: any) =>
-    setEditForm((prev: any) => ({ ...prev, [field]: value }));
-  const handleArrayFieldChange = (
-    arrayName: string,
-    index: number,
-    field: string,
-    value: any,
-  ) => {
-    setEditForm((prev: any) => {
-      const updated = [...(prev[arrayName] || [])];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, [arrayName]: updated };
-    });
-  };
-  const addArrayItem = (arrayName: string, defaultObj: any) =>
-    setEditForm((prev: any) => ({
-      ...prev,
-      [arrayName]: [...(prev[arrayName] || []), defaultObj],
-    }));
-  const removeArrayItem = (arrayName: string, index: number) =>
-    setEditForm((prev: any) => ({
-      ...prev,
-      [arrayName]: (prev[arrayName] || []).filter(
-        (_: any, i: number) => i !== index,
-      ),
-    }));
-
-  const handleToggleTypeOfWork = (type: string) => {
-    const currentTypes = editForm.type_of_work
-      ? editForm.type_of_work
-          .split(",")
-          .map((s: string) => s.trim())
-          .filter(Boolean)
-      : [];
-    let newTypes = currentTypes.includes(type)
-      ? currentTypes.filter((t: string) => t !== type)
-      : [...currentTypes, type];
-    handleFieldChange("type_of_work", newTypes.join(", "));
-  };
+  }
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!profile || !editForm) return <p>No user data</p>;
+  if (error !== "") return <p>Error: {error}</p>;
 
-  const fmt = (val: any) =>
-    val !== null && val !== undefined ? String(val) : "-";
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-  const typeOfWorkList = (
-    editMode ? editForm.type_of_work : profile.type_of_work
-  )
-    ? (editMode ? editForm.type_of_work : profile.type_of_work)
-        .split(",")
-        .map((s: string) => s.trim())
-    : [];
+  const workTypes = [
+    "Full-time",
+    "Freelance",
+    "Part-time",
+    "Internship",
+    "Contract",
+  ];
+  const typeOfWorkList = (editMode ? form.type_of_work : profile.type_of_work)
+    .split(",")
+    .map((s) => s.trim());
+
+  const fileCategories = ["transcript", "resume", "portfolio", "certificate"];
 
   return (
     <div className={styles.container}>
       <div className={styles.profileGrid}>
         {/* ── Column 1: Personal Info ── */}
         <div className={styles.column}>
-          <div
-            className={styles.cardHeader}
-            style={{
-              position: "relative",
-            }}
-          >
+          <div className={styles.cardHeader} style={{ position: "relative" }}>
             Personal Information
-            {/* ── ปุ่มเปิด/ปิดการมองเห็นโปรไฟล์ (คลิกแล้วยิง API ทันที) ── */}
             <button
               type="button"
-              onClick={handleToggleVisibility}
+              onClick={toggleVisibility}
               disabled={togglingVisibility}
               title={
                 profile.is_visible === 1
@@ -350,14 +934,13 @@ const SeekerProfile = () => {
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor:
-                  profile.is_visible === 1 ? "#28a745" : "#888888",
+                  profile.is_visible === 1 ? "#111827" : "#9ca3af",
                 color: "#fff",
                 opacity: togglingVisibility ? 0.6 : 1,
                 transition: "background-color 0.2s ease",
               }}
             >
               {profile.is_visible === 1 ? (
-                // ตาเปิด (มองเห็นได้)
                 <svg
                   width="16"
                   height="16"
@@ -372,7 +955,6 @@ const SeekerProfile = () => {
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               ) : (
-                // ตาปิด (ถูกซ่อน)
                 <svg
                   width="16"
                   height="16"
@@ -393,31 +975,30 @@ const SeekerProfile = () => {
           <div className={styles.personalInfoContent}>
             <div
               className={styles.avatarWrapper}
-              onClick={() => avatarInputRef.current?.click()} // คลิกตรงไหนในกล่องก็เปิดหน้าต่างเลือกไฟล์
+              onClick={() => openFilePicker("avatar-input")}
               style={{ position: "relative", cursor: "pointer" }}
             >
-              {/* ตัวซ่อน Input File ดั้งเดิมเอาไว้ */}
               <input
+                id="avatar-input"
                 type="file"
                 accept="image/*"
-                ref={avatarInputRef}
-                onChange={handleAvatarChange}
+                onChange={uploadAvatar}
                 style={{ display: "none" }}
               />
 
-              {/* แสดงรูปโปรไฟล์ปัจจุบัน */}
-             <img
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={
-                  // เช็คก่อนว่ามีรูปในระบบไหม (ดึงจาก editForm ถ้าแก้กดอยู่ หรือ profile ในโหมดปกติ)
-                  (editMode ? editForm?.profile_image : profile?.profile_image) ||
-                  //  ถ้าไม่มีรูปจริง ให้ใช้ UI Avatars เป็นค่าเริ่มต้น
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent((editMode ? editForm?.fullname : profile?.fullname) || "User")}&background=random`
+                  (editMode ? form.profile_image : profile.profile_image) ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    (editMode ? form.fullname : profile.fullname) || "User",
+                  )}&background=111827&color=ffffff`
                 }
                 className={styles.avatar}
                 alt="avatar"
                 style={{ width: "100%", height: "100%", display: "block" }}
               />
-              {/* ตัวครอบเอฟเฟกต์ Overlay ปรากฏขึ้นเมื่อนำเมาส์มา Hover รูปภาพ */}
+
               <div
                 style={{
                   position: "absolute",
@@ -426,13 +1007,13 @@ const SeekerProfile = () => {
                   width: "100%",
                   height: "100%",
                   borderRadius: "50%",
-                  backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+                  backgroundColor: "rgba(17, 24, 39, 0.6)",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
                   color: "#fff",
                   fontSize: "0.85rem",
-                  fontWeight: "bold",
+                  fontWeight: 600,
                   opacity: 0,
                   transition: "opacity 0.2s ease",
                 }}
@@ -446,9 +1027,9 @@ const SeekerProfile = () => {
             {!editMode ? (
               <>
                 <h2 className={styles.name} style={{ marginTop: "1rem" }}>
-                  {fmt(profile.fullname)}
+                  {show(profile.fullname)}
                 </h2>
-                <p className={styles.email}>{fmt(profile.email)}</p>
+                <p className={styles.email}>{show(profile.email)}</p>
               </>
             ) : (
               <div
@@ -456,23 +1037,18 @@ const SeekerProfile = () => {
                   display: "flex",
                   flexDirection: "column",
                   gap: "0.5rem",
-                  margin: "1.5rem 0",
+                  margin: "1.25rem 0",
+                  width: "100%",
                 }}
               >
                 <input
                   type="text"
                   placeholder="Full Name"
-                  value={editForm.fullname ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange("fullname", e.target.value)
-                  }
-                  style={{
-                    padding: "0.4rem",
-                    borderRadius: "4px",
-                    border: "1px solid #000000",
-                  }}
+                  value={form.fullname}
+                  onChange={(e) => changeText("fullname", e.target.value)}
+                  style={baseInputStyle}
                 />
-                <p className={styles.email}>{fmt(profile.email)}</p>
+                <p className={styles.email}>{show(profile.email)}</p>
               </div>
             )}
 
@@ -480,215 +1056,133 @@ const SeekerProfile = () => {
               <div className={styles.titleinfoRow}>
                 <strong>About</strong>
               </div>
-              {[
-                {
-                  label: "Gender",
-                  field: "gender",
-                  type: "select",
-                  options: ["Male", "Female", "Other"],
-                },
-                {
-                  label: "Military Status",
-                  field: "military_status",
-                  type: "select",
-                  options: ["Exempted", "Served", "None"],
-                },
-                {
-                  label: "Date of Birth",
-                  field: "date_of_birth",
-                  type: "date",
-                },
-                { label: "Nationality", field: "nationality", type: "text" },
-                { label: "Religion", field: "religion", type: "text" },
-                { label: "Weight (Kg)", field: "weight", type: "number" },
-                { label: "Height (Cm)", field: "height", type: "number" },
-                {
-                  label: "Disability",
-                  field: "disability_status",
-                  type: "text",
-                },
-                {
-                  label: "Marital",
-                  field: "marital_status",
-                  type: "select",
-                  options: ["Single", "Married", "Divorced"],
-                },
-                { label: "Mobile", field: "mobile_phone", type: "text" },
-              ].map((item) => (
-                <div className={styles.infoRow} key={item.field}>
-                  {item.label}:{" "}
-                  {!editMode ? (
-                    item.field === "date_of_birth" ? (
-                      formatDate(profile[item.field])
-                    ) : (
-                      fmt(profile[item.field])
-                    )
-                  ) : item.type === "select" ? (
-                    <select
-                      value={editForm[item.field] ?? ""}
-                      onChange={(e) =>
-                        handleFieldChange(item.field, e.target.value)
-                      }
-                      style={{
-                        minWidth: "120px",
-                        padding: "0.3rem",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                    >
-                      <option value="">-- เลือก --</option>
-                      {item.options?.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      type={item.type}
-                      value={
-                        item.field === "date_of_birth" && editForm[item.field]
-                          ? editForm[item.field].substring(0, 10)
-                          : (editForm[item.field] ?? "")
-                      }
-                      onChange={(e) =>
-                        handleFieldChange(item.field, e.target.value)
-                      }
-                      style={{
-                        minWidth: "120px",
-                        padding: "0.3rem",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc",
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
+
+              <InfoRow
+                label="Gender"
+                editing={editMode}
+                value={editMode ? form.gender : profile.gender}
+                options={["Male", "Female", "Other"]}
+                onChange={(v) => changeText("gender", v)}
+              />
+              <InfoRow
+                label="Military Status"
+                editing={editMode}
+                value={
+                  editMode ? form.military_status : profile.military_status
+                }
+                options={["Exempted", "Served", "None"]}
+                onChange={(v) => changeText("military_status", v)}
+              />
+              <InfoRow
+                label="Date of Birth"
+                type="date"
+                editing={editMode}
+                value={editMode ? form.date_of_birth : profile.date_of_birth}
+                onChange={(v) => changeText("date_of_birth", v)}
+              />
+              <InfoRow
+                label="Nationality"
+                editing={editMode}
+                value={editMode ? form.nationality : profile.nationality}
+                onChange={(v) => changeText("nationality", v)}
+              />
+              <InfoRow
+                label="Religion"
+                editing={editMode}
+                value={editMode ? form.religion : profile.religion}
+                onChange={(v) => changeText("religion", v)}
+              />
+              <InfoRow
+                label="Weight (Kg)"
+                type="number"
+                editing={editMode}
+                value={editMode ? form.weight : profile.weight}
+                onChange={(v) => changeText("weight", v)}
+              />
+              <InfoRow
+                label="Height (Cm)"
+                type="number"
+                editing={editMode}
+                value={editMode ? form.height : profile.height}
+                onChange={(v) => changeText("height", v)}
+              />
+              <InfoRow
+                label="Disability"
+                editing={editMode}
+                value={
+                  editMode ? form.disability_status : profile.disability_status
+                }
+                onChange={(v) => changeText("disability_status", v)}
+              />
+              <InfoRow
+                label="Marital"
+                editing={editMode}
+                value={editMode ? form.marital_status : profile.marital_status}
+                options={["Single", "Married", "Divorced"]}
+                onChange={(v) => changeText("marital_status", v)}
+              />
+              <InfoRow
+                label="Mobile"
+                editing={editMode}
+                value={editMode ? form.mobile_phone : profile.mobile_phone}
+                onChange={(v) => changeText("mobile_phone", v)}
+              />
 
               <div className={styles.titleinfoRow}>
                 <br />
                 <strong>Contact</strong>
               </div>
-              <div className={styles.infoRow}>
-                Line ID:{" "}
-                {!editMode ? (
-                  fmt(profile.line_id)
-                ) : (
-                  <input
-                    style={{
-                      minWidth: "120px",
-                      padding: "0.3rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                    type="text"
-                    value={editForm.line_id ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("line_id", e.target.value)
-                    }
-                  />
-                )}
-              </div>
 
+              <InfoRow
+                label="Line ID"
+                editing={editMode}
+                value={editMode ? form.line_id : profile.line_id}
+                onChange={(v) => changeText("line_id", v)}
+              />
               <div className={styles.infoRow}>
                 Country:{" "}
                 {!editMode ? (
-                  fmt(profile.country)
+                  show(profile.country)
                 ) : (
-                  <input
-                    style={{
-                      minWidth: "120px",
-                      padding: "0.3rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                    type="text"
-                    value={editForm.country ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("country", e.target.value)
-                    }
+                  <CountrySelect
+                    value={form.country}
+                    onChange={(value: string) => changeText("country", value)}
                   />
                 )}
               </div>
-
-              {/* เอา address กับ postal_code ออกตามที่คอมเมนต์ไว้ในลูปเดิม */}
 
               <div className={styles.infoRow}>
                 Province:{" "}
                 {!editMode ? (
-                  fmt(profile.province)
+                  show(profile.province)
                 ) : (
-                  // <input
-                  //   style={{
-                  //     minWidth: "120px",
-                  //     padding: "0.3rem",
-                  //     borderRadius: "4px",
-                  //     border: "1px solid #ccc",
-                  //   }}
-                  //   type="text"
-                  //   value={editForm.province ?? ""}
-                  //   onChange={(e) =>
-                  //     handleFieldChange("province", e.target.value)
-                  //   }
-                  // />
                   <ProvinceSelect
-                    value={editForm.province ?? ""}
-                    onChange={(value: string) => {
-                      handleFieldChange("province", value);
-                    }}
+                    value={form.province}
+                    onChange={(value: string) => changeText("province", value)}
                   />
                 )}
               </div>
 
-              <div className={styles.infoRow}>
-                District:{" "}
-                {!editMode ? (
-                  fmt(profile.district)
-                ) : (
-                  <input
-                    style={{
-                      minWidth: "120px",
-                      padding: "0.3rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                    type="text"
-                    value={editForm.district ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("district", e.target.value)
-                    }
-                  />
-                )}
-              </div>
-
-              <div className={styles.infoRow}>
-                Sub District:{" "}
-                {!editMode ? (
-                  fmt(profile.sub_district)
-                ) : (
-                  <input
-                    style={{
-                      minWidth: "120px",
-                      padding: "0.3rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                    type="text"
-                    value={editForm.sub_district ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("sub_district", e.target.value)
-                    }
-                  />
-                )}
-              </div>
+              <InfoRow
+                label="District"
+                editing={editMode}
+                value={editMode ? form.district : profile.district}
+                onChange={(v) => changeText("district", v)}
+              />
+              <InfoRow
+                label="Sub District"
+                editing={editMode}
+                value={editMode ? form.sub_district : profile.sub_district}
+                onChange={(v) => changeText("sub_district", v)}
+              />
             </div>
 
-            {/* ── ปุ่ม Edit Profile / Save+Cancel (ย้ายมาไว้ด้านล่างสุดของคอลัมน์ Personal Information) ── */}
+            {/* ปุ่ม Edit / Save + Cancel */}
             <div
               style={{
                 marginTop: "1.5rem",
                 paddingTop: "1.25rem",
-                borderTop: "1px solid rgba(0,0,0,0.08)",
+                borderTop: "1px solid #e5e7eb",
               }}
             >
               {!editMode ? (
@@ -702,28 +1196,22 @@ const SeekerProfile = () => {
                     justifyContent: "center",
                     gap: "8px",
                     padding: "11px 18px",
-                    backgroundColor: "#111111",
+                    backgroundColor: "#111827",
                     color: "#ffffff",
                     borderRadius: "999px",
                     border: "none",
                     fontSize: "0.92rem",
                     fontWeight: 600,
-                    letterSpacing: "0.01em",
                     cursor: "pointer",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.18)",
-                    transition:
-                      "transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                    transition: "all 0.15s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#2a2a2a";
-                    e.currentTarget.style.boxShadow =
-                      "0 4px 10px rgba(0,0,0,0.24)";
+                    e.currentTarget.style.backgroundColor = "#374151";
                     e.currentTarget.style.transform = "translateY(-1px)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#111111";
-                    e.currentTarget.style.boxShadow =
-                      "0 2px 6px rgba(0,0,0,0.18)";
+                    e.currentTarget.style.backgroundColor = "#111827";
                     e.currentTarget.style.transform = "translateY(0)";
                   }}
                 >
@@ -743,15 +1231,10 @@ const SeekerProfile = () => {
                   Edit Profile
                 </button>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.6rem",
-                  }}
-                >
+                <div style={{ display: "flex", gap: "0.6rem" }}>
                   <button
                     type="button"
-                    onClick={handleSaveChanges}
+                    onClick={saveProfile}
                     disabled={saving}
                     style={{
                       flex: 1,
@@ -761,23 +1244,22 @@ const SeekerProfile = () => {
                       gap: "6px",
                       padding: "11px 14px",
                       fontSize: "0.88rem",
-                      fontWeight: 700,
-                      backgroundColor: saving ? "#5fb37b" : "#28a745",
+                      fontWeight: 600,
+                      backgroundColor: saving ? "#6b7280" : "#111827",
                       color: "#ffffff",
                       borderRadius: "999px",
                       border: "none",
                       cursor: saving ? "wait" : "pointer",
-                      boxShadow: "0 2px 6px rgba(40,167,69,0.35)",
-                      transition:
-                        "background-color 0.15s ease, transform 0.15s ease",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      transition: "all 0.15s ease",
                     }}
                     onMouseEnter={(e) => {
                       if (!saving)
-                        e.currentTarget.style.backgroundColor = "#239a3b";
+                        e.currentTarget.style.backgroundColor = "#374151";
                     }}
                     onMouseLeave={(e) => {
                       if (!saving)
-                        e.currentTarget.style.backgroundColor = "#28a745";
+                        e.currentTarget.style.backgroundColor = "#111827";
                     }}
                   >
                     {saving ? (
@@ -803,10 +1285,7 @@ const SeekerProfile = () => {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setEditMode(false);
-                      setEditForm(JSON.parse(JSON.stringify(profile)));
-                    }}
+                    onClick={cancelEdit}
                     disabled={saving}
                     style={{
                       flex: 1,
@@ -816,22 +1295,21 @@ const SeekerProfile = () => {
                       gap: "6px",
                       padding: "11px 14px",
                       fontSize: "0.88rem",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       backgroundColor: "#ffffff",
-                      color: "#dc3545",
+                      color: "#374151",
                       borderRadius: "999px",
-                      border: "1.5px solid #dc3545",
+                      border: "1px solid #d1d5db",
                       cursor: "pointer",
-                      transition:
-                        "background-color 0.15s ease, color 0.15s ease",
+                      transition: "all 0.15s ease",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#dc3545";
-                      e.currentTarget.style.color = "#ffffff";
+                      e.currentTarget.style.backgroundColor = "#f3f4f6";
+                      e.currentTarget.style.color = "#111827";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.backgroundColor = "#ffffff";
-                      e.currentTarget.style.color = "#dc3545";
+                      e.currentTarget.style.color = "#374151";
                     }}
                   >
                     <svg
@@ -859,79 +1337,64 @@ const SeekerProfile = () => {
         <div className={styles.column}>
           <div className={styles.cardHeader}>Job Preferences</div>
           <div className={styles.contentPadding}>
+            {/* Job Title */}
             <section className={styles.section}>
               <h4>Job Title</h4>
               {!editMode ? (
                 <ol className="list-decimal list-inside">
-                  {profile.job_titles?.map((job: any, i: number) => (
-                    <li key={i}>{fmt(job.job_name)}</li>
+                  {profile.job_titles.map((job, i) => (
+                    <li key={job.job_id ?? `view-job-${i}`}>
+                      {show(job.job_name)}
+                    </li>
                   ))}
                 </ol>
               ) : (
-                <div>
-                  {(editForm.job_titles || []).map((job: any, i: number) => (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                  }}
+                >
+                  {form.job_titles.map((job, i) => (
                     <div
-                      key={i}
+                      key={job.job_id ?? `edit-job-${i}`}
                       style={{
                         display: "flex",
-                        gap: "0.2rem",
-                        marginBottom: "0.3rem",
+                        alignItems: "center",
+                        gap: "0.5rem",
                       }}
                     >
                       <input
-                        style={{
-                          flex: 1,
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={baseInputStyle}
                         type="text"
-                        value={job.job_name ?? ""}
-                        onChange={(e) =>
-                          handleArrayFieldChange(
-                            "job_titles",
-                            i,
-                            "job_name",
-                            e.target.value,
-                          )
-                        }
+                        placeholder="Job Title"
+                        value={job.job_name}
+                        onChange={(e) => changeJob(i, e.target.value)}
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayItem("job_titles", i)}
-                      >
-                        ❌
-                      </button>
+                      <RemoveButton onClick={() => removeJob(i)} />
                     </div>
                   ))}
-                  <button
-                    style={{ marginTop: "0.5rem", border: "1px solid #000000" }}
-                    type="button"
-                    className={styles.tag}
-                    onClick={() => addArrayItem("job_titles", { job_name: "" })}
-                  >
-                    + Add Job
-                  </button>
+                  <div>
+                    <AddButton label="Add Job" onClick={addJob} />
+                  </div>
                 </div>
               )}
             </section>
 
+            {/* Type of Work */}
             <section className={styles.section}>
               <h4>Type Of Work</h4>
               <div className={styles.tagGroup}>
-                {[
-                  "Full-time",
-                  "Freelance",
-                  "Part-time",
-                  "Internship",
-                  "Contract",
-                ].map((t) => (
+                {workTypes.map((t) => (
                   <span
                     key={t}
                     className={
                       typeOfWorkList.includes(t) ? styles.tagActive : styles.tag
                     }
-                    onClick={() => editMode && handleToggleTypeOfWork(t)}
+                    onClick={() => {
+                      if (editMode) toggleTypeOfWork(t);
+                    }}
                     style={{ cursor: editMode ? "pointer" : "default" }}
                   >
                     {t}
@@ -940,324 +1403,177 @@ const SeekerProfile = () => {
               </div>
             </section>
 
+            {/* Desired Salary */}
             <section className={styles.section}>
               <h4>Desired salary (baht)</h4>
               {!editMode ? (
-                <p>{fmt(profile.desired_salary)} baht</p>
+                <p>{show(profile.desired_salary)} baht</p>
               ) : (
                 <input
-                  style={{
-                    padding: "0.3rem",
-                    borderRadius: "4px",
-                    border: "1px solid #000000",
-                  }}
+                  style={baseInputStyle}
                   type="number"
-                  value={editForm.desired_salary ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange("desired_salary", e.target.value)
-                  }
+                  placeholder="e.g. 35000"
+                  value={form.desired_salary}
+                  onChange={(e) => changeText("desired_salary", e.target.value)}
                 />
               )}
             </section>
+
+            {/* Education */}
             <section className={styles.section}>
               <h4 className={styles.section}>Education</h4>
               <section className={styles.Educontainer}>
                 <div className={styles.timeline}>
                   {!editMode ? (
-                    <div className={styles.centralLine}></div>
-                  ) : (
-                    <div></div>
-                  )}
-
-                  {!editMode ? (
-                    profile.educations?.map((item: any, index: number) => (
-                      <div
-                        key={index}
-                        className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
-                      >
-                        <div className={styles.content}>
-                          <p className={styles.level}>{fmt(item.level)}</p>
-                          <h4 className={styles.degree}>{fmt(item.major)}</h4>
-                          <p className={styles.school}>
-                            {fmt(item.institution)}
-                          </p>
-                          <p style={{ fontSize: "15px" }}>
-                            {fmt(item.year_start)} – {fmt(item.year_end)}
-                          </p>
+                    <>
+                      <div className={styles.centralLine}></div>
+                      {profile.educations.map((item, index) => (
+                        <div
+                          key={item.education_id ?? `view-edu-${index}`}
+                          className={`${styles.timelineItem} ${
+                            index % 2 === 0 ? styles.left : styles.right
+                          }`}
+                        >
+                          <div className={styles.content}>
+                            <p className={styles.level}>{show(item.level)}</p>
+                            <h4 className={styles.degree}>
+                              {show(item.major)}
+                            </h4>
+                            <p className={styles.school}>
+                              {show(item.institution)}
+                            </p>
+                            <p style={{ fontSize: "15px" }}>
+                              {show(item.year_start)} – {show(item.year_end)}
+                            </p>
+                          </div>
+                          <div className={styles.connector}></div>
                         </div>
-                        <div className={styles.connector}></div>
-                      </div>
-                    ))
+                      ))}
+                    </>
                   ) : (
+                    /* EDIT MODE - EDUCATION */
                     <div
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "1.5rem",
-                        width: "100%",
-                        maxWidth: "460px", // ขยายพื้นที่เพิ่มให้ไม่ดูอึดอัด
-                        margin: "0 auto",
+                        gap: "1rem",
+                        width: "150%",
+                        marginLeft: "-28%",
+                        marginTop: "-25%",
                       }}
                     >
-                      {(editForm.educations || []).map(
-                        (item: any, i: number) => (
+                      {form.educations.map((item, i) => (
+                        <div
+                          key={item.education_id ?? `edit-edu-${i}`}
+                          style={editCardStyle}
+                        >
                           <div
-                            key={i}
                             style={{
-                              border: "1px solid #ccc",
-                              padding: "1.2rem",
-                              borderRadius: "8px",
-                              backgroundColor: "#ffffff", // เพิ่มพื้นหลังสีขาวเพื่อให้เด่นขึ้นมาจาก Educontainer สีเทา
-                              position: "relative",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "0.8rem",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
                             }}
                           >
-                            {/* ปุ่มลบ (ย้ายมาไว้ที่มุมขวาบนของการ์ด) */}
-                            <button
-                              type="button"
-                              onClick={() => removeArrayItem("educations", i)}
-                              style={{
-                                position: "absolute",
-                                top: "12px",
-                                right: "12px",
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                fontSize: "1.1rem",
-                              }}
-                            >
-                              ❌
-                            </button>
+                            <RemoveButton onClick={() => removeEducation(i)} />
+                          </div>
 
-                            {/* ระดับการศึกษา */}
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.3rem",
-                              }}
-                            >
-                              <label
-                                style={{
-                                  fontWeight: "500",
-                                  fontSize: "0.9rem",
-                                  color: "#333",
-                                }}
-                              >
-                                Level:
-                              </label>
+                          <div>
+                            <label style={labelStyle}>Level:</label>
+                            <LevelSelect
+                              value={item.level}
+                              onChange={(value: string) =>
+                                changeEducation(i, "level", value)
+                              }
+                            />
+                          </div>
 
-                              <LevelSelect
-                                value={item.level ?? ""}
-                                onChange={(value: string) =>
-                                  handleArrayFieldChange(
-                                    "educations",
-                                    i,
-                                    "level",
-                                    value,
-                                  )
-                                }
-                              />
-                            </div>
+                          <div>
+                            <label style={labelStyle}>Major:</label>
+                            <input
+                              type="text"
+                              placeholder="Major / Field of Study"
+                              value={item.major}
+                              onChange={(e) =>
+                                changeEducation(i, "major", e.target.value)
+                              }
+                              style={baseInputStyle}
+                            />
+                          </div>
 
-                            {/* สาขาวิชา */}
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.3rem",
-                              }}
-                            >
-                              <label
-                                style={{
-                                  fontWeight: "500",
-                                  fontSize: "0.9rem",
-                                  color: "#333",
-                                }}
-                              >
-                                Major:
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Major"
-                                value={item.major ?? ""}
+                          <div>
+                            <label style={labelStyle}>Institution:</label>
+                            <input
+                              type="text"
+                              placeholder="School / University"
+                              value={item.institution}
+                              onChange={(e) =>
+                                changeEducation(
+                                  i,
+                                  "institution",
+                                  e.target.value,
+                                )
+                              }
+                              style={baseInputStyle}
+                            />
+                          </div>
+
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.75rem",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <div style={{ flex: "1 1 130px" }}>
+                              <label style={labelStyle}>Year Start:</label>
+                              <select
+                                value={item.year_start}
                                 onChange={(e) =>
-                                  handleArrayFieldChange(
-                                    "educations",
+                                  changeEducation(
                                     i,
-                                    "major",
+                                    "year_start",
                                     e.target.value,
                                   )
                                 }
-                                style={{
-                                  padding: "0.5rem",
-                                  borderRadius: "4px",
-                                  border: "1px solid #ccc",
-                                  width: "100%",
-                                }}
-                              />
+                                style={baseInputStyle}
+                              >
+                                <option value="">Select year</option>
+                                {yearOptions.map((year) => (
+                                  <option key={`start-${year}`} value={year}>
+                                    {year}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
 
-                            {/* สถาบันการศึกษา */}
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.3rem",
-                              }}
-                            >
-                              <label
-                                style={{
-                                  fontWeight: "500",
-                                  fontSize: "0.9rem",
-                                  color: "#333",
-                                }}
-                              >
-                                Institution:
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="School / University"
-                                value={item.institution ?? ""}
+                            <div style={{ flex: "1 1 130px" }}>
+                              <label style={labelStyle}>Year End:</label>
+                              <select
+                                value={item.year_end}
                                 onChange={(e) =>
-                                  handleArrayFieldChange(
-                                    "educations",
-                                    i,
-                                    "institution",
-                                    e.target.value,
-                                  )
+                                  changeEducation(i, "year_end", e.target.value)
                                 }
-                                style={{
-                                  padding: "0.5rem",
-                                  borderRadius: "4px",
-                                  border: "1px solid #ccc",
-                                  width: "100%",
-                                }}
-                              />
-                            </div>
-
-                            {/* กลุ่มของปี (แบ่งครึ่งซ้าย-ขวาอย่างสมดุล) */}
-                            <div style={{ display: "flex", gap: "1rem" }}>
-                              {/* ปีที่เริ่ม */}
-                              <div
-                                style={{
-                                  flex: 1,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "0.3rem",
-                                }}
+                                style={baseInputStyle}
                               >
-                                <label
-                                  style={{
-                                    fontWeight: "500",
-                                    fontSize: "0.9rem",
-                                    color: "#000000",
-                                  }}
-                                >
-                                  Year Start:
-                                </label>
-                                <select
-                                  value={item.year_start ?? ""}
-                                  onChange={(e) =>
-                                    handleArrayFieldChange(
-                                      "educations",
-                                      i,
-                                      "year_start",
-                                      e.target.value,
-                                    )
-                                  }
-                                  style={{
-                                    padding: "0.5rem",
-                                    borderRadius: "4px",
-                                    border: "1px solid #ccc",
-                                    width: "100%",
-                                    backgroundColor: "#fff",
-                                  }}
-                                >
-                                  <option value="">year start</option>
-                                  {yearOptions.map((year) => (
-                                    <option key={`start-${year}`} value={year}>
-                                      {year}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              {/* ปีที่จบ */}
-                              <div
-                                style={{
-                                  flex: 1,
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: "0.3rem",
-                                }}
-                              >
-                                <label
-                                  style={{
-                                    fontWeight: "500",
-                                    fontSize: "0.9rem",
-                                    color: "#020202",
-                                  }}
-                                >
-                                  Year End:
-                                </label>
-                                <select
-                                  value={item.year_end ?? ""}
-                                  onChange={(e) =>
-                                    handleArrayFieldChange(
-                                      "educations",
-                                      i,
-                                      "year_end",
-                                      e.target.value,
-                                    )
-                                  }
-                                  style={{
-                                    padding: "0.5rem",
-                                    borderRadius: "4px",
-                                    border: "1px solid #ccc",
-                                    width: "100%",
-                                    backgroundColor: "#fff",
-                                  }}
-                                >
-                                  <option value="">year end</option>
-                                  <option value="Present">Present</option>
-                                  {yearOptions.map((year) => (
-                                    <option key={`end-${year}`} value={year}>
-                                      {year}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
+                                <option value="">Select year</option>
+                                <option value="Present">Present</option>
+                                {yearOptions.map((year) => (
+                                  <option key={`end-${year}`} value={year}>
+                                    {year}
+                                  </option>
+                                ))}
+                              </select>
                             </div>
                           </div>
-                        ),
-                      )}
+                        </div>
+                      ))}
 
-                      {/* ปุ่มกดเพิ่มประวัติการศึกษา (ถ้าต้องการใช้ต่อ) */}
-                      <button
-                        type="button"
-                        className={styles.tag}
-                        onClick={() =>
-                          addArrayItem("educations", {
-                            level: "",
-                            major: "",
-                            institution: "",
-                            faculty: "",
-                            year_start: "",
-                            year_end: "",
-                          })
-                        }
-                        style={{
-                          alignSelf: "flex-start",
-                          marginTop: "0.5rem",
-                          border: "1px solid #000000",
-                        }}
-                      >
-                        + เพิ่มประวัติการศึกษา
-                      </button>
+                      <div>
+                        <AddButton
+                          label="เพิ่มประวัติการศึกษา"
+                          onClick={addEducation}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1270,155 +1586,64 @@ const SeekerProfile = () => {
         <div className={styles.column}>
           <div className={styles.cardHeader}>Skills</div>
           <div className={styles.contentPadding}>
+            {/* Specific Skills */}
             <section className={styles.section}>
               <h4>Specific skills</h4>
               {!editMode ? (
                 <ol className="list-decimal list-inside">
-                  {profile.skills?.map((s: any, i: number) => (
-                    <li key={i}>{fmt(s.skill_name)}</li>
+                  {profile.skills.map((s, i) => (
+                    <li key={s.skill_id ?? `view-skill-${i}`}>
+                      {show(s.skill_name)}
+                    </li>
                   ))}
                 </ol>
               ) : (
-                <div>
-                  {(editForm.skills || []).map((s: any, i: number) => (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                  }}
+                >
+                  {form.skills.map((s, i) => (
                     <div
-                      key={i}
+                      key={s.skill_id ?? `edit-skill-${i}`}
                       style={{
-                        borderBottom: "1px solid #eee",
-                        marginBottom: "0.5rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
                       }}
                     >
                       <input
-                        style={{
-                          width: "80%",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={baseInputStyle}
                         type="text"
-                        value={s.skill_name ?? ""}
-                        onChange={(e) =>
-                          handleArrayFieldChange(
-                            "skills",
-                            i,
-                            "skill_name",
-                            e.target.value,
-                          )
-                        }
+                        placeholder="Skill Name"
+                        value={s.skill_name}
+                        onChange={(e) => changeSkill(i, e.target.value)}
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayItem("skills", i)}
-                      >
-                        ❌
-                      </button>
+                      <RemoveButton onClick={() => removeSkill(i)} />
                     </div>
                   ))}
-                  <button
-                    style={{ border: "1px solid #000000" }}
-                    type="button"
-                    className={styles.tag}
-                    onClick={() =>
-                      addArrayItem("skills", {
-                        skill_name: "",
-                        skill_category: "General",
-                        skill_detail: "",
-                      })
-                    }
-                  >
-                    + Add Skill
-                  </button>
+                  <div>
+                    <AddButton label="Add Skill" onClick={addSkill} />
+                  </div>
                 </div>
               )}
             </section>
+
+            {/* Typing Speed */}
             <section className={styles.section}>
-              <h4>Typing Speed:</h4>
+              <h4>Typing Speed</h4>
               {!editMode ? (
-                profile.typing_speeds?.map((t: any, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem" }}>
-                    <li>
-                      <h4>{fmt(t.typing_language)}</h4>
-                    </li>
-                    <li>- {fmt(t.typing_wpm)} WPM</li>
-                  </ul>
-                ))
-              ) : (
-                <div>
-                  {(editForm.typing_speeds || []).map((t: any, i: number) => (
-                    <div key={i} style={{ display: "flex", gap: "0.5rem" }}>
-                      <input
-                        style={{
-                          flex: 1,
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                          width: "10px",
-                        }}
-                        type="text"
-                        value={t.typing_language ?? ""}
-                        onChange={(e) =>
-                          handleArrayFieldChange(
-                            "typing_speeds",
-                            i,
-                            "typing_language",
-                            e.target.value,
-                          )
-                        }
-                      />
-                      <input
-                        style={{
-                          width: "100px",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
-                        type="number"
-                        value={t.typing_wpm ?? ""}
-                        onChange={(e) =>
-                          handleArrayFieldChange(
-                            "typing_speeds",
-                            i,
-                            "typing_wpm",
-                            e.target.value,
-                          )
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayItem("typing_speeds", i)}
-                      >
-                        ❌
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    style={{ marginTop: "0.5rem", border: "1px solid #000000" }}
-                    type="button"
-                    className={styles.tag}
-                    onClick={() =>
-                      addArrayItem("typing_speeds", {
-                        typing_language: "",
-                        typing_wpm: "",
-                      })
-                    }
+                profile.typing_speeds.map((t, i) => (
+                  <ul
+                    key={t.typing_id ?? `view-typing-${i}`}
+                    style={{ marginBottom: "1rem" }}
                   >
-                    + Add Typing
-                  </button>
-                </div>
-              )}
-            </section>
-            <section className={styles.section}>
-              <h4>Projects & Experiences</h4>
-              {!editMode ? (
-                profile.experiences?.map((exp: any, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem" }}>
                     <li>
-                      - <strong>{fmt(exp.ex_title)}</strong>
+                      <h4>{show(t.typing_language)}</h4>
                     </li>
-                    <li className={styles.setLi}>{fmt(exp.ex_description)}</li>
-                    <li className={styles.setLi}>
-                      {formatDate(exp.start_date)} – {formatDate(exp.end_date)}
-                    </li>
+                    <li>- {show(t.typing_wpm)} WPM</li>
                   </ul>
                 ))
               ) : (
@@ -1426,394 +1651,267 @@ const SeekerProfile = () => {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "1.5rem",
-                    width: "100%",
-                    maxWidth: "460px",
-                    margin: "0 auto",
+                    gap: "0.5rem",
                   }}
                 >
-                  {(editForm.experiences || []).map((exp: any, i: number) => (
+                  {form.typing_speeds.map((t, i) => (
                     <div
-                      key={i}
+                      key={t.typing_id ?? `edit-typing-${i}`}
                       style={{
-                        border: "1px solid #ccc",
-                        padding: "1.2rem",
-                        borderRadius: "8px",
-                        backgroundColor: "#ffffff", // พื้นหลังขาวตัดกับพื้นเทา
-                        position: "relative",
                         display: "flex",
-                        flexDirection: "column",
-                        gap: "0.8rem",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                        alignItems: "center",
+                        gap: "0.5rem",
                       }}
                     >
-                      {/* ปุ่มลบอยู่ที่มุมขวาบนของการ์ด */}
-                      <button
-                        type="button"
-                        onClick={() => removeArrayItem("experiences", i)}
-                        style={{
-                          position: "absolute",
-                          top: "12px",
-                          right: "12px",
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "1.1rem",
-                        }}
-                      >
-                        ❌
-                      </button>
+                      <input
+                        style={{ ...baseInputStyle, flex: 2 }}
+                        type="text"
+                        placeholder="Language (e.g. Thai)"
+                        value={t.typing_language}
+                        onChange={(e) =>
+                          changeTypingLanguage(i, e.target.value)
+                        }
+                      />
+                      <input
+                        style={{ ...baseInputStyle, flex: 1 }}
+                        type="number"
+                        placeholder="WPM"
+                        value={t.typing_wpm}
+                        onChange={(e) => changeTypingWpm(i, e.target.value)}
+                      />
+                      <RemoveButton onClick={() => removeTyping(i)} />
+                    </div>
+                  ))}
+                  <div>
+                    <AddButton label="Add Typing" onClick={addTyping} />
+                  </div>
+                </div>
+              )}
+            </section>
 
-                      {/* ชื่อโครงการ / ประสบการณ์ */}
+            {/* Projects & Experiences */}
+            <section className={styles.section}>
+              <h4>Projects &amp; Experiences</h4>
+              {!editMode ? (
+                profile.experiences.map((exp, i) => (
+                  <ul
+                    key={exp.ex_id ?? `view-exp-${i}`}
+                    style={{ marginBottom: "1rem" }}
+                  >
+                    <li>
+                      - <strong>{show(exp.ex_title)}</strong>
+                    </li>
+                    <li className={styles.setLi}>{show(exp.ex_description)}</li>
+                    <li className={styles.setLi}>
+                      {showDate(exp.start_date)} – {showDate(exp.end_date)}
+                    </li>
+                  </ul>
+                ))
+              ) : (
+                /* EDIT MODE - EXPERIENCE */
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
+                    width: "100%",
+                  }}
+                >
+                  {form.experiences.map((exp, i) => (
+                    <div
+                      key={exp.ex_id ?? `edit-exp-${i}`}
+                      style={editCardStyle}
+                    >
                       <div
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "0.3rem",
+                          position: "absolute",
+                          top: "10px",
+                          right: "10px",
                         }}
                       >
-                        <label
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "0.9rem",
-                            color: "#333",
-                          }}
-                        >
-                          Experience Title:
-                        </label>
+                        <RemoveButton onClick={() => removeExperience(i)} />
+                      </div>
+
+                      <div>
+                        <label style={labelStyle}>Experience Title:</label>
                         <input
                           type="text"
                           placeholder="Title (e.g., Senior Developer)"
-                          value={exp.ex_title ?? ""}
+                          value={exp.ex_title}
                           onChange={(e) =>
-                            handleArrayFieldChange(
-                              "experiences",
-                              i,
-                              "ex_title",
-                              e.target.value,
-                            )
+                            changeExperience(i, "ex_title", e.target.value)
                           }
-                          style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                          }}
+                          style={baseInputStyle}
                         />
                       </div>
 
-                      {/* รายละเอียดโครงการ / ประสบการณ์ */}
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "0.3rem",
-                        }}
-                      >
-                        <label
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "0.9rem",
-                            color: "#333",
-                          }}
-                        >
-                          Experience Description:
-                        </label>
+                      <div>
+                        <label style={labelStyle}>Description:</label>
                         <textarea
-                          placeholder="Description of your responsibilities or achievements"
-                          value={exp.ex_description ?? ""}
+                          placeholder="Description of responsibilities or achievements"
+                          value={exp.ex_description}
                           onChange={(e) =>
-                            handleArrayFieldChange(
-                              "experiences",
+                            changeExperience(
                               i,
                               "ex_description",
                               e.target.value,
                             )
                           }
                           style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                            minHeight: "80px",
+                            ...baseInputStyle,
+                            minHeight: "75px",
                             fontFamily: "inherit",
                             resize: "vertical",
                           }}
                         />
                       </div>
 
-                      {/* วันที่เริ่มงาน */}
                       <div
                         style={{
-                          flex: 1,
                           display: "flex",
-                          flexDirection: "column",
-                          gap: "0.3rem",
+                          gap: "0.75rem",
+                          flexWrap: "wrap",
                         }}
                       >
-                        <label
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "0.9rem",
-                            color: "#333",
-                          }}
-                        >
-                          Start Date:
-                        </label>
-                        <input
-                          type="date"
-                          value={
-                            exp.start_date
-                              ? new Date(exp.start_date)
-                                  .toISOString()
-                                  .substring(0, 10)
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleArrayFieldChange(
-                              "experiences",
-                              i,
-                              "start_date",
-                              e.target.value,
-                            )
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                            backgroundColor: "#fff",
-                          }}
-                        />
-                      </div>
-                      {/* วันที่สิ้นสุดงาน */}
-                      <div
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "0.3rem",
-                        }}
-                      >
-                        <label
-                          style={{
-                            fontWeight: "600",
-                            fontSize: "0.9rem",
-                            color: "#333",
-                          }}
-                        >
-                          End Date:
-                        </label>
-                        <input
-                          type="date"
-                          value={
-                            exp.end_date
-                              ? new Date(exp.end_date)
-                                  .toISOString()
-                                  .substring(0, 10)
-                              : ""
-                          }
-                          onChange={(e) =>
-                            handleArrayFieldChange(
-                              "experiences",
-                              i,
-                              "end_date",
-                              e.target.value,
-                            )
-                          }
-                          style={{
-                            width: "100%",
-                            padding: "0.5rem",
-                            borderRadius: "4px",
-                            border: "1px solid #ccc",
-                            backgroundColor: "#fff",
-                          }}
-                        />
+                        <div style={{ flex: "1 1 130px" }}>
+                          <label style={labelStyle}>Start Date:</label>
+                          <input
+                            type="date"
+                            value={toDateInput(exp.start_date)}
+                            onChange={(e) =>
+                              changeExperience(i, "start_date", e.target.value)
+                            }
+                            style={baseInputStyle}
+                          />
+                        </div>
+
+                        <div style={{ flex: "1 1 130px" }}>
+                          <label style={labelStyle}>End Date:</label>
+                          <input
+                            type="date"
+                            value={toDateInput(exp.end_date)}
+                            onChange={(e) =>
+                              changeExperience(i, "end_date", e.target.value)
+                            }
+                            style={baseInputStyle}
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
 
-                  {/* ปุ่มสำหรับกดเพิ่มประวัติโครงการ/ประสบการณ์ใหม่ */}
-                  <button
-                    type="button"
-                    className={styles.tag}
-                    onClick={() =>
-                      addArrayItem("experiences", {
-                        ex_title: "",
-                        ex_description: "",
-                        type: "",
-                        start_date: null,
-                        end_date: null,
-                      })
-                    }
-                    style={{
-                      alignSelf: "flex-start",
-                      marginTop: "0.5rem",
-                      border: "1px solid #000000",
-                    }}
-                  >
-                    + Add Exp
-                  </button>
+                  <div>
+                    <AddButton label="Add Exp" onClick={addExperience} />
+                  </div>
                 </div>
               )}
             </section>
 
+            {/* Language Proficiency */}
             <section className={styles.section}>
               <h4>Language Proficiency</h4>
               {!editMode ? (
-                profile.languages?.map((lang: any, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem" }}>
+                profile.languages.map((lang, i) => (
+                  <ul
+                    key={lang.language_id ?? `view-lang-${i}`}
+                    style={{ marginBottom: "1rem" }}
+                  >
                     <li>
-                      <h4>{fmt(lang.language_type)}</h4>
+                      <h4>{show(lang.language_type)}</h4>
                     </li>
-                    <li>- {fmt(lang.level)}</li>
-                    {(lang.test_name || lang.score) && (
+                    <li>- {show(lang.level)}</li>
+                    {(lang.test_name !== "" || lang.score !== "") && (
                       <li>
-                        - {fmt(lang.test_name)}
-                        {lang.score ? `: ${fmt(lang.score)}` : ""}
+                        - {show(lang.test_name)}
+                        {lang.score !== "" ? `: ${lang.score}` : ""}
                       </li>
                     )}
                   </ul>
                 ))
               ) : (
-                <div>
-                  {(editForm.languages || []).map((lang: any, i: number) => (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                  }}
+                >
+                  {form.languages.map((lang, i) => (
                     <div
-                      key={i}
+                      key={lang.language_id ?? `edit-lang-${i}`}
                       style={{
                         display: "flex",
                         flexWrap: "wrap",
                         gap: "0.5rem",
                         alignItems: "center",
-                        borderBottom: "1px solid #eee",
-                        paddingBottom: "0.5rem",
-                        marginBottom: "0.5rem",
+                        padding: "0.75rem",
+                        borderRadius: "6px",
+                        backgroundColor: "#f9fafb",
+                        border: "1px solid #e5e7eb",
                       }}
                     >
                       <input
-                        style={{
-                          flex: "1 1 120px",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={{ ...baseInputStyle, flex: "1 1 120px" }}
                         type="text"
-                        placeholder="Language (e.g., English)"
-                        value={lang.language_type ?? ""}
+                        placeholder="Language (e.g. English)"
+                        value={lang.language_type}
                         onChange={(e) =>
-                          handleArrayFieldChange(
-                            "languages",
-                            i,
-                            "language_type",
-                            e.target.value,
-                          )
+                          changeLanguage(i, "language_type", e.target.value)
                         }
                       />
                       <input
-                        style={{
-                          flex: "1 1 100px",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
-                        placeholder="Level (e.g., Advanced)"
-                        value={lang.level ?? ""}
+                        placeholder="Level (e.g. Advanced)"
+                        value={lang.level}
                         onChange={(e) =>
-                          handleArrayFieldChange(
-                            "languages",
-                            i,
-                            "level",
-                            e.target.value,
-                          )
+                          changeLanguage(i, "level", e.target.value)
                         }
                       />
                       <input
-                        style={{
-                          flex: "1 1 100px",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
-                        placeholder="Test (e.g., TOEIC)"
-                        value={lang.test_name ?? ""}
+                        placeholder="Test (e.g. TOEIC)"
+                        value={lang.test_name}
                         onChange={(e) =>
-                          handleArrayFieldChange(
-                            "languages",
-                            i,
-                            "test_name",
-                            e.target.value,
-                          )
+                          changeLanguage(i, "test_name", e.target.value)
                         }
                       />
                       <input
-                        style={{
-                          flex: "0 1 80px",
-                          padding: "0.3rem",
-                          borderRadius: "4px",
-                          border: "1px solid #000000",
-                        }}
+                        style={{ ...baseInputStyle, flex: "0 1 80px" }}
                         type="number"
                         step="any"
                         placeholder="Score"
-                        value={lang.score ?? ""}
+                        value={lang.score}
                         onChange={(e) =>
-                          handleArrayFieldChange(
-                            "languages",
-                            i,
-                            "score",
-                            e.target.value,
-                          )
+                          changeLanguage(i, "score", e.target.value)
                         }
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeArrayItem("languages", i)}
-                      >
-                        ❌
-                      </button>
+                      <RemoveButton onClick={() => removeLanguage(i)} />
                     </div>
                   ))}
-                  <button
-                    style={{ marginTop: "0.5rem", border: "1px solid #000000" }}
-                    type="button"
-                    className={styles.tag}
-                    onClick={() =>
-                      addArrayItem("languages", {
-                        language_type: "",
-                        level: "",
-                        test_name: "",
-                        score: "",
-                      })
-                    }
-                  >
-                    + Add Language
-                  </button>
+                  <div>
+                    <AddButton label="Add Language" onClick={addLanguage} />
+                  </div>
                 </div>
               )}
             </section>
           </div>
         </div>
 
-        {/* ── Column 4: Files (อัปโหลดอิสระ ไม่สน EditMode) ── */}
+        {/* ── Column 4: Files ── */}
         <div className={styles.columnTransparent}>
           <div className={styles.fileGroup}>
-            {[
-              { id: "transcript", label: "transcript" },
-              { id: "resume", label: "resume" },
-              { id: "portfolio", label: "portfolio" },
-              { id: "certificate", label: "certificate" },
-            ].map((cat) => {
-              const currentFiles = getFilesByCategory(cat.id);
-              const isUploading = uploadingCategory === cat.id;
+            {fileCategories.map((category) => {
+              const currentFiles = getFilesByCategory(category);
+              const isUploading = uploadingCategory === category;
 
               return (
-                <div key={cat.id} className={styles.fileItem}>
+                <div key={category} className={styles.fileItem}>
                   <label
                     style={{ textTransform: "lowercase", marginBottom: "10px" }}
                   >
-                    {cat.label} ({currentFiles.length})
+                    {category} ({currentFiles.length})
                   </label>
 
                   <div
@@ -1824,28 +1922,24 @@ const SeekerProfile = () => {
                       alignItems: "center",
                     }}
                   >
-                    {currentFiles.map((file: any) => {
+                    {currentFiles.map((file, i) => {
+                      const name =
+                        file.file_name === "" ? "File" : file.file_name;
                       const shortName =
-                        file.file_name?.length > 15
-                          ? file.file_name.substring(0, 13) + "..."
-                          : file.file_name || "File";
+                        name.length > 15 ? name.substring(0, 13) + "..." : name;
+                      const fileKey =
+                        file.file_id && file.file_id !== 0
+                          ? file.file_id
+                          : `file-${category}-${i}`;
+
                       return (
-                        <div
-                          key={file.file_id}
-                          className={styles.fileContainerBox}
-                        >
-                          <div
-                            className={styles.fileNameDisplay}
-                            title={file.file_name}
-                          >
+                        <div key={fileKey} className={styles.fileContainerBox}>
+                          <div className={styles.fileNameDisplay} title={name}>
                             📄 {shortName}
                             <span
                               className={styles.deleteFileIcon}
                               onClick={() =>
-                                onInstantFileDelete(
-                                  file.file_id,
-                                  file.file_path,
-                                )
+                                deleteFile(file.file_id, file.file_path)
                               }
                             >
                               ❌
@@ -1853,12 +1947,7 @@ const SeekerProfile = () => {
                           </div>
                           <div
                             className={styles.fileBox}
-                            onClick={() =>
-                              setActivePreviewFile({
-                                path: file.file_path,
-                                name: file.file_name,
-                              })
-                            }
+                            onClick={() => setPreviewFile(file)}
                           >
                             view file
                           </div>
@@ -1868,22 +1957,16 @@ const SeekerProfile = () => {
 
                     <div style={{ width: "100%", marginTop: "5px" }}>
                       <input
+                        id={`file-input-${category}`}
                         type="file"
-                        ref={
-                          fileInputRefs[cat.id as keyof typeof fileInputRefs]
-                        }
-                        onChange={(e) => onInstantFileUpload(e, cat.id)}
+                        onChange={(e) => uploadFile(e, category)}
                         className={styles.hiddenInput}
                       />
                       <button
                         type="button"
                         className={styles.addFileInlineBtn}
-                        onClick={() =>
-                          fileInputRefs[
-                            cat.id as keyof typeof fileInputRefs
-                          ].current?.click()
-                        }
-                        disabled={uploadingCategory !== null}
+                        onClick={() => openFilePicker(`file-input-${category}`)}
+                        disabled={uploadingCategory !== ""}
                       >
                         {isUploading ? "uploading..." : "+ add file"}
                       </button>
@@ -1896,44 +1979,34 @@ const SeekerProfile = () => {
         </div>
       </div>
 
-      {/* ─── POPUP MODAL พรีวิวไฟล์ ─── */}
-      {activePreviewFile && (
+      {/* ─── Popup พรีวิวไฟล์ ─── */}
+      {previewFile && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContainer}>
             <div className={styles.modalHeader}>
               <span className={styles.modalTitle}>
-                Preview: {activePreviewFile.name}
+                Preview: {previewFile.file_name}
               </span>
               <button
                 className={styles.modalCloseBtn}
-                onClick={() => setActivePreviewFile(null)}
+                onClick={() => setPreviewFile(null)}
               >
                 ปิดหน้าต่าง ✖
               </button>
             </div>
             <div className={styles.modalBody}>
-              {activePreviewFile.path.toLowerCase().includes(".pdf") ||
-              (activePreviewFile.path.includes("alt=media") == false &&
-                activePreviewFile.path.toLowerCase().endsWith(".pdf")) ? (
+              {previewFile.file_path.toLowerCase().includes(".pdf") ? (
                 <iframe
-                  src={activePreviewFile.path}
+                  src={previewFile.file_path}
                   className={styles.modalIframe}
                   title="PDF View"
                 />
               ) : (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={activePreviewFile.path}
+                  src={previewFile.file_path}
                   className={styles.modalImg}
                   alt="Preview"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = "none";
-                    const iframe = document.createElement("iframe");
-                    iframe.src = activePreviewFile.path;
-                    iframe.className = styles.modalIframe;
-                    (e.target as HTMLElement).parentElement?.appendChild(
-                      iframe,
-                    );
-                  }}
                 />
               )}
             </div>

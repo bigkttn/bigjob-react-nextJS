@@ -2,7 +2,14 @@
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
-export default function YourComponent({ job, isAdmin }: any) {
+interface BanPopupProps {
+  job: {
+    ban_until?: string;
+  };
+  isAdmin?: boolean;
+}
+
+export default function YourComponent({ job, isAdmin }: BanPopupProps) {
   // อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
   const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
   const router = useRouter();

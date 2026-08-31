@@ -5,14 +5,40 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProvinceSelect from "./province";
 
-const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
+// 1. กำหนด Type ของ User (อิงตามข้อมูลจริงจาก Console ในรูป)
+interface User {
+  id?: number;
+  user_id?: number | string;
+  email?: string;
+  role?: string;
+  iat?: number;
+  exp?: number;
+}
+
+// 2. กำหนด Type ของ ประกาศงาน (Job Post)
+interface JobPost {
+  post_id: number | string;
+  company_name?: string;
+  logo_image?: string;
+  status?: string;
+  job_position?: string;
+  province?: string;
+  work_location?: string;
+  job_type?: string;
+  salary_min?: number;
+  salary_max?: number;
+  created_at?: string;
+  matchScore?: number;
+}
+
+const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [user] = useState(initialUser);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<JobPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
   // Suggested Posts State
-  const [suggestedPosts, setSuggestedPosts] = useState<any[]>([]);
+  const [suggestedPosts, setSuggestedPosts] = useState<JobPost[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
   // Search & Filter State
@@ -30,6 +56,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
 
   const router = useRouter();
 
+  console.log(" = ", initialUser);
   // 1. ดึงข้อมูล Suggested Posts ครั้งแรก
   useEffect(() => {
     fetchSuggestedPosts();
@@ -179,7 +206,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
   const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
 
-  const handleFilterChange = (setter: Function, value: string) => {
+  const handleFilterChange = (
+    setter: (value: string) => void,
+    value: string,
+  ) => {
     setter(value);
     setCurrentPage(1);
   };
@@ -360,7 +390,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           <p className={styles.bold}>{post.company_name}</p>
                           <span
                             className={styles.statusBadge}
-                            style={getStatusStyle(post.status)}
+                            style={getStatusStyle(post.status || "")}
                           >
                             {post.status || "ไม่ระบุ"}
                           </span>
@@ -379,7 +409,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                         </p>
                       </div>
                       <p className={styles.subText}>
-                        {getTimeAgo(post.created_at)}
+                        {getTimeAgo(post.created_at || "")}
                       </p>
                       <Link
                         href={`/user/user-detail-job/${post.post_id}`}
@@ -436,7 +466,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                           )} */}
                           <span
                             className={styles.statusBadge}
-                            style={getStatusStyle(post.status)}
+                            style={getStatusStyle(post.status || "")}
                           >
                             {post.status || "ไม่ระบุ"}
                           </span>
@@ -455,7 +485,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: any }) => {
                         </p>
                       </div>
                       <p className={styles.subText}>
-                        {getTimeAgo(post.created_at)}
+                        {getTimeAgo(post.created_at || "")}
                       </p>
                       <Link
                         href={`/user/user-detail-job/${post.post_id}`}
