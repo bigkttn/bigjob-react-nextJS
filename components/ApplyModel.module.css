@@ -119,23 +119,21 @@
 }
 
 .btnSubmit {
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
   background-color: #2563eb;
-  border: none;
+  color: #ffffff;
+  padding: 8px 18px;
   border-radius: 8px;
+  font-weight: 600;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
-.btnSubmit:hover {
-  background-color: #1d4ed8;
-}
-
-.btnSubmit:disabled,
-.btnCancel:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
+/* 🟢 สถานะปุ่มสีเทาเมื่อส่งแล้ว หรือกำลังโหลด */
+.btnDisabled,
+.btnSubmit:disabled {
+  background-color: #9ca3af; /* สีเทา */
+  color: #ffffff ;
+  cursor: not-allowed ; /* ไอคอนห้ามคลิก */
+  opacity: 0.8;
 }

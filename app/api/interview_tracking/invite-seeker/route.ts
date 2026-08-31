@@ -33,11 +33,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "ข้อมูลไม่ครบถ้วน" }, { status: 400 });
     }
 
-    // URL เว็บไซต์ของคุณ (ดึงจาก env หรือ fallback)
-    
+    // 🟢 เพิ่มส่วนเช็กซ้ำใน Database ก่อนทำการบันทึก
+    const checkSql = `SELECT tracking_id FROM interview_tracking WHERE post_id = ? AND user_id = ? LIMIT 1`;
+    const [existing] = await db.query(checkSql, [post_id, user_id]) as [Array<{tracking_id: number}>, unknown];
+
+    if (Array.isArray(existing) && existing.length > 0) {
+      return NextResponse.json(
+        { message: "ผู้สมัครคนนี้เคยได้รับการเชิญชวนหรือสมัครตำแหน่งนี้แล้ว" },
+        { status: 400 }
+      );
+    }
+
     const jobLink = `${apiUrl}/jobs/${post_id}`;
 
-    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'pending', ? )`;
+    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'pending', ?)`;
     await db.query(sql, [post_id, user_id, message || null]);
 
     // ส่งอีเมลไปหาผู้สมัคร (Seeker)

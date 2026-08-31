@@ -78,10 +78,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "ส่งใบสมัครเรียบร้อยแล้ว!" }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending Job Application:", error);
     return NextResponse.json(
-      { message: "เกิดข้อผิดพลาดในการส่งใบสมัคร", error: error.message },
+      { message: "เกิดข้อผิดพลาดในการส่งใบสมัคร", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
