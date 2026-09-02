@@ -22,13 +22,13 @@ export default function AdminButton({
   const [banDuration, setBanDuration] = useState("3");
   const [isLoading, setIsLoading] = useState(false);
 
-  // State สำหรับเก็บข้อความแสดงเวลาแบนถอยหลัง
   const [countdownText, setCountdownText] = useState<string>("");
   const [isBanned, setIsBanned] = useState<boolean>(false);
 
   const router = useRouter();
+  const [warnMessage, setWarnMessage] = useState("");
+  const [warnLoading, setWarnLoading] = useState(false);
 
-  // ฟังก์ชันคำนวณเวลาถอยหลัง
   useEffect(() => {
     if (!ban_until) {
       setIsBanned(false);
@@ -37,7 +37,6 @@ export default function AdminButton({
     }
 
     const checkTime = () => {
-      // เนื่องจาก backend มีการ +7 ชม. ตอนเซฟ ดังนั้นถ้าแสดงผลในไทยถือว่าเวลาตรงกันแล้ว
       const targetDate = new Date(ban_until);
       const now = new Date();
       const diffMs = targetDate.getTime() - now.getTime();
@@ -64,14 +63,13 @@ export default function AdminButton({
     };
 
     checkTime();
-    // อัปเดตเวลาทุกๆ 1 นาที (60000 ms)
     const interval = setInterval(checkTime, 60000);
     return () => clearInterval(interval);
   }, [ban_until]);
 
   const handleDelete = async () => {
     const isConfirm = confirm(
-      `Are you sure you want to delete Post ID: ${post_id} ? This action cannot be undone.`,
+      `คุณต้องการลบโพสต์ ID: ${post_id} ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
     );
     if (!isConfirm) return;
 
@@ -81,11 +79,12 @@ export default function AdminButton({
         method: "DELETE",
       });
       if (response.ok) {
-        alert("Post deleted successfully");
+        alert("ลบโพสต์สำเร็จ!");
         router.back();
       } else {
         const errorData = await response.json();
         console.error("Error deleting post:", errorData);
+        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถลบโพสต์ได้"}`);
       }
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -98,7 +97,7 @@ export default function AdminButton({
   const handleBan = async () => {
     const durationText = banDuration === "999" ? "ถาวร" : `${banDuration} วัน`;
     const isConfirm = confirm(
-      `คุณต้องการแบนผู้สร้างโพสต์ ID: ${post_id} เป็นเวลา ${durationText} ใช่หรือไม่?`,
+      `คุณต้องการแบนโพสต์ ID: ${post_id} เป็นเวลา ${durationText} ใช่หรือไม่?`,
     );
     if (!isConfirm) return;
 
@@ -118,13 +117,13 @@ export default function AdminButton({
       if (res.ok) {
         alert(`แบนโพสต์สำเร็จ! (ระยะเวลา: ${durationText})`);
         setIsOpen(false);
-        router.refresh(); // ใช้ refresh แทน back เพื่อให้ข้อมูลหน้าที่เปิดอยู่อัปเดต
+        router.refresh();
       } else {
         alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถแบนโพสต์ได้"}`);
       }
     } catch (error) {
       console.error("Ban error:", error);
-      alert("เกิดข้อผิดพลาดในการแบนผู้ใช้");
+      alert("เกิดข้อผิดพลาดในการแบนโพสต์");
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +137,6 @@ export default function AdminButton({
 
     setIsLoading(true);
     try {
-      // ส่ง DELETE Request พร้อม query parameter
       const res = await fetch(`/api/admin/post/Ban?post_id=${post_id}`, {
         method: "DELETE",
       });
@@ -148,7 +146,7 @@ export default function AdminButton({
       if (res.ok) {
         alert("ปลดแบนสำเร็จ!");
         setIsOpen(false);
-        router.refresh(); // รีเฟรชหน้าเพื่อดึงข้อมูลใหม่
+        router.refresh();
       } else {
         alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถปลดแบนได้"}`);
       }
@@ -157,6 +155,39 @@ export default function AdminButton({
       alert("เกิดข้อผิดพลาดในการปลดแบน");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSendWarning = async () => {
+    if (!warnMessage.trim()) {
+      alert("กรุณากรอกข้อความตักเตือน");
+      return;
+    }
+
+    setWarnLoading(true);
+    try {
+      const res = await fetch("/api/admin/warn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_id: post_id, // user: user_id | post: post_id
+          source: "post", // user: "user"  | post: "post"
+          message: warnMessage.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("ส่งอีเมลตักเตือนสำเร็จ!");
+        setWarnMessage("");
+      } else {
+        alert(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถส่งข้อความได้"}`);
+      }
+    } catch (error) {
+      console.error("Warn error:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setWarnLoading(false);
     }
   };
 
@@ -214,7 +245,7 @@ export default function AdminButton({
                 fontWeight: "bold",
               }}
             >
-              Admin Post Management
+              จัดการโพสต์ (Admin)
             </h3>
             <p
               style={{
@@ -223,13 +254,12 @@ export default function AdminButton({
                 marginBottom: "15px",
               }}
             >
-              Managing Target ID:{" "}
+              รหัสโพสต์ที่กำลังจัดการ:{" "}
               <span style={{ fontWeight: "bold", color: "#000" }}>
                 {post_id}
               </span>
             </p>
 
-            {/* แสดงสถานะการแบนปัจจุบัน */}
             <div
               style={{
                 backgroundColor: isBanned ? "#fff3cd" : "#d4edda",
@@ -253,7 +283,7 @@ export default function AdminButton({
               }}
             />
 
-            {/* ส่วนที่ 1: การลบโพสต์ (Delete) */}
+            {/* ส่วนที่ 1: ลบโพสต์ */}
             <div style={{ marginBottom: "25px" }}>
               <h4
                 style={{
@@ -263,7 +293,7 @@ export default function AdminButton({
                   color: "#dc3545",
                 }}
               >
-                1. Delete This Post
+                ลบประกาศงานนี้
               </h4>
               <button
                 onClick={handleDelete}
@@ -280,7 +310,7 @@ export default function AdminButton({
                   opacity: isLoading ? 0.7 : 1,
                 }}
               >
-                {isLoading ? "Processing..." : "Delete Post Now"}
+                {isLoading ? "กำลังดำเนินการ..." : "ลบโพสต์ทันที"}
               </button>
             </div>
 
@@ -292,7 +322,7 @@ export default function AdminButton({
               }}
             />
 
-            {/* ส่วนที่ 2: การแบน หรือ ปลดแบน (Ban / Unban) */}
+            {/* ส่วนที่ 2: แบน / ปลดแบน */}
             <div style={{ marginBottom: "20px" }}>
               <h4
                 style={{
@@ -302,11 +332,10 @@ export default function AdminButton({
                   color: "#fd7e14",
                 }}
               >
-                2. Ban / Unban Post
+                แบน / ปลดแบน โพสต์
               </h4>
 
               {isBanned ? (
-                // ถ้าโดนแบนอยู่ให้แสดงปุ่มปลดแบน
                 <button
                   onClick={handleUnban}
                   disabled={isLoading}
@@ -322,10 +351,9 @@ export default function AdminButton({
                     opacity: isLoading ? 0.7 : 1,
                   }}
                 >
-                  {isLoading ? "Processing..." : "ปลดแบนโพสต์นี้"}
+                  {isLoading ? "กำลังดำเนินการ..." : "ปลดแบนโพสต์นี้"}
                 </button>
               ) : (
-                // ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
                 <>
                   <div
                     style={{
@@ -347,10 +375,10 @@ export default function AdminButton({
                         cursor: "pointer",
                       }}
                     >
-                      <option value="3">Ban for 3 Days</option>
-                      <option value="7">Ban for 7 Days</option>
-                      <option value="30">Ban for 30 Days</option>
-                      <option value="999">Permanently Suspend</option>
+                      <option value="3">แบน 3 วัน</option>
+                      <option value="7">แบน 7 วัน</option>
+                      <option value="30">แบน 30 วัน</option>
+                      <option value="999">แบนถาวร</option>
                     </select>
                   </div>
 
@@ -369,13 +397,69 @@ export default function AdminButton({
                       opacity: isLoading ? 0.7 : 1,
                     }}
                   >
-                    {isLoading ? "Processing..." : "Confirm Ban"}
+                    {isLoading ? "กำลังดำเนินการ..." : "ยืนยันการแบน"}
                   </button>
                 </>
               )}
             </div>
+            <hr
+              style={{
+                border: 0,
+                borderTop: "1px solid #eee",
+                marginBottom: "20px",
+              }}
+            />
 
-            {/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
+            <div style={{ marginBottom: "20px" }}>
+              <h4
+                style={{
+                  margin: "0 0 6px 0",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  color: "#d97706",
+                }}
+              >
+                ส่งข้อความตักเตือน
+              </h4>
+
+              <textarea
+                rows={3}
+                value={warnMessage}
+                onChange={(e) => setWarnMessage(e.target.value)}
+                placeholder="กรอกข้อความ / เหตุผลที่ต้องการแจ้งเตือน..."
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  marginBottom: "10px",
+                  boxSizing: "border-box",
+                  fontFamily: "inherit",
+                  fontSize: "0.9rem",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={handleSendWarning}
+                disabled={warnLoading}
+                style={{
+                  width: "100%",
+                  backgroundColor: "#f59e0b",
+                  color: "white",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  cursor: warnLoading ? "not-allowed" : "pointer",
+                  opacity: warnLoading ? 0.7 : 1,
+                }}
+              >
+                {warnLoading ? "กำลังส่ง..." : "ส่งตักเตือน"}
+              </button>
+            </div>
+
+            {/* ส่วนที่ 3: ปิด Popup */}
             <button
               onClick={() => setIsOpen(false)}
               disabled={isLoading}
@@ -391,7 +475,7 @@ export default function AdminButton({
                 marginTop: "10px",
               }}
             >
-              Cancel / Close
+              ปิดหน้าต่าง
             </button>
           </div>
         </div>

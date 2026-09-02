@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import styles from './ApplyModel.module.css';
+import { useEffect, useState } from "react";
+import styles from "./ApplyModel.module.css";
 
 interface jobOption {
   post_id: number;
@@ -9,7 +9,7 @@ interface jobOption {
 }
 
 interface ContactModalProps {
-  mode: 'apply' | 'invite'; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
+  mode: "apply" | "invite"; // 'apply' = ผู้สมัครกดสมัคร, 'invite' = บริษัทกดทักหา
   isOpen: boolean;
   onClose: () => void;
   postId?: number;
@@ -38,21 +38,26 @@ export default function ApplyModal({
   companyJobs = [],
   existingPostIds = [],
 }: ContactModalProps) {
-  const [selectedPostId, setSelectedPostId] = useState<number | undefined>(postId);
-  const [selectedJobTitle, setSelectedJobTitle] = useState<string>(jobTitle || '');
+  const [selectedPostId, setSelectedPostId] = useState<number | undefined>(
+    postId,
+  );
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>(
+    jobTitle || "",
+  );
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+  const [statusMsg, setStatusMsg] = useState({ type: "", text: "" });
   // const indent = "\u00A0".repeat(109);
-  
-// 🟢 เช็กโดยแปลงค่าใน existingPostIds เป็น Number ทุกตัวก่อนเปรียบเทียบ
-const isSelectedJobTaken = selectedPostId !== undefined && selectedPostId !== null
-  ? existingPostIds.map(id => Number(id)).includes(Number(selectedPostId))
-  : false;
-  
+
+  // 🟢 เช็กโดยแปลงค่าใน existingPostIds เป็น Number ทุกตัวก่อนเปรียบเทียบ
+  const isSelectedJobTaken =
+    selectedPostId !== undefined && selectedPostId !== null
+      ? existingPostIds.map((id) => Number(id)).includes(Number(selectedPostId))
+      : false;
+
   const generateMessage = (currentJobTitle: string) => {
-    if (mode === 'apply') {
+    if (mode === "apply") {
       return `เรียน ฝ่ายทรัพยากรบุคคล (HR) บริษัท ${companyName}
 
 ข้าพเจ้า ${seekerName} มีความประสงค์ขอสมัครงานในตำแหน่ง ${currentJobTitle}
@@ -79,21 +84,20 @@ ${seekerName}`;
     }
   };
 
-
   const handleJobChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newPostId = Number(e.target.value);
     setSelectedPostId(newPostId);
 
     // 1. ค้นหา Job ที่ถูกเลือก
     const selectedJob = companyJobs.find(
-      (job) => Number(job.post_id) === newPostId
+      (job) => Number(job.post_id) === newPostId,
     );
 
-    const newTitle = selectedJob?.job_position || '';
+    const newTitle = selectedJob?.job_position || "";
     setSelectedJobTitle(newTitle);
 
     // 2. ถ้าเป็น Mode Invite ให้อัปเดต Template ข้อความใหม่ทันที
-    if (mode === 'invite' && newTitle) {
+    if (mode === "invite" && newTitle) {
       setMessage(generateMessage(newTitle));
     }
   };
@@ -101,14 +105,14 @@ ${seekerName}`;
   useEffect(() => {
     if (!isOpen) return;
 
-    const initialPostId = postId || (companyJobs.length > 0 ? companyJobs[0].post_id : undefined);
+    const initialPostId =
+      postId || (companyJobs.length > 0 ? companyJobs[0].post_id : undefined);
     const initialJobTitle =
-      jobTitle || (companyJobs.length > 0 ? companyJobs[0].job_position : '');
+      jobTitle || (companyJobs.length > 0 ? companyJobs[0].job_position : "");
 
     setSelectedPostId(initialPostId);
     setSelectedJobTitle(initialJobTitle);
 
-  
     setMessage(generateMessage(initialJobTitle));
   }, [isOpen, postId, jobTitle, companyName, seekerName, mode, companyJobs]);
 
@@ -117,17 +121,17 @@ ${seekerName}`;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setStatusMsg({ type: '', text: '' });
+    setStatusMsg({ type: "", text: "" });
 
     const endpoint =
-      mode === 'apply'
-        ? '/api/interview_tracking/apply-company'
-        : '/api/interview_tracking/invite-seeker';
+      mode === "apply"
+        ? "/api/interview_tracking/apply-company"
+        : "/api/interview_tracking/invite-seeker";
 
     try {
       const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postId: selectedPostId,
           userId,
@@ -143,30 +147,34 @@ ${seekerName}`;
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'เกิดข้อผิดพลาดในการส่ง');
+        throw new Error(data.message || "เกิดข้อผิดพลาดในการส่ง");
       }
 
       setStatusMsg({
-        type: 'success',
-        text: mode === 'apply' ? 'ส่งใบสมัครสำเร็จแล้ว!' : 'ส่งข้อความเชิญชวนสำเร็จแล้ว!',
+        type: "success",
+        text:
+          mode === "apply"
+            ? "ส่งใบสมัครสำเร็จแล้ว!"
+            : "ส่งข้อความเชิญชวนสำเร็จแล้ว!",
       });
 
       // ปิด modal หลังส่งสำเร็จ 1.5 วินาที
       setTimeout(() => {
         onClose();
-        setStatusMsg({ type: '', text: '' });
+        setStatusMsg({ type: "", text: "" });
       }, 1500);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการส่ง';
-      setStatusMsg({ type: 'error', text: errorMessage });
+      const errorMessage =
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการส่ง";
+      setStatusMsg({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
     }
   };
 
   const titleText =
-    mode === 'apply'
-      ? `สมัครงานตำแหน่ง ${jobTitle || ''}`
+    mode === "apply"
+      ? `สมัครงานตำแหน่ง ${jobTitle || ""}`
       : `ส่งข้อความติดต่อคุณ ${seekerName}`;
 
   return (
@@ -177,7 +185,9 @@ ${seekerName}`;
         {statusMsg.text && (
           <div
             className={`${styles.statusAlert} ${
-              statusMsg.type === 'success' ? styles.statusSuccess : styles.statusError
+              statusMsg.type === "success"
+                ? styles.statusSuccess
+                : styles.statusError
             }`}
           >
             {statusMsg.text}
@@ -185,19 +195,25 @@ ${seekerName}`;
         )}
 
         <form onSubmit={handleSubmit} className={styles.formGroup}>
-          {mode === 'invite' && companyJobs.length > 0 && (
-            <div className={styles.formItem} style={{ marginBottom: '15px' }}>
-              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>
+          {mode === "invite" && companyJobs.length > 0 && (
+            <div className={styles.formItem} style={{ marginBottom: "15px" }}>
+              <label
+                style={{
+                  fontWeight: "bold",
+                  display: "block",
+                  marginBottom: "5px",
+                }}
+              >
                 เลือกตำแหน่งงานที่ต้องการเสนอ
               </label>
               <select
-                value={selectedPostId || ''}
+                value={selectedPostId || ""}
                 onChange={handleJobChange}
                 style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #ccc',
+                  width: "100%",
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
                 }}
               >
                 <option value="" disabled>
@@ -217,7 +233,7 @@ ${seekerName}`;
               rows={8}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              style={{ width: '100%', padding: '10px' }}
+              style={{ width: "100%", padding: "10px" }}
             />
           </div>
 
@@ -231,18 +247,18 @@ ${seekerName}`;
               ยกเลิก
             </button>
             <button
-  type="submit"
-  disabled={loading || isSelectedJobTaken}
-  className={`${styles.btnSubmit} ${isSelectedJobTaken ? styles.btnDisabled : ''}`}
->
-  {loading
-    ? 'กำลังส่ง...'
-    : isSelectedJobTaken
-    ? 'ส่งแล้ว'
-    : mode === 'apply'
-    ? 'ส่งใบสมัคร'
-    : 'ส่งข้อความ'}
-</button>
+              type="submit"
+              disabled={loading || isSelectedJobTaken}
+              className={`${styles.btnSubmit} ${isSelectedJobTaken ? styles.btnDisabled : ""}`}
+            >
+              {loading
+                ? "กำลังส่ง..."
+                : isSelectedJobTaken
+                  ? "ส่งแล้ว"
+                  : mode === "apply"
+                    ? "ส่งใบสมัคร"
+                    : "ส่งข้อความ"}
+            </button>
           </div>
         </form>
       </div>

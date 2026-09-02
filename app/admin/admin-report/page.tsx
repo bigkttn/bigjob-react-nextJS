@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import styles from "./adminReport.module.css";
-import { useRouter } from "next/navigation"; // --- TypeScript Interfaces ---
+import { useRouter } from "next/navigation";
+
+// --- TypeScript Interfaces ---
 interface RawReportApiItem {
+  report_id?: number;
   reporter_name?: string;
   reporter_id: number;
   reporter_role: string;
@@ -12,13 +15,16 @@ interface RawReportApiItem {
   description: string;
   target_name?: string;
   target_id: number;
+  target_banned_until?: string | null;
   source: string;
   report_date: string;
   status: number;
+  warn_message?: string | null; // ✅ เพิ่มรองรับข้อความตักเตือน
 }
 
 interface ReportItem {
   id: number;
+  reportId?: number;
   reporter: string;
   reporterId: number;
   reporterRole: string;
@@ -26,14 +32,16 @@ interface ReportItem {
   details: string;
   target: string;
   targetId: number;
+  bannedUntil: number | null;
   source: string;
   rawDate: number;
   date: string;
+  statusCode: number;
   status: string;
   statusClass: string;
+  warnMessage?: string | null; // ✅ เพิ่มรองรับข้อความตักเตือน
 }
 
-// กำหนด Type ของ User ให้ชัดเจน (ไม่ต้องใช้ any)
 interface UserPayload {
   id?: number | string;
   role?: string;
@@ -41,13 +49,28 @@ interface UserPayload {
   [key: string]: unknown;
 }
 
-// --- Helper Functions (วางไว้นอก Component เพื่อป้องกัน react-hooks/exhaustive-deps) ---
+// --- Helper Functions ---
+const getDurationText = (
+  statusCode: number,
+  bannedUntil: number | null,
+): string => {
+  if (statusCode !== 1) return "-";
+  if (!bannedUntil) return "ไม่มีกำหนด";
+  const diffDays = Math.ceil(
+    (bannedUntil - Date.now()) / (1000 * 60 * 60 * 24),
+  );
+  if (diffDays <= 0) return "ครบกำหนดแล้ว";
+  return `เหลืออีก ${diffDays} วัน`;
+};
+
 const getStatusText = (statusCode: number): string => {
   switch (statusCode) {
     case 1:
       return "ระงับการใช้งาน";
     case 2:
       return "ตักเตือน";
+    case 3:
+      return "ปลดแบน";
     case 0:
     default:
       return "รอดำเนินการ";
@@ -60,6 +83,8 @@ const getStatusClass = (statusCode: number): string => {
       return styles.suspend;
     case 2:
       return styles.warn;
+    case 3:
+      return styles.unban;
     case 0:
     default:
       return styles.review;
@@ -115,19 +140,72 @@ const AdminReportPage = () => {
   const [filterStatus, setFilterStatus] = useState<string>("ทั้งหมด");
   const [sortOrder, setSortOrder] = useState<string>("desc");
 
+  // States สำหรับ Modal ส่งตักเตือน
+  const [warnModalItem, setWarnModalItem] = useState<ReportItem | null>(null);
+  const [customWarnText, setCustomWarnText] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // State สำหรับป๊อปอัพดูข้อความตักเตือนย้อนหลัง ✅
+  const [viewWarnText, setViewWarnText] = useState<{
+    target: string;
+    message: string;
+  } | null>(null);
+
   const router = useRouter();
-  const [user, setUser] = useState<UserPayload | null>(null);
+  const [, setUser] = useState<UserPayload | null>(null);
+
+  // ฟังก์ชันดึงข้อมูลรายการรายงาน
+  const fetchReports = useCallback(async () => {
+    try {
+      // 🟢 ใส่ { cache: 'no-store' } เพื่อให้ดึงข้อมูลใหม่จาก DB ทุกครั้ง
+      const response = await fetch("/api/admin/reports", { cache: "no-store" });
+      const result = await response.json();
+
+      if (response.ok) {
+        const formattedData: ReportItem[] = result.data.map(
+          (item: RawReportApiItem, index: number) => ({
+            id: index + 1,
+            reportId: item.report_id,
+            reporter: item.reporter_name || "ไม่ทราบชื่อ",
+            reporterId: item.reporter_id,
+            reporterRole: item.reporter_role,
+            reportType: getReportTypeText(item.report_type),
+            details: item.description,
+            target: item.target_name || "ไม่ทราบข้อมูล",
+            targetId: item.target_id,
+            bannedUntil: item.target_banned_until
+              ? new Date(item.target_banned_until).getTime()
+              : null,
+            source: item.source,
+            rawDate: new Date(item.report_date).getTime(),
+            date: new Date(item.report_date).toLocaleDateString("th-TH", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            }),
+            statusCode: item.status,
+            status: getStatusText(item.status),
+            statusClass: getStatusClass(item.status),
+            warnMessage: item.warn_message || null, // ✅ อ่านค่าข้อความตักเตือน
+          }),
+        );
+        setReportData(formattedData);
+      } else {
+        console.error(result.message);
+      }
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     const checkSessionAndFetch = async () => {
       try {
-        // 1. เรียก API Route ที่คุณสร้างไว้ (เปลี่ยน Path ให้ตรงกับที่คุณเซ็ตไว้)
         const res = await fetch("/api/auth/me");
         const data = await res.json();
 
-        // 2. ถ้าไม่มี User ล็อกอิน หรือ Role ไม่ใช่ admin ให้ Re-direct ไปหน้าหลัก
         if (!data.user || data.user.role !== "admin") {
           router.push("/");
           return;
@@ -135,9 +213,8 @@ const AdminReportPage = () => {
 
         if (isMounted) {
           setUser(data.user);
+          await fetchReports();
         }
-
-        // 3. (ถ้ามี) ดึงข้อมูลรายงานต่อ...
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการตรวจสอบ Session:", error);
         router.push("/");
@@ -153,55 +230,85 @@ const AdminReportPage = () => {
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [router, fetchReports]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const handleToggleUnban = async (report: ReportItem) => {
+    if (report.statusCode !== 1) return;
 
-    const fetchReports = async () => {
-      try {
-        const response = await fetch("/api/admin/reports");
-        const result = await response.json();
+    const confirmUnban = window.confirm(
+      `คุณต้องการปลดแบน ${report.target} ใช่หรือไม่?`,
+    );
+    if (!confirmUnban) return;
 
-        if (response.ok && isMounted) {
-          const formattedData: ReportItem[] = result.data.map(
-            (item: RawReportApiItem, index: number) => ({
-              id: index + 1,
-              reporter: item.reporter_name || "ไม่ทราบชื่อ",
-              reporterId: item.reporter_id,
-              reporterRole: item.reporter_role,
-              reportType: getReportTypeText(item.report_type),
-              details: item.description,
-              target: item.target_name || "ไม่ทราบข้อมูล",
-              targetId: item.target_id,
-              source: item.source,
-              rawDate: new Date(item.report_date).getTime(),
-              date: new Date(item.report_date).toLocaleDateString("th-TH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              }),
-              status: getStatusText(item.status),
-              statusClass: getStatusClass(item.status),
-            }),
-          );
-          setReportData(formattedData);
-        } else if (!response.ok) {
-          console.error(result.message);
-        }
-      } catch (error) {
-        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+    try {
+      let endpoint = "";
+      if (report.source === "user") {
+        endpoint = `/api/admin/user/ban?user_id=${report.targetId}`;
+      } else if (report.source === "company") {
+        endpoint = `/api/admin/companies/Ban?company_id=${report.targetId}`;
+      } else if (report.source === "post") {
+        endpoint = `/api/admin/post/Ban?post_id=${report.targetId}`;
       }
-    };
 
-    if (!loading) {
-      fetchReports();
+      const res = await fetch(endpoint, { method: "DELETE" });
+
+      if (res.ok) {
+        alert("ปลดแบนเรียบร้อยแล้ว");
+        fetchReports();
+      } else {
+        const errData = await res.json();
+        alert(`เกิดข้อผิดพลาด: ${errData.error || "ไม่สามารถปลดแบนได้"}`);
+      }
+    } catch (error) {
+      console.error("Error unbanning:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    }
+  };
+
+  const handleOpenWarnModal = (report: ReportItem) => {
+    setWarnModalItem(report);
+    setCustomWarnText(
+      `ได้รับการแจ้งร้องเรียนในหัวข้อ: ${report.reportType}\nรายละเอียด: ${report.details}`,
+    );
+  };
+
+  const handleSendWarning = async () => {
+    if (!warnModalItem || !customWarnText.trim()) {
+      alert("กรุณากรอกข้อความตักเตือน");
+      return;
     }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [loading]);
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/warn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          report_id: warnModalItem.reportId,
+          target_id: warnModalItem.targetId,
+          source: warnModalItem.source,
+          message: customWarnText,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("ส่งอีเมลตักเตือนเรียบร้อยแล้ว");
+        setWarnModalItem(null);
+        setCustomWarnText("");
+        fetchReports();
+      } else {
+        alert(
+          `เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถส่งอีเมลตักเตือนได้"}`,
+        );
+      }
+    } catch (err) {
+      console.error("Error sending warning:", err);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const filteredAndSortedData = reportData
     .filter((report) => {
@@ -257,6 +364,7 @@ const AdminReportPage = () => {
               <option value="รอดำเนินการ">รอดำเนินการ</option>
               <option value="ตักเตือน">ตักเตือน</option>
               <option value="ระงับการใช้งาน">ระงับการใช้งาน</option>
+              <option value="ปลดแบน">ปลดแบน</option>
             </select>
           </div>
 
@@ -283,6 +391,7 @@ const AdminReportPage = () => {
             <div className={styles.headerCell}>เป้าหมายที่ถูกรายงาน</div>
             <div className={styles.headerCell}>วันที่แจ้ง</div>
             <div className={styles.headerCell}>สถานะ</div>
+            <div className={styles.headerCell}>ระยะเวลาแบน / การจัดการ</div>
           </div>
 
           <div className={styles.tableBody}>
@@ -325,15 +434,248 @@ const AdminReportPage = () => {
                 <div className={styles.cell}>
                   <button
                     type="button"
+                    onClick={() => handleToggleUnban(report)}
                     className={`${styles.statusBtn} ${report.statusClass}`}
+                    title={
+                      report.statusCode === 1
+                        ? "คลิกเพื่อปลดแบนรายการนี้"
+                        : undefined
+                    }
                   >
                     {report.status}
                   </button>
+                </div>
+
+                {/* ✅ คอลัมน์ที่ 8: แสดงปุ่มตักเตือน / ปุ่มดูเรื่องที่ส่งเตือน / ระยะเวลาแบน */}
+                <div className={styles.cell}>
+                  {report.statusCode === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenWarnModal(report)}
+                      style={{
+                        backgroundColor: "#f59e0b",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      ตักเตือน
+                    </button>
+                  ) : report.statusCode === 2 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setViewWarnText({
+                          target: report.target,
+                          message:
+                            report.warnMessage ||
+                            "ไม่พบรายละเอียดข้อความตักเตือน",
+                        })
+                      }
+                      style={{
+                        backgroundColor: "#3b82f6",
+                        color: "#ffffff",
+                        border: "none",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        fontSize: "13px",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap",
+                      }}
+                      title="คลิกเพื่อดูข้อความตักเตือนที่ส่งไป"
+                    >
+                      ดูข้อความเตือน
+                    </button>
+                  ) : (
+                    <span className={styles.badgeGray}>
+                      {getDurationText(report.statusCode, report.bannedUntil)}
+                    </span>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
+
+        {/* ✅ Modal 1: ป๊อปอัพสำหรับ Admin กรอกข้อความตักเตือนก่อนส่ง */}
+        {warnModalItem && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                padding: "24px",
+                borderRadius: "12px",
+                width: "90%",
+                maxWidth: "500px",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+              }}
+            >
+              <h3 style={{ margin: "0 0 12px 0", color: "#d97706" }}>
+                ส่งอีเมลตักเตือน: {warnModalItem.target}
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#4b5563",
+                  marginBottom: "8px",
+                }}
+              >
+                แก้ไขหรือระบุข้อความตักเตือนที่ต้องการส่งหาผู้ใช้ผ่านอีเมล:
+              </p>
+
+              <textarea
+                rows={5}
+                value={customWarnText}
+                onChange={(e) => setCustomWarnText(e.target.value)}
+                placeholder="พิมพ์รายละเอียดข้อความตักเตือนตรงนี้..."
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  border: "1px solid #cbd5e1",
+                  marginBottom: "16px",
+                  fontFamily: "inherit",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                  resize: "vertical",
+                }}
+              />
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setWarnModalItem(null)}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    backgroundColor: "#ffffff",
+                    cursor: "pointer",
+                  }}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendWarning}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    border: "none",
+                    backgroundColor: "#f59e0b",
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isSubmitting ? "กำลังส่ง..." : "ส่งอีเมลตักเตือน"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Modal 2: ป๊อปอัพแสดงรายละเอียดข้อความตักเตือนย้อนหลัง */}
+        {viewWarnText && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                padding: "24px",
+                borderRadius: "12px",
+                width: "90%",
+                maxWidth: "500px",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+              }}
+            >
+              <h3 style={{ margin: "0 0 12px 0", color: "#2563eb" }}>
+                รายละเอียดข้อความตักเตือน
+              </h3>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#6b7280",
+                  marginBottom: "8px",
+                }}
+              >
+                ส่งถึง: <strong>{viewWarnText.target}</strong>
+              </p>
+              <div
+                style={{
+                  backgroundColor: "#f8fafc",
+                  padding: "14px",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  whiteSpace: "pre-line",
+                  fontSize: "14px",
+                  color: "#334155",
+                  marginBottom: "16px",
+                  maxHeight: "250px",
+                  overflowY: "auto",
+                }}
+              >
+                {viewWarnText.message}
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  onClick={() => setViewWarnText(null)}
+                  style={{
+                    padding: "8px 18px",
+                    borderRadius: "6px",
+                    border: "none",
+                    backgroundColor: "#64748b",
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  ปิด
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

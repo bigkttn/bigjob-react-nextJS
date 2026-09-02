@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { IFeedback, ApiResponse } from "@/app/api/admin/feedbacks/route";
 import styles from "./AdminFeedback.module.css";
-import { useRouter } from "next/navigation"; // --- TypeScript Interfaces ---
+import { useRouter } from "next/navigation";
 
+// --- TypeScript Interfaces ---
 interface UserPayload {
   id?: number | string;
   role?: string;
@@ -14,7 +15,7 @@ interface UserPayload {
 
 // แผนผังแสดงประเภทสถานะ (Status Badge Config)
 const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
-  pending: { label: "รอตรวจรับ", class: styles.statusPending },
+  pending: { label: "รอดำเนินการ", class: styles.statusPending },
   read: { label: "อ่านแล้ว", class: styles.statusRead },
   replied: { label: "ตอบกลับแล้ว", class: styles.statusReplied },
 };
@@ -41,11 +42,9 @@ export default function AdminFeedbackPage() {
 
     const checkSessionAndFetch = async () => {
       try {
-        // 1. เรียก API Route ที่คุณสร้างไว้ (เปลี่ยน Path ให้ตรงกับที่คุณเซ็ตไว้)
         const res = await fetch("/api/auth/me");
         const data = await res.json();
 
-        // 2. ถ้าไม่มี User ล็อกอิน หรือ Role ไม่ใช่ admin ให้ Re-direct ไปหน้าหลัก
         if (!data.user || data.user.role !== "admin") {
           router.push("/");
           return;
@@ -54,8 +53,6 @@ export default function AdminFeedbackPage() {
         if (isMounted) {
           setUser(data.user);
         }
-
-        // 3. (ถ้ามี) ดึงข้อมูลรายงานต่อ...
       } catch (error) {
         console.error("เกิดข้อผิดพลาดในการตรวจสอบ Session:", error);
         router.push("/");
@@ -110,7 +107,7 @@ export default function AdminFeedbackPage() {
     const year = d.getFullYear();
     const hours = String(d.getHours()).padStart(2, "0");
     const minutes = String(d.getMinutes()).padStart(2, "0");
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    return `${day}/${month}/${year} ${hours}:${minutes} น.`;
   };
 
   const handleReplySubmit = async (item: IFeedback) => {
@@ -118,7 +115,7 @@ export default function AdminFeedbackPage() {
     const text = replyTexts[key]?.trim() || "";
 
     if (!text) {
-      alert("กรุณาพิมพ์ข้อความก่อนทำการส่งคำตอบกลับ");
+      alert("กรุณาระบุข้อความตอบกลับก่อนส่ง");
       return;
     }
 
@@ -136,14 +133,14 @@ export default function AdminFeedbackPage() {
       });
 
       if (res.ok) {
-        alert("บันทึกคำตอบสำเร็จ!");
+        alert("บันทึกคำตอบกลับเรียบร้อยแล้ว!");
         fetchFeedbacks();
       } else {
-        alert("เกิดข้อผิดพลาดในการบันทึกคำตอบกลับ");
+        alert("เกิดข้อผิดพลาด ไม่สามารถบันทึกคำตอบกลับได้");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
     } finally {
       setSubmittingStates((prev) => ({ ...prev, [key]: false }));
     }
@@ -153,7 +150,7 @@ export default function AdminFeedbackPage() {
     feedback_id: number,
     source_type: string,
   ): Promise<void> => {
-    if (!confirm("คุณต้องการลบ Feedback นี้ใช่หรือไม่?")) return;
+    if (!confirm("คุณต้องการลบข้อเสนอแนะ (Feedback) นี้ใช่หรือไม่?")) return;
 
     try {
       const res = await fetch(
@@ -169,7 +166,7 @@ export default function AdminFeedbackPage() {
           ),
         );
       } else {
-        alert("ลบไม่สำเร็จ");
+        alert("เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้");
       }
     } catch (err) {
       console.error(err);
@@ -201,47 +198,47 @@ export default function AdminFeedbackPage() {
       {/* ส่วนหัว Dashboard */}
       <div className={styles.header}>
         <h2>Admin Feedback Dashboard</h2>
-        <p>จัดการและตอบกลับข้อเสนอแนะจากผู้ใช้งานอย่างเป็นระบบ</p>
+        <p>ศูนย์จัดการข้อเสนอแนะและตอบกลับความคิดเห็นจากผู้ใช้งาน</p>
       </div>
 
       {/* ส่วนตัวกรอง (Control Bar) */}
       <div className={styles.filterContainer}>
         <div className={styles.filterGroup}>
-          <label>ประเภทบัญชี</label>
+          <label>ประเภทผู้ใช้งาน</label>
           <select
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
             className={styles.filterSelect}
           >
-            <option value="all">ทั้งหมด</option>
-            <option value="seeker">User (ผู้หางาน)</option>
-            <option value="company">Company (บริษัท)</option>
+            <option value="all">ทั้งหมด (All Roles)</option>
+            <option value="seeker">ผู้หางาน (User)</option>
+            <option value="company">บริษัท / สถานประกอบการ (Company)</option>
           </select>
         </div>
 
         <div className={styles.filterGroup}>
-          <label>สถานะรายการ</label>
+          <label>สถานะ</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className={styles.filterSelect}
           >
-            <option value="all">ทั้งหมด</option>
-            <option value="pending">รอตรวจรับ (Pending)</option>
+            <option value="all">สถานะทั้งหมด</option>
+            <option value="pending">รอดำเนินการ (Pending)</option>
             <option value="read">อ่านแล้ว (Read)</option>
             <option value="replied">ตอบกลับแล้ว (Replied)</option>
           </select>
         </div>
 
         <div className={styles.filterGroup}>
-          <label>เรียงลำดับ</label>
+          <label>เรียงลำดับตามวันที่</label>
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             className={styles.filterSelect}
           >
-            <option value="desc">ใหม่สุด ไป เก่าสุด</option>
-            <option value="asc">เก่าสุด ไป ใหม่สุด</option>
+            <option value="desc">ใหม่ล่าสุด - เก่าที่สุด</option>
+            <option value="asc">เก่าที่สุด - ใหม่ล่าสุด</option>
           </select>
         </div>
       </div>
@@ -249,10 +246,10 @@ export default function AdminFeedbackPage() {
       {/* รายการ Feedbacks */}
       <div className={styles.listContainer}>
         {isLoading ? (
-          <div className={styles.loading}>กำลังโหลดข้อมูล Feedbacks...</div>
+          <div className={styles.loading}>กำลังโหลดข้อมูล Feedback...</div>
         ) : processedFeedbacks.length === 0 ? (
           <div className={styles.empty}>
-            ไม่พบข้อมูล Feedback ที่ตรงกับเงื่อนไขที่เลือก
+            ไม่พบข้อมูล Feedback ที่ตรงกับเงื่อนไขการค้นหา
           </div>
         ) : (
           processedFeedbacks.map((item, index) => {
@@ -277,7 +274,7 @@ export default function AdminFeedbackPage() {
                       isCompany ? styles.badgeCompany : styles.badgeUser
                     }`}
                   >
-                    {isCompany ? "company" : "user"}
+                    {isCompany ? "Company" : "User"}
                   </span>
 
                   <span className={styles.date}>
@@ -319,11 +316,13 @@ export default function AdminFeedbackPage() {
                         >
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        <span>Admin Reply (ประวัติคำตอบเดิม):</span>
+                        <span>ประวัติการตอบกลับจาก Admin:</span>
                       </div>
                       <p>{item.admin_message}</p>
                       {item.replied_at && (
-                        <small>ตอบเมื่อ: {formatDate(item.replied_at)}</small>
+                        <small>
+                          ตอบกลับเมื่อ: {formatDate(item.replied_at)}
+                        </small>
                       )}
                     </div>
                   )}
@@ -331,7 +330,7 @@ export default function AdminFeedbackPage() {
                   {/* ฟอร์มพิมพ์ข้อความตอบกลับ */}
                   <div className={styles.replySection}>
                     <textarea
-                      placeholder="พิมพ์ข้อความตอบกลับผู้ใช้..."
+                      placeholder="พิมพ์ข้อความตอบกลับผู้ใช้งานที่นี่..."
                       value={replyText}
                       onChange={(e) =>
                         setReplyTexts((prev) => ({
@@ -342,17 +341,18 @@ export default function AdminFeedbackPage() {
                       className={styles.replyTextarea}
                       disabled={isSubmitting}
                     />
+
                     <button
                       onClick={() => handleReplySubmit(item)}
                       className={styles.replyBtn}
                       disabled={isSubmitting}
                     >
-                      {hasAdminMessage ? "Update Reply" : "Send Reply"}
+                      {hasAdminMessage ? "อัปเดตคำตอบกลับ" : "ส่งคำตอบกลับ"}
                     </button>
                   </div>
                 </div>
 
-                {/* 3. ปุ่ม Remove สไตล์แคปซูลสีแดง */}
+                {/* 3. ปุ่ม ลบ Feedback */}
                 <div className={styles.actions}>
                   <button
                     className={styles.removeBtn}
@@ -360,7 +360,7 @@ export default function AdminFeedbackPage() {
                       handleDeleteFeedback(item.feedback_id, item.source_type)
                     }
                   >
-                    remove
+                    ลบ Feedback
                   </button>
                 </div>
               </div>

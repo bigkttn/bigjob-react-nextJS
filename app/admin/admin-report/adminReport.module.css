@@ -111,15 +111,16 @@
     minmax(240px, 2.5fr) 
     minmax(160px, 1.5fr) 
     minmax(130px, 1.2fr) 
-    minmax(130px, 1fr);
+    minmax(130px, 1fr)
+    minmax(140px, 1.2fr);   /* ✅ คอลัมน์ใหม่: ระยะเวลาแบน */
   align-items: center;
   gap: 12px;
   width: 100%;
-  min-width: 1100px;
+  min-width: 1250px;         /* ✅ เดิม 1100px */
   box-sizing: border-box;
 }
 
-/* --- Header ตาราง (สีเขียวดั้งเดิม #4dfc50) --- */
+/* --- Header ตาราง --- */
 .tableHeader {
   background-color: #4dfc50;
   padding: 14px 18px;
@@ -143,7 +144,7 @@
 .reportRow {
   padding: 12px 18px;
   background-color: #ffffff;
-  border-bottom: 1px solid #f1f5f9; /* ใช้เส้นแบ่งแถวอ่อนๆ แทน */
+  border-bottom: 1px solid #f1f5f9;
   transition: all 0.2s ease;
 }
 
@@ -169,18 +170,15 @@
   min-width: 0;
 }
 
-/* --- ปรับแต่งตัวอักษรธรรมดา (ถอดขอบและพื้นหลังสีเทาออก) --- */
 .badgeGray {
   background-color: transparent;
   color: #475569;
   font-weight: 600;
   font-size: 14px;
   text-align: center;
-  
-  /* ปรับแต่งส่วนนี้เพื่อให้ตัดขึ้นบรรทัดใหม่อย่างสวยงาม */
-  white-space: normal;       /* อนุญาตให้ขึ้นบรรทัดใหม่ */
-  word-break: break-word;     /* ตัดคำตามความเหมาะสม */
-  line-height: 1.4;          /* เพิ่มระยะห่างระหว่างบรรทัดให้น่าอ่าน */
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
   width: 100%;
 }
 
@@ -196,13 +194,10 @@
   transition: all 0.25s ease-in-out;
 }
 
-
-
 .nextLink:hover {
   color: #3653f8;
-  background-color: #f0f4ff; /* พื้นหลังสีฟ้าอ่อนมากๆ จางๆ ออกมาจากความว่างเปล่า */
+  background-color: #f0f4ff;
 }
-
 
 .detailBubble {
   background-color: transparent;
@@ -218,7 +213,7 @@
   white-space: normal;
 }
 
-/* --- ปุ่มสถานะ (คงไว้ปุ่มเดียว) --- */
+/* --- ปุ่มสถานะ --- */
 .statusBtn {
   width: 100%;
   padding: 8px 12px;
@@ -245,6 +240,11 @@
 .review {
   background-color: #ffd8b1;
   color: #7c2d12;
+}
+
+.unban {
+  background-color: #86efac;
+  color: #14532d;
 }
 
 .statusBtn:hover {

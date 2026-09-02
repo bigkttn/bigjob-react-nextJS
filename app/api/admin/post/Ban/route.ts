@@ -62,46 +62,51 @@ export async function POST(request: Request) {
     }
 }
 
-
-// ระบบปลดแบนโพสต์ (DELETE)
+// ระบบปลดแบนโพสต์ (DELETE) -> เปลี่ยนสถานะกลับเป็น active และเปลี่ยน status รายงานเป็น 3 (ปลดแบน)
 export async function DELETE(request: Request) {
-    try {
-        // รับค่า post_id จาก URL Parameters (เช่น /api/admin/post/Ban?post_id=123)
-        const { searchParams } = new URL(request.url);
-        const post_id = searchParams.get("post_id");
+  try {
+    const { searchParams } = new URL(request.url);
+    const post_id = searchParams.get("post_id");
 
-        if (!post_id) {
-            return NextResponse.json(
-                { error: "Please provide post_id" },
-                { status: 400 }
-            );
-        }
+    if (!post_id) {
+      return NextResponse.json(
+        { error: "Please provide post_id" },
+        { status: 400 }
+      );
+    }
 
-        // อัปเดตสถานะกลับเป็นปกติ (เช่น 'active') และล้างค่า ban_until เป็น NULL
-        const query = `
+    // 1. เปลี่ยนสถานะโพสต์กลับเป็น active และล้างค่า ban_until
+    const query = `
       UPDATE posts
       SET status = 'active', ban_until = NULL
       WHERE post_id = ?
     `;
+    const [result]: any = await db.query(query, [post_id]);
 
-        const [result]: any = await db.query(query, [post_id]);
-
-        if (result.affectedRows === 0) {
-            return NextResponse.json(
-                { error: "Post not found" },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json(
-            { message: "Unbanned successfully" },
-            { status: 200 }
-        );
-    } catch (error: any) {
-        console.error("Database Error:", error);
-        return NextResponse.json(
-            { error: "Server Error", details: error.message },
-            { status: 500 }
-        );
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { error: "Post not found" },
+        { status: 404 }
+      );
     }
+
+    // 2. อัปเดตสถานะในตาราง report_post ให้เป็น 3 (ปลดแบน)
+    const queryUpdateReport = `
+      UPDATE report_post
+      SET status = 3
+      WHERE post_id = ?
+    `;
+    await db.query(queryUpdateReport, [post_id]);
+
+    return NextResponse.json(
+      { message: "Unbanned successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Database Error:", error);
+    return NextResponse.json(
+      { error: "Server Error", details: error.message },
+      { status: 500 }
+    );
+  }
 }

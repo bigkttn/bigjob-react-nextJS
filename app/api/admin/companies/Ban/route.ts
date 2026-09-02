@@ -62,44 +62,51 @@ export async function POST(request: Request) {
     }
 }
 
-// ระบบปลดแบนบริษัท (DELETE) -> ล้างค่า banned_until ให้เป็น NULL
+// ระบบปลดแบนบริษัท (DELETE) -> ล้างค่า banned_until ให้เป็น NULL และเปลี่ยน status รายงานเป็น 3 (ปลดแบน)
 export async function DELETE(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const company_id = searchParams.get("company_id");
+  try {
+    const { searchParams } = new URL(request.url);
+    const company_id = searchParams.get("company_id");
 
-        if (!company_id) {
-            return NextResponse.json(
-                { error: "Please provide company_id" },
-                { status: 400 }
-            );
-        }
+    if (!company_id) {
+      return NextResponse.json(
+        { error: "Please provide company_id" },
+        { status: 400 }
+      );
+    }
 
-        // ล้างค่า banned_until ให้เป็น NULL
-        const query = `
+    // 1. ล้างค่า banned_until ให้เป็น NULL ในตาราง company
+    const query = `
       UPDATE company
       SET banned_until = NULL
       WHERE company_id = ?
     `;
+    const [result]: any = await db.query(query, [company_id]);
 
-        const [result]: any = await db.query(query, [company_id]);
-
-        if (result.affectedRows === 0) {
-            return NextResponse.json(
-                { error: "Company not found" },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json(
-            { message: "Unbanned company successfully" },
-            { status: 200 }
-        );
-    } catch (error: any) {
-        console.error("Database Error:", error);
-        return NextResponse.json(
-            { error: "Server Error", details: error.message },
-            { status: 500 }
-        );
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { error: "Company not found" },
+        { status: 404 }
+      );
     }
+
+    // 2. อัปเดตสถานะในตาราง report_company ให้เป็น 3 (ปลดแบน)
+    const queryUpdateReport = `
+      UPDATE report_company
+      SET status = 3
+      WHERE company_id = ?
+    `;
+    await db.query(queryUpdateReport, [company_id]);
+
+    return NextResponse.json(
+      { message: "Unbanned company successfully" },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Database Error:", error);
+    return NextResponse.json(
+      { error: "Server Error", details: error.message },
+      { status: 500 }
+    );
+  }
 }

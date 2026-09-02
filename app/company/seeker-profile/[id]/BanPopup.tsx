@@ -1,20 +1,23 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-export default function YourComponent({ profile, isAdmin }: any) {
-  // อย่าลืมใส่ props job หรือดึงข้อมูล job มาใช้
-  const [showBanPopup, setShowBanPopup] = useState(true); // เปลี่ยนเป็น true ถ้าอยากให้เปิดทันทีที่โดนแบน'
+interface BanPopupProps {
+  profile?: {
+    banned_until?: string | null;
+  };
+  isAdmin?: boolean;
+}
+
+export default function BanPopup({ profile, isAdmin }: BanPopupProps) {
+  const [showBanPopup, setShowBanPopup] = useState(true);
   const router = useRouter();
 
   let formattedBanDate = "";
   let remainingText = "";
   let isBanned = false;
 
-  // 2. คำนวณตรรกะต่างๆ ก่อนแสดงผล
   if (profile && profile.banned_until && !isAdmin) {
-    console.log(isAdmin);
-    console.log(profile);
     const banDate = new Date(profile.banned_until.replace(" ", "T"));
     const now = new Date();
     const diffMs = banDate.getTime() - now.getTime();
@@ -33,7 +36,9 @@ export default function YourComponent({ profile, isAdmin }: any) {
       "พฤศจิกายน",
       "ธันวาคม",
     ];
-    formattedBanDate = `${banDate.getDate()} ${monthNames[banDate.getMonth()]} ค.ศ. ${banDate.getFullYear()} เวลา ${banDate.getHours().toString().padStart(2, "0")}:${banDate.getMinutes().toString().padStart(2, "0")} น.`;
+
+    const thaiYear = banDate.getFullYear() + 543;
+    formattedBanDate = `วันที่ ${banDate.getDate()} ${monthNames[banDate.getMonth()]} พ.ศ. ${thaiYear} เวลา ${banDate.getHours().toString().padStart(2, "0")}:${banDate.getMinutes().toString().padStart(2, "0")} น.`;
 
     if (diffMs > 0) {
       const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -49,17 +54,13 @@ export default function YourComponent({ profile, isAdmin }: any) {
       remainingText = `(เหลือเวลาอีก ${dayText}${hourText}${minText})`;
       isBanned = true;
     } else {
-      remainingText = "(ครบกำหนดเวลาแบนแล้ว)";
+      remainingText = "(ครบกำหนดเวลาระงับการใช้งานแล้ว)";
       isBanned = false;
     }
   }
 
-  // 3. ส่วนของการแสดงผล (return) จะอยู่ล่างสุดเสมอ
   return (
     <div>
-      {/* เนื้อหาอื่นๆ ในหน้าเว็บของคุณ */}
-
-      {/* โค้ด Popup ของคุณ */}
       {showBanPopup && isBanned && (
         <div
           style={{
@@ -83,8 +84,7 @@ export default function YourComponent({ profile, isAdmin }: any) {
               padding: "30px",
               width: "90%",
               maxWidth: "400px",
-              boxShadow:
-                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
               textAlign: "center",
               position: "relative",
             }}
@@ -97,7 +97,7 @@ export default function YourComponent({ profile, isAdmin }: any) {
                 fontSize: "1.25rem",
               }}
             >
-              ถูกระงับการใช้งาน
+              บัญชีผู้ใช้นี้ถูกระงับการใช้งาน
             </h2>
             <p
               style={{
@@ -107,7 +107,7 @@ export default function YourComponent({ profile, isAdmin }: any) {
                 marginBottom: "25px",
               }}
             >
-              ไม่สามารถกระทำการข้อมูลได้
+              ไม่สามารถดูข้อมูลโปรไฟล์ หรือดำเนินการใดๆ ได้ในขณะนี้
               <br />
               จนกว่าจะถึงเวลา:{" "}
               <strong style={{ color: "#111" }}>{formattedBanDate}</strong>
@@ -138,16 +138,9 @@ export default function YourComponent({ profile, isAdmin }: any) {
                 fontWeight: "bold",
                 cursor: "pointer",
                 width: "100%",
-                transition: "background-color 0.2s",
               }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#dc2626")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#ef4444")
-              }
             >
-              รับทราบ
+              รับทราบและกลับไปหน้าก่อนหน้า
             </button>
           </div>
         </div>

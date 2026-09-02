@@ -27,6 +27,8 @@ export default function AdminButton({
   const [isBanned, setIsBanned] = useState<boolean>(false);
 
   const router = useRouter();
+  const [warnMessage, setWarnMessage] = useState("");
+  const [warnLoading, setWarnLoading] = useState(false);
 
   // --- ระบบนับเวลาถอยหลัง Real-time (อัปเดตทุก 1 นาที) ---
   useEffect(() => {
@@ -135,6 +137,38 @@ export default function AdminButton({
       setIsLoading(false);
     }
   };
+  const handleSendWarning = async () => {
+    if (!warnMessage.trim()) {
+      alert("กรุณากรอกข้อความตักเตือน");
+      return;
+    }
+
+    setWarnLoading(true);
+    try {
+      const res = await fetch("/api/admin/warn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_id: user_id, // user: user_id | post: post_id
+          source: "user", // user: "user"  | post: "post"
+          message: warnMessage.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("ส่งอีเมลตักเตือนสำเร็จ!");
+        setWarnMessage("");
+      } else {
+        alert(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถส่งข้อความได้"}`);
+      }
+    } catch (error) {
+      console.error("Warn error:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setWarnLoading(false);
+    }
+  };
 
   return (
     <>
@@ -190,7 +224,7 @@ export default function AdminButton({
                 fontWeight: "bold",
               }}
             >
-              Admin User Management
+              จัดการผู้ใช้งาน (Admin)
             </h3>
             <p
               style={{
@@ -199,7 +233,7 @@ export default function AdminButton({
                 marginBottom: "15px",
               }}
             >
-              Managing Target ID:{" "}
+              รหัสผู้ใช้ที่กำลังจัดการ:{" "}
               <span style={{ fontWeight: "bold", color: "#000" }}>
                 {user_id}
               </span>
@@ -231,7 +265,7 @@ export default function AdminButton({
                   color: "#fd7e14",
                 }}
               >
-                Ban / Unban User Account
+                แบน / ปลดแบน บัญชีผู้ใช้
               </h4>
 
               {isBanned ? (
@@ -251,7 +285,7 @@ export default function AdminButton({
                     opacity: isLoading ? 0.7 : 1,
                   }}
                 >
-                  {isLoading ? "Processing..." : "ปลดแบนผู้ใช้นี้"}
+                  {isLoading ? "กำลังดำเนินการ..." : "ปลดแบนผู้ใช้นี้"}
                 </button>
               ) : (
                 // ถ้าไม่ได้โดนแบนให้แสดงฟอร์มสำหรับแบน
@@ -276,10 +310,13 @@ export default function AdminButton({
                         cursor: "pointer",
                       }}
                     >
-                      <option value="3">Ban for 3 Days</option>
-                      <option value="7">Ban for 7 Days</option>
-                      <option value="30">Ban for 30 Days</option>
-                      <option value="999">Permanently Suspend</option>
+                      <option value="3">แบน 3 วัน</option>
+
+                      <option value="7">แบน 7 วัน</option>
+
+                      <option value="30">แบน 30 วัน</option>
+
+                      <option value="999">แบนถาวร</option>
                     </select>
                   </div>
 
@@ -298,10 +335,66 @@ export default function AdminButton({
                       opacity: isLoading ? 0.7 : 1,
                     }}
                   >
-                    {isLoading ? "Processing..." : "Confirm Ban"}
+                    {isLoading ? "กำลังดำเนินการ..." : "ยืนยันการแบน"}
                   </button>
                 </>
               )}
+            </div>
+            <hr
+              style={{
+                border: 0,
+                borderTop: "1px solid #eee",
+                marginBottom: "20px",
+              }}
+            />
+
+            <div style={{ marginBottom: "20px" }}>
+              <h4
+                style={{
+                  margin: "0 0 6px 0",
+                  fontSize: "1rem",
+                  fontWeight: "bold",
+                  color: "#d97706",
+                }}
+              >
+                ส่งข้อความตักเตือน
+              </h4>
+
+              <textarea
+                rows={3}
+                value={warnMessage}
+                onChange={(e) => setWarnMessage(e.target.value)}
+                placeholder="กรอกข้อความ / เหตุผลที่ต้องการแจ้งเตือน..."
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #cbd5e1",
+                  marginBottom: "10px",
+                  boxSizing: "border-box",
+                  fontFamily: "inherit",
+                  fontSize: "0.9rem",
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={handleSendWarning}
+                disabled={warnLoading}
+                style={{
+                  width: "100%",
+                  backgroundColor: "#f59e0b",
+                  color: "white",
+                  border: "none",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  fontWeight: "bold",
+                  cursor: warnLoading ? "not-allowed" : "pointer",
+                  opacity: warnLoading ? 0.7 : 1,
+                }}
+              >
+                {warnLoading ? "กำลังส่ง..." : "ส่งตักเตือน"}
+              </button>
             </div>
 
             {/* ส่วนที่ 3: ปุ่มยกเลิก / ปิด Popup */}
@@ -320,7 +413,7 @@ export default function AdminButton({
                 marginTop: "10px",
               }}
             >
-              Cancel / Close
+              ปิดหน้าต่าง
             </button>
           </div>
         </div>

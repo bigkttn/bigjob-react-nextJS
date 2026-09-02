@@ -83,7 +83,7 @@ const Home = () => {
 
   // ─── อนุมัติบริษัท ───
   const handleApprove = async (id: number) => {
-    if (!confirm("ยืนยันอนุมัติบริษัทนี้?")) return;
+    if (!confirm("คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?")) return;
     try {
       setActingId(id);
       const res = await fetch(`/api/admin/verify/${id}`, {
@@ -95,7 +95,7 @@ const Home = () => {
         setCompanies((prev) => prev.filter((c) => c.company_id !== id));
       } else {
         const data = await res.json();
-        alert(data.error || "ไม่สามารถอนุมัติได้");
+        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
       const errorMessage =
@@ -108,7 +108,7 @@ const Home = () => {
 
   // ─── ปฏิเสธบริษัท ───
   const handleReject = async (id: number) => {
-    const comment = prompt("ระบุเหตุผลที่ปฏิเสธบริษัทนี้:");
+    const comment = prompt("กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้:");
     if (!comment) return;
 
     try {
@@ -125,7 +125,7 @@ const Home = () => {
         setCompanies((prev) => prev.filter((c) => c.company_id !== id));
       } else {
         const data = await res.json();
-        alert(data.error || "ไม่สามารถปฏิเสธได้");
+        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
       const errorMessage =
@@ -140,15 +140,17 @@ const Home = () => {
     <div className={styles.container}>
       <div className={styles.cardWrapper}>
         <h2 className={styles.headerTitle}>
-          Display the Articles of Association or Company Registration
-          Certificate submitted by the company.
+          รายการหนังสือรับรอง / เอกสารการจดทะเบียนบริษัทที่รอการตรวจสอบ (Company
+          Verification Requests)
         </h2>
 
         {loading ? (
-          <p style={{ textAlign: "center" }}>Loading...</p>
+          <p style={{ textAlign: "center" }}>
+            กำลังโหลดข้อมูลบริษัทที่รอการตรวจสอบ...
+          </p>
         ) : companies.length === 0 ? (
           <p style={{ textAlign: "center", color: "#666" }}>
-            ไม่มีบริษัทที่รอการตรวจสอบในขณะนี้ 🎉
+            ไม่มีรายการบริษัทที่รอการตรวจสอบในขณะนี้
           </p>
         ) : (
           <div className={styles.list}>
@@ -177,7 +179,7 @@ const Home = () => {
                     disabled={actingId === company.company_id}
                     className={`${styles.btn} ${styles.approve}`}
                   >
-                    approve
+                    อนุมัติ (Approve)
                   </button>
                   <button
                     type="button"
@@ -185,7 +187,7 @@ const Home = () => {
                     disabled={actingId === company.company_id}
                     className={`${styles.btn} ${styles.reject}`}
                   >
-                    reject
+                    ปฏิเสธ (Reject)
                   </button>
                   <button
                     type="button"
@@ -194,7 +196,7 @@ const Home = () => {
                       router.push(`/admin/company/${company.company_id}`)
                     }
                   >
-                    See Info
+                    ดูรายละเอียด (See Info)
                   </button>
                 </div>
               </div>

@@ -82,7 +82,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
       if (res.ok) {
         setCompany(data.company);
       } else {
-        setError(data.error || "Failed to fetch company");
+        setError(data.error || "ไม่สามารถดึงข้อมูลบริษัทได้");
       }
     } catch (err: unknown) {
       const errorMessage =
@@ -99,7 +99,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   // จัดการการอนุมัติ
   const handleApprove = async () => {
-    if (!confirm("ยืนยันอนุมัติบริษัทนี้?")) return;
+    if (!confirm("คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?")) return;
     try {
       setActing(true);
       const res = await fetch(`/api/admin/verify/${companyId}`, {
@@ -108,11 +108,11 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         body: JSON.stringify({ verification_status: "Approved" }),
       });
       if (res.ok) {
-        alert("อนุมัติเรียบร้อยแล้ว");
+        alert("ดำเนินการอนุมัติบริษัทเรียบร้อยแล้ว");
         await fetchCompany();
       } else {
         const data = await res.json();
-        alert(data.error || "ไม่สามารถอนุมัติได้");
+        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
       const errorMessage =
@@ -125,7 +125,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   // จัดการการปฏิเสธ
   const handleReject = async () => {
-    const comment = prompt("ระบุเหตุผลที่ปฏิเสธบริษัทนี้:");
+    const comment = prompt("กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้:");
     if (!comment) return;
     try {
       setActing(true);
@@ -138,11 +138,11 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         }),
       });
       if (res.ok) {
-        alert("ปฏิเสธเรียบร้อยแล้ว");
+        alert("ดำเนินการปฏิเสธบริษัทเรียบร้อยแล้ว");
         await fetchCompany();
       } else {
         const data = await res.json();
-        alert(data.error || "ไม่สามารถปฏิเสธได้");
+        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
       const errorMessage =
@@ -153,9 +153,20 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
     }
   };
 
-  if (loading) return <p style={{ padding: 30 }}>Loading...</p>;
-  if (error) return <p style={{ padding: 30 }}>Error: {error}</p>;
-  if (!company) return <p style={{ padding: 30 }}>No company data</p>;
+  if (loading)
+    return (
+      <p style={{ padding: 30, textAlign: "center" }}>กำลังโหลดข้อมูล...</p>
+    );
+  if (error)
+    return (
+      <p style={{ padding: 30, textAlign: "center", color: "#b50000" }}>
+        เกิดข้อผิดพลาด: {error}
+      </p>
+    );
+  if (!company)
+    return (
+      <p style={{ padding: 30, textAlign: "center" }}>ไม่พบข้อมูลบริษัท</p>
+    );
 
   const fmt = (val: unknown): string =>
     val !== null && val !== undefined && val !== "" ? String(val) : "-";
@@ -167,6 +178,17 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
       : status === "Rejected"
         ? "#b50000"
         : "#888";
+
+  const renderStatusText = (status: string | null) => {
+    switch (status) {
+      case "Approved":
+        return "อนุมัติแล้ว (Approved)";
+      case "Rejected":
+        return "ปฏิเสธ (Rejected)";
+      default:
+        return "รอการตรวจสอบ (Pending)";
+    }
+  };
 
   const isPdf =
     typeof company.dbd_file === "string" &&
@@ -194,7 +216,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
           </svg>
-          <span>กลับหน้ารายการ</span>
+          <span>ย้อนกลับหน้ารายการ (Back)</span>
         </button>
       </div>
 
@@ -211,7 +233,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
               className={styles.statusBadge}
               style={{ backgroundColor: statusColor }}
             >
-              {status || "Pending"}
+              {renderStatusText(status)}
             </span>
           </div>
         </div>
@@ -230,23 +252,26 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             <strong>ผู้ติดต่อ:</strong> {fmt(company.contact_information)}
           </div>
           <div>
-            <strong>เบอร์โทร:</strong> {fmt(company.mobile_phone)}
+            <strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}
           </div>
           <div>
             <strong>อีเมล:</strong> {fmt(company.company_email)}
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
-            <strong>ที่อยู่:</strong> {fmt(company.full_address)}{" "}
+            <strong>ที่อยู่บริษัท:</strong> {fmt(company.full_address)}{" "}
             {fmt(company.province)} {fmt(company.postcode)}
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
-            <strong>ประวัติบริษัท:</strong> {fmt(company.brief_history)}
+            <strong>รายละเอียด / ประวัติบริษัท:</strong>{" "}
+            {fmt(company.brief_history)}
           </div>
         </div>
 
-        <h3 className={styles.sectionTitle}>หนังสือรับรอง / ทะเบียนบริษัท</h3>
+        <h3 className={styles.sectionTitle}>
+          หนังสือรับรองบริษัท / ใบทะเบียนพาณิชย์ (DBD Document)
+        </h3>
         {!company.dbd_file ? (
-          <p style={{ color: "#888" }}>บริษัทนี้ยังไม่ได้อัปโหลดไฟล์</p>
+          <p style={{ color: "#888" }}>บริษัทนี้ยังไม่ได้อัปโหลดไฟล์เอกสาร</p>
         ) : isPdf ? (
           <iframe
             src={company.dbd_file}
@@ -269,7 +294,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             onClick={handleApprove}
             disabled={acting || status === "Approved"}
           >
-            Approve อนุมัติ
+            อนุมัติ (Approve)
           </button>
           <button
             type="button"
@@ -277,7 +302,7 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
             onClick={handleReject}
             disabled={acting || status === "Rejected"}
           >
-            Reject ปฏิเสธ
+            ปฏิเสธ (Reject)
           </button>
         </div>
       </div>
