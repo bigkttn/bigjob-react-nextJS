@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import styles from "./company_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
 
@@ -98,7 +99,10 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
 
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingTime, setMeetingTime] = useState("");
+  const [interviewDate, setInterviewDate] = useState("");
   const [startDate, setStartDate] = useState("");
+
+  const status = selectedJob?.status || "pending";
 
   const getStatusClass = (status: string = "pending") => {
     switch (status.toLowerCase()) {
@@ -115,7 +119,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     }
   };
 
-  const steps = ["pending", "Applied", "Interview", "Appointment"];
+  const steps = ["Pending", "Applied", "Interview", "Appointment"];
 
   const getStepStatus = (stepName: string, currentStatus: string = "pending") => {
     const stepIndex = steps.findIndex((s) => s.toLowerCase() === stepName.toLowerCase());
@@ -131,24 +135,41 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     if (!selectedJob) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/interview_tracking/update_status/company`, {
+      const response = await fetch(`${apiUrl}/api/interview_tracking/update-status/company`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tracking_id: trackingId,
+          trackingId: trackingId,
           status: newStatus,
+          seekerEmail: selectedJob.email,
+          seekerName: selectedJob.fullname,
+          jobTitle: selectedJob.job_position,
         }),
       });
 
       if (response.ok) {
-        setJobs((prevJobs) =>
-          prevJobs.map((job) =>
-            job.tracking_id === trackingId ? { ...job, status: newStatus } : job
-          )
-        );
+        if (newStatus === "reject" || newStatus === "rejected") {
+          // ลบรายการออกจาก State ซ้ายมือ
+          setJobs((prevJobs) => {
+            const updatedJobs = prevJobs.filter((job) => job.tracking_id !== trackingId);
+            
+            // สลับไปเลือกผู้สมัครคนถัดไป หรือคนแรกในรายการถ้ามี
+            if (selectedJob.tracking_id === trackingId) {
+              setSelectedJob(updatedJobs.length > 0 ? updatedJobs[0] : null);
+            }
+            return updatedJobs;
+          });
+        } else {
+          // กรณีสถานะอื่น ให้อัปเดตข้อมูลตามเดิม
+          setJobs((prevJobs) =>
+            prevJobs.map((job) =>
+              job.tracking_id === trackingId ? { ...job, status: newStatus } : job
+            )
+          );
 
-        if (selectedJob && selectedJob.tracking_id === trackingId) {
-          setSelectedJob((prev) => (prev ? { ...prev, status: newStatus } : null));
+          if (selectedJob && selectedJob.tracking_id === trackingId) {
+            setSelectedJob((prev) => (prev ? { ...prev, status: newStatus } : null));
+          }
         }
       }
     } catch (error) {
@@ -173,39 +194,46 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     <div className={styles.container}>
       <main className={styles.mainContent}>
         {/* รายการผู้สมัครด้านซ้าย */}
-        <aside className={styles.sidebar}>
-          {jobs.length === 0 ? (
-            <p style={{ textAlign: "center", padding: "20px" }}>ไม่พบข้อมูลผู้สมัคร</p>
-          ) : (
-            jobs.map((job) => (
-              <div
-                key={job.tracking_id}
-                className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""
-                  }`}
-                onClick={() => setSelectedJob(job)}
-              >
-                <div className={styles.cardLeft}>
-                  <img
-                    src={job.profile_image || "/default-avatar.png"}
-                    alt={job.fullname || "Applicant"}
-                    className={styles.companyLogo}
-                    onError={(e) => {
-                      (e.target as HTMLElement).setAttribute("src", "https://via.placeholder.com/50");
-                    }}
-                  />
-                  <div className={styles.cardDetails}>
-                    <h4>{job.fullname || "ไม่ระบุชื่อ"}</h4>
-                    <p>{job.job_position || "ไม่ระบุตำแหน่ง"}</p>
+        <div className={styles.cardScollBar}>
+          <aside className={styles.sidebar}>
+            {jobs.length === 0 ? (
+              <p style={{ textAlign: "center", padding: "20px" }}>ไม่พบข้อมูลผู้สมัคร</p>
+            ) : (
+              jobs.map((job) => (
+                <div
+                  key={job.tracking_id}
+                  className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""
+                    }`}
+                  onClick={() => setSelectedJob(job)}
+                >
+                  <div className={styles.cardLeft}>
+                    <img
+                      src={
+                        job.profile_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          job.fullname || "Seeker"
+                        )}&background=random`
+                      }
+                      alt="seeker profile"
+                      className={styles.profileLeft}
+                      onError={(e) => {
+                        e.currentTarget.src = "https://via.placeholder.com/50";
+                      }}
+                    />
+                    <div className={styles.cardDetails}>
+                      <h4>{job.fullname || "ไม่ระบุชื่อ"}</h4>
+                      <p>{job.job_position || "ไม่ระบุตำแหน่ง"}</p>
+                    </div>
                   </div>
+                  <span className={`${styles.statusBadge} ${getStatusClass(job.status)}`}>
+                    {job.status || "Pending"}
+                  </span>
                 </div>
-                <span className={`${styles.statusBadge} ${getStatusClass(job.status)}`}>
-                  {job.status || "Pending"}
-                </span>
-              </div>
-            ))
-          )}
-        </aside>
+              ))
+            )}
+          </aside>
 
+        </div>
         {/* รายละเอียดผู้สมัครด้านขวา */}
         <section className={styles.rightPanel}>
           <div style={{ width: "56rem", height: "45rem", backgroundColor: "#9D9D9D" }}>
@@ -213,122 +241,110 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
               <>
                 {/* Stepper Status Box */}
                 <div className={styles.trackerBox}>
+                  {/*  */}
                   <div className={styles.stepperContainer}>
-                    {steps.map((step, idx) => {
-                      const currentStatus = selectedJob.status?.toLowerCase() || "";
+                    {/* Step 1: pending */}
+                    <div className={`${styles.step} ${status === 'pending' ? styles.active : ''}`}>
+                      <div className={styles.stepIcon}>📄</div>
+                      <span className={styles.stepLabel}>Pending</span>
+                      {status === 'pending' && (
+                        <div className={styles.inlineDatePicker}>
+                          <p className={styles.txtWaiting}>รอผู้สมัครงานตอบกลับ</p>
+                          <button
+                            className={styles.txtRejected}
+                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'reject')}
+                          >
+                            ยกเลิก
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
-                      return (
-                        <React.Fragment key={step}>
-                          <div className={`${styles.step} ${getStepStatus(step, selectedJob.status)}`}>
-                            <div className={styles.stepIcon}>
-                              {step === "pending" && "📄"}
-                              {step === "Applied" && "☑️"}
-                              {step === "Interview" && "🎙️"}
-                              {step === "Appointment" && "💼"}
-                            </div>
-                            <span className={styles.stepLabel}>{step}</span>
+                    <div className={styles.stepLine} />
 
-                            {step === "pending" && (
-                              <div className={styles.stepActionArea}>
-                                {currentStatus === "pending" ? (
-                                  <span className={styles.txtWaiting}>รอผู้สมัครตอบรับงาน</span>
-                                ) : currentStatus === "rejected" ? (
-                                  <span className={styles.txtRejected}>ผู้สมัครปฏิเสธงานแล้ว</span>
-                                ) : null}
-                              </div>
-                            )}
+                    {/* Step 2: Applied */}
+                    <div className={`${styles.step} ${status === 'applied' ? styles.active : ''}`}>
+                      <div className={styles.stepIcon}>☑️</div>
+                      <span className={styles.stepLabel}>Applied</span>
+                      {status === 'applied' && (
+                        <div className={styles.inlineDatePicker}>
+                          <label>วันสัมภาษณ์:</label>
+                          <input
+                            type="date"
+                            value={interviewDate}
+                            onChange={(e) => setInterviewDate(e.target.value)}
+                          />
+                          <button
+                            className={styles.btnSubmitStep}
+                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'interview_pending')}
+                          >
+                            นัดสัมภาษณ์
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
-                            {step === "Applied" && currentStatus === "applied" && (
-                              <div className={styles.stepActionArea}>
-                                <div className={styles.actionBtnGroup}>
-                                  <button
-                                    onClick={() => handleUpdateStatus(selectedJob.tracking_id, "prepinterview")}
-                                    className={styles.btnRead}
-                                  >
-                                    รับสัมภาษณ์
-                                  </button>
-                                  <button
-                                    onClick={() => handleUpdateStatus(selectedJob.tracking_id, "rejected")}
-                                    className={styles.btnReject}
-                                  >
-                                    ปฏิเสธ
-                                  </button>
-                                </div>
-                              </div>
-                            )}
+                    <div className={styles.stepLine} />
 
-                            {step === "Interview" && (
-                              <div className={styles.stepActionArea}>
-                                {currentStatus === "screening" || currentStatus === "applied" ? (
-                                  <div className={styles.inlineDatePicker}>
-                                    <input
-                                      type="date"
-                                      value={meetingDate}
-                                      onChange={(e) => setMeetingDate(e.target.value)}
-                                      className={styles.inputField}
-                                    />
-                                    <input
-                                      type="time"
-                                      value={meetingTime}
-                                      onChange={(e) => setMeetingTime(e.target.value)}
-                                      className={styles.inputField}
-                                    />
-                                    <button
-                                      onClick={() => handleUpdateStatus(selectedJob.tracking_id, "interview_pending")}
-                                      className={styles.btnSetDate}
-                                    >
-                                      นัดสัมภาษณ์
-                                    </button>
-                                  </div>
-                                ) : currentStatus === "interview_pending" ? (
-                                  <span className={styles.txtWaiting}>นัดหมายแล้ว (รอผู้สมัครตอบกลับ)</span>
-                                ) : null}
-                              </div>
-                            )}
+                    {/* Step 3: Interview */}
+                    <div className={`${styles.step} ${status === 'interview' || status === 'interview_pending' ? styles.active : ''}`}>
+                      <div className={styles.stepIcon}>🎙️</div>
+                      <span className={styles.stepLabel}>Interview</span>
 
-                            {step === "Appointment" && (
-                              <div className={styles.stepActionArea}>
-                                {currentStatus === "interview_passed" || currentStatus === "interview" ? (
-                                  <div className={styles.inlineDatePicker}>
-                                    <label>วันเริ่มงาน:</label>
-                                    <input
-                                      type="date"
-                                      value={startDate}
-                                      onChange={(e) => setStartDate(e.target.value)}
-                                      className={styles.inputField}
-                                    />
-                                    <button
-                                      onClick={() => handleUpdateStatus(selectedJob.tracking_id, "offer_pending")}
-                                      className={styles.btnSetDate}
-                                    >
-                                      ส่งข้อเสนอเริ่มงาน
-                                    </button>
-                                  </div>
-                                ) : currentStatus === "offer_pending" ? (
-                                  <span className={styles.txtWaiting}>ส่งวันเริ่มงานแล้ว (รอผู้สมัครตอบกลับ)</span>
-                                ) : null}
-                              </div>
-                            )}
-                          </div>
-                          {idx < steps.length - 1 && <div className={styles.stepLine} />}
-                        </React.Fragment>
-                      );
-                    })}
+                      {/* แสดงเฉพาะตอนอยู่ขั้นตอน Interview */}
+                      {status === 'interview' && (
+                        <div className={styles.inlineDatePicker}>
+                          <label>วันสัมภาษณ์:</label>
+                          <input
+                            type="date"
+                            value={interviewDate}
+                            onChange={(e) => setInterviewDate(e.target.value)}
+                          />
+                          <button
+                            className={styles.btnSubmitStep}
+                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'interview_pending')}
+                          >
+                            นัดสัมภาษณ์
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.stepLine} />
+
+                    {/* Step 4: Appointment */}
+                    <div className={`${styles.step} ${status === 'appointment' || status === 'hired' ? styles.active : ''}`}>
+                      <div className={styles.stepIcon}>💼</div>
+                      <span className={styles.stepLabel}>Appointment</span>
+
+                      {/* แสดงเฉพาะตอนอยู่ขั้นตอน Appointment */}
+                      {status === 'appointment' && (
+                        <div className={styles.inlineDatePicker}>
+                          <label>วันเริ่มงาน:</label>
+                          <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                          />
+                          <button
+                            className={styles.btnSubmitStep}
+                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'hired')}
+                          >
+                            ส่งข้อเสนอเริ่มงาน
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* ข้อมูลโปรไฟล์ผู้สมัคร 3 คอลัมน์ */}
                 <div className={styles.detailGrid}>
-                  {/* คอลัมน์ที่ 1: Profile ส่วนตัว */}
                   <div className={styles.columnProfile}>
                     <div className={styles.avatarWrapper}>
                       <img
-                        src={selectedJob.profile_image || "/default-avatar.png"}
-                        alt="Applicant Avatar"
-                        className={styles.profileAvatar}
-                        onError={(e) => {
-                          (e.target as HTMLElement).setAttribute("src", "https://via.placeholder.com/100");
-                        }}
+                        src={selectedJob.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}&background=random`}
+                        alt="seeker profile"
+                        className={styles.profileRight}
                       />
                       <h3>{selectedJob.fullname || "ไม่ระบุชื่อ"}</h3>
                       <a href={`mailto:${selectedJob.email}`} className={styles.emailLink}>

@@ -9,11 +9,24 @@
 .mainContent {
   display: grid;
   grid-template-columns: 320px 1fr;
-  gap: 20px;
+  gap: 5px;
+  
+}
+
+.cardScollBar {
+  display: flex;
+  flex-direction: column; /* จัดองค์ประกอบเรียงต่อกันแนวตั้ง */
+  max-height: 730px;      /* กำหนดความสูงสูงสุดเพื่อให้เกิด overflow */
+  overflow-y: auto;       /* แสดง scrollbar แนวตั้งเมื่อเนื้อหาล้น */
+  overflow-x: hidden;     /* ซ่อน scrollbar แนวนอน */
+  background-color: white;
+  border: 1px solid #000000; /* กรอบเส้นทึบ หนา 1px สีเทาอ่อน */
+  border-radius: 20px;     /* เพิ่มความโค้งมนให้มุมกรอบ (ใส่หรือไม่ใส่ก็ได้) */
 }
 
 /* Sidebar ด้านซ้าย */
 .sidebar {
+  margin: 10px 2px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -38,18 +51,30 @@
 .cardLeft {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex: 1;
 }
 
-.companyLogo {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
+.profileLeft {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   object-fit: cover;
+ flex-shrink: 0; /* ป้องกันรูปภาพโดนบีบเบี้ยว */
+  margin-right: 0; /* ลบ margin-right 50px ออกเพื่อแก้ปัญหาช่องว่างเกิน */
+}
+
+.profileRight {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
 }
 
 .cardDetails h4 {
-  margin: 0;
+ margin: 2px 0 0;
   font-size: 16px;
   font-weight: bold;
 }
@@ -65,6 +90,7 @@
   border-radius: 12px;
   font-size: 11px;
   font-weight: bold;
+  /* background-color: fuchsia; */
 }
 
 .statusPending { background: #dcdcdc; color: #333; }
@@ -147,10 +173,38 @@
   cursor: pointer;
 }
 
+.btnRead:hover {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #13376d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btnRead::after {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #2b5604;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .btnReject {
   padding: 2px 8px;
   font-size: 10px;
   background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btnRead::after {
+  padding: 2px 8px;
+  font-size: 10px;
+  background-color: #5f0404;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -338,21 +392,15 @@
 
 /* ข้อความสถานะรอการตอบกลับ */
 .txtWaiting {
-  color: #d97706; /* สีส้มเตือน */
-  font-weight: 500;
+  color: #8d4e06; /* สีส้มเตือน */
+  font-weight: 300;
   background-color: #fef3c7;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
+  font-size: 12px;
+  margin: 3px 6px 0px 6px;
 }
 
-/* ข้อความปฏิเสธ */
-.txtRejected {
-  color: #dc2626;
-  font-weight: 500;
-  background-color: #fee2e2;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
 
 /* กล่องเลือกวันที่แบบกระชับใต้ Icon */
 .inlineDatePicker {
@@ -368,4 +416,94 @@
 .inlineDatePicker input {
   font-size: 11px;
   padding: 2px 4px;
+}
+
+/* 1. จัด Stepper ให้อยู่แนวเดียวกัน และจัด alignment ให้ส่วนขยายลงมาด้านล่างได้สวยงาม */
+.stepperContainer {
+  display: flex;
+  align-items: flex-start; /* ปรับจาก center เป็น flex-start เพื่อรองรับเนื้อหาล่าง Icon */
+  justify-content: space-between;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+/* 2. กำหนดโครงสร้างแต่ละ Step ให้เป็นแนวตั้ง และมีตำแหน่งแน่นอน */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  text-align: center;
+}
+
+/* 3. ปรับตำแหน่งเส้นเชื่อมระหว่าง Step ให้อยู่ระดับเดียวกับ Icon */
+.stepLine {
+  flex: 1;
+  height: 3px;
+  background: #ccc;
+  margin: 21px 10px 0 10px; /* ปรับ margin-top ให้ตรงกับจุดศูนย์กลางของ Icon */
+}
+
+/* 4. กล่องเลือกวันที่ และปุ่มกดใต้ Icon (Interview / Appointment) */
+.inlineDatePicker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+  width: 140px; /* กำหนดความกว้างให้พอดี */
+  z-index: 2;
+}
+
+.inlineDatePicker label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #374151;
+  text-align: left;
+}
+
+.inlineDatePicker input[type="date"] {
+  font-size: 11px;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  width: 100%;
+}
+
+.txtRejected {
+  padding: 5px 8px;
+  font-size: 11px;
+  background-color: #d50101;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.txtRejected:hover {
+  background-color: #760202;
+}
+
+.btnSubmitStep {
+  padding: 5px 8px;
+  font-size: 11px;
+  background-color: #066f06;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btnSubmitStep:hover {
+  background-color: #02320d;
 }
