@@ -82,6 +82,7 @@
 .trackerBox {
   margin: 15px 15px;
   background: #ffffff;
+  box-shadow: 10px 10px 5px rgba(0,0,0,0.3);
   border-radius: 16px;
   padding: 20px;
 }
@@ -195,9 +196,15 @@
 
 /* 3 Columns Layout */
 .detailGrid {
+  background-color: #ffffff;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 15px;
+  gap: 10px;
+  border-radius: 10px;
+  box-shadow: 8px 8px 2px #000;
+  padding: 10px 10px 10px;
+  margin: 15px 15px 15px 15px;
+
 }
 
 /* Column 1: Profile */
@@ -206,6 +213,7 @@
   flex-direction: column;
   align-items: center;
   padding: 10px;
+  /* background-color: #0066cc; */
 }
 
 .avatarWrapper {
@@ -216,6 +224,8 @@
 .profileAvatar {
   width: 90px;
   height: 90px;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 8px;
@@ -290,13 +300,24 @@
   line-height: 1.4;
 }
 
+.badgeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Badge Pill */
 .badgePill {
-  display: inline-block;
-  padding: 2px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
   background: #000;
   color: #fff;
-  border-radius: 10px;
-  font-size: 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  width: auto; /* เอา width: 5rem ออก เพื่อให้ขนาดขยายตามความยาวข้อความ */
 }
 
 .emptyState {
@@ -304,4 +325,47 @@
   padding: 50px;
   background: #e0e0e0;
   border-radius: 16px;
+}
+
+/* พื้นที่สำหรับปุ่มหรือข้อความใต้แต่ละ Step */
+.stepActionArea {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 12px;
+}
+
+/* ข้อความสถานะรอการตอบกลับ */
+.txtWaiting {
+  color: #d97706; /* สีส้มเตือน */
+  font-weight: 500;
+  background-color: #fef3c7;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* ข้อความปฏิเสธ */
+.txtRejected {
+  color: #dc2626;
+  font-weight: 500;
+  background-color: #fee2e2;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* กล่องเลือกวันที่แบบกระชับใต้ Icon */
+.inlineDatePicker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #f9fafb;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.inlineDatePicker input {
+  font-size: 11px;
+  padding: 2px 4px;
 }
