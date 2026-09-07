@@ -248,8 +248,7 @@ export default async function DetailJob({ params }: PageProps) {
                 <img
                   src={
                     job.logo_image ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
-                  }
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random` }
                   alt="Company Logo"
                   className={styles.logo}
                 />
