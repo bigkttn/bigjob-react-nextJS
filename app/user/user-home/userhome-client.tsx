@@ -1,21 +1,16 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./userhome-client.module.css";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import ProvinceSelect from "./province";
 
-// 1. กำหนด Type ของ User (อิงตามข้อมูลจริงจาก Console ในรูป)
 interface User {
   id?: number;
   user_id?: number | string;
   email?: string;
   role?: string;
-  iat?: number;
-  exp?: number;
 }
 
-// 2. กำหนด Type ของ ประกาศงาน (Job Post)
 interface JobPost {
   post_id: number | string;
   company_name?: string;
@@ -37,51 +32,75 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Suggested Posts State
+  const abortRef = useRef<AbortController | null>(null);
+
   const [suggestedPosts, setSuggestedPosts] = useState<JobPost[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
-  // Search & Filter State
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter & Sort State
   const [selectedJobType, setSelectedJobType] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
-  // Sort State (ค่าเริ่มต้นเรียงตามความเกี่ยวข้อง AI Match)
-  const [sortBy, setSortBy] = useState("relevance");
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 12;
 
-  const router = useRouter();
-
-  console.log(" = ", initialUser);
-  // 1. ดึงข้อมูล Suggested Posts ครั้งแรก
   useEffect(() => {
     fetchSuggestedPosts();
   }, [user]);
 
-  // 2. Debounce Search Effect สำหรับ AI Hybrid Search API
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchTerm.trim()) {
-        performHybridSearch(searchTerm.trim());
-      } else {
-        fetchPosts();
+  const performHybridSearch = useCallback(
+    async (query: string) => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      try {
+        setIsSearching(true);
+        const queryParams = new URLSearchParams({
+          q: query,
+          job_type: selectedJobType,
+          province: selectedProvince,
+          status: selectedStatus,
+          sort: sortBy,
+        });
+
+        const res = await fetch(
+          `/api/posts/user-search-post?${queryParams.toString()}`,
+          { signal: controller.signal },
+        );
+        const data = await res.json();
+        if (data.success) {
+          setPosts(data.posts || []);
+        }
+      } catch (err: any) {
+        if (err.name !== "AbortError") console.error("Search Error:", err);
+      } finally {
+        if (!controller.signal.aborted) setIsSearching(false);
       }
-    }, 400); // ชะลอ 400ms ก่อนยิง API
+    },
+    [selectedJobType, selectedProvince, selectedStatus, sortBy],
+  );
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // ฟังก์ชันดึงโพสต์งานปกติ (กรณีไม่มีคำค้นหา)
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/posts/getallPosts?t=${Date.now()}`, {
-        cache: "no-store",
+      const queryParams = new URLSearchParams({
+        job_type: selectedJobType,
+        province: selectedProvince,
+        status: selectedStatus,
+        sort: sortBy,
+        t: Date.now().toString(),
       });
+
+      const res = await fetch(
+        `/api/posts/getallPosts?${queryParams.toString()}`,
+        { cache: "no-store" },
+      );
       const data = await res.json();
       setPosts(data.posts || []);
     } catch (err) {
@@ -90,145 +109,88 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedJobType, selectedProvince, selectedStatus, sortBy]);
 
-  // ฟังก์ชันยิง AI Hybrid Search API
-  const performHybridSearch = async (query: string) => {
-    try {
-      setIsSearching(true);
-      const res = await fetch(
-        `/api/posts/user-search-post?q=${encodeURIComponent(query)}`,
-      );
-      const data = await res.json();
-      if (data.success) {
-        setPosts(data.posts || []);
-      }
-    } catch (err) {
-      console.error("Hybrid Search Error:", err);
-    } finally {
-      setIsSearching(false);
+  // เมื่อเปลี่ยนเงื่อนไขค้นหา หรือ Filter
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      performHybridSearch(searchTerm.trim());
+    } else {
+      fetchPosts();
     }
-  };
+  }, [searchTerm, fetchPosts, performHybridSearch]);
 
   const fetchSuggestedPosts = async () => {
     try {
       setIsSuggestLoading(true);
       const userId = user?.user_id || user?.id || "";
-
       const res = await fetch(`/api/posts/UserSuggested?userId=${userId}`);
       const data = await res.json();
-
-      if (data.success) {
-        setSuggestedPosts(data.posts || []);
-      }
+      if (data.success) setSuggestedPosts(data.posts || []);
     } catch (err) {
-      console.error("Fetch suggested posts error:", err);
-      setSuggestedPosts([]);
+      console.error("Fetch suggested error:", err);
     } finally {
       setIsSuggestLoading(false);
     }
   };
 
+  const handleSearchSubmit = () => {
+    setCurrentPage(1);
+    setSearchTerm(searchInput.trim());
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSearchSubmit();
+    }
+  };
+
   function getTimeAgo(dateString: string | Date): string {
     if (!dateString) return "ไม่ระบุเวลา";
-
     const createdDate = new Date(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor(
       (now.getTime() - createdDate.getTime()) / 1000,
     );
-
     if (diffInSeconds < 60) return "เมื่อสักครู่";
-
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
-
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
-
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 30) return `${diffInDays} วันที่แล้ว`;
-
     const diffInMonths = Math.floor(diffInDays / 30);
     if (diffInMonths < 12) return `${diffInMonths} เดือนที่แล้ว`;
-
-    const diffInYears = Math.floor(diffInDays / 365);
-    return `${diffInYears} ปีที่แล้ว`;
+    return `${Math.floor(diffInDays / 365)} ปีที่แล้ว`;
   }
 
-  const availableJobTypes = useMemo(() => {
-    const types = posts.map((p) => p.job_type).filter(Boolean);
-    return Array.from(new Set(types));
-  }, [posts]);
+  const availableJobTypes = [
+    "Full-time",
+    "Part-time",
+    "Freelance",
+    "Internship",
+    "Contract",
+  ];
 
-  // ฟังก์ชันกรองและเรียงลำดับโพสต์งานบน Client-Side
-  const filteredPosts = useMemo(() => {
-    const filtered = posts.filter((post) => {
-      const matchesJobType =
-        !selectedJobType || post.job_type === selectedJobType;
-
-      const matchesProvince =
-        !selectedProvince ||
-        post.province === selectedProvince ||
-        post.work_location?.includes(selectedProvince);
-
-      const matchesStatus =
-        !selectedStatus ||
-        post.status?.toLowerCase() === selectedStatus.toLowerCase();
-
-      return matchesJobType && matchesProvince && matchesStatus;
-    });
-
-    return filtered.sort((a, b) => {
-      const timeA = new Date(a.created_at || 0).getTime();
-      const timeB = new Date(b.created_at || 0).getTime();
-
-      if (sortBy === "oldest") {
-        return timeA - timeB;
-      }
-      if (sortBy === "newest") {
-        return timeB - timeA;
-      }
-      // ค่าเริ่มต้น "relevance": เรียงตาม matchScore หากมี (กรณีค้นหาด้วย Hybrid Search)
-      if (
-        typeof b.matchScore === "number" &&
-        typeof a.matchScore === "number"
-      ) {
-        return b.matchScore - a.matchScore;
-      }
-      return timeB - timeA;
-    });
-  }, [posts, selectedJobType, selectedProvince, selectedStatus, sortBy]);
-
-  // Pagination Calculations
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
-  const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+  const totalPages = Math.ceil(posts.length / postsPerPage);
 
-  const handleFilterChange = (
-    setter: (value: string) => void,
-    value: string,
-  ) => {
-    setter(value);
+  const handleFilterChange = (setter: (val: string) => void, val: string) => {
+    setter(val);
     setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
+    setSearchInput("");
     setSearchTerm("");
     setSelectedJobType("");
     setSelectedProvince("");
     setSelectedStatus("");
-    setSortBy("relevance");
+    setSortBy("newest");
     setCurrentPage(1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const getStatusStyle = (status: string) => {
@@ -258,6 +220,13 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
     if (!min && max) return `สูงสุด ฿${max.toLocaleString()}`;
     return `฿ ${min?.toLocaleString()} - ฿ ${max?.toLocaleString()}`;
   };
+
+  const isFilterActive =
+    searchTerm ||
+    selectedJobType ||
+    selectedProvince ||
+    selectedStatus ||
+    sortBy !== "newest";
 
   if (isLoading) {
     return (
@@ -290,22 +259,32 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
 
   return (
     <div className={styles.container}>
-      {/* Header Search & Filters */}
       <header className={styles.searchSection}>
         <div className={styles.searchBarWrapper}>
           <input
             type="text"
-            value={searchTerm}
-            onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
             placeholder="ค้นหาตำแหน่งงาน, ชื่อบริษัท, ทักษะ หรือสถานที่ (รองรับ AI Semantic Search)..."
             className={styles.searchInput}
           />
-          {isSearching && (
-            <span className={styles.searchingBadge}>กำลังค้นหาด้วย AI...</span>
-          )}
+          <button
+            type="button"
+            onClick={handleSearchSubmit}
+            disabled={isSearching}
+            className={styles.searchBtnMain}
+          >
+            {isSearching ? "กำลังค้นหา..." : "ค้นหา"}
+          </button>
         </div>
 
-        {/* Dynamic Filters */}
+        {searchTerm && !isSearching && (
+          <p className={styles.searchingBadge}>
+            แสดงผลการค้นหาสำหรับ: “{searchTerm}”
+          </p>
+        )}
+
         <div className={styles.filters}>
           <select
             value={selectedJobType}
@@ -321,7 +300,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
             ))}
           </select>
 
-          {/* Standalone Province Select Component */}
           <ProvinceSelect
             value={selectedProvince}
             onChange={(val) => handleFilterChange(setSelectedProvince, val)}
@@ -334,38 +312,30 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
             }
           >
             <option value="">ทุกสถานะ</option>
-            <option value="Open">Open (เปิดรับ)</option>
-            <option value="Closed">Closed (ปิดรับ)</option>
+            <option value="Open">เปิดรับสมัคร</option>
+            <option value="Closed">ปิดรับสมัคร</option>
           </select>
 
           <select
             value={sortBy}
             onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
           >
-            {/* <option value="relevance">
-              เรียงตาม: ความเกี่ยวข้อง (AI Match)
-            </option> */}
             <option value="newest">เรียงตาม: โพสต์ล่าสุด</option>
             <option value="oldest">เรียงตาม: โพสต์เก่าสุด</option>
           </select>
 
-          {(searchTerm ||
-            selectedJobType ||
-            selectedProvince ||
-            selectedStatus ||
-            sortBy !== "relevance") && (
+          {isFilterActive && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>
-              Clear Filters
+              ล้างตัวกรอง
             </button>
           )}
         </div>
       </header>
 
-      {/* Main Layout 30% / 70% */}
       <div className={styles.mainLayout}>
         <aside className={styles.leftSidebar}>
           <div className={styles.suggestContent}>
-            <h3>Suggested Posts</h3>
+            <h3>ตำแหน่งงานแนะนำ</h3>
             <div className={styles.verticalList}>
               {isSuggestLoading ? (
                 <p className={styles.subText}>
@@ -415,7 +385,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                         href={`/user/user-detail-job/${post.post_id}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>Details</button>
+                        <button className={styles.detailsBtn}>
+                          รายละเอียด
+                        </button>
                       </Link>
                     </div>
                   </div>
@@ -431,17 +403,16 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
           <div className={styles.suggestContent}>
             <div className={styles.headerTitleRow}>
               <h3>
-                {searchTerm ||
-                selectedJobType ||
-                selectedProvince ||
-                selectedStatus
-                  ? `ผลการค้นหา (${filteredPosts.length} รายการ)`
-                  : "Latest Job Openings"}
+                {isFilterActive
+                  ? `ผลการค้นหา (${posts.length} รายการ)`
+                  : "ประกาศงานล่าสุด"}
               </h3>
             </div>
 
             <div className={styles.suggestGrid}>
-              {currentPosts.length > 0 ? (
+              {isSearching ? (
+                <p className={styles.subText}>กำลังค้นหาด้วย AI...</p>
+              ) : currentPosts.length > 0 ? (
                 currentPosts.map((post) => (
                   <div key={post.post_id} className={styles.suggestMiniCard}>
                     <img
@@ -458,12 +429,6 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                       <div>
                         <div className={styles.cardHeader}>
                           <p className={styles.bold}>{post.company_name}</p>
-                          {/* แสดง AI Match Score เปอร์เซ็นต์เมื่อมีการค้นหา */}
-                          {/* {typeof post.matchScore === "number" && 
-                            <span className={styles.matchBadge}>
-                              {Math.min(100, Math.round(post.matchScore * 100))}% Match
-                            </span>
-                          )} */}
                           <span
                             className={styles.statusBadge}
                             style={getStatusStyle(post.status || "")}
@@ -491,7 +456,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                         href={`/user/user-detail-job/${post.post_id}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>Details</button>
+                        <button className={styles.detailsBtn}>
+                          รายละเอียด
+                        </button>
                       </Link>
                     </div>
                   </div>
@@ -500,24 +467,29 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                 <p className={styles.noData}>ไม่พบประกาศงานที่ตรงกับการค้นหา</p>
               )}
             </div>
-            {filteredPosts.length > postsPerPage && (
+
+            {posts.length > postsPerPage && (
               <div className={styles.paginationWrapper}>
                 <button
-                  onClick={handlePrevPage}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={currentPage === 1}
                   className={styles.pageBtn}
                 >
-                  Previous
+                  ก่อนหน้า
                 </button>
                 <span className={styles.pageInfo}>
-                  Page {currentPage} of {totalPages}
+                  หน้า {currentPage} จาก {totalPages}
                 </span>
                 <button
-                  onClick={handleNextPage}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
                   disabled={currentPage === totalPages}
                   className={styles.pageBtn}
                 >
-                  Next
+                  ถัดไป
                 </button>
               </div>
             )}

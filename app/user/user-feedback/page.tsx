@@ -126,7 +126,7 @@ export default function UserFeedbackPage() {
             className={styles.submitBtn}
             disabled={isLoading || !message.trim()}
           >
-            {isLoading ? "กำลังส่งข้อมูล..." : "ส่งเรื่องให้ Admin"}
+            {isLoading ? "กำลังส่งข้อมูล..." : "ส่งเรื่องให้แอดมิน"}
           </button>
         </form>
       </div>
@@ -172,7 +172,7 @@ export default function UserFeedbackPage() {
 
                 {item.admin_message && (
                   <div className={styles.adminReply}>
-                    <strong>Admin Reply:</strong>
+                    <strong>คำตอบจากแอดมิน:</strong>
                     <p>{item.admin_message}</p>
                     {item.replied_at && (
                       <span className={styles.replyDate}>

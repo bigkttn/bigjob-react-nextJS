@@ -43,7 +43,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         setCompanyData(data);
       } catch (err) {
         console.error("Fetch Error:", err);
-        setError(err instanceof Error ? err.message : "Something went wrong");
+        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาดบางอย่าง");
       } finally {
         setLoading(false);
       }
@@ -64,9 +64,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
     );
   if (compayData.length === 0)
     return (
-      <div className={styles.centerMessage}>
-        ไม่พบข้อมูลผู้สมัครที่บันทึกไว้
-      </div>
+      <div className={styles.centerMessage}>ไม่พบข้อมูลบริษัทที่บันทึกไว้</div>
     );
 
   return (
@@ -101,7 +99,7 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
                 // onClick={() => console.log("text = ", company.post_id)}
               >
                 <Link href={"/user/user-detail-job/" + company.post_id}>
-                  <button className={styles.infoButton}>See Info</button>
+                  <button className={styles.infoButton}>ดูรายละเอียด</button>
                 </Link>
               </div>
             </div>

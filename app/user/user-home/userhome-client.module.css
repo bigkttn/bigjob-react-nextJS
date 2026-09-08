@@ -18,8 +18,9 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  align-items: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .searchInput {
@@ -28,21 +29,45 @@
   border-radius: 20px;
   border: 1px solid #000000;
   background-color: white;
+  outline: none;
 }
 
+/* ✅ ปุ่มค้นหา */
 .searchBtnMain {
   background: #000;
   color: white;
-  padding: 10px 25px;
+  padding: 10px 28px;
   border-radius: 10px;
   border: none;
   cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.searchBtnMain:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.searchBtnMain:disabled {
+  background: #a0a0a0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ✅ ข้อความบอกสถานะการค้นหา */
+.searchingBadge {
+  margin: 0 0 14px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .filters {
   display: flex;
   justify-content: center;
-  align-items: center; /* 📌 เพิ่มเพื่อให้ปุ่มทุกตัวจัดกึ่งกลางแนวนอนเท่ากัน */
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -66,13 +91,11 @@
   box-sizing: border-box;
 }
 
-/* ฝั่งซ้าย 30% */
 .leftSidebar {
   flex: 0 0 25%;
   min-width: 280px;
 }
 
-/* ฝั่งขวา 70% */
 .rightContent {
   flex: 1;
 }
@@ -90,14 +113,12 @@
   margin-bottom: 16px;
 }
 
-/* ซ้าย: เรียงลงมาแนวตั้ง */
 .verticalList {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* ขวา: แสดงแบบ Grid สองคอลัมน์ หรือยืดหยุ่นตามหน้าจอ */
 .suggestGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -226,7 +247,6 @@
   background-size: 600px 100%;
 }
 
-/* รองรับมือถือ ปรับกลับเป็นคอลัมน์เดียว */
 @media (max-width: 768px) {
   .mainLayout {
     flex-direction: column;
@@ -236,7 +256,15 @@
     width: 100%;
     flex: none;
   }
+  .searchBarWrapper {
+    flex-direction: column;
+  }
+  .searchInput,
+  .searchBtnMain {
+    width: 100%;
+  }
 }
+
 /* ================= PAGINATION BUTTONS ================= */
 .paginationWrapper {
   display: flex;
@@ -276,6 +304,7 @@
   font-weight: bold;
   color: #333333;
 }
+
 .resetBtn {
   background-color: #dc3545;
   color: white;

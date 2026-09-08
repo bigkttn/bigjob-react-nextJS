@@ -60,7 +60,7 @@ export default async function DetailJob({ params }: PageProps) {
   if (!viewer) {
     return (
       <div className={styles.centerMsg}>
-        <p>Please log in to view this profile.</p>
+        <p>กรุณาเข้าสู่ระบบเพื่อดูข้อมูลนี้</p>
       </div>
     );
   }
@@ -68,11 +68,7 @@ export default async function DetailJob({ params }: PageProps) {
   let seekerName = viewer?.fullname || "";
   let seekerEmail = viewer?.email || "";
 
-  // const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
   if (viewer?.id) {
-    // console.log("1111111111111111111หก1หกดหกดำ"+viewer.id);
-
     try {
       const seekerRes = await fetch(
         `${apiUrl}/api/user/getUserById/${viewer.id}`,
@@ -92,10 +88,7 @@ export default async function DetailJob({ params }: PageProps) {
 
         seekerEmail = seekerData?.email || seekerEmail;
         seekerName = seekerData?.fullname || seekerName;
-
-        // console.log(seekerEmail+ seekerName+"ok naka ");
       } else {
-        // ปรับเปลี่ยนจาก console.error เป็น warning หรือใช้ค่า fallback จาก JWT
         console.warn(
           `User profile not found in DB (Status ${seekerRes.status}). Using JWT fallback info.`,
         );
@@ -105,14 +98,14 @@ export default async function DetailJob({ params }: PageProps) {
     }
   }
 
-  // ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default ป้องกัน string ว่าง
-  seekerEmail = seekerEmail || "invalid seeker email";
-  seekerName = seekerName || "invalid seeker name";
+  // ถ้าสุดท้ายยังไม่ได้ค่า ให้ใส่ค่า Default
+  seekerEmail = seekerEmail || "ไม่ระบุอีเมลผู้สมัคร";
+  seekerName = seekerName || "ไม่ระบุชื่อผู้สมัคร";
 
   // เช็กว่าเป็น admin หรือ superadmin
   const isAdmin = viewer.role === "admin" || viewer.role === "superadmin";
 
-  // 3. Fetch ข้อมูล Job Post
+  // Fetch ข้อมูล Job Post
   let job: JobPost | null = null;
 
   try {
@@ -141,7 +134,7 @@ export default async function DetailJob({ params }: PageProps) {
     console.error("Fetch job error:", error);
   }
 
-  // 4. Fetch ข้อมูล Company Email
+  // Fetch ข้อมูล Company Email
   let companyEmail = "";
   if (job?.company_id) {
     try {
@@ -211,26 +204,24 @@ export default async function DetailJob({ params }: PageProps) {
             borderRadius: "8px",
           }}
         >
-          Admin Mode
+          โหมดแอดมิน
         </h1>
       )}
       <div className={styles.container}>
         <div className={styles.card}>
           <BackButton />
 
-          {/* ปุ่ม Apply พร้อมส่ง Props ที่อัปเดตแล้ว */}
+          {/* ปุ่ม Apply พร้อมส่ง Props */}
           <ApplyCompany
             mode="invite"
             postId={Number(postId)}
             userId={viewer.id}
             companyId={Number(job.company_id)}
-            companyName={job.company_name || "invalid Company Name"}
-            seekerName={seekerName || "invalid seeker Name"}
-            jobTitle={job.job_position || "invalid jobTitle"}
-            seekerEmail={seekerEmail || "invalid seeker Email"}
-            companyEmail={
-              companyEmail || viewer.email || "invalid companyEmail"
-            }
+            companyName={job.company_name || "ไม่ระบุชื่อบริษัท"}
+            seekerName={seekerName || "ไม่ระบุชื่อผู้สมัคร"}
+            jobTitle={job.job_position || "ไม่ระบุตำแหน่งงาน"}
+            seekerEmail={seekerEmail || "ไม่ระบุอีเมลผู้สมัคร"}
+            companyEmail={companyEmail || viewer.email || "ไม่ระบุอีเมลบริษัท"}
           />
 
           <div className={styles.header}>
@@ -248,7 +239,8 @@ export default async function DetailJob({ params }: PageProps) {
                 <img
                   src={
                     job.logo_image ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random` }
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
+                  }
                   alt="Company Logo"
                   className={styles.logo}
                 />
@@ -257,7 +249,7 @@ export default async function DetailJob({ params }: PageProps) {
                   style={{ display: "flex", alignItems: "center", gap: "10px" }}
                 >
                   <h1 className={styles.companyName}>
-                    {job.company_name || "Company Name"}
+                    {job.company_name || "ไม่ระบุชื่อบริษัท"}
                   </h1>
 
                   <span
@@ -298,15 +290,15 @@ export default async function DetailJob({ params }: PageProps) {
               <table className={styles.infoTable}>
                 <tbody>
                   <tr>
-                    <td className={styles.label}>Job Title</td>
-                    <td>{job.job_position || "Job Title"}</td>
+                    <td className={styles.label}>ตำแหน่งงาน</td>
+                    <td>{job.job_position || "ไม่ระบุตำแหน่งงาน"}</td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Province</td>
-                    <td>{job.province || "Province"}</td>
+                    <td className={styles.label}>จังหวัด</td>
+                    <td>{job.province || "ไม่ระบุจังหวัด"}</td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Work Location</td>
+                    <td className={styles.label}>สถานที่ทำงาน</td>
                     <td
                       style={{
                         maxWidth: "450px",
@@ -314,32 +306,32 @@ export default async function DetailJob({ params }: PageProps) {
                         wordBreak: "break-word",
                       }}
                     >
-                      {job.work_location || "Work Location"}
+                      {job.work_location || "ไม่ระบุสถานที่ทำงาน"}
                     </td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Salary</td>
+                    <td className={styles.label}>เงินเดือน</td>
                     <td>
-                      {job.salary_min || "Salary"} -{" "}
-                      {job.salary_max || "Salary"} บาท
+                      {job.salary_min || "ไม่ระบุ"} -{" "}
+                      {job.salary_max || "ไม่ระบุ"} บาท
                     </td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Age</td>
+                    <td className={styles.label}>อายุ</td>
                     <td>
-                      {job.age_min || "Salary"} - {job.age_max || "Salary"} ปี
+                      {job.age_min || "ไม่ระบุ"} - {job.age_max || "ไม่ระบุ"} ปี
                     </td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Job type</td>
-                    <td>{job.job_type || "Salary"}</td>
+                    <td className={styles.label}>ประเภทงาน</td>
+                    <td>{job.job_type || "ไม่ระบุ"}</td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Vacancy</td>
-                    <td>{job.vacancy || 1}</td>
+                    <td className={styles.label}>จำนวนที่รับ</td>
+                    <td>{job.vacancy || 1} ตำแหน่ง</td>
                   </tr>
                   <tr>
-                    <td className={styles.label}>Details</td>
+                    <td className={styles.label}>รายละเอียดงาน</td>
                     <td>
                       <ul className={styles.list}>
                         <li
@@ -349,7 +341,7 @@ export default async function DetailJob({ params }: PageProps) {
                             wordBreak: "break-word",
                           }}
                         >
-                          {job.job_description || "No details specified"}
+                          {job.job_description || "ไม่ได้ระบุรายละเอียด"}
                         </li>
                       </ul>
                     </td>
@@ -359,7 +351,7 @@ export default async function DetailJob({ params }: PageProps) {
 
               <div style={{ marginTop: "30px" }}>
                 <hr />
-                <h3 className={styles.sectionTitle}>Qualifications</h3>
+                <h3 className={styles.sectionTitle}>คุณสมบัติ</h3>
                 <ol className={styles.list}>
                   <li
                     style={{
@@ -370,7 +362,7 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {typeof job.preferred_qualifications === "string"
                       ? job.preferred_qualifications
-                      : "No qualifications specified"}
+                      : "ไม่ได้ระบุคุณสมบัติ"}
                   </li>
                 </ol>
               </div>
@@ -379,7 +371,7 @@ export default async function DetailJob({ params }: PageProps) {
             {/* ฝั่งขวา: สวัสดิการและติดต่อ */}
             <div className={styles.rightCol}>
               <section>
-                <h3 className={styles.sectionTitle}>Benefits</h3>
+                <h3 className={styles.sectionTitle}>สวัสดิการ</h3>
                 <ul className={styles.list}>
                   <li
                     style={{
@@ -390,14 +382,14 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {typeof job.Benefits === "string"
                       ? job.Benefits
-                      : "No benefits specified"}
+                      : "ไม่ได้ระบุสวัสดิการ"}
                   </li>
                 </ul>
               </section>
 
               <section style={{ marginTop: "30px" }}>
                 <hr />
-                <h3 className={styles.sectionTitle}>How to Apply</h3>
+                <h3 className={styles.sectionTitle}>วิธีการสมัคร</h3>
                 <ul className={styles.list}>
                   <li
                     style={{
@@ -408,14 +400,14 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {typeof job.how_to_apply === "string"
                       ? job.how_to_apply
-                      : "No application instructions specified"}
+                      : "ไม่ได้ระบุวิธีการสมัคร"}
                   </li>
                 </ul>
               </section>
 
               <section style={{ marginTop: "30px" }}>
                 <hr />
-                <h3 className={styles.sectionTitle}>Contact</h3>
+                <h3 className={styles.sectionTitle}>ช่องทางติดต่อ</h3>
                 <ul className={styles.list}>
                   <li
                     style={{
@@ -426,14 +418,14 @@ export default async function DetailJob({ params }: PageProps) {
                   >
                     {typeof job.contact === "string"
                       ? job.contact
-                      : "No contact information specified"}
+                      : "ไม่ได้ระบุข้อมูลติดต่อ"}
                   </li>
                 </ul>
               </section>
 
               <section style={{ marginTop: "30px" }}>
                 <hr />
-                <h3 className={styles.sectionTitle}>Application Deadline</h3>
+                <h3 className={styles.sectionTitle}>วันปิดรับสมัคร</h3>
                 <div
                   style={{
                     display: "flex",
@@ -469,7 +461,7 @@ export default async function DetailJob({ params }: PageProps) {
                           minute: "2-digit",
                           hour12: false,
                         }) + " น."
-                      : "No deadline specified"}
+                      : "ไม่ได้ระบุกำหนดการ"}
                   </span>
                 </div>
               </section>

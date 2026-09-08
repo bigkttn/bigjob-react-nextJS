@@ -183,6 +183,12 @@ interface ApiProfile {
 
 /* ================= 3) ฟังก์ชันช่วยพื้นฐาน ================= */
 
+const blockInvalidKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (["e", "E", "+", "-", ".", "="].includes(e.key)) {
+    e.preventDefault();
+  }
+};
+
 function toText(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return "";
   return String(value);
@@ -196,7 +202,7 @@ function showDate(value: string): string {
   if (value === "") return "-";
   const d = new Date(value);
   if (isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("en-GB", {
+  return d.toLocaleDateString("th-TH", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -489,6 +495,7 @@ function InfoRow(props: InfoRowProps) {
         type={type ?? "text"}
         value={type === "date" ? toDateInput(value) : value}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={type === "number" ? blockInvalidKeys : undefined}
       />
     </div>
   );
@@ -889,9 +896,10 @@ const SeekerProfile = () => {
     }
   }
 
-  if (loading) return <p>Loading...</p>;
-  if (error !== "") return <p>Error: {error}</p>;
+  if (loading) return <p>กำลังโหลดข้อมูล...</p>;
+  if (error !== "") return <p>เกิดข้อผิดพลาด: {error}</p>;
 
+  // ยกเว้นตามรูป: Work Types และ Header ไม่ต้องเปลี่ยนภาษา
   const workTypes = [
     "Full-time",
     "Freelance",
@@ -904,6 +912,12 @@ const SeekerProfile = () => {
     .map((s) => s.trim());
 
   const fileCategories = ["transcript", "resume", "portfolio", "certificate"];
+  const categoryLabels: Record<string, string> = {
+    transcript: "ใบรายงานผลการเรียน",
+    resume: "เรซูเม่",
+    portfolio: "แฟ้มสะสมผลงาน",
+    certificate: "ใบรับรอง / เกียรติบัตร",
+  };
 
   return (
     <div className={styles.container}>
@@ -911,7 +925,7 @@ const SeekerProfile = () => {
         {/* ── Column 1: Personal Info ── */}
         <div className={styles.column}>
           <div className={styles.cardHeader} style={{ position: "relative" }}>
-            Personal Information
+            ข้อมูลส่วนตัว
             <button
               type="button"
               onClick={toggleVisibility}
@@ -1043,7 +1057,7 @@ const SeekerProfile = () => {
               >
                 <input
                   type="text"
-                  placeholder="Full Name"
+                  placeholder="ชื่อ-นามสกุล"
                   value={form.fullname}
                   onChange={(e) => changeText("fullname", e.target.value)}
                   style={baseInputStyle}
@@ -1054,60 +1068,64 @@ const SeekerProfile = () => {
 
             <div className={styles.detailsBox}>
               <div className={styles.titleinfoRow}>
-                <strong>About</strong>
+                <strong>เกี่ยวกับ</strong>
               </div>
 
               <InfoRow
-                label="Gender"
+                label="เพศ"
                 editing={editMode}
                 value={editMode ? form.gender : profile.gender}
-                options={["Male", "Female", "Other"]}
+                options={["ชาย", "หญิง", "อื่นๆ"]}
                 onChange={(v) => changeText("gender", v)}
               />
               <InfoRow
-                label="Military Status"
+                label="สถานะทางทหาร"
                 editing={editMode}
                 value={
                   editMode ? form.military_status : profile.military_status
                 }
-                options={["Exempted", "Served", "None"]}
+                options={[
+                  "ได้รับการยกเว้น",
+                  "ผ่านการเกณฑ์ทหารแล้ว",
+                  "ยังไม่ผ่านการเกณฑ์ทหาร",
+                ]}
                 onChange={(v) => changeText("military_status", v)}
               />
               <InfoRow
-                label="Date of Birth"
+                label="วันเกิด"
                 type="date"
                 editing={editMode}
                 value={editMode ? form.date_of_birth : profile.date_of_birth}
                 onChange={(v) => changeText("date_of_birth", v)}
               />
               <InfoRow
-                label="Nationality"
+                label="สัญชาติ"
                 editing={editMode}
                 value={editMode ? form.nationality : profile.nationality}
                 onChange={(v) => changeText("nationality", v)}
               />
               <InfoRow
-                label="Religion"
+                label="ศาสนา"
                 editing={editMode}
                 value={editMode ? form.religion : profile.religion}
                 onChange={(v) => changeText("religion", v)}
               />
               <InfoRow
-                label="Weight (Kg)"
+                label="น้ำหนัก (กก.)"
                 type="number"
                 editing={editMode}
                 value={editMode ? form.weight : profile.weight}
                 onChange={(v) => changeText("weight", v)}
               />
               <InfoRow
-                label="Height (Cm)"
+                label="ส่วนสูง (ซม.)"
                 type="number"
                 editing={editMode}
                 value={editMode ? form.height : profile.height}
                 onChange={(v) => changeText("height", v)}
               />
               <InfoRow
-                label="Disability"
+                label="ความพิการ"
                 editing={editMode}
                 value={
                   editMode ? form.disability_status : profile.disability_status
@@ -1115,14 +1133,14 @@ const SeekerProfile = () => {
                 onChange={(v) => changeText("disability_status", v)}
               />
               <InfoRow
-                label="Marital"
+                label="สถานภาพการสมรส"
                 editing={editMode}
                 value={editMode ? form.marital_status : profile.marital_status}
-                options={["Single", "Married", "Divorced"]}
+                options={["โสด", "สมรส", "หย่าร้าง"]}
                 onChange={(v) => changeText("marital_status", v)}
               />
               <InfoRow
-                label="Mobile"
+                label="เบอร์โทรศัพท์"
                 editing={editMode}
                 value={editMode ? form.mobile_phone : profile.mobile_phone}
                 onChange={(v) => changeText("mobile_phone", v)}
@@ -1130,7 +1148,7 @@ const SeekerProfile = () => {
 
               <div className={styles.titleinfoRow}>
                 <br />
-                <strong>Contact</strong>
+                <strong>ช่องทางการติดต่อ</strong>
               </div>
 
               <InfoRow
@@ -1140,7 +1158,7 @@ const SeekerProfile = () => {
                 onChange={(v) => changeText("line_id", v)}
               />
               <div className={styles.infoRow}>
-                Country:{" "}
+                ประเทศ:{" "}
                 {!editMode ? (
                   show(profile.country)
                 ) : (
@@ -1152,7 +1170,7 @@ const SeekerProfile = () => {
               </div>
 
               <div className={styles.infoRow}>
-                Province:{" "}
+                จังหวัด:{" "}
                 {!editMode ? (
                   show(profile.province)
                 ) : (
@@ -1164,13 +1182,13 @@ const SeekerProfile = () => {
               </div>
 
               <InfoRow
-                label="District"
+                label="อำเภอ/เขต"
                 editing={editMode}
                 value={editMode ? form.district : profile.district}
                 onChange={(v) => changeText("district", v)}
               />
               <InfoRow
-                label="Sub District"
+                label="ตำบล/แขวง"
                 editing={editMode}
                 value={editMode ? form.sub_district : profile.sub_district}
                 onChange={(v) => changeText("sub_district", v)}
@@ -1228,7 +1246,7 @@ const SeekerProfile = () => {
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
-                  Edit Profile
+                  แก้ไขโปรไฟล์
                 </button>
               ) : (
                 <div style={{ display: "flex", gap: "0.6rem" }}>
@@ -1263,7 +1281,7 @@ const SeekerProfile = () => {
                     }}
                   >
                     {saving ? (
-                      "Saving..."
+                      "กำลังบันทึก..."
                     ) : (
                       <>
                         <svg
@@ -1278,7 +1296,7 @@ const SeekerProfile = () => {
                         >
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        Save
+                        บันทึก
                       </>
                     )}
                   </button>
@@ -1325,7 +1343,7 @@ const SeekerProfile = () => {
                       <line x1="18" y1="6" x2="6" y2="18"></line>
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
-                    Cancel
+                    ยกเลิก
                   </button>
                 </div>
               )}
@@ -1335,11 +1353,11 @@ const SeekerProfile = () => {
 
         {/* ── Column 2: Job Preferences ── */}
         <div className={styles.column}>
-          <div className={styles.cardHeader}>Job Preferences</div>
+          <div className={styles.cardHeader}>ความต้องการในการทำงาน</div>
           <div className={styles.contentPadding}>
             {/* Job Title */}
             <section className={styles.section}>
-              <h4>Job Title</h4>
+              <h4>ตำแหน่งงานที่สนใจ</h4>
               {!editMode ? (
                 <ol className="list-decimal list-inside">
                   {profile.job_titles.map((job, i) => (
@@ -1368,7 +1386,7 @@ const SeekerProfile = () => {
                       <input
                         style={baseInputStyle}
                         type="text"
-                        placeholder="Job Title"
+                        placeholder="ชื่อตำแหน่งงาน"
                         value={job.job_name}
                         onChange={(e) => changeJob(i, e.target.value)}
                       />
@@ -1376,15 +1394,15 @@ const SeekerProfile = () => {
                     </div>
                   ))}
                   <div>
-                    <AddButton label="Add Job" onClick={addJob} />
+                    <AddButton label="เพิ่มตำแหน่งงาน" onClick={addJob} />
                   </div>
                 </div>
               )}
             </section>
 
-            {/* Type of Work */}
+            {/* Type of Work - คงเดิมตามรูปภาพ */}
             <section className={styles.section}>
-              <h4>Type Of Work</h4>
+              <h4>รูปแบบการทำงาน</h4>
               <div className={styles.tagGroup}>
                 {workTypes.map((t) => (
                   <span
@@ -1405,23 +1423,24 @@ const SeekerProfile = () => {
 
             {/* Desired Salary */}
             <section className={styles.section}>
-              <h4>Desired salary (baht)</h4>
+              <h4>เงินเดือนที่ต้องการ (บาท)</h4>
               {!editMode ? (
-                <p>{show(profile.desired_salary)} baht</p>
+                <p>{show(profile.desired_salary)} บาท</p>
               ) : (
                 <input
                   style={baseInputStyle}
                   type="number"
-                  placeholder="e.g. 35000"
+                  placeholder="เช่น 35000"
                   value={form.desired_salary}
                   onChange={(e) => changeText("desired_salary", e.target.value)}
+                  onKeyDown={blockInvalidKeys}
                 />
               )}
             </section>
 
             {/* Education */}
             <section className={styles.section}>
-              <h4 className={styles.section}>Education</h4>
+              <h4 className={styles.section}>ประวัติการศึกษา</h4>
               <section className={styles.Educontainer}>
                 <div className={styles.timeline}>
                   {!editMode ? (
@@ -1478,7 +1497,7 @@ const SeekerProfile = () => {
                           </div>
 
                           <div>
-                            <label style={labelStyle}>Level:</label>
+                            <label style={labelStyle}>ระดับการศึกษา:</label>
                             <LevelSelect
                               value={item.level}
                               onChange={(value: string) =>
@@ -1488,10 +1507,10 @@ const SeekerProfile = () => {
                           </div>
 
                           <div>
-                            <label style={labelStyle}>Major:</label>
+                            <label style={labelStyle}>สาขาวิชา:</label>
                             <input
                               type="text"
-                              placeholder="Major / Field of Study"
+                              placeholder="สาขาวิชา / วิชาเอก"
                               value={item.major}
                               onChange={(e) =>
                                 changeEducation(i, "major", e.target.value)
@@ -1501,10 +1520,10 @@ const SeekerProfile = () => {
                           </div>
 
                           <div>
-                            <label style={labelStyle}>Institution:</label>
+                            <label style={labelStyle}>สถาบันการศึกษา:</label>
                             <input
                               type="text"
-                              placeholder="School / University"
+                              placeholder="สถานศึกษา / มหาวิทยาลัย"
                               value={item.institution}
                               onChange={(e) =>
                                 changeEducation(
@@ -1525,7 +1544,7 @@ const SeekerProfile = () => {
                             }}
                           >
                             <div style={{ flex: "1 1 130px" }}>
-                              <label style={labelStyle}>Year Start:</label>
+                              <label style={labelStyle}>ปีที่เริ่มต้น:</label>
                               <select
                                 value={item.year_start}
                                 onChange={(e) =>
@@ -1537,7 +1556,7 @@ const SeekerProfile = () => {
                                 }
                                 style={baseInputStyle}
                               >
-                                <option value="">Select year</option>
+                                <option value="">เลือกปี</option>
                                 {yearOptions.map((year) => (
                                   <option key={`start-${year}`} value={year}>
                                     {year}
@@ -1547,7 +1566,7 @@ const SeekerProfile = () => {
                             </div>
 
                             <div style={{ flex: "1 1 130px" }}>
-                              <label style={labelStyle}>Year End:</label>
+                              <label style={labelStyle}>ปีที่สิ้นสุด:</label>
                               <select
                                 value={item.year_end}
                                 onChange={(e) =>
@@ -1555,8 +1574,8 @@ const SeekerProfile = () => {
                                 }
                                 style={baseInputStyle}
                               >
-                                <option value="">Select year</option>
-                                <option value="Present">Present</option>
+                                <option value="">เลือกปี</option>
+                                <option value="Present">ปัจจุบัน</option>
                                 {yearOptions.map((year) => (
                                   <option key={`end-${year}`} value={year}>
                                     {year}
@@ -1584,11 +1603,11 @@ const SeekerProfile = () => {
 
         {/* ── Column 3: Skills ── */}
         <div className={styles.column}>
-          <div className={styles.cardHeader}>Skills</div>
+          <div className={styles.cardHeader}>ทักษะความสามารถ</div>
           <div className={styles.contentPadding}>
             {/* Specific Skills */}
             <section className={styles.section}>
-              <h4>Specific skills</h4>
+              <h4>ทักษะเฉพาะทาง</h4>
               {!editMode ? (
                 <ol className="list-decimal list-inside">
                   {profile.skills.map((s, i) => (
@@ -1617,7 +1636,7 @@ const SeekerProfile = () => {
                       <input
                         style={baseInputStyle}
                         type="text"
-                        placeholder="Skill Name"
+                        placeholder="ชื่อทักษะ"
                         value={s.skill_name}
                         onChange={(e) => changeSkill(i, e.target.value)}
                       />
@@ -1625,7 +1644,7 @@ const SeekerProfile = () => {
                     </div>
                   ))}
                   <div>
-                    <AddButton label="Add Skill" onClick={addSkill} />
+                    <AddButton label="เพิ่มทักษะ" onClick={addSkill} />
                   </div>
                 </div>
               )}
@@ -1633,7 +1652,7 @@ const SeekerProfile = () => {
 
             {/* Typing Speed */}
             <section className={styles.section}>
-              <h4>Typing Speed</h4>
+              <h4>ความเร็วในการพิมพ์</h4>
               {!editMode ? (
                 profile.typing_speeds.map((t, i) => (
                   <ul
@@ -1643,7 +1662,7 @@ const SeekerProfile = () => {
                     <li>
                       <h4>{show(t.typing_language)}</h4>
                     </li>
-                    <li>- {show(t.typing_wpm)} WPM</li>
+                    <li>- {show(t.typing_wpm)} คำ/นาที (WPM)</li>
                   </ul>
                 ))
               ) : (
@@ -1666,7 +1685,7 @@ const SeekerProfile = () => {
                       <input
                         style={{ ...baseInputStyle, flex: 2 }}
                         type="text"
-                        placeholder="Language (e.g. Thai)"
+                        placeholder="ภาษา (เช่น ภาษาไทย)"
                         value={t.typing_language}
                         onChange={(e) =>
                           changeTypingLanguage(i, e.target.value)
@@ -1675,15 +1694,16 @@ const SeekerProfile = () => {
                       <input
                         style={{ ...baseInputStyle, flex: 1 }}
                         type="number"
-                        placeholder="WPM"
+                        placeholder="คำ/นาที"
                         value={t.typing_wpm}
                         onChange={(e) => changeTypingWpm(i, e.target.value)}
+                        onKeyDown={blockInvalidKeys}
                       />
                       <RemoveButton onClick={() => removeTyping(i)} />
                     </div>
                   ))}
                   <div>
-                    <AddButton label="Add Typing" onClick={addTyping} />
+                    <AddButton label="เพิ่มทักษะพิมพ์ดีด" onClick={addTyping} />
                   </div>
                 </div>
               )}
@@ -1691,7 +1711,7 @@ const SeekerProfile = () => {
 
             {/* Projects & Experiences */}
             <section className={styles.section}>
-              <h4>Projects &amp; Experiences</h4>
+              <h4>โปรเจกต์ &amp; ประวัติการทำงาน</h4>
               {!editMode ? (
                 profile.experiences.map((exp, i) => (
                   <ul
@@ -1733,10 +1753,12 @@ const SeekerProfile = () => {
                       </div>
 
                       <div>
-                        <label style={labelStyle}>Experience Title:</label>
+                        <label style={labelStyle}>
+                          ชื่อตำแหน่ง / ประสบการณ์:
+                        </label>
                         <input
                           type="text"
-                          placeholder="Title (e.g., Senior Developer)"
+                          placeholder="ชื่อตำแหน่ง (เช่น นักพัฒนาซอฟต์แวร์)"
                           value={exp.ex_title}
                           onChange={(e) =>
                             changeExperience(i, "ex_title", e.target.value)
@@ -1746,9 +1768,9 @@ const SeekerProfile = () => {
                       </div>
 
                       <div>
-                        <label style={labelStyle}>Description:</label>
+                        <label style={labelStyle}>รายละเอียด:</label>
                         <textarea
-                          placeholder="Description of responsibilities or achievements"
+                          placeholder="รายละเอียดหน้าที่ความรับผิดชอบ หรือผลงาน"
                           value={exp.ex_description}
                           onChange={(e) =>
                             changeExperience(
@@ -1774,7 +1796,7 @@ const SeekerProfile = () => {
                         }}
                       >
                         <div style={{ flex: "1 1 130px" }}>
-                          <label style={labelStyle}>Start Date:</label>
+                          <label style={labelStyle}>วันที่เริ่มต้น:</label>
                           <input
                             type="date"
                             value={toDateInput(exp.start_date)}
@@ -1786,7 +1808,7 @@ const SeekerProfile = () => {
                         </div>
 
                         <div style={{ flex: "1 1 130px" }}>
-                          <label style={labelStyle}>End Date:</label>
+                          <label style={labelStyle}>วันที่สิ้นสุด:</label>
                           <input
                             type="date"
                             value={toDateInput(exp.end_date)}
@@ -1801,7 +1823,10 @@ const SeekerProfile = () => {
                   ))}
 
                   <div>
-                    <AddButton label="Add Exp" onClick={addExperience} />
+                    <AddButton
+                      label="เพิ่มประสบการณ์"
+                      onClick={addExperience}
+                    />
                   </div>
                 </div>
               )}
@@ -1809,7 +1834,7 @@ const SeekerProfile = () => {
 
             {/* Language Proficiency */}
             <section className={styles.section}>
-              <h4>Language Proficiency</h4>
+              <h4>ความสามารถทางภาษา</h4>
               {!editMode ? (
                 profile.languages.map((lang, i) => (
                   <ul
@@ -1853,7 +1878,7 @@ const SeekerProfile = () => {
                       <input
                         style={{ ...baseInputStyle, flex: "1 1 120px" }}
                         type="text"
-                        placeholder="Language (e.g. English)"
+                        placeholder="ภาษา (เช่น ภาษาอังกฤษ)"
                         value={lang.language_type}
                         onChange={(e) =>
                           changeLanguage(i, "language_type", e.target.value)
@@ -1862,7 +1887,7 @@ const SeekerProfile = () => {
                       <input
                         style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
-                        placeholder="Level (e.g. Advanced)"
+                        placeholder="ระดับภาษา (เช่น ระดับสูง)"
                         value={lang.level}
                         onChange={(e) =>
                           changeLanguage(i, "level", e.target.value)
@@ -1871,7 +1896,7 @@ const SeekerProfile = () => {
                       <input
                         style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
-                        placeholder="Test (e.g. TOEIC)"
+                        placeholder="การทดสอบ (เช่น TOEIC)"
                         value={lang.test_name}
                         onChange={(e) =>
                           changeLanguage(i, "test_name", e.target.value)
@@ -1881,17 +1906,18 @@ const SeekerProfile = () => {
                         style={{ ...baseInputStyle, flex: "0 1 80px" }}
                         type="number"
                         step="any"
-                        placeholder="Score"
+                        placeholder="คะแนน"
                         value={lang.score}
                         onChange={(e) =>
                           changeLanguage(i, "score", e.target.value)
                         }
+                        onKeyDown={blockInvalidKeys}
                       />
                       <RemoveButton onClick={() => removeLanguage(i)} />
                     </div>
                   ))}
                   <div>
-                    <AddButton label="Add Language" onClick={addLanguage} />
+                    <AddButton label="เพิ่มภาษา" onClick={addLanguage} />
                   </div>
                 </div>
               )}
@@ -1909,9 +1935,10 @@ const SeekerProfile = () => {
               return (
                 <div key={category} className={styles.fileItem}>
                   <label
-                    style={{ textTransform: "lowercase", marginBottom: "10px" }}
+                    style={{ textTransform: "none", marginBottom: "10px" }}
                   >
-                    {category} ({currentFiles.length})
+                    {categoryLabels[category] ?? category} (
+                    {currentFiles.length})
                   </label>
 
                   <div
@@ -1949,7 +1976,7 @@ const SeekerProfile = () => {
                             className={styles.fileBox}
                             onClick={() => setPreviewFile(file)}
                           >
-                            view file
+                            ดูไฟล์
                           </div>
                         </div>
                       );
@@ -1968,7 +1995,7 @@ const SeekerProfile = () => {
                         onClick={() => openFilePicker(`file-input-${category}`)}
                         disabled={uploadingCategory !== ""}
                       >
-                        {isUploading ? "uploading..." : "+ add file"}
+                        {isUploading ? "กำลังอัปโหลด..." : "+ เพิ่มไฟล์"}
                       </button>
                     </div>
                   </div>
@@ -1985,7 +2012,7 @@ const SeekerProfile = () => {
           <div className={styles.modalContainer}>
             <div className={styles.modalHeader}>
               <span className={styles.modalTitle}>
-                Preview: {previewFile.file_name}
+                ตัวอย่างไฟล์: {previewFile.file_name}
               </span>
               <button
                 className={styles.modalCloseBtn}

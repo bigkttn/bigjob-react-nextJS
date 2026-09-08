@@ -14,10 +14,7 @@ interface FooterStats {
 const Footer = () => {
   const [stats, setStats] = useState<FooterStats | null>(null);
 
-  useEffect(() => {
-    fetchFooterStats();
-  }, []);
-
+  //  ย้ายประกาศฟังก์ชันขึ้นมาก่อน useEffect เพื่อแก้บั๊ก Cannot access variable before it is declared
   const fetchFooterStats = async () => {
     try {
       const res = await fetch("/api/footer-stats");
@@ -30,6 +27,10 @@ const Footer = () => {
     }
   };
 
+  useEffect(() => {
+    fetchFooterStats();
+  }, []);
+
   return (
     <footer className={styles.footerContainer}>
       <hr className={styles.divider} />
@@ -37,15 +38,15 @@ const Footer = () => {
         {/* Column 1: User Stats */}
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
-            <span className={styles.label}>Total Users</span>
+            <span className={styles.label}>ผู้ใช้งานทั้งหมด</span>
             <span className={styles.value}>{stats?.total_users ?? 0}</span>
           </div>
           <div className={styles.statRow}>
-            <span className={styles.label}>General Users</span>
+            <span className={styles.label}>ผู้ใช้งานทั่วไป</span>
             <span className={styles.value}>{stats?.general_users ?? 0}</span>
           </div>
           <div className={styles.statRow}>
-            <span className={styles.label}>Companies</span>
+            <span className={styles.label}>บริษัท</span>
             <span className={styles.value}>{stats?.companies ?? 0}</span>
           </div>
         </div>
@@ -53,7 +54,7 @@ const Footer = () => {
         {/* Column 2: Job Stats */}
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
-            <span className={styles.label}>All Jobs</span>
+            <span className={styles.label}>งานทั้งหมด</span>
             <span className={styles.value}>{stats?.all_jobs ?? 0}</span>
           </div>
         </div>
@@ -61,7 +62,7 @@ const Footer = () => {
         {/* Column 3: Visitor Stats */}
         <div className={styles.footerColumn}>
           <div className={styles.statRow}>
-            <span className={styles.label}>Visitors</span>
+            <span className={styles.label}>ผู้เข้าชมเว็บไซต์</span>
             <span className={styles.value}>{stats?.visitors ?? 0}</span>
           </div>
         </div>
