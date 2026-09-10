@@ -1,11 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import styles from "./company_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
+import dynamic from "next/dynamic";
 
-// 1. เพิ่ม Interfaces สำหรับ Sub-tables
+// โหลด MapComponent เข้ามาและปิดการทำ SSR
+const MapComponent = dynamic(() => import("./mapComponent"), {
+  ssr: false,
+  loading: () => <p style={{ textAlign: "center", padding: "20px" }}>กำลังโหลดแผนที่...</p>,
+});
+
+// 1. Interfaces สำหรับ Sub-tables
 export interface SkillItem {
   skill_id: number;
   skill_name: string;
@@ -44,7 +50,13 @@ export interface FileItem {
   file_category?: string;
 }
 
-// 2. อัปเดต Interface Applicant ให้รวม Sub-tables
+export interface JobTitleItem {
+  jobtitle_id: number;
+  job_name: string;
+  user_id: number;
+}
+
+// 2. Interface Applicant
 export interface Applicant {
   tracking_id: number;
   post_id: number;
@@ -78,12 +90,14 @@ export interface Applicant {
   desired_salary?: string;
   desired_work_location?: string;
   profile_image?: string;
-  // เพิ่ม 5 properties ตัวใหม่
   skills?: SkillItem[];
   experiences?: ExperienceItem[];
   typing_speed?: TypingSpeedItem[];
   languages?: LanguageItem[];
   files?: FileItem[];
+  company_latitude?: number;
+  company_longitude?: number;
+  job_titles?: JobTitleItem[];
 }
 
 interface ComponentProps {
@@ -97,10 +111,24 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     initialJobs && initialJobs.length > 0 ? initialJobs[0] : null
   );
 
-  const [meetingDate, setMeetingDate] = useState("");
-  const [meetingTime, setMeetingTime] = useState("");
   const [interviewDate, setInterviewDate] = useState("");
+  const [interviewTime, setInterviewTime] = useState("");
   const [startDate, setStartDate] = useState("");
+  
+  // ----- เพิ่ม State สำหรับจัดการประเภทการนัดสัมภาษณ์ -----
+  const [interviewType, setInterviewType] = useState<"onsite" | "online">("onsite");
+  const [meetingLink, setMeetingLink] = useState("");
+  // ----------------------------------------------
+
+  const [isRejectModalOpen, setIsRejectModelOpen] = useState(false);
+  const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
+
+  const [locationName, setLocationName] = useState("");
+  const [selectedLat, setSelectedLat] = useState<number | null>(null);
+  const [selectedLng, setSelectedLng] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const status = selectedJob?.status || "pending";
 
@@ -112,6 +140,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
       case "closed":
         return styles.statusRejected;
       case "applied":
+        return styles.statusApplied;
       case "appointment":
         return styles.statusOffer;
       default:
@@ -131,7 +160,18 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     return "";
   };
 
-  const handleUpdateStatus = async (trackingId: number, newStatus: string) => {
+  const handleUpdateStatus = async (
+    trackingId: number,
+    newStatus: string,
+    interviewDetails?: {
+      interviewDate: string;
+      interviewTime: string;
+      locationName: string;
+      latitude: number | null;
+      longitude: number | null;
+      interviewType?: string; // รองรับประเภทการสัมภาษณ์
+    }
+  ) => {
     if (!selectedJob) return;
 
     try {
@@ -144,23 +184,20 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
           seekerEmail: selectedJob.email,
           seekerName: selectedJob.fullname,
           jobTitle: selectedJob.job_position,
+          ...interviewDetails,
         }),
       });
 
       if (response.ok) {
         if (newStatus === "reject" || newStatus === "rejected") {
-          // ลบรายการออกจาก State ซ้ายมือ
           setJobs((prevJobs) => {
             const updatedJobs = prevJobs.filter((job) => job.tracking_id !== trackingId);
-            
-            // สลับไปเลือกผู้สมัครคนถัดไป หรือคนแรกในรายการถ้ามี
             if (selectedJob.tracking_id === trackingId) {
               setSelectedJob(updatedJobs.length > 0 ? updatedJobs[0] : null);
             }
             return updatedJobs;
           });
         } else {
-          // กรณีสถานะอื่น ให้อัปเดตข้อมูลตามเดิม
           setJobs((prevJobs) =>
             prevJobs.map((job) =>
               job.tracking_id === trackingId ? { ...job, status: newStatus } : job
@@ -177,12 +214,35 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     }
   };
 
-  // ดึงไฟล์ PDF Resume ของผู้สมัคร
+  const handleOpenRejectModel = (trackingId: number) => {
+    setTargetTrackingId(trackingId);
+    setIsRejectModelOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (targetTrackingId !== null) {
+      await handleUpdateStatus(targetTrackingId, "reject");
+      setIsRejectModelOpen(false);
+      setTargetTrackingId(null);
+    }
+  };
+
+  const handleOpenMap = () => {
+    if (selectedJob?.company_latitude && selectedJob?.company_longitude) {
+      setSelectedLat(Number(selectedJob.company_latitude));
+      setSelectedLng(Number(selectedJob.company_longitude));
+    } else {
+      setSelectedLat(13.7563);
+      setSelectedLng(100.5018);
+    }
+    setSearchQuery(locationName || "");
+    setIsMapModalOpen(true);
+  };
+
   const resumeFile = selectedJob?.files?.find(
     (f) => f.file_category?.toLowerCase() === "resume" || f.file_name.endsWith(".pdf")
   ) || selectedJob?.files?.[0];
 
-  // ดึงความเร็วพิมพ์ดีดภาษาไทย และ อังกฤษ
   const thaiTyping = selectedJob?.typing_speed?.find(
     (t) => t.typing_language.toLowerCase() === "thai" || t.typing_language === "ไทย"
   );
@@ -232,8 +292,8 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
               ))
             )}
           </aside>
-
         </div>
+
         {/* รายละเอียดผู้สมัครด้านขวา */}
         <section className={styles.rightPanel}>
           <div style={{ width: "56rem", height: "45rem", backgroundColor: "#9D9D9D" }}>
@@ -241,10 +301,10 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
               <>
                 {/* Stepper Status Box */}
                 <div className={styles.trackerBox}>
-                  {/*  */}
                   <div className={styles.stepperContainer}>
+                    
                     {/* Step 1: pending */}
-                    <div className={`${styles.step} ${status === 'pending' ? styles.active : ''}`}>
+                    <div className={`${styles.step} ${status === 'Pending' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>📄</div>
                       <span className={styles.stepLabel}>Pending</span>
                       {status === 'pending' && (
@@ -252,10 +312,31 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                           <p className={styles.txtWaiting}>รอผู้สมัครงานตอบกลับ</p>
                           <button
                             className={styles.txtRejected}
-                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'reject')}
+                            onClick={() => handleOpenRejectModel(selectedJob.tracking_id)}
                           >
                             ยกเลิก
                           </button>
+                        </div>
+                      )}
+
+                      {isRejectModalOpen && (
+                        <div className={styles.modalOverlay}>
+                          <div className={styles.modalContent}>
+                            <h3>ยืนยันการยกเลิก</h3>
+                            <p>คุณต้องการยกเลิกรายการผู้สมัครคนนี้ใช่หรือไม่?</p>
+                            <div className={styles.modalActions}>
+                              <button
+                                className={styles.btnConfirm}
+                                onClick={handleConfirmReject}>
+                                ยกเลิก
+                              </button>
+                              <button
+                                className={styles.btnCancel}
+                                onClick={() => setIsRejectModelOpen(false)}>
+                                ใม่
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -263,9 +344,10 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     <div className={styles.stepLine} />
 
                     {/* Step 2: Applied */}
-                    <div className={`${styles.step} ${status === 'applied' ? styles.active : ''}`}>
+                    <div className={`${styles.step} ${status === 'applied' || status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>☑️</div>
                       <span className={styles.stepLabel}>Applied</span>
+                      
                       {status === 'applied' && (
                         <div className={styles.inlineDatePicker}>
                           <label>วันสัมภาษณ์:</label>
@@ -274,50 +356,158 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                             value={interviewDate}
                             onChange={(e) => setInterviewDate(e.target.value)}
                           />
+                          <label>เวลาสัมภาษณ์:</label>
+                          <input
+                            type="time"
+                            value={interviewTime}
+                            onChange={(e) => setInterviewTime(e.target.value)}
+                          />
+
+                          {/* ----- เพิ่มตัวเลือกรุปแบบการสัมภาษณ์ ----- */}
+                          <label style={{ marginTop: '10px' }}>รูปแบบการสัมภาษณ์:</label>
+                          <div style={{ display: 'flex', gap: '15px', marginBottom: '10px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                              <input
+                                type="radio"
+                                name="interviewType"
+                                value="onsite"
+                                checked={interviewType === "onsite"}
+                                onChange={() => setInterviewType("onsite")}
+                              />
+                              นัดเจอ (On-site)
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                              <input
+                                type="radio"
+                                name="interviewType"
+                                value="online"
+                                checked={interviewType === "online"}
+                                onChange={() => setInterviewType("online")}
+                              />
+                              ออนไลน์ (Online)
+                            </label>
+                          </div>
+                          {/* -------------------------------------- */}
+
+                          {/* สลับการแสดงผลตามประเภทที่เลือก */}
+                          {interviewType === "onsite" ? (
+                            <>
+                              <label>สถานที่สัมภาษณ์:</label>
+                              <div className={styles.mapContainer}>
+                                <input className={styles.inputMap}
+                                  type="text"
+                                  placeholder="ปักหมุดสถานที่สัมภาษณ์..."
+                                  value={locationName}
+                                  onChange={(e) => setLocationName(e.target.value)}
+                                />
+                                <button
+                                  type="button"
+                                  className={styles.btnMap}
+                                  onClick={handleOpenMap}
+                                >
+                                ปักหมุด
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <label>ลิงก์เข้าร่วมสัมภาษณ์ (Google Meet, Zoom ฯลฯ):</label>
+                              <input
+                                type="text"
+                                placeholder="วางลิงก์ที่นี่..."
+                                value={meetingLink}
+                                onChange={(e) => setMeetingLink(e.target.value)}
+                                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                              />
+                            </>
+                          )}
+
                           <button
                             className={styles.btnSubmitStep}
-                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'interview_pending')}
+                            style={{ marginTop: '15px' }}
+                            onClick={() => {
+                              // เลือกส่งข้อมูลตามประเภทการสัมภาษณ์
+                              const finalLocation = interviewType === "online" ? meetingLink : locationName;
+                              
+                              handleUpdateStatus(selectedJob.tracking_id, 'Interview', {
+                                interviewDate, 
+                                interviewTime, 
+                                locationName: finalLocation, // ส่งลิงก์หรือสถานที่ไปที่ฟิลด์เดิม
+                                interviewType: interviewType, // ส่งประเภทบอก Backend ไปด้วย
+                                latitude: interviewType === "onsite" ? selectedLat : null, 
+                                longitude: interviewType === "onsite" ? selectedLng : null,
+                              });
+                            }}
                           >
                             นัดสัมภาษณ์
                           </button>
+                        </div>
+                      )}
+
+                      {(status === 'interview' || status === 'Interview') && (
+                        <div className={styles.inlineDatePicker}>
+                          <p className={styles.txtWaiting}>⏳ รอการตอบกลับนัดหมาย</p>
                         </div>
                       )}
                     </div>
 
+                    {/* Pop-up แผนที่ (แยก Component) */}
+                    {isMapModalOpen && (
+                      <div className={styles.modalOverlay}>
+                        <div className={styles.mapModalContent}>
+                          <h3>คลิกบนแผนที่เพื่อปักหมุดเลือกสถานที่</h3>
+                          <p style={{ fontSize: "14px", color: "#333", margin: "8px 0" }}>
+                            <strong>สถานที่เลือก:</strong> {searchQuery || "ยังไม่ได้เลือกสถานที่"}
+                          </p>
+
+                          <div className={styles.mapContainer} style={{ height: "350px", width: "100%" }}>
+                            <MapComponent
+                              selectedLat={selectedLat || 13.7563}
+                              selectedLng={selectedLng || 100.5018}
+                              onLocationSelect={(lat, lng, addressName) => {
+                                setSelectedLat(lat);
+                                setSelectedLng(lng);
+                                setSearchQuery(addressName);
+                              }}
+                            />
+                          </div>
+
+                          <div className={styles.modalActions} style={{ marginTop: "16px" }}>
+                            <button
+                              className={styles.btnConfirm}
+                              onClick={() => {
+                                setLocationName(searchQuery);
+                                setIsMapModalOpen(false);
+                              }}
+                            >
+                              ยืนยันตำแหน่งนี้
+                            </button>
+                            <button
+                              className={styles.btnCancel}
+                              onClick={() => setIsMapModalOpen(false)}
+                            >
+                              ยกเลิก
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className={styles.stepLine} />
 
                     {/* Step 3: Interview */}
-                    <div className={`${styles.step} ${status === 'interview' || status === 'interview_pending' ? styles.active : ''}`}>
+                    <div className={`${styles.step} ${status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>🎙️</div>
                       <span className={styles.stepLabel}>Interview</span>
-
-                      {/* แสดงเฉพาะตอนอยู่ขั้นตอน Interview */}
-                      {status === 'interview' && (
-                        <div className={styles.inlineDatePicker}>
-                          <label>วันสัมภาษณ์:</label>
-                          <input
-                            type="date"
-                            value={interviewDate}
-                            onChange={(e) => setInterviewDate(e.target.value)}
-                          />
-                          <button
-                            className={styles.btnSubmitStep}
-                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'interview_pending')}
-                          >
-                            นัดสัมภาษณ์
-                          </button>
-                        </div>
-                      )}
                     </div>
 
                     <div className={styles.stepLine} />
 
                     {/* Step 4: Appointment */}
-                    <div className={`${styles.step} ${status === 'appointment' || status === 'hired' ? styles.active : ''}`}>
+                    <div className={`${styles.step} ${status === 'appointment' || status === 'Appointment' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>💼</div>
                       <span className={styles.stepLabel}>Appointment</span>
 
-                      {/* แสดงเฉพาะตอนอยู่ขั้นตอน Appointment */}
                       {status === 'appointment' && (
                         <div className={styles.inlineDatePicker}>
                           <label>วันเริ่มงาน:</label>
@@ -338,6 +528,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                   </div>
                 </div>
 
+                {/* Profile Details */}
                 <div className={styles.detailGrid}>
                   <div className={styles.columnProfile}>
                     <div className={styles.avatarWrapper}>
@@ -380,7 +571,6 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                       </p>
                     </div>
 
-                    {/* ปุ่มดาวน์โหลด Resume PDF จริงจาก Database */}
                     {resumeFile ? (
                       <a
                         href={resumeFile.file_path}
@@ -402,9 +592,15 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     <h2>Job Preferences</h2>
                     <div className={styles.cardSection}>
                       <label>Job Title</label>
-                      <ol>
-                        <li>{selectedJob.job_position || "ไม่ระบุ"}</li>
-                      </ol>
+                      {selectedJob.job_titles && selectedJob.job_titles.length > 0 ? (
+                        <ol>
+                          {selectedJob.job_titles.map((job) => (
+                            <li key={job.jobtitle_id}>{job.job_name}</li>
+                          ))}
+                        </ol>
+                      ) : (
+                        <p>ไม่ระบุ</p>
+                      )}
                     </div>
 
                     <div className={styles.cardSection}>
@@ -436,11 +632,10 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     </div>
                   </div>
 
-                  {/* คอลัมน์ที่ 3: Skills, Experiences, Languages (แมปข้อมูลจริงจาก DB) */}
+                  {/* คอลัมน์ที่ 3: Skills, Experiences, Languages */}
                   <div className={styles.columnCard}>
                     <h2>Skills</h2>
 
-                    {/* Specific Skills */}
                     <div className={styles.cardSection}>
                       <label>specific skills</label>
                       {selectedJob.skills && selectedJob.skills.length > 0 ? (
@@ -454,7 +649,6 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                       )}
                     </div>
 
-                    {/* Typing Speed */}
                     <div className={styles.cardSection}>
                       <label>Typing speed in Thai (wpm)</label>
                       <p>{thaiTyping ? `- Thai - ${thaiTyping.typing_wpm} wpm` : "-"}</p>
@@ -465,7 +659,6 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                       <p>{engTyping ? `- English - ${engTyping.typing_wpm} wpm` : "-"}</p>
                     </div>
 
-                    {/* Experiences */}
                     <div className={styles.cardSection}>
                       <label>Projects, Achievements, and Other Experiences</label>
                       {selectedJob.experiences && selectedJob.experiences.length > 0 ? (
@@ -482,7 +675,6 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                       )}
                     </div>
 
-                    {/* Language Proficiency */}
                     <div className={styles.cardSection}>
                       <label>Language Proficiency</label>
                       {selectedJob.languages && selectedJob.languages.length > 0 ? (
