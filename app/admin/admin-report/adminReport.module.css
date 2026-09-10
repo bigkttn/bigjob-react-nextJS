@@ -105,21 +105,45 @@
 .reportRow {
   display: grid;
   grid-template-columns: 
-    minmax(60px, 0.5fr) 
-    minmax(160px, 1.5fr) 
-    minmax(190px, 2fr) 
-    minmax(240px, 2.5fr) 
-    minmax(160px, 1.5fr) 
-    minmax(130px, 1.2fr) 
-    minmax(130px, 1fr)
-    minmax(140px, 1.2fr);   /* ✅ คอลัมน์ใหม่: ระยะเวลาแบน */
+    minmax(70px, 0.6fr)   /* ขยายให้พอกับปุ่มลบ + ตัวเลขลำดับ */
+    minmax(110px, 1.2fr) 
+    minmax(140px, 1.5fr) 
+    minmax(150px, 2fr) 
+    minmax(110px, 1.2fr) 
+    minmax(90px, 0.8fr) 
+    minmax(100px, 0.9fr) 
+    minmax(140px, 1.5fr); /* ลดขนาดลงเพราะย้ายปุ่มลบออกไปแล้ว */
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  min-width: 1250px;         /* ✅ เดิม 1100px */
+  min-width: 900px;
   box-sizing: border-box;
 }
 
+
+/*  เพิ่มสไตล์ให้ปุ่มลบโดยเฉพาะ (นำไปวางล่างสุดของไฟล์ได้เลย) */
+.deleteIconBtn {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.deleteIconBtn:hover {
+  background-color: #fecaca;
+  color: #dc2626;
+  border-color: #f87171;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.15);
+}
 /* --- Header ตาราง --- */
 .tableHeader {
   background-color: #4dfc50;
@@ -142,7 +166,7 @@
 
 /* --- Row แถวข้อมูล --- */
 .reportRow {
-  padding: 12px 18px;
+  padding: 12px 24px 12px 18px; /* 👈 extra right padding just on rows so trash icon clears the card edge */
   background-color: #ffffff;
   border-bottom: 1px solid #f1f5f9;
   transition: all 0.2s ease;

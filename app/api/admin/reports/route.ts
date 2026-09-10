@@ -67,3 +67,49 @@ export async function GET() {
     );
   }
 }
+
+//  DELETE: ลบรายงานการร้องเรียน (Report)
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const report_id = searchParams.get('report_id');
+    const source = searchParams.get('source'); // 'company' | 'user' | 'post'
+
+    if (!report_id || !source) {
+      return NextResponse.json(
+        { error: 'กรุณาระบุ report_id และ source ให้ครบถ้วน' },
+        { status: 400 }
+      );
+    }
+
+    const tableName =
+      source === 'company'
+        ? 'report_company'
+        : source === 'post'
+        ? 'report_post'
+        : 'report_user';
+
+    const [result]: any = await db.query(
+      `DELETE FROM ${tableName} WHERE report_id = ?`,
+      [Number(report_id)]
+    );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { error: 'ไม่พบรายการรายงานที่ต้องการลบในระบบ' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: 'ลบรายงานเรียบร้อยแล้ว' },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error('Delete Report Error:', error);
+    return NextResponse.json(
+      { error: 'เกิดข้อผิดพลาดในการลบรายงาน', details: error.message },
+      { status: 500 }
+    );
+  }
+}

@@ -130,6 +130,48 @@ const getReportLink = (role: string, reporterId: number): string => {
       return "#";
   }
 };
+const RemoveButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    style={{
+      background: "transparent",
+      border: "none",
+      color: "#9ca3af",
+      cursor: "pointer",
+      padding: "6px",
+      borderRadius: "6px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.15s ease",
+      flexShrink: 0,
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.color = "#ef4444";
+      e.currentTarget.style.backgroundColor = "#fee2e2";
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.color = "#9ca3af";
+      e.currentTarget.style.backgroundColor = "transparent";
+    }}
+    title="ลบรายงานนี้"
+  >
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    </svg>
+  </button>
+);
 
 const AdminReportPage = () => {
   const [reportData, setReportData] = useState<ReportItem[]>([]);
@@ -310,6 +352,38 @@ const AdminReportPage = () => {
     }
   };
 
+  const handleDeleteReport = async (report: ReportItem) => {
+    if (!report.reportId) return;
+
+    const confirmDelete = window.confirm(
+      `คุณต้องการลบรายงาน "${report.reportType}" ใช่หรือไม่?`,
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(
+        `/api/admin/reports?report_id=${report.reportId}&source=${report.source}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("ลบรายงานเรียบร้อยแล้ว");
+        setReportData((prev) =>
+          prev.filter((r) => r.reportId !== report.reportId),
+        );
+      } else {
+        alert(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถลบรายงานได้"}`);
+      }
+    } catch (error) {
+      console.error("Error deleting report:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    }
+  };
+
   const filteredAndSortedData = reportData
     .filter((report) => {
       if (
@@ -397,7 +471,8 @@ const AdminReportPage = () => {
           <div className={styles.tableBody}>
             {filteredAndSortedData.map((report, index) => (
               <div key={report.id} className={styles.reportRow}>
-                <div className={styles.cell}>
+                <div className={styles.cell} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <RemoveButton onClick={() => handleDeleteReport(report)} />
                   <span className={styles.badgeGray}>{index + 1}</span>
                 </div>
 
@@ -446,8 +521,20 @@ const AdminReportPage = () => {
                   </button>
                 </div>
 
-                {/* ✅ คอลัมน์ที่ 8: แสดงปุ่มตักเตือน / ปุ่มดูเรื่องที่ส่งเตือน / ระยะเวลาแบน */}
-                <div className={styles.cell}>
+                {/* ✅ คอลัมน์ที่ 8: แสดงปุ่มตักเตือน / ปุ่มดูเรื่องที่ส่งเตือน / ระยะเวลาแบน และปุ่มลบรายงาน เรียงเป็นแถวแนวนอน */}
+                <div
+                  className={styles.cell}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                    flexWrap: "nowrap",
+                    width: "100%",
+                    paddingRight: "4px", // 👈 added
+                  }}
+                >
                   {report.statusCode === 0 ? (
                     <button
                       type="button"
@@ -456,12 +543,13 @@ const AdminReportPage = () => {
                         backgroundColor: "#f59e0b",
                         color: "#ffffff",
                         border: "none",
-                        padding: "6px 12px",
+                        padding: "5px 10px",
                         borderRadius: "6px",
                         cursor: "pointer",
-                        fontSize: "14px",
+                        fontSize: "13px",
                         fontWeight: "bold",
                         whiteSpace: "nowrap",
+                        flexShrink: 0,
                       }}
                     >
                       ตักเตือน
@@ -481,19 +569,23 @@ const AdminReportPage = () => {
                         backgroundColor: "#3b82f6",
                         color: "#ffffff",
                         border: "none",
-                        padding: "6px 10px",
+                        padding: "5px 8px",
                         borderRadius: "6px",
                         cursor: "pointer",
-                        fontSize: "13px",
+                        fontSize: "12px",
                         fontWeight: "600",
                         whiteSpace: "nowrap",
+                        flexShrink: 0,
                       }}
                       title="คลิกเพื่อดูข้อความตักเตือนที่ส่งไป"
                     >
                       ดูข้อความเตือน
                     </button>
                   ) : (
-                    <span className={styles.badgeGray}>
+                    <span
+                      className={styles.badgeGray}
+                      style={{ whiteSpace: "nowrap", flexShrink: 0 }}
+                    >
                       {getDurationText(report.statusCode, report.bannedUntil)}
                     </span>
                   )}

@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import BanPopup from "./navbar/BanPopup";
+import DesktopMenu from "./navbar/DesktopMenu";
+import MobileMenu from "./navbar/MobileMenu";
 import "./navbar.css";
 
 export default function Navbar() {
@@ -201,94 +204,13 @@ export default function Navbar() {
     <>
       {/* ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
       {isBanned && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 99999,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderTop: "6px solid #ef4444",
-              borderRadius: "12px",
-              padding: "30px",
-              width: "90%",
-              maxWidth: "400px",
-              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.2)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: "40px", marginBottom: "10px" }}>⚠️</div>
-            <h2
-              style={{
-                color: "#b91c1c",
-                margin: "0 0 15px 0",
-                fontSize: "1.25rem",
-              }}
-            >
-              บัญชีผู้ใช้นี้ถูกระงับการใช้งาน
-            </h2>
-            <p
-              style={{
-                color: "#4b5563",
-                fontSize: "0.95rem",
-                lineHeight: "1.5",
-                marginBottom: "25px",
-              }}
-            >
-              คุณไม่สามารถเข้าใช้งานระบบได้ในขณะนี้
-              <br />
-              จนกว่าจะถึงเวลา:{" "}
-              <strong style={{ color: "#111" }}>{banDetails.date}</strong>
-              <br />
-              <span
-                style={{
-                  color: "#ef4444",
-                  fontSize: "0.9rem",
-                  fontWeight: "bold",
-                  display: "inline-block",
-                  marginTop: "5px",
-                }}
-              >
-                {banDetails.remaining}
-              </span>
-            </p>
-            <button
-              onClick={() => {
-                setIsBanned(false);
-                forceLogout();
-              }}
-              style={{
-                backgroundColor: "#ef4444",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                width: "100%",
-                transition: "0.2s",
-              }}
-              onMouseOver={(e) =>
-                (e.currentTarget.style.backgroundColor = "#dc2626")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.backgroundColor = "#ef4444")
-              }
-            >
-              รับทราบและออกจากระบบ
-            </button>
-          </div>
-        </div>
+        <BanPopup 
+          banDetails={banDetails} 
+          onAcknowledge={() => {
+            setIsBanned(false);
+            forceLogout();
+          }} 
+        />
       )}
 
       {/* Navbar Structure */}
@@ -308,295 +230,26 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className="nav-links desktop-menu">
-            {userRole === "guest" && (
-              <>
-                <Link href="/login" className="nav-btn-outline">
-                  Login
-                </Link>
-                <Link href="/register" className="nav-btn-primary">
-                  Sign Up
-                </Link>
-              </>
-            )}
-
-            {userRole === "seeker" && (
-              <>
-                <Link
-                  href="/user/user-home"
-                  className={`nav-item ${isActive("/user/user-home")}`}
-                >
-                  Home
-                </Link>
-                <Link
-                  href={`/user/seeker_tracking/${userId}`}
-                  className={`nav-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
-                >
-                  Tracking
-                </Link>
-
-                <Link
-                  href="/user/savedCompany"
-                  className={`nav-item ${isActive("/user/savedCompany")}`}
-                >
-                  Saved
-                </Link>
-                <Link
-                  href="/user/user-feedback"
-                  className={`nav-item nav-feedback-link ${isActive("/user/user-feedback")}`}
-                >
-                  Feedback
-                  {unreadCount > 0 && (
-                    <span className="shock-badge">! {unreadCount}</span>
-                  )}
-                </Link>
-                <Link
-                  href="/user/user-profile"
-                  className={`nav-item ${isActive("/user/user-profile")}`}
-                >
-                  My Profile
-                </Link>
-                <button onClick={onLogout} className="nav-btn-logout">
-                  Log out
-                </button>
-              </>
-            )}
-
-            {userRole === "company" && (
-              <>
-                <Link
-                  href="/company/company-home"
-                  className={`nav-item ${isActive("/company/company-home")}`}
-                >
-                  Home
-                </Link>
-                <Link
-                  href={`/company/company_tracking/${userId}`}
-                  className={`nav-item ${isActive(`/company/company_tracking/${userId}`)}`}
-                >
-                  Tracking
-                </Link>
-                <Link
-                  href="/company/savedSeeker"
-                  className={`nav-item ${isActive("/company/savedSeeker")}`}
-                >
-                  Saved
-                </Link>
-                <Link
-                  href="/company/company-feedback"
-                  className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}
-                >
-                  Feedback
-                  {unreadCount > 0 && (
-                    <span className="shock-badge">! {unreadCount}</span>
-                  )}
-                </Link>
-                <Link
-                  href="/company/post-job"
-                  className={`nav-item ${isActive("/company/post-job")}`}
-                >
-                  Post a Job
-                </Link>
-                <Link
-                  href="/company/profile"
-                  className={`nav-item ${isActive("/company/profile")}`}
-                >
-                  Profile
-                </Link>
-                <button onClick={onLogout} className="nav-btn-logout">
-                  Log out
-                </button>
-              </>
-            )}
-
-            {userRole === "admin" && (
-              <>
-                <Link href="/admin/admin-report" className="nav-item">
-                  Report
-                </Link>
-                <Link href="/admin/Feedbacks" className="nav-item">
-                  Feedbacks
-                </Link>
-                <Link href="/admin/home" className="nav-item">
-                  Verification
-                </Link>
-                <button onClick={onLogout} className="nav-btn-logout">
-                  Log out
-                </button>
-              </>
-            )}
-          </div>
+          <DesktopMenu 
+            userRole={userRole} 
+            userId={userId} 
+            unreadCount={unreadCount} 
+            isActive={isActive} 
+            onLogout={onLogout} 
+          />
         </div>
-
-        {/* Backdrop overlay สำหรับปิดเมนูเมื่อแตะพื้นหลัง */}
-        {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
 
         {/* Mobile Drawer / Sidebar */}
-        <div className={`sidebar-menu ${isMenuOpen ? "open" : ""}`}>
-          <div className="sidebar-header">
-            <h3 className="logo-text">BIGJOBs</h3>
-            <button className="close-btn" onClick={closeMenu}>
-              ×
-            </button>
-          </div>
-          <div className="sidebar-links">
-            {/* ข้อมูลผู้ใช้ */}
-            {userRole !== "guest" && (
-              <div className="user-info">
-                <span className="u-name">
-                  Hi {userRole}, {userName} ({userId})
-                </span>
-              </div>
-            )}
-            {/* ครอบด้วย mobile-only-links: แสดงเมนูพวกนี้เฉพาะบนมือถือเท่านั้น */}
-            <div className="mobile-only-links">
-              <hr className="sidebar-divider" />
-
-              {userRole === "guest" && (
-                <>
-                  <Link href="/login" className="side-item" onClick={closeMenu}>
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="side-item highlight"
-                    onClick={closeMenu}
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-
-              {userRole === "seeker" && (
-                <>
-                  <Link
-                    href="/user/user-home"
-                    className={`side-item ${isActive("/user/user-home")}`}
-                    onClick={closeMenu}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href={`/user/seeker_tracking/${userId}`}
-                    className={`side-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
-                    onClick={closeMenu}
-                  >
-                    Tracking
-                  </Link>
-                  <Link
-                    href="/user/savedCompany"
-                    className={`side-item ${isActive("/user/savedCompany")}`}
-                    onClick={closeMenu}
-                  >
-                    Saved
-                  </Link>
-                  <Link
-                    href="/user/user-feedback"
-                    className={`side-item ${isActive("/user/user-feedback")}`}
-                    onClick={closeMenu}
-                  >
-                    Feedback{" "}
-                    {unreadCount > 0 && (
-                      <span className="shock-badge">! {unreadCount}</span>
-                    )}
-                  </Link>
-                  <Link
-                    href="/user/user-profile"
-                    className={`side-item ${isActive("/user/user-profile")}`}
-                    onClick={closeMenu}
-                  >
-                    My Profile
-                  </Link>
-                  <button onClick={onLogout} className="side-btn-logout">
-                    Log out
-                  </button>
-                </>
-              )}
-
-              {userRole === "company" && (
-                <>
-                  <Link
-                    href="/company/company-home"
-                    className={`side-item ${isActive("/company/company-home")}`}
-                    onClick={closeMenu}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href={`/company/company_tracking/${userId}`}
-                    className={`side-item ${isActive(`/company/company_tracking/${userId}`)}`}
-                    onClick={closeMenu}
-                  >
-                    Tracking
-                  </Link>
-                  <Link
-                    href="/company/savedSeeker"
-                    className={`side-item ${isActive("/company/savedSeeker")}`}
-                    onClick={closeMenu}
-                  >
-                    Saved
-                  </Link>
-                  <Link
-                    href="/company/company-feedback"
-                    className={`side-item ${isActive("/company/company-feedback")}`}
-                    onClick={closeMenu}
-                  >
-                    Feedback{" "}
-                    {unreadCount > 0 && (
-                      <span className="shock-badge">! {unreadCount}</span>
-                    )}
-                  </Link>
-                  <Link
-                    href="/company/post-job"
-                    className={`side-item ${isActive("/company/post-job")}`}
-                    onClick={closeMenu}
-                  >
-                    Post a Job
-                  </Link>
-                  <Link
-                    href="/company/profile"
-                    className={`side-item ${isActive("/company/profile")}`}
-                    onClick={closeMenu}
-                  >
-                    Profile
-                  </Link>
-                  <button onClick={onLogout} className="side-btn-logout">
-                    Log out
-                  </button>
-                </>
-              )}
-
-              {userRole === "admin" && (
-                <>
-                  <Link
-                    href="/admin/admin-report"
-                    className={`side-item ${isActive("/admin/admin-report")}`}
-                    onClick={closeMenu}
-                  >
-                    Report
-                  </Link>
-                  <Link
-                    href="/admin/Feedbacks"
-                    className={`side-item ${isActive("/admin/Feedbacks")}`}
-                    onClick={closeMenu}
-                  >
-                    Feedbacks
-                  </Link>
-                  <Link
-                    href="/admin/home"
-                    className={`side-item ${isActive("/admin/home")}`}
-                    onClick={closeMenu}
-                  >
-                    Verification
-                  </Link>
-                  <button onClick={onLogout} className="side-btn-logout">
-                    Log out
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <MobileMenu 
+          isMenuOpen={isMenuOpen} 
+          closeMenu={closeMenu} 
+          userRole={userRole} 
+          userName={userName} 
+          userId={userId} 
+          unreadCount={unreadCount} 
+          isActive={isActive} 
+          onLogout={onLogout} 
+        />
       </nav>
     </>
   );
