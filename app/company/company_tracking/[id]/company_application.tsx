@@ -98,6 +98,9 @@ export interface Applicant {
   company_latitude?: number;
   company_longitude?: number;
   job_titles?: JobTitleItem[];
+  interview_date?: string;
+  link?: string;
+  location?: string;
 }
 
 interface ComponentProps {
@@ -114,7 +117,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
   const [interviewDate, setInterviewDate] = useState("");
   const [interviewTime, setInterviewTime] = useState("");
   const [startDate, setStartDate] = useState("");
-  
+
   // ----- เพิ่ม State สำหรับจัดการประเภทการนัดสัมภาษณ์ -----
   const [interviewType, setInterviewType] = useState<"onsite" | "online">("onsite");
   const [meetingLink, setMeetingLink] = useState("");
@@ -302,7 +305,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                 {/* Stepper Status Box */}
                 <div className={styles.trackerBox}>
                   <div className={styles.stepperContainer}>
-                    
+
                     {/* Step 1: pending */}
                     <div className={`${styles.step} ${status === 'Pending' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>📄</div>
@@ -347,7 +350,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     <div className={`${styles.step} ${status === 'applied' || status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>☑️</div>
                       <span className={styles.stepLabel}>Applied</span>
-                      
+
                       {status === 'applied' && (
                         <div className={styles.inlineDatePicker}>
                           <label>วันสัมภาษณ์:</label>
@@ -405,13 +408,13 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                                   className={styles.btnMap}
                                   onClick={handleOpenMap}
                                 >
-                                ปักหมุด
+                                  ปักหมุด
                                 </button>
                               </div>
                             </>
                           ) : (
                             <>
-                              <label>ลิงก์เข้าร่วมสัมภาษณ์ (Google Meet, Zoom ฯลฯ):</label>
+                              <label>ลิงก์เข้าร่วมสัมภาษณ์:</label>
                               <input
                                 type="text"
                                 placeholder="วางลิงก์ที่นี่..."
@@ -428,25 +431,19 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                             onClick={() => {
                               // เลือกส่งข้อมูลตามประเภทการสัมภาษณ์
                               const finalLocation = interviewType === "online" ? meetingLink : locationName;
-                              
+
                               handleUpdateStatus(selectedJob.tracking_id, 'Interview', {
-                                interviewDate, 
-                                interviewTime, 
+                                interviewDate,
+                                interviewTime,
                                 locationName: finalLocation, // ส่งลิงก์หรือสถานที่ไปที่ฟิลด์เดิม
                                 interviewType: interviewType, // ส่งประเภทบอก Backend ไปด้วย
-                                latitude: interviewType === "onsite" ? selectedLat : null, 
+                                latitude: interviewType === "onsite" ? selectedLat : null,
                                 longitude: interviewType === "onsite" ? selectedLng : null,
                               });
                             }}
                           >
                             นัดสัมภาษณ์
                           </button>
-                        </div>
-                      )}
-
-                      {(status === 'interview' || status === 'Interview') && (
-                        <div className={styles.inlineDatePicker}>
-                          <p className={styles.txtWaiting}>⏳ รอการตอบกลับนัดหมาย</p>
                         </div>
                       )}
                     </div>
@@ -499,6 +496,56 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     <div className={`${styles.step} ${status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
                       <div className={styles.stepIcon}>🎙️</div>
                       <span className={styles.stepLabel}>Interview</span>
+
+                      {(status === 'interview' || status === 'Interview') && (
+                        <div className={styles.interviewDetailsCard}>
+                          <h3 style={{ borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '12px', fontSize: '16px', fontWeight: 'bold' }}>
+                            รายละเอียด
+                          </h3>
+
+                          <div className={styles.detailRow}>
+                            <span className={styles.detailLabel}>วันสัมภาษณ์:</span>
+                            <span className={styles.detailValue}>
+                              {selectedJob.interview_date
+                                ? new Date(selectedJob.interview_date).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                                : "ไม่ระบุ"}
+                            </span>
+                          </div>
+
+                          <div className={styles.detailRow}>
+                            <span className={styles.detailLabel}>เวลาสัมภาษณ์:</span>
+                            <span className={styles.detailValue}>
+                              {selectedJob.interview_date
+                                ? new Date(selectedJob.interview_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'
+                                : "ไม่ระบุ"}
+                            </span>
+                          </div>
+
+                          {selectedJob.link ? (
+                            <div className={styles.detailRow}>
+                              <span className={styles.detailLabel}>สัมภาษณ์ออนไลน์:</span>
+                              <a href={selectedJob.link} target="_blank" rel="noopener noreferrer" className={styles.detailValue} style={{ color: '#3182ce', textDecoration: 'underline' }}>
+                                {selectedJob.link}
+                              </a>
+                            </div>
+                          ) : (
+                            <div className={styles.detailRow}>
+                              <span className={styles.detailLabel}>สถานที่สัมภาษณ์:</span>
+                              <span className={styles.detailValue}>{selectedJob.location || "ไม่ระบุ"}</span>
+                            </div>
+                          )}
+
+                          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <p className={styles.txtWaiting} style={{ margin: 0 }}>⏳ รอการตอบกลับนัดหมาย</p>
+                            <button
+                              className={styles.txtRejected}
+                              onClick={() => handleOpenRejectModel(selectedJob.tracking_id)}
+                            >
+                              ยกเลิก
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className={styles.stepLine} />

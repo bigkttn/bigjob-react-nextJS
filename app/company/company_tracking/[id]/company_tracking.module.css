@@ -671,3 +671,37 @@
   border-radius: 4px;
   font-size: 12px;
 }
+
+.interviewDetailsCard {
+  background-color: #ffffff;
+  border-radius: 16px; /* ปรับความโค้งให้มนขึ้นเหมือนในรูป */
+  padding: 20px; /* เพิ่มพื้นที่ว่างด้านในให้ดูไม่อึดอัด */
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* ปรับเงาให้ดูนุ่มนวลขึ้น */
+  width: 100%;
+  text-align: left;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center; /* ให้อักษรอยู่กึ่งกลางบรรทัดเดียวกันเสมอ */
+  margin-bottom: 12px; /* เพิ่มระยะห่างระหว่างบรรทัด */
+  font-size: 15px; /* ปรับขนาดฟอนต์ให้ใหญ่และอ่านง่ายขึ้น */
+}
+
+.detailLabel {
+  width: 130px; /* เพิ่มความกว้างให้พอดีกับคำว่า "สถานที่สัมภาษณ์:" */
+  font-weight: 500;
+  color: #000; /* เปลี่ยนเป็นสีดำสนิทตามภาพ */
+  flex-shrink: 0;
+}
+
+.detailValue {
+  flex: 1;
+  color: #000; /* เปลี่ยนเป็นสีดำสนิทตามภาพ */
+  font-weight: 500;
+
+  white-space: nowrap; 
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
