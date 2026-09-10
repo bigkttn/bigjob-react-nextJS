@@ -2,14 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* บังคับทุก Selector ให้ใช้ฟอนต์ Kanit */
-*,
-*::before,
-*::after,
-body,
-button,
-input,
-textarea,
-select {
-  font-family: var(--font-kanit), sans-serif !important;
+input, select, button, textarea {
+  font-family: var(--font-kanit), sans-serif;
 }
