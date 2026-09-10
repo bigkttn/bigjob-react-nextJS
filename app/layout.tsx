@@ -1,18 +1,14 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Kanit } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/footer";
-import { GoogleAnalytics } from "@next/third-parties/google"; // นำเข้า GoogleAnalytics component
+import { GoogleAnalytics } from "@next/third-parties/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const kanit = Kanit({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["thai", "latin"],
+  variable: "--font-kanit", // ประกาศตัวแปร CSS
 });
 
 export const metadata: Metadata = {
@@ -26,19 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      {/* นำตัวแปรฟอนต์ และ Class สำหรับตกแต่งพื้นหลังมารวมกันที่ tag body */}
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gray-50 font-sans flex flex-col`}
-      >
-        <Navbar /> {/* ใส่ Navbar ไว้ด้านบนสุด */}
-        {/* ให้ children (เนื้อหาของหน้าเว็บต่างๆ) อยู่ตรงนี้ */}
+    <html lang="th" className={kanit.variable}>
+      <body className="antialiased min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
         {process.env.GOOGLE_ANALYTICS_ID && (
           <GoogleAnalytics gaId={process.env.GOOGLE_ANALYTICS_ID} />
-        )}{" "}
-        {/* ใส่ Google Analytics */}
+        )}
       </body>
     </html>
   );
