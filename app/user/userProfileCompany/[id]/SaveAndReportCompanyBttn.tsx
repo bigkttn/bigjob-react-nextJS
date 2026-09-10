@@ -41,12 +41,42 @@ export default function ProfileActionsButton({
   }, []);
 
   useEffect(() => {
-    checkReport();
-  }, []);
+    let ignore = false;
+    async function checkReport() {
+      try {
+        const response = await fetch("/api/seeker/check_report_company", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: Number(userId),
+            company_id: Number(companyId),
+          }),
+        });
+        const data = await response.json();
+        if (!ignore) {
+          if (data && data.rows && data.rows.length > 0) {
+            setIsReported(true);
+          } else {
+            setIsReported(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error in checkReport:", error);
+      }
+    }
+
+    if (userId && companyId) {
+      checkReport();
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [userId, companyId]);
 
   const openReportModal = () => {
     if (isReported) {
-      alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว");
+      alert("คุณได้ทำการรายงานบริษัทนี้เรียบร้อยแล้ว");
       setIsModalOpen(false);
     } else {
       setSelectedType("");
@@ -75,7 +105,7 @@ export default function ProfileActionsButton({
 
       if (response.status === 409) {
         alert(
-          "คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ",
+          "คุณเคยส่งรายงานสำหรับบริษัทนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ",
         );
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
         setIsOpen(false); // ปิดเมนูสามจุด
@@ -85,7 +115,7 @@ export default function ProfileActionsButton({
       if (response.ok) {
         console.log("reported!!");
         setIsReported(true);
-        alert("Reported Successfully!");
+        alert("ส่งรายงานสำเร็จแล้ว");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
       } else {
         console.log("fail report!!");
@@ -96,27 +126,6 @@ export default function ProfileActionsButton({
       alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
     setIsOpen(false);
-  };
-
-  const checkReport = async () => {
-    try {
-      const response = await fetch("/api/seeker/check_report_company", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: Number(userId),
-          company_id: Number(companyId),
-        }),
-      });
-      const data = await response.json();
-      if (data && data.rows && data.rows.length > 0) {
-        setIsReported(true);
-      } else {
-        setIsReported(false);
-      }
-    } catch (error) {
-      console.error("Error in checkSaved:", error);
-    }
   };
 
   return (
@@ -174,7 +183,7 @@ export default function ProfileActionsButton({
             >
               flag_2
             </span>
-            Report
+            รายงาน
           </button>
         </div>
       )}
@@ -218,7 +227,7 @@ export default function ProfileActionsButton({
               }}
             >
               <h3 style={{ margin: 0, fontSize: "18px", color: "#333" }}>
-                รายงานรายละเอียดงาน
+                รายงานบริษัท
               </h3>
               <span
                 className="material-symbols-outlined"

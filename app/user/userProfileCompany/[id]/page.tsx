@@ -148,7 +148,7 @@ export default function ProfileCompany() {
             borderRadius: "8px",
           }}
         >
-          Admin Mode
+          โหมดแอดมิน
         </h1>
       )}
       <div className={styles.container}>
@@ -168,7 +168,7 @@ export default function ProfileCompany() {
             <img
               src={company.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`}
               className={styles.banner}
-              alt="Banner"
+              alt="ภาพหน้าปกบริษัท"
             />
 
             <div className={styles.logoWrapper}>
@@ -177,7 +177,7 @@ export default function ProfileCompany() {
                   company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                 }
                 className={styles.logo}
-                alt="Logo"
+                alt="โลโก้บริษัท"
               />
             </div>
 
@@ -244,13 +244,13 @@ export default function ProfileCompany() {
               <p>{fmt(company.brief_history)}</p>
               <hr />
               <div className={styles.contactGroup}>
-                <h3>Contact & Location</h3>
-                <p>{fmt(company.contact_information)}</p>
-                <p>{fmt(company.full_address)}</p>
-                <p>{fmt(company.province)}</p>
-                <p>{fmt(company.postcode)}</p>
-                <p>Tel: {fmt(company.mobile_phone)}</p>
-                <p>Email: {fmt(company.company_email)}</p>
+                <h3>ช่องทางการติดต่อและสถานที่ตั้ง</h3>
+                <p><strong>ข้อมูลติดต่อ:</strong> {fmt(company.contact_information)}</p>
+                <p><strong>ที่อยู่:</strong> {fmt(company.full_address)}</p>
+                <p><strong>จังหวัด:</strong> {fmt(company.province)}</p>
+                <p><strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}</p>
+                <p><strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}</p>
+                <p><strong>อีเมล:</strong> {fmt(company.company_email)}</p>
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ export default function ProfileCompany() {
                 gap: "10px",
               }}
             >
-              <h3 style={{ margin: 0 }}>Company Registration Certificate</h3>
+              <h3 style={{ margin: 0 }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
               <span
                 style={{
                   fontSize: "0.8rem",
@@ -317,14 +317,14 @@ export default function ProfileCompany() {
                   <div>
                     <h2>{fmt(job.job_position)}</h2>
                     <p>
-                      <strong>Details:</strong> {fmt(job.job_description)}
+                      <strong>รายละเอียดงาน:</strong> {fmt(job.job_description)}
                     </p>
                     <p>
-                      <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
-                      {fmt(job.salary_max)} / month
+                      <strong>เงินเดือน:</strong> {fmt(job.salary_min)} -{" "}
+                      {fmt(job.salary_max)} บาท / เดือน
                     </p>
                     <Link href={`/user/user-detail-job/${job.post_id}`}>
-                      <button className={styles.detailBtn}>Detail</button>
+                      <button className={styles.detailBtn}>ดูรายละเอียด</button>
                     </Link>
                   </div>
                 </div>

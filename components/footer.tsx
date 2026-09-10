@@ -14,21 +14,24 @@ interface FooterStats {
 const Footer = () => {
   const [stats, setStats] = useState<FooterStats | null>(null);
 
-  //  ย้ายประกาศฟังก์ชันขึ้นมาก่อน useEffect เพื่อแก้บั๊ก Cannot access variable before it is declared
-  const fetchFooterStats = async () => {
-    try {
-      const res = await fetch("/api/footer-stats");
-      const data = await res.json();
-      if (data.success) {
-        setStats(data.data);
-      }
-    } catch (err) {
-      console.error("Fetch stats error:", err);
-    }
-  };
-
   useEffect(() => {
+    let isMounted = true;
+    const fetchFooterStats = async () => {
+      try {
+        const res = await fetch("/api/footer-stats");
+        const data = await res.json();
+        if (isMounted && data.success) {
+          setStats(data.data);
+        }
+      } catch (err) {
+        console.error("Fetch stats error:", err);
+      }
+    };
+
     fetchFooterStats();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

@@ -3,14 +3,13 @@
 import styles from "./seeker_tracking.module.css";
 import { useState } from "react";
 
-
-export interface AppliedJobItem{
+export interface AppliedJobItem {
   tracking_id: number;
   post_id: number;
   user_id: number;
   status: string; // applied, screening, interview, offer, rejected
   interview_message?: string;
-  
+
   // ข้อมูล Post
   job_position: string;
   job_description?: string;
@@ -30,25 +29,21 @@ export interface AppliedJobItem{
   logo_image?: string;
   company_email?: string;
 }
+
 interface TrackingProps {
   initialJobs: AppliedJobItem[];
-  userId:string;
+  userId: string;
 }
 
 export default function SeekerApplication({ initialJobs }: TrackingProps) {
-  console.log("initialJobสสสสสสสสสส",initialJobs);
   const [jobs] = useState<AppliedJobItem[]>(initialJobs);
 
   const [selectedJob, setSelectedJob] = useState<AppliedJobItem | null>(
-     initialJobs.length>0? initialJobs[0]:null
-     
+    initialJobs.length > 0 ? initialJobs[0] : null
   );
 
-  
-
-
-  const getStatus = (status:string = "")=>{
-     switch (status.toLowerCase()) {
+  const getStatus = (status: string = "") => {
+    switch (status.toLowerCase()) {
       case "screening":
         return styles.statusScreening;
       case "rejected":
@@ -57,10 +52,29 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
         return styles.statusOffer;
       default:
         return styles.statusPending;
-          
-     }
+    }
   };
- if (!jobs || jobs.length === 0) {
+
+  const getStatusLabel = (status: string = "") => {
+    switch (status.toLowerCase()) {
+      case "applied":
+      case "pending":
+        return "ยื่นใบสมัครแล้ว";
+      case "screening":
+        return "กำลังพิจารณา";
+      case "interview":
+        return "นัดสัมภาษณ์";
+      case "offer":
+        return "ได้รับข้อเสนองาน";
+      case "rejected":
+      case "reject":
+        return "ไม่ผ่านการพิจารณา";
+      default:
+        return status;
+    }
+  };
+
+  if (!jobs || jobs.length === 0) {
     return (
       <div className={styles.container} style={{ padding: "40px", textAlign: "center" }}>
         <h2>คุณยังไม่มีประวัติการสมัครงาน</h2>
@@ -97,7 +111,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   job.status
                 )}`}
               >
-                {job.status}
+                {getStatusLabel(job.status)}
               </span>
             </div>
           ))}
@@ -111,8 +125,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
               <div className={styles.stepperContainer}>
                 <div className={`${styles.step} ${styles.active}`}>
                   <div className={styles.stepIcon}>&#128203;</div>
-
-                  <span className={styles.stepLabel}>Applied</span>
+                  <span className={styles.stepLabel}>ยื่นใบสมัครแล้ว</span>
                 </div>
                 <div className={styles.stepLine}></div>
 
@@ -124,7 +137,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   }`}
                 >
                   <div className={styles.stepIcon}>&#128065;</div>
-                  <span className={styles.stepLabel}>Screening</span>
+                  <span className={styles.stepLabel}>กำลังพิจารณา</span>
                 </div>
                 <div className={styles.stepLine}></div>
 
@@ -136,7 +149,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   }`}
                 >
                   <div className={styles.stepIcon}>&#127908;</div>
-                  <span className={styles.stepLabel}>Interview</span>
+                  <span className={styles.stepLabel}>นัดสัมภาษณ์</span>
                 </div>
                 <div className={styles.stepLine}></div>
 
@@ -146,7 +159,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   }`}
                 >
                   <div className={styles.stepIcon}>&#128092;</div>
-                  <span className={styles.stepLabel}>Offer</span>
+                  <span className={styles.stepLabel}>ได้รับข้อเสนองาน</span>
                 </div>
               </div>
 
@@ -154,10 +167,10 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
               {selectedJob.status?.toLowerCase() === "offer" && (
                 <div className={styles.actionButtons}>
                   <button className={styles.btnAccept}>
-                    <span>&#10004;</span> Accept
+                    <span>&#10004;</span> ยอมรับ
                   </button>
                   <button className={styles.btnReject}>
-                    <span>&#10006;</span> Reject
+                    <span>&#10006;</span> ปฏิเสธ
                   </button>
                 </div>
               )}
@@ -171,7 +184,7 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   alt={selectedJob.company_name}
                   className={styles.detailLogo}
                 />
-                <h2>{selectedJob.company_name || "Company Name"}</h2>
+                <h2>{selectedJob.company_name || "ไม่ระบุชื่อบริษัท"}</h2>
               </div>
 
               <div className={styles.detailGrid}>
@@ -180,19 +193,19 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                   <table className={styles.infoTable}>
                     <tbody>
                       <tr>
-                        <td>Job Title</td>
+                        <td>ตำแหน่งงาน</td>
                         <td>{selectedJob.job_position}</td>
                       </tr>
                       <tr>
-                        <td>Province</td>
+                        <td>จังหวัด</td>
                         <td>{selectedJob.province || "-"}</td>
                       </tr>
                       <tr>
-                        <td>Work Location</td>
+                        <td>สถานที่ทำงาน</td>
                         <td>{selectedJob.work_location || "-"}</td>
                       </tr>
                       <tr>
-                        <td>Salary</td>
+                        <td>เงินเดือน</td>
                         <td>
                           {selectedJob.salary_min && selectedJob.salary_max
                             ? `${selectedJob.salary_min.toLocaleString()} - ${selectedJob.salary_max.toLocaleString()} บาท`
@@ -200,18 +213,18 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                         </td>
                       </tr>
                       <tr>
-                        <td>Job Type</td>
+                        <td>ประเภทงาน</td>
                         <td>{selectedJob.job_type || "-"}</td>
                       </tr>
                     </tbody>
                   </table>
 
-                  <div className={styles.sectionTitle}>Details</div>
+                  <div className={styles.sectionTitle}>รายละเอียดงาน</div>
                   <p style={{ whiteSpace: "pre-line", margin: 0 }}>
                     {selectedJob.job_description || "-"}
                   </p>
 
-                  <div className={styles.sectionTitle}>Qualifications</div>
+                  <div className={styles.sectionTitle}>คุณสมบัติ</div>
                   <p style={{ whiteSpace: "pre-line", margin: 0 }}>
                     {selectedJob.preferred_qualifications || "-"}
                   </p>
@@ -220,18 +233,18 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
                 {/* Right Column - Benefits & Contact */}
                 <div className={styles.contactBox}>
                   <div className={styles.sectionTitle} style={{ marginTop: 0 }}>
-                    Benefits
+                    สวัสดิการ
                   </div>
                   <p style={{ whiteSpace: "pre-line", margin: 0 }}>
                     {selectedJob.Benefits || "-"}
                   </p>
 
-                  <div className={styles.sectionTitle}>How to Apply</div>
+                  <div className={styles.sectionTitle}>วิธีการสมัคร</div>
                   <p style={{ whiteSpace: "pre-line", margin: 0 }}>
                     {selectedJob.how_to_apply || "-"}
                   </p>
 
-                  <div className={styles.sectionTitle}>Contact</div>
+                  <div className={styles.sectionTitle}>ช่องทางติดต่อ</div>
                   <p style={{ whiteSpace: "pre-line", margin: 0 }}>
                     {selectedJob.contact || "-"}
                   </p>
@@ -243,4 +256,4 @@ export default function SeekerApplication({ initialJobs }: TrackingProps) {
       </div>
     </div>
   );
-}
+}

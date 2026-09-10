@@ -24,7 +24,7 @@ const MapWithNoSSR = dynamic<LeafletMapProps>(
           justifyContent: "center",
         }}
       >
-        <p>Loading Map...</p>
+        <p>กำลังโหลดแผนที่...</p>
       </div>
     ),
   }

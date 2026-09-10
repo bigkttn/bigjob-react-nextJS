@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation";
 import styles from "./userProfileCompany.module.css";
 
-
 export default function BackButton() {
   const router = useRouter();
   return (
@@ -20,7 +19,7 @@ export default function BackButton() {
       >
         <polyline points="15 18 9 12 15 6" />
       </svg>
-      Back
+      ย้อนกลับ
     </button>
   );
 }

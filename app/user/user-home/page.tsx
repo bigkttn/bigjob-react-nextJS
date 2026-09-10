@@ -21,5 +21,5 @@ export default async function Page() {
     }
   }
 
-  return <UserHomeClient initialUser={user} />;
+  return <UserHomeClient initialUser={user as any} />;
 }

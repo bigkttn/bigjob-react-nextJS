@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params; // ดึง post_id จาก URL
         const post_id = id; // ตัวอย่าง post_id ที่คุณต้องการดึงข้อมูล
