@@ -14,11 +14,11 @@ interface CustomJwtPayload extends JwtPayload {
   id: number;
   email: string;
   role: string;
-  company_name:string;
+  company_name: string;
 }
 
-interface PageProps{
-   params: Promise<{ id: string }>;
+interface PageProps {
+  params: Promise<{ id: string }>;
 }
 
 interface Education {
@@ -41,14 +41,14 @@ interface TypingSpeed {
 interface Experiences {
   ex_title?: unknown;
   ex_description?: unknown;
-  start_date?: string|null;
-  end_date?: string|null;
+  start_date?: string | null;
+  end_date?: string | null;
 }
-interface Language{
-  language_type?:string;
-  test_name?:string|null;
-  level?:string|null;
-  score?:number|0;
+interface Language {
+  language_type?: string;
+  test_name?: string | null;
+  level?: string | null;
+  score?: number | 0;
 }
 
 interface FileRecord {
@@ -62,15 +62,13 @@ interface CompanyProfile {
   company_name?: string | null;
 }
 
-
 async function getSeekerProfile(userId: string) {
-  
   const res = await fetch(`${apiUrl}/api/user/getUserById/${userId}`, {
     cache: "no-store",
   });
   if (!res.ok) return null;
   const data = await res.json();
-  return data.company ??data.user ?? null;
+  return data.company ?? data.user ?? null;
 }
 
 async function getCompanyProfile(companyId: number, token?: string) {
@@ -92,13 +90,12 @@ async function getCompanyProfile(companyId: number, token?: string) {
 
   const data = await res.json();
   return data.company ?? data.user ?? data.data ?? data;
-
 }
 
 const fmt = (val: unknown) =>
   val !== null && val !== undefined ? String(val) : "-";
 
-const formatDate = (dateStr: string | null|undefined) => {
+const formatDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return "-";
   return new Date(dateStr).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -107,8 +104,7 @@ const formatDate = (dateStr: string | null|undefined) => {
   });
 };
 
-export default async function SeekerProfilePage({params}:PageProps)
-{
+export default async function SeekerProfilePage({ params }: PageProps) {
   const Param = await params;
   const userId = Param.id;
   const cookieStore = await cookies();
@@ -133,7 +129,7 @@ export default async function SeekerProfilePage({params}:PageProps)
   }
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
   const profile = await getSeekerProfile(userId);
- 
+
   let company: CompanyProfile | null = null;
   let jobTitle = "";
   let postId: number | null = null;
@@ -142,28 +138,32 @@ export default async function SeekerProfilePage({params}:PageProps)
   if (viewer?.id) {
     company = await getCompanyProfile(viewer.id, token);
     try {
-      
       const postRes = await fetch(
         `${apiUrl}/api/posts/getPostbyCompanyId?company_id=${viewer.id}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json",
-          "Cookie": `session=${token}`
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session=${token}`,
           },
           cache: "no-store",
-        });
+        },
+      );
 
       if (postRes.ok) {
         const reponseData = await postRes.json();
-        companyJobs = Array.isArray(reponseData)? reponseData:[];
+        companyJobs = Array.isArray(reponseData) ? reponseData : [];
 
-      
         const firstPost = companyJobs[0];
 
         if (firstPost) {
           jobTitle = firstPost.job_position || firstPost.post_title || "";
 
-          const foundId = firstPost.post_id ?? firstPost.id ?? firstPost.postId ?? firstPost._id;
+          const foundId =
+            firstPost.post_id ??
+            firstPost.id ??
+            firstPost.postId ??
+            firstPost._id;
           postId = foundId ? Number(foundId) : null;
         }
       }
@@ -171,7 +171,6 @@ export default async function SeekerProfilePage({params}:PageProps)
       console.error("Fetch Seeker error:", error);
     }
   }
-
 
   if (!profile) {
     return (
@@ -199,7 +198,7 @@ export default async function SeekerProfilePage({params}:PageProps)
             borderRadius: "8px",
           }}
         >
-          Admin Mode
+          โหมดแอดมิน
         </h1>
       )}
       <div className={styles.container}>
@@ -264,7 +263,10 @@ export default async function SeekerProfilePage({params}:PageProps)
             <div className={styles.personalInfoContent}>
               <div className={styles.avatarWrapper}>
                 <Image
-                  src={profile.profile_image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`}
+                  src={
+                    profile.profile_image ??
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`
+                  }
                   alt="avatar"
                   className={styles.avatar}
                   width={150}
@@ -333,9 +335,11 @@ export default async function SeekerProfilePage({params}:PageProps)
               <section className={styles.section}>
                 <h4>Job Title</h4>
                 <ol className={styles.plainList}>
-                  {profile.job_titles?.map((job: {job_name:string}, i: number) => (
-                    <li key={i}>{fmt(job.job_name)}</li>
-                  ))}
+                  {profile.job_titles?.map(
+                    (job: { job_name: string }, i: number) => (
+                      <li key={i}>{fmt(job.job_name)}</li>
+                    ),
+                  )}
                 </ol>
               </section>
 
@@ -472,8 +476,8 @@ export default async function SeekerProfilePage({params}:PageProps)
                         )}
                         {files.map((file: FileRecord) => {
                           const shortName =
-                            (file.file_name?.length??0) > 15
-                              ? (file.file_name?? "").substring(0, 13) + "..."
+                            (file.file_name?.length ?? 0) > 15
+                              ? (file.file_name ?? "").substring(0, 13) + "..."
                               : file.file_name || "File";
                           return (
                             <div
@@ -488,8 +492,8 @@ export default async function SeekerProfilePage({params}:PageProps)
                               </div>
                               {/* ── Client Component สำหรับ popup ── */}
                               <FilePreviewButton
-                                filePath={file.file_path??""}
-                                fileName={file.file_name??""}
+                                filePath={file.file_path ?? ""}
+                                fileName={file.file_name ?? ""}
                               />
                             </div>
                           );
@@ -502,18 +506,22 @@ export default async function SeekerProfilePage({params}:PageProps)
             </div>
             <div className={styles.contactCard}>
               <h3>การติดต่อ</h3>
-             <ApplySeeker
-  mode="invite"
-  postId={Number(postId) ?? 0}
-  userId={Number(userId)}
-  companyId={Number(viewer.id)}
-  companyName={company?.company_name || viewer?.company_name || "invaid Company"}
-  seekerName={profile.fullname || "invaid Seeker"}
-  jobTitle={jobTitle || profile.job_titles?.[0]?.job_name}
-  seekerEmail={profile.email || ""}
-  companyEmail={viewer.email || ""}
-  companyJobs={companyJobs}
-/>
+              <ApplySeeker
+                mode="invite"
+                postId={Number(postId) ?? 0}
+                userId={Number(userId)}
+                companyId={Number(viewer.id)}
+                companyName={
+                  company?.company_name ||
+                  viewer?.company_name ||
+                  "invaid Company"
+                }
+                seekerName={profile.fullname || "invaid Seeker"}
+                jobTitle={jobTitle || profile.job_titles?.[0]?.job_name}
+                seekerEmail={profile.email || ""}
+                companyEmail={viewer.email || ""}
+                companyJobs={companyJobs}
+              />
             </div>
           </div>
         </div>
