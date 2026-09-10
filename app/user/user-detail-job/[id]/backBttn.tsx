@@ -5,7 +5,16 @@ import styles from "../seekerProfile.module.css";
 export default function BackButton() {
   const router = useRouter();
   return (
-    <button className={styles.backBtn} onClick={() => router.back()}>
+    <button
+      className={styles.backBtn}
+      onClick={() => router.back()}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        whiteSpace: "nowrap", // ป้องกันไม่ให้ข้อความตัดขึ้นบรรทัดใหม่
+        width: "auto", // ให้ความกว้างขยายตามข้อความข้างใน
+      }}
+    >
       <svg
         width="16"
         height="16"
@@ -19,7 +28,7 @@ export default function BackButton() {
       >
         <polyline points="15 18 9 12 15 6" />
       </svg>
-      Back
+      ย้อนกลับ
     </button>
   );
 }

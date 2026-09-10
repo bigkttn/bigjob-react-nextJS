@@ -5,7 +5,16 @@ import styles from "./userProfileCompany.module.css";
 export default function BackButton() {
   const router = useRouter();
   return (
-    <button className={styles.backBtn} onClick={() => router.back()}>
+    <button
+      className={styles.backBtn}
+      onClick={() => router.back()}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        whiteSpace: "nowrap", // ป้องกันไม่ให้ข้อความตัดขึ้นบรรทัดใหม่
+        width: "auto", // ให้ความกว้างขยายตามข้อความข้างใน
+      }}
+    >
       <svg
         width="16"
         height="16"
