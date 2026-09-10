@@ -1,27 +1,26 @@
 .container {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 20px;
   background-color: #f5f5f7;
-  font-family: Arial, sans-serif;
+  font-family: 'Kanit', sans-serif;
 }
 
 .mainContent {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 360px 1fr;
   gap: 5px;
-  
 }
 
 .cardScollBar {
   display: flex;
   flex-direction: column; /* จัดองค์ประกอบเรียงต่อกันแนวตั้ง */
-  max-height: 730px;      /* กำหนดความสูงสูงสุดเพื่อให้เกิด overflow */
-  overflow-y: auto;       /* แสดง scrollbar แนวตั้งเมื่อเนื้อหาล้น */
-  overflow-x: hidden;     /* ซ่อน scrollbar แนวนอน */
+  max-height: 730px; /* กำหนดความสูงสูงสุดเพื่อให้เกิด overflow */
+  overflow-y: auto; /* แสดง scrollbar แนวตั้งเมื่อเนื้อหาล้น */
+  overflow-x: hidden; /* ซ่อน scrollbar แนวนอน */
   background-color: white;
   border: 1px solid #000000; /* กรอบเส้นทึบ หนา 1px สีเทาอ่อน */
-  border-radius: 20px;     /* เพิ่มความโค้งมนให้มุมกรอบ (ใส่หรือไม่ใส่ก็ได้) */
+  border-radius: 20px; /* เพิ่มความโค้งมนให้มุมกรอบ (ใส่หรือไม่ใส่ก็ได้) */
 }
 
 /* Sidebar ด้านซ้าย */
@@ -60,7 +59,7 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
- flex-shrink: 0; /* ป้องกันรูปภาพโดนบีบเบี้ยว */
+  flex-shrink: 0; /* ป้องกันรูปภาพโดนบีบเบี้ยว */
   margin-right: 0; /* ลบ margin-right 50px ออกเพื่อแก้ปัญหาช่องว่างเกิน */
 }
 
@@ -74,7 +73,7 @@
 }
 
 .cardDetails h4 {
- margin: 2px 0 0;
+  margin: 2px 0 0;
   font-size: 16px;
   font-weight: bold;
 }
@@ -93,10 +92,31 @@
   /* background-color: fuchsia; */
 }
 
-.statusPending { background: #dcdcdc; color: #333; }
-.statusOffer { background: #d1e7dd; color: #0f5132; }
-.statusInterview { background: #fff3cd; color: #664d03; }
-.statusRejected { background: #f8d7da; color: #842029; }
+.statusPending {
+  background: #c5c2c2;
+  color: #333;
+  box-shadow: 1px 2px 2px#000 ;
+}
+.statusApplied {
+  background: #fff98c;
+  color: #898714;
+   box-shadow: 1px 2px 2px#000 ;
+}
+.statusInterview {
+  background: #f3cf5b;
+  color: #664d03;
+   box-shadow: 1px 2px 2px#000 ;
+}
+.statusOffer {
+  background: #70eab3;
+  color: #0f5132;
+   box-shadow: 1px 2px 2px#000 ;
+}
+.statusRejected {
+  background: #e06b75;
+  color: #842029;
+   box-shadow: 1px 2px 2px#000 ;
+}
 
 /* Detail Panel ด้านขวา */
 .rightPanel {
@@ -108,7 +128,7 @@
 .trackerBox {
   margin: 15px 15px;
   background: #ffffff;
-  box-shadow: 10px 10px 5px rgba(0,0,0,0.3);
+  box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.3);
   border-radius: 16px;
   padding: 20px;
 }
@@ -258,7 +278,6 @@
   box-shadow: 8px 8px 2px #000;
   padding: 10px 10px 10px;
   margin: 15px 15px 15px 15px;
-
 }
 
 /* Column 1: Profile */
@@ -347,7 +366,9 @@
   color: #444;
 }
 
-.cardSection p, .cardSection ol, .cardSection ul {
+.cardSection p,
+.cardSection ol,
+.cardSection ul {
   margin: 0;
   padding-left: 15px;
   color: #333;
@@ -388,6 +409,7 @@
   flex-direction: column;
   align-items: center;
   font-size: 12px;
+  
 }
 
 /* ข้อความสถานะรอการตอบกลับ */
@@ -400,7 +422,6 @@
   font-size: 12px;
   margin: 3px 6px 0px 6px;
 }
-
 
 /* กล่องเลือกวันที่แบบกระชับใต้ Icon */
 .inlineDatePicker {
@@ -416,6 +437,7 @@
 .inlineDatePicker input {
   font-size: 11px;
   padding: 2px 4px;
+  
 }
 
 /* 1. จัด Stepper ให้อยู่แนวเดียวกัน และจัด alignment ให้ส่วนขยายลงมาด้านล่างได้สวยงาม */
@@ -456,7 +478,7 @@
   border: 1px solid #d1d5db;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   margin-top: 10px;
-  width: 140px; /* กำหนดความกว้างให้พอดี */
+  width: 200px; /* กำหนดความกว้างให้พอดี */
   z-index: 2;
 }
 
@@ -506,4 +528,146 @@
 
 .btnSubmitStep:hover {
   background-color: #02320d;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  width: 380px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modalContent h3 {
+  margin-top: 0;
+  color: #333333;
+}
+
+.modalContent p {
+  color: #666666;
+  margin-bottom: 20px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btnConfirm {
+  background-color: #e53e3e;
+  color: #ffffff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.btnConfirm:hover {
+  background-color: #c53030;
+}
+
+.btnCancel {
+  background-color: #edf2f7;
+  color: #4a5568;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.btnCancel:hover {
+  background-color: #e2e8f0;
+}
+.btnMap {
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  padding: 0 16px; /* ปรับ padding ซ้ายขวา */
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap; /* ป้องกันข้อความตกบรรทัด */
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ลบ width: 50%; ออก เพื่อให้ปุ่มกว้างตามเนื้อหาอัตโนมัติ */
+}
+
+.btnMap:hover {
+  background-color: #2b6cb0;
+}
+
+.mapModalContent {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mapContainer {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Modal Overlay Z-Index and Layout */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Modal Content Box */
+.mapModalContent {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 650px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+}
+
+/* Map Wrapper Fix */
+.mapContainer {
+  display: flex;
+  gap: 8px; /* ระยะห่างระหว่าง input และ button */
+  width: 100%;
+  height: 35px; /* ปรับความสูงให้กดง่ายขึ้นเล็กน้อย */
+}
+
+.inputMap {
+  flex: 1; /* ให้ input ขยายกินพื้นที่ที่เหลือทั้งหมด */
+  width: 100%;
+  padding: 6px 12px;
+  border: 1px solid #ccc; /* เพิ่มขอบให้ดูชัดเจน */
+  border-radius: 4px;
+  font-size: 12px;
 }

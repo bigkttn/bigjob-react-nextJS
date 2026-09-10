@@ -63,6 +63,10 @@ export async function GET(
     if (userIds.length > 0) {
       const placeholders = userIds.map(() => "?").join(",");
 
+      const [jobTitles] = await db.query(
+        `SELECT * FROM JobTitle WHERE user_id IN (${placeholders})`,userIds
+      ) as [any[], unknown];
+
       const [skills] = await db.query(
         `SELECT * FROM skills WHERE user_id IN (${placeholders})`, userIds
       ) as [any[], unknown];
@@ -85,6 +89,7 @@ export async function GET(
 
       // 3. นำข้อมูลย่อยแมปเข้ากับผู้สมัครแต่ละคน
       applicants.forEach((applicant) => {
+        applicant.job_titles = jobTitles.filter((j) => j.user_id === applicant.user_id);
         applicant.skills = skills.filter((s) => s.user_id === applicant.user_id);
         applicant.experiences = experiences.filter((e) => e.user_id === applicant.user_id);
         applicant.files = files.filter((f) => f.user_id === applicant.user_id);
