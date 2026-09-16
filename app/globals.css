@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-input, select, button, textarea {
+body * {
   font-family: var(--font-kanit), sans-serif;
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined" !important;
 }

@@ -1,10 +1,11 @@
 .container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* แบ่งครึ่งซ้าย-ขวา */
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
   padding: 20px;
   background-color: #ffffff;
   min-height: 100vh;
+  font-family: var(--font-kanit), sans-serif;
 }
 
 .backBtnWrapper {
@@ -85,7 +86,7 @@
 }
 
 .material-symbols-outlined {
-  font-family: "Material Symbols Outlined";
+  /* font-family: "Material Symbols Outlined"; */
   display: inline-block;
   vertical-align: middle;
   font-variation-settings:
@@ -113,12 +114,54 @@
 .VerifiedConfirm {
   display: flex;
   flex-direction: column;
-  height: auto;
-  padding: 16px 20px;
-  background-color: #fff;
+  padding: 20px 24px;
+  background: linear-gradient(145deg, #ffffff, #f9fafb);
   border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  gap: 14px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  gap: 16px;
+}
+
+.certHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.certTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.viewCertBtn {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background-color: #fff;
+  color: #111;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+
+.viewCertBtn:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.viewCertBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .jobScrollArea {

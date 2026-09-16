@@ -27,6 +27,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Search History State
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const searchInputRef = useRef<HTMLDivElement>(null);
+
   // State Filters
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedWorkType, setSelectedWorkType] = useState("");
@@ -45,6 +50,34 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   useEffect(() => {
     fetchSuggestedSeekers();
   }, [company]);
+
+  // Load History from LocalStorage
+  useEffect(() => {
+    const history = localStorage.getItem("searchHistory_company");
+    if (history) {
+      try {
+        setSearchHistory(JSON.parse(history));
+      } catch (e) {
+        console.error("Failed to parse search history", e);
+      }
+    }
+  }, []);
+
+  // Click outside to close history
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
+      ) {
+        setShowHistory(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const performHybridSearch = useCallback(
     async (query: string) => {
@@ -147,9 +180,41 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     }
   };
 
+  const saveSearchHistory = (term: string) => {
+    if (!term) return;
+    const newHistory = [term, ...searchHistory.filter((h) => h !== term)].slice(
+      0,
+      10,
+    );
+    setSearchHistory(newHistory);
+    localStorage.setItem("searchHistory_company", JSON.stringify(newHistory));
+  };
+
   const handleSearchSubmit = () => {
     setCurrentPage(1);
-    setSearchTerm(searchInput.trim());
+    const term = searchInput.trim();
+    setSearchTerm(term);
+    setShowHistory(false);
+    saveSearchHistory(term);
+  };
+
+  const handleHistoryClick = (item: string) => {
+    setSearchInput(item);
+    setCurrentPage(1);
+    setSearchTerm(item);
+    setShowHistory(false);
+    saveSearchHistory(item);
+  };
+
+  const removeHistoryItem = (itemToRemove: string) => {
+    const newHistory = searchHistory.filter((h) => h !== itemToRemove);
+    setSearchHistory(newHistory);
+    localStorage.setItem("searchHistory_company", JSON.stringify(newHistory));
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem("searchHistory_company");
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -263,14 +328,42 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     <div className={styles.container}>
       <header className={styles.searchSection}>
         <div className={styles.searchBarWrapper}>
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด (รองรับ AI Semantic Search)..."
-            className={styles.searchInput}
-          />
+          <div className={styles.searchBarContainer} ref={searchInputRef}>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              onFocus={() => setShowHistory(true)}
+              placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด (รองรับ AI Semantic Search)..."
+              className={styles.searchInputFull}
+            />
+            {showHistory && searchHistory.length > 0 && (
+              <div className={styles.historyDropdown}>
+                {searchHistory.map((item, index) => (
+                  <div
+                    key={index}
+                    className={styles.historyItem}
+                    onClick={() => handleHistoryClick(item)}
+                  >
+                    <span className={styles.historyItemText}>{item}</span>
+                    <span
+                      className={styles.historyRemove}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeHistoryItem(item);
+                      }}
+                    >
+                      ✕
+                    </span>
+                  </div>
+                ))}
+                <div className={styles.historyClearAll} onClick={clearHistory}>
+                  ล้างประวัติการค้นหาทั้งหมด
+                </div>
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleSearchSubmit}
@@ -281,11 +374,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
           </button>
         </div>
 
-        {searchTerm && !isSearching && (
+        {/* {searchTerm && !isSearching && (
           <p className={styles.searchingBadge}>
             แสดงผลการค้นหาสำหรับ: “{searchTerm}”
           </p>
-        )}
+        )} */}
 
         <div className={styles.filters}>
           <select

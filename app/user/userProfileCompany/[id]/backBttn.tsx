@@ -13,6 +13,7 @@ export default function BackButton() {
         alignItems: "center",
         whiteSpace: "nowrap", // ป้องกันไม่ให้ข้อความตัดขึ้นบรรทัดใหม่
         width: "auto", // ให้ความกว้างขยายตามข้อความข้างใน
+        fontFamily: "var(--font-kanit), sans-serif",
       }}
     >
       <svg

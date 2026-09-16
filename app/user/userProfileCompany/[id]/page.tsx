@@ -264,29 +264,42 @@ export default function ProfileCompany() {
         {/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
         <div className={styles.rightSection}>
           <div className={styles.VerifiedConfirm}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: "10px",
-              }}
-            >
-              <h3 style={{ margin: 0 }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
+            <div className={styles.certHeader}>
+              <div className={styles.certTitleGroup}>
+                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: statusColor }}>
+                  {isVerified ? 'verified_user' : isRejected ? 'gpp_bad' : 'pending_actions'}
+                </span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                    {isVerified ? 'เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว' : isRejected ? 'เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ' : 'เอกสารนี้อยู่ระหว่างการตรวจสอบ'}
+                  </p>
+                </div>
+              </div>
               <span
                 style={{
-                  fontSize: "0.8rem",
+                  fontSize: "0.85rem",
                   fontWeight: 700,
                   color: "#fff",
                   backgroundColor: statusColor,
                   borderRadius: "999px",
-                  padding: "4px 12px",
+                  padding: "6px 16px",
+                  boxShadow: `0 2px 8px ${statusColor}40`
                 }}
               >
                 {statusLabel}
               </span>
             </div>
+            
+            {company.company_certificate && (
+              <button 
+                className={styles.viewCertBtn} 
+                onClick={() => window.open(company.company_certificate, '_blank')}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                เปิดดูเอกสารรับรอง
+              </button>
+            )}
           </div>
 
           <div className={styles.jobScrollArea}>
