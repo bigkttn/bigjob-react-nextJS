@@ -12,7 +12,25 @@ export async function GET(
       SELECT 
         interview.tracking_id,
         interview.status,
-        posts.*,
+        interview.interview_message,
+        interview.date_time AS interview_date,
+        interview.link,
+        interview.location,
+        posts.post_id,
+        posts.job_position,
+        posts.job_description AS details,
+        posts.preferred_qualifications,
+        posts.Benefits,
+        posts.province,
+        posts.work_location,
+        posts.vacancy AS rate,
+        posts.how_to_apply,
+        posts.contact,
+        posts.job_type,
+        posts.salary_min,
+        posts.salary_max,
+        posts.age_min,
+        posts.age_max,
         comp.company_email,
         comp.company_name,
         comp.logo_image 
@@ -25,7 +43,7 @@ export async function GET(
     const [rows]: any = await db.query(sql, [id]);
     return NextResponse.json({ rows }, { status: 200 });
   } catch (error: any) {
-    console.error("SQL Error:", error.message); // เพิ่ม log ดู error ใน terminal
+    console.error("SQL Error:", error.message);
     return NextResponse.json(
       { message: "Error fetching tracking", error: error.message },
       { status: 500 }

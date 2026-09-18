@@ -4,60 +4,27 @@ import React, { useState } from "react";
 import styles from "./company_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
 import dynamic from "next/dynamic";
+import { resume } from "react-dom/server";
 
-// โหลด MapComponent เข้ามาและปิดการทำ SSR
 const MapComponent = dynamic(() => import("./mapComponent"), {
   ssr: false,
   loading: () => <p style={{ textAlign: "center", padding: "20px" }}>กำลังโหลดแผนที่...</p>,
 });
 
-// 1. Interfaces สำหรับ Sub-tables
-export interface SkillItem {
-  skill_id: number;
-  skill_name: string;
-  skill_category?: string;
-  skill_detail?: string;
-}
-
-export interface ExperienceItem {
-  experience_id: number;
-  ex_title: string;
-  ex_description?: string;
-  type?: string;
-  start_date?: string;
-  end_date?: string;
-}
-
-export interface TypingSpeedItem {
-  typing_id: number;
-  typing_language: string;
-  typing_wpm: number;
-}
-
-export interface LanguageItem {
-  lang_id: number;
-  language_type: string;
-  level?: string;
-  test_name?: string;
-  score?: string;
-}
-
-export interface FileItem {
-  file_id: number;
-  file_path: string;
-  file_name: string;
-  file_type?: string;
-  file_category?: string;
-}
-
-export interface JobTitleItem {
-  jobtitle_id: number;
-  job_name: string;
-  user_id: number;
-}
-
-// 2. Interface Applicant
 export interface Applicant {
+  district: any;
+  province: any;
+  postal_code: any;
+  sub_district: any;
+  address: any;
+  height: any;
+  weight: any;
+  religion: string;
+  military_status: string;
+  nationality: string;
+  gender: string;
+  age: string;
+  mobile_phone: string;
   tracking_id: number;
   post_id: number;
   user_id: number;
@@ -66,38 +33,27 @@ export interface Applicant {
   date_time?: string;
   job_position?: string;
   fullname?: string;
-  email?: string;
-  gender?: string;
-  age?: number;
-  military_status?: string;
-  date_of_birth?: string;
-  nationality?: string;
-  religion?: string;
-  weight?: number;
-  height?: number;
-  disability_status?: string;
-  marital_status?: string;
-  mobile_phone?: string;
-  line_id?: string;
-  country?: string;
-  address?: string;
-  province?: string;
-  district?: string;
-  sub_district?: string;
-  postal_code?: string;
+  email?: string; // อีเมลของผู้สมัคร (seekerEmail)
+  company_email?: string; // อีเมลของบริษัทตัวเอง
+  company_name?: string;
+  job_titles?: any[];
   type_of_work?: string;
-  available_start_date?: string;
   desired_salary?: string;
   desired_work_location?: string;
+  available_start_date?: string;
+  skills?: any[];
+  experiences?: any[];
+  languages?: any[];
+  typing_speed?: any[];
+  files?: any[];
   profile_image?: string;
-  skills?: SkillItem[];
-  experiences?: ExperienceItem[];
-  typing_speed?: TypingSpeedItem[];
-  languages?: LanguageItem[];
-  files?: FileItem[];
+  company_full_address?: string;
+  company_sub_district?: string;
+  company_district?: string;
+  company_province?: string;
+  company_postcode?: string;
   company_latitude?: number;
   company_longitude?: number;
-  job_titles?: JobTitleItem[];
   interview_date?: string;
   link?: string;
   location?: string;
@@ -112,80 +68,49 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
   const [jobs, setJobs] = useState<Applicant[]>(initialJobs || []);
   const [selectedJob, setSelectedJob] = useState<Applicant | null>(
     initialJobs && initialJobs.length > 0 ? initialJobs[0] : null
+    
   );
+      console.log("data รายการผู้สมัครงาน tracking:",initialJobs);
 
   const [interviewDate, setInterviewDate] = useState("");
   const [interviewTime, setInterviewTime] = useState("");
   const [startDate, setStartDate] = useState("");
-
-  // ----- เพิ่ม State สำหรับจัดการประเภทการนัดสัมภาษณ์ -----
   const [interviewType, setInterviewType] = useState<"onsite" | "online">("onsite");
   const [meetingLink, setMeetingLink] = useState("");
-  // ----------------------------------------------
-
-  const [isRejectModalOpen, setIsRejectModelOpen] = useState(false);
-  const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
-
   const [locationName, setLocationName] = useState("");
   const [selectedLat, setSelectedLat] = useState<number | null>(null);
   const [selectedLng, setSelectedLng] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModelOpen] = useState(false);
+  const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
 
-  const status = selectedJob?.status || "pending";
+  const status = selectedJob?.status?.toLowerCase() || "pending";
 
   const getStatusClass = (status: string = "pending") => {
-    switch (status.toLowerCase()) {
-      case "interview":
-        return styles.statusInterview;
-      case "rejected":
-      case "closed":
-        return styles.statusRejected;
-      case "applied":
-        return styles.statusApplied;
-      case "appointment":
-        return styles.statusOffer;
-      default:
-        return styles.statusPending;
-    }
+    const s = status.toLowerCase();
+    if (s === "applied") return styles.statusApplied;
+    if (s === "screening") return styles.statusScreening;
+    if (s === "interview") return styles.statusInterview;
+    if (s === "appointment" || s === "offer" || s === "hired") return styles.statusOffer;
+    if (s === "rejected" || s === "reject") return styles.statusRejected;
+    return styles.statusPending;
   };
 
-  const steps = ["Pending", "Applied", "Interview", "Appointment"];
-
-  const getStepStatus = (stepName: string, currentStatus: string = "pending") => {
-    const stepIndex = steps.findIndex((s) => s.toLowerCase() === stepName.toLowerCase());
-    const currentIndex = steps.findIndex((s) => s.toLowerCase() === currentStatus.toLowerCase());
-
-    if (currentIndex === -1) return "";
-    if (stepIndex === currentIndex) return styles.active;
-    if (stepIndex < currentIndex) return styles.completed;
-    return "";
-  };
-
-  const handleUpdateStatus = async (
-    trackingId: number,
-    newStatus: string,
-    interviewDetails?: {
-      interviewDate: string;
-      interviewTime: string;
-      locationName: string;
-      latitude: number | null;
-      longitude: number | null;
-      interviewType?: string; // รองรับประเภทการสัมภาษณ์
-    }
-  ) => {
+  const handleUpdateStatus = async (trackingId: number, newStatus: string, interviewDetails?: any) => {
     if (!selectedJob) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/interview_tracking/update-status/company`, {
+      const response = await fetch(`${apiUrl}/api/interview_tracking/update-status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           trackingId: trackingId,
           status: newStatus,
+          companyEmail: selectedJob.company_email || "hr@company.com", // เปลี่ยนตามดึงจริง
           seekerEmail: selectedJob.email,
-          seekerName: selectedJob.fullname,
+          companyName: selectedJob.company_name || "บริษัท",
+          seekerName: selectedJob.fullname || "ผู้สมัคร",
           jobTitle: selectedJob.job_position,
           ...interviewDetails,
         }),
@@ -193,23 +118,11 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
 
       if (response.ok) {
         if (newStatus === "reject" || newStatus === "rejected") {
-          setJobs((prevJobs) => {
-            const updatedJobs = prevJobs.filter((job) => job.tracking_id !== trackingId);
-            if (selectedJob.tracking_id === trackingId) {
-              setSelectedJob(updatedJobs.length > 0 ? updatedJobs[0] : null);
-            }
-            return updatedJobs;
-          });
+          setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
+          setSelectedJob(null);
         } else {
-          setJobs((prevJobs) =>
-            prevJobs.map((job) =>
-              job.tracking_id === trackingId ? { ...job, status: newStatus } : job
-            )
-          );
-
-          if (selectedJob && selectedJob.tracking_id === trackingId) {
-            setSelectedJob((prev) => (prev ? { ...prev, status: newStatus } : null));
-          }
+          setJobs((prev) => prev.map((job) => job.tracking_id === trackingId ? { ...job, status: newStatus } : job));
+          setSelectedJob((prev) => (prev ? { ...prev, status: newStatus } : null));
         }
       }
     } catch (error) {
@@ -217,46 +130,22 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
     }
   };
 
-  const handleOpenRejectModel = (trackingId: number) => {
-    setTargetTrackingId(trackingId);
-    setIsRejectModelOpen(true);
-  };
-
-  const handleConfirmReject = async () => {
-    if (targetTrackingId !== null) {
-      await handleUpdateStatus(targetTrackingId, "reject");
-      setIsRejectModelOpen(false);
-      setTargetTrackingId(null);
-    }
-  };
-
   const handleOpenMap = () => {
     if (selectedJob?.company_latitude && selectedJob?.company_longitude) {
       setSelectedLat(Number(selectedJob.company_latitude));
       setSelectedLng(Number(selectedJob.company_longitude));
-    } else {
-      setSelectedLat(13.7563);
-      setSelectedLng(100.5018);
     }
     setSearchQuery(locationName || "");
     setIsMapModalOpen(true);
   };
 
-  const resumeFile = selectedJob?.files?.find(
-    (f) => f.file_category?.toLowerCase() === "resume" || f.file_name.endsWith(".pdf")
-  ) || selectedJob?.files?.[0];
-
-  const thaiTyping = selectedJob?.typing_speed?.find(
-    (t) => t.typing_language.toLowerCase() === "thai" || t.typing_language === "ไทย"
-  );
-  const engTyping = selectedJob?.typing_speed?.find(
-    (t) => t.typing_language.toLowerCase() === "english" || t.typing_language === "อังกฤษ"
-  );
+  const resumeFile = selectedJob?.files?.find((f) => f.file_category?.toLowerCase() === "resume" || f.file_name.endsWith(".pdf"));
 
   return (
+    
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* รายการผู้สมัครด้านซ้าย */}
+        {/* Left Sidebar */}
         <div className={styles.cardScollBar}>
           <aside className={styles.sidebar}>
             {jobs.length === 0 ? (
@@ -265,23 +154,14 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
               jobs.map((job) => (
                 <div
                   key={job.tracking_id}
-                  className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""
-                    }`}
+                  className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
                   onClick={() => setSelectedJob(job)}
                 >
                   <div className={styles.cardLeft}>
                     <img
-                      src={
-                        job.profile_image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          job.fullname || "Seeker"
-                        )}&background=random`
-                      }
+                      src={job.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.fullname || "Seeker")}&background=random`}
                       alt="seeker profile"
                       className={styles.profileLeft}
-                      onError={(e) => {
-                        e.currentTarget.src = "https://via.placeholder.com/50";
-                      }}
                     />
                     <div className={styles.cardDetails}>
                       <h4>{job.fullname || "ไม่ระบุชื่อ"}</h4>
@@ -289,7 +169,7 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
                     </div>
                   </div>
                   <span className={`${styles.statusBadge} ${getStatusClass(job.status)}`}>
-                    {job.status || "Pending"}
+                    {job.status}
                   </span>
                 </div>
               ))
@@ -297,457 +177,315 @@ export default function CompanyApplication({ initialJobs, companyId }: Component
           </aside>
         </div>
 
-        {/* รายละเอียดผู้สมัครด้านขวา */}
+        {/* Right Panel */}
         <section className={styles.rightPanel}>
-          <div style={{ width: "56rem", height: "45rem", backgroundColor: "#9D9D9D" }}>
+          <div style={{ width: "100%", height: 'auto', backgroundColor: "#9D9D9D", borderRadius: '10px' }}>
             {selectedJob ? (
               <>
-                {/* Stepper Status Box */}
                 <div className={styles.trackerBox}>
                   <div className={styles.stepperContainer}>
 
-                    {/* Step 1: pending */}
-                    <div className={`${styles.step} ${status === 'Pending' ? styles.active : ''}`}>
+                    {/* Step 1: Pending */}
+                    <div className={`${styles.step} ${styles.active}`}>
                       <div className={styles.stepIcon}>📄</div>
                       <span className={styles.stepLabel}>Pending</span>
                       {status === 'pending' && (
                         <div className={styles.inlineDatePicker}>
                           <p className={styles.txtWaiting}>รอผู้สมัครงานตอบกลับ</p>
-                          <button
-                            className={styles.txtRejected}
-                            onClick={() => handleOpenRejectModel(selectedJob.tracking_id)}
-                          >
-                            ยกเลิก
-                          </button>
-                        </div>
-                      )}
-
-                      {isRejectModalOpen && (
-                        <div className={styles.modalOverlay}>
-                          <div className={styles.modalContent}>
-                            <h3>ยืนยันการยกเลิก</h3>
-                            <p>คุณต้องการยกเลิกรายการผู้สมัครคนนี้ใช่หรือไม่?</p>
-                            <div className={styles.modalActions}>
-                              <button
-                                className={styles.btnConfirm}
-                                onClick={handleConfirmReject}>
-                                ยกเลิก
-                              </button>
-                              <button
-                                className={styles.btnCancel}
-                                onClick={() => setIsRejectModelOpen(false)}>
-                                ใม่
-                              </button>
-                            </div>
-                          </div>
+                          <button className={styles.txtRejected} onClick={() => setIsRejectModelOpen(true)}>ยกเลิก</button>
                         </div>
                       )}
                     </div>
-
                     <div className={styles.stepLine} />
 
-                    {/* Step 2: Applied */}
-                    <div className={`${styles.step} ${status === 'applied' || status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
+                    {/* Step 2: Applied (บริษัทตั้งค่าและกดส่งนัดหมาย Screening) */}
+                    <div className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""}`}>
                       <div className={styles.stepIcon}>☑️</div>
                       <span className={styles.stepLabel}>Applied</span>
 
                       {status === 'applied' && (
-                        <div className={styles.inlineDatePicker}>
+                        <div className={styles.inlineDatePicker} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #ccc', marginTop: '10px' }}>
                           <label>วันสัมภาษณ์:</label>
-                          <input
-                            type="date"
-                            value={interviewDate}
-                            onChange={(e) => setInterviewDate(e.target.value)}
-                          />
+                          <input type="date" value={interviewDate} onChange={(e) => setInterviewDate(e.target.value)} />
                           <label>เวลาสัมภาษณ์:</label>
-                          <input
-                            type="time"
-                            value={interviewTime}
-                            onChange={(e) => setInterviewTime(e.target.value)}
-                          />
+                          <input type="time" value={interviewTime} onChange={(e) => setInterviewTime(e.target.value)} />
 
-                          {/* ----- เพิ่มตัวเลือกรุปแบบการสัมภาษณ์ ----- */}
                           <label style={{ marginTop: '10px' }}>รูปแบบการสัมภาษณ์:</label>
                           <div style={{ display: 'flex', gap: '15px', marginBottom: '10px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                              <input
-                                type="radio"
-                                name="interviewType"
-                                value="onsite"
-                                checked={interviewType === "onsite"}
-                                onChange={() => setInterviewType("onsite")}
-                              />
-                              นัดเจอ (On-site)
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                              <input
-                                type="radio"
-                                name="interviewType"
-                                value="online"
-                                checked={interviewType === "online"}
-                                onChange={() => setInterviewType("online")}
-                              />
-                              ออนไลน์ (Online)
-                            </label>
+                            <label><input type="radio" value="onsite" checked={interviewType === "onsite"} onChange={() => setInterviewType("onsite")} /> On-site</label>
+                            <label><input type="radio" value="online" checked={interviewType === "online"} onChange={() => setInterviewType("online")} /> Online</label>
                           </div>
-                          {/* -------------------------------------- */}
 
-                          {/* สลับการแสดงผลตามประเภทที่เลือก */}
                           {interviewType === "onsite" ? (
                             <>
                               <label>สถานที่สัมภาษณ์:</label>
                               <div className={styles.mapContainer}>
-                                <input className={styles.inputMap}
-                                  type="text"
-                                  placeholder="ปักหมุดสถานที่สัมภาษณ์..."
-                                  value={locationName}
-                                  onChange={(e) => setLocationName(e.target.value)}
+                                <input className={styles.inputMap} type="text"
+                                  placeholder={[selectedJob.company_full_address, selectedJob.company_sub_district, selectedJob.company_province].filter(Boolean).join(" ") || "ปักหมุดสถานที่"}
+                                  value={locationName} onChange={(e) => setLocationName(e.target.value)}
                                 />
-                                <button
-                                  type="button"
-                                  className={styles.btnMap}
-                                  onClick={handleOpenMap}
-                                >
-                                  ปักหมุด
-                                </button>
+                                <button type="button" className={styles.btnMap} onClick={handleOpenMap}>ปักหมุด</button>
                               </div>
                             </>
                           ) : (
                             <>
-                              <label>ลิงก์เข้าร่วมสัมภาษณ์:</label>
-                              <input
-                                type="text"
-                                placeholder="วางลิงก์ที่นี่..."
-                                value={meetingLink}
-                                onChange={(e) => setMeetingLink(e.target.value)}
-                                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                              />
+                              <label>ลิงก์สัมภาษณ์:</label>
+                              <input type="text" placeholder="วางลิงก์ที่นี่..." value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} style={{ width: '100%', padding: '8px' }} />
                             </>
                           )}
 
                           <button
-                            className={styles.btnSubmitStep}
-                            style={{ marginTop: '15px' }}
+                            className={styles.btnSubmitStep} style={{ marginTop: '15px', width: '8rem'}}
                             onClick={() => {
-                              // เลือกส่งข้อมูลตามประเภทการสัมภาษณ์
                               const finalLocation = interviewType === "online" ? meetingLink : locationName;
-
-                              handleUpdateStatus(selectedJob.tracking_id, 'Interview', {
-                                interviewDate,
-                                interviewTime,
-                                locationName: finalLocation, // ส่งลิงก์หรือสถานที่ไปที่ฟิลด์เดิม
-                                interviewType: interviewType, // ส่งประเภทบอก Backend ไปด้วย
-                                latitude: interviewType === "onsite" ? selectedLat : null,
-                                longitude: interviewType === "onsite" ? selectedLng : null,
+                              handleUpdateStatus(selectedJob.tracking_id, 'screening', { // ส่งสถานะ Screening ให้ผู้สมัคร
+                                interviewDate, interviewTime, locationName: finalLocation, interviewType: interviewType,
+                                latitude: interviewType === "onsite" ? selectedLat : null, longitude: interviewType === "onsite" ? selectedLng : null,
                               });
                             }}
                           >
-                            นัดสัมภาษณ์
+                            ส่งนัดหมายสัมภาษณ์
                           </button>
                         </div>
                       )}
                     </div>
-
-                    {/* Pop-up แผนที่ (แยก Component) */}
-                    {isMapModalOpen && (
-                      <div className={styles.modalOverlay}>
-                        <div className={styles.mapModalContent}>
-                          <h3>คลิกบนแผนที่เพื่อปักหมุดเลือกสถานที่</h3>
-                          <p style={{ fontSize: "14px", color: "#333", margin: "8px 0" }}>
-                            <strong>สถานที่เลือก:</strong> {searchQuery || "ยังไม่ได้เลือกสถานที่"}
-                          </p>
-
-                          <div className={styles.mapContainer} style={{ height: "350px", width: "100%" }}>
-                            <MapComponent
-                              selectedLat={selectedLat || 13.7563}
-                              selectedLng={selectedLng || 100.5018}
-                              onLocationSelect={(lat, lng, addressName) => {
-                                setSelectedLat(lat);
-                                setSelectedLng(lng);
-                                setSearchQuery(addressName);
-                              }}
-                            />
-                          </div>
-
-                          <div className={styles.modalActions} style={{ marginTop: "16px" }}>
-                            <button
-                              className={styles.btnConfirm}
-                              onClick={() => {
-                                setLocationName(searchQuery);
-                                setIsMapModalOpen(false);
-                              }}
-                            >
-                              ยืนยันตำแหน่งนี้
-                            </button>
-                            <button
-                              className={styles.btnCancel}
-                              onClick={() => setIsMapModalOpen(false)}
-                            >
-                              ยกเลิก
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     <div className={styles.stepLine} />
 
-                    {/* Step 3: Interview */}
-                    <div className={`${styles.step} ${status === 'interview' || status === 'Interview' ? styles.active : ''}`}>
+                    {/* Step 3: Screening / Interview */}
+                    <div className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""}`}>
                       <div className={styles.stepIcon}>🎙️</div>
                       <span className={styles.stepLabel}>Interview</span>
 
-                      {(status === 'interview' || status === 'Interview') && (
-                        <div className={styles.interviewDetailsCard}>
-                          <h3 style={{ borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '12px', fontSize: '16px', fontWeight: 'bold' }}>
-                            รายละเอียด
-                          </h3>
+                      {status === 'screening' && (
+                        <p style={{ fontSize: '13px', color: '#555', marginTop: '10px' }}>รอผู้สมัครยืนยันการนัดหมาย</p>
+                      )}
 
-                          <div className={styles.detailRow}>
-                            <span className={styles.detailLabel}>วันสัมภาษณ์:</span>
-                            <span className={styles.detailValue}>
-                              {selectedJob.interview_date
-                                ? new Date(selectedJob.interview_date).toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' })
-                                : "ไม่ระบุ"}
-                            </span>
-                          </div>
-
-                          <div className={styles.detailRow}>
-                            <span className={styles.detailLabel}>เวลาสัมภาษณ์:</span>
-                            <span className={styles.detailValue}>
-                              {selectedJob.interview_date
-                                ? new Date(selectedJob.interview_date).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'
-                                : "ไม่ระบุ"}
-                            </span>
-                          </div>
-
-                          {selectedJob.link ? (
-                            <div className={styles.detailRow}>
-                              <span className={styles.detailLabel}>สัมภาษณ์ออนไลน์:</span>
-                              <a href={selectedJob.link} target="_blank" rel="noopener noreferrer" className={styles.detailValue} style={{ color: '#3182ce', textDecoration: 'underline' }}>
-                                {selectedJob.link}
-                              </a>
-                            </div>
-                          ) : (
-                            <div className={styles.detailRow}>
-                              <span className={styles.detailLabel}>สถานที่สัมภาษณ์:</span>
-                              <span className={styles.detailValue}>{selectedJob.location || "ไม่ระบุ"}</span>
-                            </div>
-                          )}
-
-                          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <p className={styles.txtWaiting} style={{ margin: 0 }}>⏳ รอการตอบกลับนัดหมาย</p>
-                            <button
-                              className={styles.txtRejected}
-                              onClick={() => handleOpenRejectModel(selectedJob.tracking_id)}
-                            >
-                              ยกเลิก
-                            </button>
-                          </div>
+                      {status === 'interview' && (
+                        <div className={styles.interviewDetailsCard} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #ccc', marginTop: '10px' }}>
+                          <h3 style={{ borderBottom: '1px solid #333', paddingBottom: '4px', fontSize: '14px' }}>รายละเอียดการนัดหมาย</h3>
+                          <p><strong>วันเวลา:</strong> {selectedJob.interview_date ? new Date(selectedJob.interview_date).toLocaleString('th-TH') : "ไม่ระบุ"}</p>
+                          <p><strong>สถานที่:</strong> {selectedJob.link ? <a href={selectedJob.link} target="_blank">คลิกเข้าร่วมออนไลน์</a> : selectedJob.location}</p>
+                          <button className={styles.txtRejected} style={{ marginTop: '10px' }} onClick={() => setIsRejectModelOpen(true)}>ยกเลิก/ไม่ผ่าน</button>
                         </div>
                       )}
                     </div>
-
                     <div className={styles.stepLine} />
 
-                    {/* Step 4: Appointment */}
-                    <div className={`${styles.step} ${status === 'appointment' || status === 'Appointment' ? styles.active : ''}`}>
+                    {/* Step 4: Appointment / Offer */}
+                    <div className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""}`}>
                       <div className={styles.stepIcon}>💼</div>
                       <span className={styles.stepLabel}>Appointment</span>
 
-                      {status === 'appointment' && (
-                        <div className={styles.inlineDatePicker}>
-                          <label>วันเริ่มงาน:</label>
-                          <input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                          />
-                          <button
-                            className={styles.btnSubmitStep}
-                            onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'hired')}
-                          >
+                      {status === 'interview' && (
+                        <div className={styles.inlineDatePicker} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #ccc', marginTop: '10px' }}>
+                          <label>กำหนดวันเริ่มงาน:</label>
+                          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                          <button className={styles.btnSubmitStep} style={{ width: '100%', marginTop: '10px' }} onClick={() => handleUpdateStatus(selectedJob.tracking_id, 'appointment')}>
                             ส่งข้อเสนอเริ่มงาน
                           </button>
                         </div>
                       )}
+                      
+                      {(status === 'appointment' || status === 'offer' || status === 'hired') && (
+                        <p style={{ fontSize: '13px', color: '#2e7d32', marginTop: '10px', fontWeight: 'bold' }}>ส่งข้อเสนองานเรียบร้อยแล้ว</p>
+                      )}
                     </div>
+
                   </div>
                 </div>
 
-                {/* Profile Details */}
-                <div className={styles.detailGrid}>
-                  <div className={styles.columnProfile}>
-                    <div className={styles.avatarWrapper}>
-                      <img
-                        src={selectedJob.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}&background=random`}
-                        alt="seeker profile"
-                        className={styles.profileRight}
-                      />
-                      <h3>{selectedJob.fullname || "ไม่ระบุชื่อ"}</h3>
-                      <a href={`mailto:${selectedJob.email}`} className={styles.emailLink}>
-                        {selectedJob.email || "ไม่ระบุ"}
-                      </a>
+                {/* แผนที่ Modal */}
+                {isMapModalOpen && (
+                  <div className={styles.modalOverlay}>
+                    <div className={styles.mapModalContent} style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px' }}>
+                      <h3>ปักหมุดเลือกสถานที่</h3>
+                      <div style={{ height: "350px", width: "100%", margin: "10px 0" }}>
+                        <MapComponent
+                          selectedLat={selectedLat || 13.7563}
+                          selectedLng={selectedLng || 100.5018}
+                          onLocationSelect={(lat, lng, addressName) => {
+                            setSelectedLat(lat); setSelectedLng(lng); setSearchQuery(addressName);
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button className={styles.btnConfirm} onClick={() => { setLocationName(searchQuery); setIsMapModalOpen(false); }}>ยืนยัน</button>
+                        <button className={styles.btnCancel} onClick={() => setIsMapModalOpen(false)}>ยกเลิก</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+               {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
+                <div style={{ backgroundColor: '#EBEBEB', padding: '20px', borderRadius: '15px', marginTop: '20px', display: 'flex', gap: '20px', alignItems: 'stretch' }}>
+                  
+                  {/* Column 1: Personal Info */}
+                  <div style={{ flex: '1', backgroundColor: '#F8F8F8', borderRadius: '12px', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                    <img 
+                      src={selectedJob.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`} 
+                      alt="profile" 
+                      style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', marginBottom: '10px' }} 
+                    />
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>{selectedJob.fullname || "ไม่ระบุชื่อ"}</h3>
+                    <a href={`mailto:${selectedJob.email}`} style={{ color: '#555', textDecoration: 'underline', marginBottom: '20px', fontSize: '14px' }}>{selectedJob.email || "ไม่ระบุ"}</a>
+
+                    <div style={{ textAlign: 'left', width: '100%', fontSize: '12px', lineHeight: '1.6', color: '#555' }}>
+                      <p style={{ margin: 0 }}><strong>Mobile:</strong> {selectedJob.mobile_phone || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Age:</strong> {selectedJob.age || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Gender:</strong> {selectedJob.gender || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Nationality:</strong> {selectedJob.nationality || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Military Status:</strong> {selectedJob.military_status || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Religion:</strong> {selectedJob.religion || "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Weight / Height:</strong> {selectedJob.weight ? `${selectedJob.weight} kg` : "-"} / {selectedJob.height ? `${selectedJob.height} cm` : "-"}</p>
+                      <p style={{ margin: 0 }}><strong>Current Address:</strong> {[selectedJob.address, selectedJob.sub_district, selectedJob.district, selectedJob.province, selectedJob.postal_code].filter(Boolean).join(" ") || "-"}</p>
                     </div>
 
-                    <div className={styles.personalInfoList}>
-                      <p><span>Gender:</span> {selectedJob.gender || "ไม่ระบุ"}</p>
-                      <p><span>Age:</span> {selectedJob.age || "ไม่ระบุ"}</p>
-                      <p><span>Military Status:</span> {selectedJob.military_status || "ไม่ระบุ"}</p>
-                      <p><span>Date of Birth:</span> {selectedJob.date_of_birth || "ไม่ระบุ"}</p>
-                      <p><span>Nationality:</span> {selectedJob.nationality || "ไม่ระบุ"}</p>
-                      <p><span>Religion:</span> {selectedJob.religion || "ไม่ระบุ"}</p>
-                      <p><span>Weight:</span> {selectedJob.weight ? `${selectedJob.weight} kg` : "ไม่ระบุ"}</p>
-                      <p><span>Height:</span> {selectedJob.height ? `${selectedJob.height} cm` : "ไม่ระบุ"}</p>
-                      <p><span>Disability Status:</span> {selectedJob.disability_status || "ไม่ระบุ"}</p>
-                      <p><span>Marital Status:</span> {selectedJob.marital_status || "ไม่ระบุ"}</p>
-                      <p><span>Mobile Phone:</span> {selectedJob.mobile_phone || "ไม่ระบุ"}</p>
-                      <p><span>LINE ID:</span> {selectedJob.line_id || "ไม่ระบุ"}</p>
-                      <p><span>Country:</span> {selectedJob.country || "ไม่ระบุ"}</p>
-                      <p>
-                        <span>Current Address:</span>{" "}
-                        {[
-                          selectedJob.address,
-                          selectedJob.sub_district,
-                          selectedJob.district,
-                          selectedJob.province,
-                          selectedJob.postal_code,
-                        ]
-                          .filter(Boolean)
-                          .join(", ") || "ไม่ระบุ"}
-                      </p>
-                    </div>
-
-                    {resumeFile ? (
-                      <a
-                        href={resumeFile.file_path}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.pdfDownloadBtn}
+                    {resumeFile && (
+                      <a 
+                        href={resumeFile.file_path} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ marginTop: 'auto', backgroundColor: '#e2e2e2', padding: '8px 20px', borderRadius: '20px', color: '#d32f2f', textDecoration: 'underline', fontSize: '14px', fontWeight: 'bold' }}
                       >
-                        {resumeFile.file_name}
+                        {resumeFile && (
+                          <a href={resumeFile.file_path} 
+                             target="_blank" 
+                             rel="noopener noreferrer"
+                             style={{
+                                    marginTop: 'auto',
+                                    backgroundColor: '#e2e2e2',
+                                    padding:'8px 20px',
+                                    borderRadius: '20px',
+                                    color: '#d32f2f',
+                                    textDecoration: 'underline',
+                                    fontSize:'14px',
+                                    fontWeight:'bold',
+                                    whiteSpace:'nowrap',
+                                    overflow:'hidden',
+                                    textOverflow:'ellipsis',
+                                    maxWidth:'100%'
+                             }} >
+
+                              {resumeFile.file_name || "resume file"}
+                             </a>
+                        )}
                       </a>
-                    ) : (
-                      <span className={styles.pdfDownloadBtn} style={{ opacity: 0.6 }}>
-                        ไม่มีไฟล์แนบ
-                      </span>
                     )}
                   </div>
 
-                  {/* คอลัมน์ที่ 2: Job Preferences */}
-                  <div className={styles.columnCard}>
-                    <h2>Job Preferences</h2>
-                    <div className={styles.cardSection}>
-                      <label>Job Title</label>
-                      {selectedJob.job_titles && selectedJob.job_titles.length > 0 ? (
-                        <ol>
-                          {selectedJob.job_titles.map((job) => (
-                            <li key={job.jobtitle_id}>{job.job_name}</li>
-                          ))}
-                        </ol>
-                      ) : (
-                        <p>ไม่ระบุ</p>
-                      )}
+                  {/* Column 2: Job Preferences */}
+                  <div style={{ flex: '1', backgroundColor: '#DBDBDB', borderRadius: '12px', padding: '20px' }}>
+                    <h2 style={{ fontSize: '18px', marginTop: 0, marginBottom: '20px', textAlign: 'center' }}>Job Preferences</h2>
+                    
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Job Title</p>
+                      <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', fontWeight: 'bold', color: '#333' }}>
+                        {selectedJob.job_titles && selectedJob.job_titles.length > 0 
+                          ? selectedJob.job_titles.map((jt, i) => <li key={i}>{jt.job_name}</li>) 
+                          : <li>{selectedJob.job_position || "-"}</li>}
+                      </ol>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Type Of Work</label>
-                      <div className={styles.badgeContainer}>
-                        {selectedJob.type_of_work
-                          ? selectedJob.type_of_work.split(",").map((item, index) => (
-                            <div key={index} className={styles.badgePill}>
-                              {item.trim()}
-                            </div>
-                          ))
-                          : "-"}
-                      </div>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Type Of Work</p>
+                      <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#333' }}>
+                         {selectedJob.type_of_work ? selectedJob.type_of_work.split(",").map((t, i) => <li key={i}>{t.trim()}</li>) : <li>-</li>}
+                      </ol>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Desired salary (baht)</label>
-                      <p>{selectedJob.desired_salary || "ไม่ระบุ"}</p>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Type of Employment</p>
+                      <span style={{ display: 'inline-block', backgroundColor: '#222', color: '#fff', padding: '4px 12px', borderRadius: '15px', fontSize: '12px' }}>Full-time</span>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Desired work location</label>
-                      <p>{selectedJob.desired_work_location || "ไม่ระบุ"}</p>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Desired salary (baht)</p>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#333' }}>{selectedJob.desired_salary || "-"}</p>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Available start date</label>
-                      <p>{selectedJob.available_start_date || "ไม่ระบุ"}</p>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Desired work location</p>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#333' }}>{selectedJob.desired_work_location || "-"}</p>
+                    </div>
+
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Available start date</p>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#333' }}>
+                        {selectedJob.available_start_date ? new Date(selectedJob.available_start_date).toLocaleDateString('en-GB') : "-"}
+                      </p>
                     </div>
                   </div>
 
-                  {/* คอลัมน์ที่ 3: Skills, Experiences, Languages */}
-                  <div className={styles.columnCard}>
-                    <h2>Skills</h2>
+                  {/* Column 3: Skills */}
+                  <div style={{ flex: '1', backgroundColor: '#DBDBDB', borderRadius: '12px', padding: '20px' }}>
+                    <h2 style={{ fontSize: '18px', marginTop: 0, marginBottom: '20px', textAlign: 'center' }}>Skills</h2>
 
-                    <div className={styles.cardSection}>
-                      <label>specific skills</label>
-                      {selectedJob.skills && selectedJob.skills.length > 0 ? (
-                        <ol>
-                          {selectedJob.skills.map((skill) => (
-                            <li key={skill.skill_id}>{skill.skill_name}</li>
-                          ))}
-                        </ol>
-                      ) : (
-                        <p>-</p>
-                      )}
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Specific skills</p>
+                      <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', color: '#333' }}>
+                        {selectedJob.skills && selectedJob.skills.length > 0 
+                          ? selectedJob.skills.map((s, i) => <li key={i}>{s.skill_name}</li>) 
+                          : <li>-</li>}
+                      </ol>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Typing speed in Thai (wpm)</label>
-                      <p>{thaiTyping ? `- Thai - ${thaiTyping.typing_wpm} wpm` : "-"}</p>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Typing speed in Thai (wpm)</p>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#333' }}>
+                        - Thai - {selectedJob.typing_speed?.find(t => t.typing_language === 'Thai' || t.typing_language === 'ไทย')?.typing_wpm || "-"} wpm
+                      </p>
+                      <p style={{ margin: '10px 0 5px 0', color: '#555', fontSize: '13px' }}>Typing speed in English (wpm)</p>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#333' }}>
+                        - English - {selectedJob.typing_speed?.find(t => t.typing_language === 'English' || t.typing_language === 'อังกฤษ' || t.typing_language === 'Eng')?.typing_wpm || "-"} wpm
+                      </p>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Typing speed in English (wpm)</label>
-                      <p>{engTyping ? `- English - ${engTyping.typing_wpm} wpm` : "-"}</p>
+                    <div style={{ marginBottom: '15px' }}>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Projects, Achievements, and Other Experiences</p>
+                      <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#333' }}>
+                        {selectedJob.experiences && selectedJob.experiences.length > 0 
+                          ? selectedJob.experiences.map((ex, i) => (
+                              <li key={i}>
+                                <strong>{ex.ex_title}</strong>{ex.ex_description ? `: ${ex.ex_description}` : ""}
+                              </li>
+                            )) 
+                          : <li>-</li>}
+                      </ul>
                     </div>
 
-                    <div className={styles.cardSection}>
-                      <label>Projects, Achievements, and Other Experiences</label>
-                      {selectedJob.experiences && selectedJob.experiences.length > 0 ? (
-                        <ul>
-                          {selectedJob.experiences.map((exp) => (
-                            <li key={exp.experience_id}>
-                              <strong>{exp.ex_title}</strong>
-                              {exp.ex_description ? `: ${exp.ex_description}` : ""}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>-</p>
-                      )}
-                    </div>
-
-                    <div className={styles.cardSection}>
-                      <label>Language Proficiency</label>
-                      {selectedJob.languages && selectedJob.languages.length > 0 ? (
-                        <ul>
-                          {selectedJob.languages.map((lang) => (
-                            <li key={lang.lang_id}>
-                              {lang.language_type}
-                              {lang.level ? `: ${lang.level}` : ""}
-                              {lang.score ? ` (${lang.score})` : ""}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p>-</p>
-                      )}
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', color: '#555', fontSize: '13px' }}>Language Proficiency</p>
+                      <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#333', listStyleType: 'disc' }}>
+                        {selectedJob.languages && selectedJob.languages.length > 0 
+                          ? selectedJob.languages.map((l, i) => (
+                              <li key={i}>{l.language_type} {l.level ? `(${l.level})` : ""}</li>
+                            )) 
+                          : <li>-</li>}
+                      </ul>
                     </div>
                   </div>
+
                 </div>
+
               </>
             ) : (
-              <div className={styles.emptyState}>
-                <p>กรุณาเลือกผู้สมัครจากรายการด้านซ้าย</p>
-              </div>
+              <div style={{ textAlign: 'center', padding: '50px', color: '#fff' }}>กรุณาเลือกผู้สมัครจากรายการด้านซ้าย</div>
             )}
           </div>
         </section>
+
+        {/* Modal ปฏิเสธ */}
+        {isRejectModalOpen && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalContent} style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+              <h3>ยืนยันการยกเลิก/ปฏิเสธ</h3>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+                <button className={styles.btnConfirm} onClick={() => { handleUpdateStatus(targetTrackingId!, "reject"); setIsRejectModelOpen(false); }}>ยืนยัน</button>
+                <button className={styles.btnCancel} onClick={() => setIsRejectModelOpen(false)}>ยกเลิก</button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

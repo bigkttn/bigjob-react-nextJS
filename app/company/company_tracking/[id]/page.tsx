@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { apiUrl } from "@/lib/hostURL";
 import CompanyApplication from "./company_application";
+import type { ComponentProps } from "react";
 
 interface CustomJwtPayload extends JwtPayload{
   id: number;
@@ -10,14 +11,6 @@ interface CustomJwtPayload extends JwtPayload{
 
 interface PageProps{
   params: Promise<{id:string}>;
-}
-
-interface Applicant {
-  tracking_id: number;
-  post_id: number;
-  user_id: number;
-  status: string;
-  [key: string]: unknown;
 }
 
 export default async function CompanyTracking({params}:PageProps) {
@@ -45,7 +38,7 @@ export default async function CompanyTracking({params}:PageProps) {
       </div>
     );
   }
-  let trackingList: Applicant[] = [];
+  let trackingList: ComponentProps<typeof CompanyApplication>["initialJobs"] = [];
   try {
     const res = await fetch(`${apiUrl}/api/interview_tracking/GetByCompany/${companyId}`, {
       cache: "no-store",
@@ -56,8 +49,8 @@ export default async function CompanyTracking({params}:PageProps) {
 
      const data = await res.json();
     if(res.ok){
-      trackingList = (Array.isArray(data) ? data : data.rows || []) as Applicant[];
-      console.log("data หน้าcompany tracking:",trackingList);
+      trackingList = (Array.isArray(data) ? data : data.rows || []) as ComponentProps<typeof CompanyApplication>["initialJobs"];
+      console.log("data รายการผู้สมัครงาน tracking:",trackingList);
     }
     
   } catch (error) {
