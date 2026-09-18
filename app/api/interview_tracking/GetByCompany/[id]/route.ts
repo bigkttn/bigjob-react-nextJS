@@ -43,11 +43,18 @@ export async function GET(
         u.type_of_work,
         u.available_start_date,
         u.desired_salary,
-        u.desired_work_location
+        u.desired_work_location,
+        comp.company_id,
+        comp.company_name,
+        comp.full_address AS company_full_address,
+        comp.sub_district AS company_sub_district,
+        comp.district AS company_district,
+        comp.province AS company_province,
+        comp.postcode AS company_postcode
       FROM interview_tracking interview
-      LEFT JOIN User u ON interview.user_id = u.uid
-      LEFT JOIN posts ON interview.post_id = posts.post_id 
-      LEFT JOIN company comp ON posts.company_id = comp.company_id
+       JOIN User u ON interview.user_id = u.uid
+       JOIN posts ON interview.post_id = posts.post_id 
+       JOIN company comp ON posts.company_id = comp.company_id
       WHERE posts.company_id = ?
     `;
 
