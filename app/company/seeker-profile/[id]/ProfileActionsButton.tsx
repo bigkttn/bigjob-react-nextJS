@@ -37,10 +37,10 @@ export default function ProfileActionsButton({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    checkSaved();
-    checkReport();
-  }, []);
+  // useEffect(() => {
+  //   checkSaved();
+  //   checkReport();
+  // }, []);
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {

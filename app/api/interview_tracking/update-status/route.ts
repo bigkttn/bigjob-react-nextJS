@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 import nodemailer from 'nodemailer';
 
-export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; }> | { trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; }; }) {
+export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; interviewDate: any; interviewTime: any; locationName: any; interviewType: any; }> | { trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; interviewDate: any; interviewTime: any; locationName: any; interviewType: any; }; }) {
   try {
     const { 
       trackingId, 
@@ -11,18 +11,49 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       seekerEmail, 
       companyName, 
       seekerName, 
-      jobTitle 
+      jobTitle,
+      // ---- รับค่าเพิ่มเติมที่ส่งมาจาก Frontend ----
+      interviewDate, 
+      interviewTime, 
+      locationName, 
+      interviewType
     } = await req.json();
 
     if (!trackingId || !status) {
       return NextResponse.json({ message: 'กรุณาระบุ trackingId และ status' }, { status: 400 });
     }
 
-    // 1. อัปเดตสถานะลง Database
-    const updateSql = `UPDATE interview_tracking SET status = ? WHERE tracking_id = ?`;
-    await db.query(updateSql, [status, trackingId]);
+    // ==========================================
+    // 1. สร้างคำสั่ง SQL สำหรับอัปเดตข้อมูลแบบไดนามิก
+    // ==========================================
+    let updateSql = `UPDATE interview_tracking SET status = ?`;
+    let queryParams = [status];
 
-    // 2. ตั้งค่าระบบส่งอีเมล
+    // ถ้ามีการส่งวันและเวลามาด้วย ให้จับมารวมกันเป็นฟอร์แมต YYYY-MM-DD HH:mm:ss ของ MySQL
+    if (interviewDate && interviewTime) {
+      updateSql += `, interview_date = ?`;
+      queryParams.push(`${interviewDate} ${interviewTime}:00`);
+    }
+
+    // แยกเซฟ Location หรือ Link ตามประเภทการสัมภาษณ์
+    if (interviewType === 'online') {
+      updateSql += `, link = ?, location = NULL`;
+      queryParams.push(locationName); // ฝั่ง frontend คุณส่งค่าลิงก์มาในชื่อ locationName
+    } else if (interviewType === 'onsite') {
+      updateSql += `, location = ?, link = NULL`;
+      queryParams.push(locationName);
+    }
+
+    // เติมเงื่อนไข WHERE ตัวสุดท้าย
+    updateSql += ` WHERE tracking_id = ?`;
+    queryParams.push(trackingId);
+
+    // ยิงคำสั่งอัปเดตฐานข้อมูลทีเดียว
+    await db.query(updateSql, queryParams);
+
+    // ==========================================
+    // 2. ตั้งค่าระบบส่งอีเมล (ใช้โค้ดเดิมของคุณได้เลย)
+    // ==========================================
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -31,16 +62,13 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       },
     });
 
-    const platformLink = "https://www.bigjobs.com/tracking"; // URL ของระบบคุณ
+    const platformLink = "https://www.bigjobs.com/tracking";
 
     let mailSubject = '';
     let mailBody = '';
     let targetEmail = '';
 
-    // ==========================================
-    // เงื่อนไขการส่งอีเมล (ใครควรได้รับข้อความอะไร)
-    // ==========================================
-
+    // (ส่วนเงื่อนไข if/else if ตั้งค่าอีเมลเหมือนเดิม ไม่ต้องเปลี่ยน)
     if (status === 'applied') {
       targetEmail = companyEmail;
       mailSubject = `[อัปเดตสถานะ] คุณ ${seekerName || 'ผู้สมัคร'} ตอบรับความสนใจตำแหน่ง ${jobTitle}`;
@@ -49,8 +77,15 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
     else if (status === 'screening') {
       targetEmail = seekerEmail;
       mailSubject = `[นัดสัมภาษณ์] บริษัท ${companyName} ได้ส่งนัดหมายสัมภาษณ์ตำแหน่ง ${jobTitle}`;
-      mailBody = `เรียน คุณ ${seekerName || 'ผู้สมัคร'},\n\nบริษัท ${companyName} ได้กำหนดวันและเวลาสัมภาษณ์งานสำหรับตำแหน่ง ${jobTitle} แล้ว\nกรุณาเข้าสู่ระบบเพื่อตรวจสอบรายละเอียดและกดยืนยันการนัดหมาย\n\nตรวจสอบรายละเอียด: ${platformLink}`;
+      
+      // *** เพิ่มรายละเอียดลงในอีเมลนิดหน่อยเพื่อให้ผู้สมัครเห็นชัดเจน ***
+      let interviewLocationText = interviewType === 'online' ? `ลิงก์: ${locationName}` : `สถานที่: ${locationName}`;
+      let interviewDateTimeText = interviewDate && interviewTime ? `วันที่ ${interviewDate} เวลา ${interviewTime} น.` : 'ตามที่ระบบระบุ';
+      
+      mailBody = `เรียน คุณ ${seekerName || 'ผู้สมัคร'},\n\nบริษัท ${companyName} ได้กำหนดวันและเวลาสัมภาษณ์งานสำหรับตำแหน่ง ${jobTitle} แล้ว\n\nรายละเอียดนัดหมาย:\n- ${interviewDateTimeText}\n- ${interviewLocationText}\n\nกรุณาเข้าสู่ระบบเพื่อตรวจสอบรายละเอียดและกดยืนยันการนัดหมาย\n\nตรวจสอบรายละเอียด: ${platformLink}`;
     }
+    // ... (เงื่อนไขอื่นๆ ด้านล่าง คงไว้ตามเดิม)
+
     else if (status === 'interview') {
       targetEmail = companyEmail;
       mailSubject = `[ยืนยันนัดหมาย] คุณ ${seekerName || 'ผู้สมัคร'} ยืนยันเข้าร่วมสัมภาษณ์ตำแหน่ง ${jobTitle}`;
@@ -67,7 +102,6 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       mailBody = `ระบบขอแจ้งให้ทราบว่า กระบวนการสมัครงานตำแหน่ง ${jobTitle} ระหว่างคุณ ${seekerName || 'ผู้สมัคร'} และบริษัท ${companyName} ได้ถูกปฏิเสธหรือยกเลิกแล้ว\n\nตรวจสอบรายละเอียด: ${platformLink}`;
     }
 
-    // 3. สั่งส่งอีเมล
     if (targetEmail && mailSubject) {
       await transporter.sendMail({
         from: `"BigJobs System" <no-reply@yourdomain.com>`,
