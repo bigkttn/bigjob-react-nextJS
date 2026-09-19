@@ -20,6 +20,8 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     const fetchSeekers = async () => {
       try {
@@ -54,6 +56,14 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
     }
   }, [userId]);
 
+  const filteredData = compayData.filter((company) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      (company.name && company.name.toLowerCase().includes(term)) ||
+      (company.job_title && company.job_title.toLowerCase().includes(term))
+    );
+  });
+
   if (loading)
     return <div className={styles.centerMessage}>กำลังโหลดข้อมูล...</div>;
   if (error)
@@ -70,41 +80,53 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {compayData.map((company, index) => (
-          <div key={`${company.cid}-${index}`} className={styles.card}>
-            <div className={styles.cardFlex}>
-              {/* Image Section */}
-              <div className={styles.imageWrapper}>
-                <img
-                  src={
-                    company.logo ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name || "Company")}&background=random`
-                  }
-                  alt={company.name}
-                  width={240}
-                  height={160}
-                  className={styles.seekerImage}
-                />
-              </div>
+        {/* Search Bar */}
+        <div className={styles.searchWrapper}>
+          <input
+            type="text"
+            placeholder="ค้นหาชื่อบริษัท หรือตำแหน่งงาน..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
-              {/* Info Section */}
-              <div className={styles.infoWrapper}>
-                <h2 className={styles.seekerName}>{company.name}</h2>
-                <h3 className={styles.seekerPosition}>{company.job_title}</h3>
-              </div>
+        {filteredData.length === 0 ? (
+          <div className={styles.centerMessage}>ไม่พบข้อมูลที่ค้นหา</div>
+        ) : (
+          filteredData.map((company, index) => (
+            <div key={`${company.cid}-${index}`} className={styles.card}>
+              <div className={styles.cardFlex}>
+                {/* Image Section */}
+                <div className={styles.imageWrapper}>
+                  <img
+                    src={
+                      company.logo ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name || "Company")}&background=random`
+                    }
+                    alt={company.name}
+                    width={240}
+                    height={160}
+                    className={styles.seekerImage}
+                  />
+                </div>
 
-              {/* Button Section */}
-              <div
-                className={styles.buttonWrapper}
-                // onClick={() => console.log("text = ", company.post_id)}
-              >
-                <Link href={"/user/user-detail-job/" + company.post_id}>
-                  <button className={styles.infoButton}>ดูรายละเอียด</button>
-                </Link>
+                {/* Info Section */}
+                <div className={styles.infoWrapper}>
+                  <h2 className={styles.seekerName}>{company.name}</h2>
+                  <h3 className={styles.seekerPosition}>{company.job_title}</h3>
+                </div>
+
+                {/* Button Section */}
+                <div className={styles.buttonWrapper}>
+                  <Link href={"/user/user-detail-job/" + company.post_id}>
+                    <button className={styles.infoButton}>ดูรายละเอียด</button>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </main>
     </div>
   );

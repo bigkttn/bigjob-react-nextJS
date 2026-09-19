@@ -21,10 +21,10 @@ export default function DesktopMenu({
       {userRole === "guest" && (
         <>
           <Link href="/login" className="nav-btn-outline">
-            Login
+            เข้าสู่ระบบ
           </Link>
           <Link href="/register" className="nav-btn-primary">
-            Sign Up
+            สมัครสมาชิก
           </Link>
         </>
       )}
@@ -35,26 +35,26 @@ export default function DesktopMenu({
             href="/user/user-home"
             className={`nav-item ${isActive("/user/user-home")}`}
           >
-            Home
+            หน้าแรก
           </Link>
           <Link
             href={`/user/seeker_tracking/${userId}`}
             className={`nav-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
           >
-            Tracking
+            ติดตามสถานะ
           </Link>
 
           <Link
             href="/user/savedCompany"
             className={`nav-item ${isActive("/user/savedCompany")}`}
           >
-            Saved
+            ที่บันทึกไว้
           </Link>
           <Link
             href="/user/user-feedback"
             className={`nav-item nav-feedback-link ${isActive("/user/user-feedback")}`}
           >
-            Feedback
+            ข้อเสนอแนะ
             {unreadCount > 0 && (
               <span className="shock-badge">! {unreadCount}</span>
             )}
@@ -63,10 +63,10 @@ export default function DesktopMenu({
             href="/user/user-profile"
             className={`nav-item ${isActive("/user/user-profile")}`}
           >
-            My Profile
+            โปรไฟล์ของฉัน
           </Link>
           <button onClick={onLogout} className="nav-btn-logout">
-            Log out
+            ออกจากระบบ
           </button>
         </>
       )}
@@ -77,25 +77,25 @@ export default function DesktopMenu({
             href="/company/company-home"
             className={`nav-item ${isActive("/company/company-home")}`}
           >
-            Home
+            หน้าแรก
           </Link>
           <Link
             href={`/company/company_tracking/${userId}`}
             className={`nav-item ${isActive(`/company/company_tracking/${userId}`)}`}
           >
-            Tracking
+            ติดตามสถานะ
           </Link>
           <Link
             href="/company/savedSeeker"
             className={`nav-item ${isActive("/company/savedSeeker")}`}
           >
-            Saved
+            ที่บันทึกไว้
           </Link>
           <Link
             href="/company/company-feedback"
             className={`nav-item nav-feedback-link ${isActive("/company/company-feedback")}`}
           >
-            Feedback
+            ข้อเสนอแนะ
             {unreadCount > 0 && (
               <span className="shock-badge">! {unreadCount}</span>
             )}
@@ -104,16 +104,16 @@ export default function DesktopMenu({
             href="/company/post-job"
             className={`nav-item ${isActive("/company/post-job")}`}
           >
-            Post a Job
+            ลงประกาศงาน
           </Link>
           <Link
             href="/company/profile"
             className={`nav-item ${isActive("/company/profile")}`}
           >
-            Profile
+            โปรไฟล์
           </Link>
           <button onClick={onLogout} className="nav-btn-logout">
-            Log out
+            ออกจากระบบ
           </button>
         </>
       )}
@@ -121,16 +121,16 @@ export default function DesktopMenu({
       {userRole === "admin" && (
         <>
           <Link href="/admin/admin-report" className={`nav-item ${isActive("/admin/admin-report")}`}>
-            Report
+            รายงาน
           </Link>
           <Link href="/admin/Feedbacks" className={`nav-item ${isActive("/admin/Feedbacks")}`}>
-            Feedbacks
+            ข้อเสนอแนะ
           </Link>
           <Link href="/admin/home" className={`nav-item ${isActive("/admin/home")}`}>
-            Verification
+            ยืนยันตัวตน
           </Link>
           <button onClick={onLogout} className="nav-btn-logout">
-            Log out
+            ออกจากระบบ
           </button>
         </>
       )}

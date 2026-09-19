@@ -446,7 +446,9 @@
   margin-top: 5px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   z-index: 10;
-  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
   text-align: left;
 }
 .historyItem {
@@ -484,6 +486,10 @@
   font-size: 0.85rem;
   cursor: pointer;
   border-top: 1px solid #eee;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  z-index: 2;
 }
 .historyClearAll:hover {
   text-decoration: underline;

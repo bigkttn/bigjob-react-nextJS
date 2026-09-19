@@ -480,16 +480,16 @@ const CompanyProfile = () => {
 
             <hr />
             <div className={styles.contactGroup}>
-              <h3>Contact & Location</h3>
+              <h3>ช่องทางการติดต่อและสถานที่ตั้ง</h3>
 
               {!editMode ? (
                 <>
-                  <p>{fmt(company.contact_information)}</p>
-                  <p>{fmt(company.full_address)}</p>
-                  <p>{fmt(company.province)}</p>
-                  <p>{fmt(company.postcode)}</p>
-                  <p>Tel: {fmt(company.mobile_phone)}</p>
-                  <p>Email: {fmt(company.company_email)}</p>
+                  <p><strong>ข้อมูลติดต่อ:</strong> {fmt(company.contact_information)}</p>
+                  <p><strong>ที่อยู่:</strong> {fmt(company.full_address)}</p>
+                  <p><strong>จังหวัด:</strong> {fmt(company.province)}</p>
+                  <p><strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}</p>
+                  <p><strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}</p>
+                  <p><strong>อีเมล:</strong> {fmt(company.company_email)}</p>
                   <p style={{ fontSize: "0.85rem", color: "#666" }}>
                     พิกัดแผนที่:{" "}
                     {company.company_latitude
@@ -644,7 +644,7 @@ const CompanyProfile = () => {
                     cursor: "pointer",
                   }}
                 >
-                  Edit Profile
+                  แก้ไขโปรไฟล์
                 </button>
               ) : (
                 <div style={{ display: "flex", gap: "0.6rem" }}>
@@ -663,7 +663,7 @@ const CompanyProfile = () => {
                       cursor: saving ? "wait" : "pointer",
                     }}
                   >
-                    {saving ? "Saving..." : "Save"}
+                    {saving ? "กำลังบันทึก..." : "บันทึก"}
                   </button>
                   <button
                     type="button"
@@ -683,7 +683,7 @@ const CompanyProfile = () => {
                       cursor: "pointer",
                     }}
                   >
-                    Cancel
+                    ยกเลิก
                   </button>
                 </div>
               )}
@@ -712,37 +712,28 @@ const CompanyProfile = () => {
 
       {/* ฝั่งขวา: ตำแหน่งงานและรีวิว */}
       <div className={styles.rightSection}>
-        <div
-          className={styles.VerifiedConfirm}
-          style={{
-            height: "auto",
-            padding: "16px 20px",
-            backgroundColor: "#fff",
-            borderRadius: "16px",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "10px",
-            }}
-          >
-            <h3 style={{ margin: 0 }}>Company Registration Certificate</h3>
+        <div className={styles.VerifiedConfirm}>
+          <div className={styles.certHeader}>
+            <div className={styles.certTitleGroup}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: statusColor }}>
+                {isVerified ? 'verified_user' : isRejected ? 'gpp_bad' : 'pending_actions'}
+              </span>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
+                  {isVerified ? 'เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว' : isRejected ? 'เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ' : 'เอกสารนี้อยู่ระหว่างการตรวจสอบ'}
+                </p>
+              </div>
+            </div>
             <span
               style={{
-                fontSize: "0.8rem",
+                fontSize: "0.85rem",
                 fontWeight: 700,
                 color: "#fff",
                 backgroundColor: statusColor,
                 borderRadius: "999px",
-                padding: "4px 12px",
+                padding: "6px 16px",
+                boxShadow: `0 2px 8px ${statusColor}40`
               }}
             >
               {statusLabel}
@@ -751,7 +742,7 @@ const CompanyProfile = () => {
 
           {isRejected && company.verification_comment && (
             <p style={{ margin: 0, fontSize: "0.85rem", color: "#b50000" }}>
-              เหตุผลที่ถูกปฏิเสธ: {company.verification_comment}
+              <strong>เหตุผลที่ถูกปฏิเสธ:</strong> {company.verification_comment}
             </p>
           )}
 
@@ -759,18 +750,11 @@ const CompanyProfile = () => {
             {company.dbd_file ? (
               <button
                 type="button"
+                className={styles.viewCertBtn}
                 onClick={() => setShowPreview(true)}
-                style={{
-                  fontSize: "0.85rem",
-                  color: "#1d9bf0",
-                  textDecoration: "underline",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
               >
-                📄 ดูไฟล์ที่อัปโหลดล่าสุด
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                เปิดดูไฟล์ที่อัปโหลดล่าสุด
               </button>
             ) : (
               <span style={{ fontSize: "0.85rem", color: "#888" }}>
@@ -791,8 +775,7 @@ const CompanyProfile = () => {
             <label
               style={{ fontSize: "0.88rem", color: "#222", fontWeight: 500 }}
             >
-              Add company incorporation documents or registration certificate
-              for verification
+              เพิ่มเอกสารจดทะเบียนบริษัทหรือหนังสือรับรองเพื่อยืนยันตัวตน
             </label>
 
             <div
@@ -837,8 +820,8 @@ const CompanyProfile = () => {
                 }}
               >
                 {selectedCertFile
-                  ? `📄 Selected: ${selectedCertFile.name}`
-                  : "Drag and drop files here, or click to select files. (PDF, JPG, PNG, DOCX)"}
+                  ? `📄 เลือกไฟล์: ${selectedCertFile.name}`
+                  : "ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์ (PDF, JPG, PNG, DOCX)"}
               </div>
 
               {/* แท็ก Input ชนิดไฟล์ที่หลบไว้เบื้องหลัง เพิ่ม docx เข้าไปด้วย */}
@@ -888,7 +871,7 @@ const CompanyProfile = () => {
                   transition: "background-color 0.2s",
                 }}
               >
-                {uploadingCert ? "Sending..." : "Send"}
+                {uploadingCert ? "กำลังส่ง..." : "ส่งไฟล์"}
               </button>
             </div>
           </div>
@@ -916,14 +899,14 @@ const CompanyProfile = () => {
                 <div>
                   <h2>{fmt(job.job_position)}</h2>
                   <p>
-                    <strong>Details:</strong> {fmt(job.job_description)}
+                    <strong>รายละเอียดงาน:</strong> {fmt(job.job_description)}
                   </p>
                   <p>
-                    <strong>Salary:</strong> THB {fmt(job.salary_min)} -{" "}
-                    {fmt(job.salary_max)} / month
+                    <strong>เงินเดือน:</strong> {fmt(job.salary_min)} -{" "}
+                    {fmt(job.salary_max)} บาท / เดือน
                   </p>
                   <Link href={`/company/detail/${job.post_id}`}>
-                    <button className={styles.detailBtn}>Edit</button>
+                    <button className={styles.detailBtn}>แก้ไข</button>
                   </Link>
                 </div>
               </div>

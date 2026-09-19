@@ -16,7 +16,7 @@ export default function FilePreviewButton({
   return (
     <>
       <button className={styles.fileBox} onClick={() => setOpen(true)}>
-        view file
+        ดูไฟล์
       </button>
 
       {open && (
@@ -26,7 +26,7 @@ export default function FilePreviewButton({
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.modalHeader}>
-              <span className={styles.modalTitle}>Preview: {fileName}</span>
+              <span className={styles.modalTitle}>ตัวอย่างไฟล์: {fileName}</span>
               <button
                 className={styles.modalCloseBtn}
                 onClick={() => setOpen(false)}

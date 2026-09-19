@@ -243,7 +243,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
 
               {/* 2. ข้อความหัวข้อจะอยู่ตรงกลาง */}
               <span style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
-                Personal Information
+                ข้อมูลส่วนตัว
               </span>
 
               {/* 3. ปุ่มสามจุดจะถูกดันไปชิดขวาสุดพอดี */}
@@ -264,7 +264,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               <div className={styles.avatarWrapper}>
                 <Image
                   src={
-                    profile.profile_image ??
+                    profile.profile_image ||
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullname || "User")}&background=random`
                   }
                   alt="avatar"
@@ -283,22 +283,22 @@ export default async function SeekerProfilePage({ params }: PageProps) {
 
               <div className={styles.detailsBox}>
                 <div className={styles.titleinfoRow}>
-                  <strong>About</strong>
+                  <strong>เกี่ยวกับ</strong>
                 </div>
                 {[
-                  { label: "Gender", value: profile.gender },
-                  { label: "Military Status", value: profile.military_status },
+                  { label: "เพศ", value: profile.gender },
+                  { label: "สถานะทางทหาร", value: profile.military_status },
                   {
-                    label: "Date of Birth",
+                    label: "วันเกิด",
                     value: formatDate(profile.date_of_birth),
                   },
-                  { label: "Nationality", value: profile.nationality },
-                  { label: "Religion", value: profile.religion },
-                  { label: "Weight (Kg)", value: profile.weight },
-                  { label: "Height (Cm)", value: profile.height },
-                  { label: "Disability", value: profile.disability_status },
-                  { label: "Marital", value: profile.marital_status },
-                  { label: "Mobile", value: profile.mobile_phone },
+                  { label: "สัญชาติ", value: profile.nationality },
+                  { label: "ศาสนา", value: profile.religion },
+                  { label: "น้ำหนัก (กก.)", value: profile.weight },
+                  { label: "ส่วนสูง (ซม.)", value: profile.height },
+                  { label: "ความพิการ", value: profile.disability_status },
+                  { label: "สถานภาพการสมรส", value: profile.marital_status },
+                  { label: "เบอร์โทรศัพท์", value: profile.mobile_phone },
                 ].map((item) => (
                   <div className={styles.infoRow} key={item.label}>
                     <strong>{item.label}:</strong> {fmt(item.value)}
@@ -309,16 +309,14 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   className={styles.titleinfoRow}
                   style={{ marginTop: "12px" }}
                 >
-                  <strong>การติดต่อ</strong>
+                  <strong>ช่องทางการติดต่อ</strong>
                 </div>
                 {[
                   { label: "Line ID", key: "line_id" },
-                  { label: "Country", key: "country" },
-                  // { label: "Address", key: "address" },
-                  { label: "Province", key: "province" },
-                  { label: "District", key: "district" },
-                  { label: "Sub District", key: "sub_district" },
-                  // { label: "Postal Code", key: "postal_code" },
+                  { label: "ประเทศ", key: "country" },
+                  { label: "จังหวัด", key: "province" },
+                  { label: "อำเภอ/เขต", key: "district" },
+                  { label: "ตำบล/แขวง", key: "sub_district" },
                 ].map((item) => (
                   <div className={styles.infoRow} key={item.key}>
                     <strong>{item.label}:</strong> {fmt(profile[item.key])}
@@ -330,10 +328,10 @@ export default async function SeekerProfilePage({ params }: PageProps) {
 
           {/* ── Column 2: Job Preferences ── */}
           <div className={styles.column}>
-            <div className={styles.cardHeader}>Job Preferences</div>
+            <div className={styles.cardHeader}>ความต้องการในการทำงาน</div>
             <div className={styles.contentPadding}>
               <section className={styles.section}>
-                <h4>Job Title</h4>
+                <h4>ตำแหน่งงานที่สนใจ</h4>
                 <ol className={styles.plainList}>
                   {profile.job_titles?.map(
                     (job: { job_name: string }, i: number) => (
@@ -344,7 +342,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               </section>
 
               <section className={styles.section}>
-                <h4>Type Of Work</h4>
+                <h4>รูปแบบการทำงาน</h4>
                 <div className={styles.tagGroup}>
                   {[
                     "Full-time",
@@ -368,12 +366,12 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               </section>
 
               <section className={styles.section}>
-                <h4>Desired Salary</h4>
-                <p>{fmt(profile.desired_salary)} baht</p>
+                <h4>เงินเดือนที่ต้องการ (บาท)</h4>
+                <p>{fmt(profile.desired_salary)} บาท</p>
               </section>
 
               <section className={styles.Educontainer}>
-                <h4 style={{ marginBottom: "1rem" }}>Education</h4>
+                <h4 style={{ marginBottom: "1rem" }}>ประวัติการศึกษา</h4>
                 <div className={styles.timeline}>
                   <div className={styles.centralLine} />
                   {profile.educations?.map((item: Education, index: number) => (
@@ -399,10 +397,10 @@ export default async function SeekerProfilePage({ params }: PageProps) {
 
           {/* ── Column 3: Skills ── */}
           <div className={styles.column}>
-            <div className={styles.cardHeader}>Skills</div>
+            <div className={styles.cardHeader}>ทักษะความสามารถ</div>
             <div className={styles.contentPadding}>
               <section className={styles.section}>
-                <h4>Specific Skills</h4>
+                <h4>ทักษะเฉพาะทาง</h4>
                 <ol className={styles.plainList}>
                   {profile.skills?.map((s: Skills, i: number) => (
                     <li key={i}>{fmt(s.skill_name)}</li>
@@ -411,21 +409,21 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               </section>
 
               <section className={styles.section}>
-                <h4>Typing Speed</h4>
+                <h4>ความเร็วในการพิมพ์</h4>
                 {profile.typing_speeds?.map((t: TypingSpeed, i: number) => (
-                  <ul key={i} className={styles.plainUl}>
+                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
                     <li>
                       <strong>{fmt(t.typing_language)}</strong>
                     </li>
-                    <li className={styles.setLi}>{fmt(t.typing_wpm)} WPM</li>
+                    <li>- {fmt(t.typing_wpm)} คำ/นาที (WPM)</li>
                   </ul>
                 ))}
               </section>
 
               <section className={styles.section}>
-                <h4>Projects & Experiences</h4>
+                <h4>โปรเจกต์ & ประวัติการทำงาน</h4>
                 {profile.experiences?.map((exp: Experiences, i: number) => (
-                  <ul key={i} className={styles.plainUl}>
+                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
                     <li>
                       – <strong>{fmt(exp.ex_title)}</strong>
                     </li>
@@ -438,9 +436,9 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               </section>
 
               <section className={styles.section}>
-                <h4>Language Proficiency</h4>
+                <h4>ความสามารถทางภาษา</h4>
                 {profile.languages?.map((exp: Language, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem" }}>
+                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
                     <li>
                       <h4>{fmt(exp.language_type)}</h4>
                     </li>
@@ -460,19 +458,24 @@ export default async function SeekerProfilePage({ params }: PageProps) {
           {/* ── Column 4: Files ── */}
           <div className={styles.columnTransparent}>
             <div className={styles.fileGroup}>
-              {["transcript", "resume", "portfolio", "certificate"].map(
-                (cat) => {
+              {[
+                { cat: "transcript", label: "ใบรายงานผลการเรียน" },
+                { cat: "resume", label: "เรซูเม่" },
+                { cat: "portfolio", label: "แฟ้มสะสมผลงาน" },
+                { cat: "certificate", label: "ใบรับรอง / เกียรติบัตร" }
+              ].map(
+                (item) => {
                   const files: FileRecord[] = (profile.files ?? []).filter(
-                    (f: FileRecord) => f.file_category?.toLowerCase() === cat,
+                    (f: FileRecord) => f.file_category?.toLowerCase() === item.cat,
                   );
                   return (
-                    <div key={cat} className={styles.fileItem}>
-                      <label style={{ textTransform: "lowercase" }}>
-                        {cat} ({files.length})
+                    <div key={item.cat} className={styles.fileItem}>
+                      <label style={{ textTransform: "none", marginBottom: "10px" }}>
+                        {item.label} ({files.length})
                       </label>
                       <div className={styles.fileList}>
                         {files.length === 0 && (
-                          <p className={styles.noFile}>No files</p>
+                          <p className={styles.noFile}>ไม่มีไฟล์</p>
                         )}
                         {files.map((file: FileRecord) => {
                           const shortName =
@@ -488,7 +491,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                                 className={styles.fileNameDisplay}
                                 title={file.file_name}
                               >
-                                📄 {shortName}
+                                {shortName}
                               </div>
                               {/* ── Client Component สำหรับ popup ── */}
                               <FilePreviewButton

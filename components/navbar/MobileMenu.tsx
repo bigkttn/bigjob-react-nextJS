@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import InterviewSchedule from "./InterviewSchedule";
 
 interface MobileMenuProps {
   isMenuOpen: boolean;
@@ -36,14 +37,15 @@ export default function MobileMenu({
           </button>
         </div>
         <div className="sidebar-links">
-          {/* ข้อมูลผู้ใช้ */}
-          {userRole !== "guest" && (
-            <div className="user-info">
-              <span className="u-name">
-                Hi {userRole}, {userName} ({userId})
-              </span>
-            </div>
-          )}
+
+          {/* ส่วนแสดงตารางนัดสัมภาษณ์ (แสดงทั้ง PC และ Mobile) แยก Component ออกมา */}
+          <InterviewSchedule 
+            isMenuOpen={isMenuOpen} 
+            userId={userId} 
+            userRole={userRole} 
+            closeMenu={closeMenu} 
+          />
+
           {/* ครอบด้วย mobile-only-links: แสดงเมนูพวกนี้เฉพาะบนมือถือเท่านั้น */}
           <div className="mobile-only-links">
             <hr className="sidebar-divider" />
@@ -51,14 +53,14 @@ export default function MobileMenu({
             {userRole === "guest" && (
               <>
                 <Link href="/login" className="side-item" onClick={closeMenu}>
-                  Login
+                  เข้าสู่ระบบ
                 </Link>
                 <Link
                   href="/register"
                   className="side-item highlight"
                   onClick={closeMenu}
                 >
-                  Sign Up
+                  สมัครสมาชิก
                 </Link>
               </>
             )}
@@ -70,28 +72,28 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/user/user-home")}`}
                   onClick={closeMenu}
                 >
-                  Home
+                  หน้าแรก
                 </Link>
                 <Link
                   href={`/user/seeker_tracking/${userId}`}
                   className={`side-item ${isActive(`/user/seeker_tracking/${userId}`)}`}
                   onClick={closeMenu}
                 >
-                  Tracking
+                  ติดตามสถานะ
                 </Link>
                 <Link
                   href="/user/savedCompany"
                   className={`side-item ${isActive("/user/savedCompany")}`}
                   onClick={closeMenu}
                 >
-                  Saved
+                  ที่บันทึกไว้
                 </Link>
                 <Link
                   href="/user/user-feedback"
                   className={`side-item ${isActive("/user/user-feedback")}`}
                   onClick={closeMenu}
                 >
-                  Feedback{" "}
+                  ข้อเสนอแนะ{" "}
                   {unreadCount > 0 && (
                     <span className="shock-badge">! {unreadCount}</span>
                   )}
@@ -101,10 +103,10 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/user/user-profile")}`}
                   onClick={closeMenu}
                 >
-                  My Profile
+                  โปรไฟล์ของฉัน
                 </Link>
                 <button onClick={onLogout} className="side-btn-logout">
-                  Log out
+                  ออกจากระบบ
                 </button>
               </>
             )}
@@ -116,28 +118,28 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/company/company-home")}`}
                   onClick={closeMenu}
                 >
-                  Home
+                  หน้าแรก
                 </Link>
                 <Link
                   href={`/company/company_tracking/${userId}`}
                   className={`side-item ${isActive(`/company/company_tracking/${userId}`)}`}
                   onClick={closeMenu}
                 >
-                  Tracking
+                  ติดตามสถานะ
                 </Link>
                 <Link
                   href="/company/savedSeeker"
                   className={`side-item ${isActive("/company/savedSeeker")}`}
                   onClick={closeMenu}
                 >
-                  Saved
+                  ที่บันทึกไว้
                 </Link>
                 <Link
                   href="/company/company-feedback"
                   className={`side-item ${isActive("/company/company-feedback")}`}
                   onClick={closeMenu}
                 >
-                  Feedback{" "}
+                  ข้อเสนอแนะ{" "}
                   {unreadCount > 0 && (
                     <span className="shock-badge">! {unreadCount}</span>
                   )}
@@ -147,17 +149,17 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/company/post-job")}`}
                   onClick={closeMenu}
                 >
-                  Post a Job
+                  ลงประกาศงาน
                 </Link>
                 <Link
                   href="/company/profile"
                   className={`side-item ${isActive("/company/profile")}`}
                   onClick={closeMenu}
                 >
-                  Profile
+                  โปรไฟล์
                 </Link>
                 <button onClick={onLogout} className="side-btn-logout">
-                  Log out
+                  ออกจากระบบ
                 </button>
               </>
             )}
@@ -169,24 +171,24 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/admin/admin-report")}`}
                   onClick={closeMenu}
                 >
-                  Report
+                  รายงาน
                 </Link>
                 <Link
                   href="/admin/Feedbacks"
                   className={`side-item ${isActive("/admin/Feedbacks")}`}
                   onClick={closeMenu}
                 >
-                  Feedbacks
+                  ข้อเสนอแนะ
                 </Link>
                 <Link
                   href="/admin/home"
                   className={`side-item ${isActive("/admin/home")}`}
                   onClick={closeMenu}
                 >
-                  Verification
+                  ยืนยันตัวตน
                 </Link>
                 <button onClick={onLogout} className="side-btn-logout">
-                  Log out
+                  ออกจากระบบ
                 </button>
               </>
             )}

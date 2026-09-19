@@ -19,7 +19,7 @@ export default function BackButton() {
       >
         <polyline points="15 18 9 12 15 6" />
       </svg>
-      Back
+      ย้อนกลับ
     </button>
   );
 }

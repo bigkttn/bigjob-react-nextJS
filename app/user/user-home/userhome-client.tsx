@@ -26,6 +26,21 @@ interface JobPost {
   matchScore?: number;
 }
 
+const getSavedState = (key: string, defaultVal: any) => {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = sessionStorage.getItem("userHomeSearchState");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed[key] !== undefined ? parsed[key] : defaultVal;
+      }
+    } catch (e) {
+      console.error("Failed to parse sessionStorage", e);
+    }
+  }
+  return defaultVal;
+};
+
 const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [user] = useState(initialUser);
   const [posts, setPosts] = useState<JobPost[]>([]);
@@ -37,8 +52,8 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [suggestedPosts, setSuggestedPosts] = useState<JobPost[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState(() => getSavedState("searchTerm", ""));
+  const [searchTerm, setSearchTerm] = useState(() => getSavedState("searchTerm", ""));
 
   // Search History State
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -46,13 +61,28 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const searchInputRef = useRef<HTMLDivElement>(null);
 
   // Filter & Sort State
-  const [selectedJobType, setSelectedJobType] = useState("");
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  const [selectedJobType, setSelectedJobType] = useState(() => getSavedState("selectedJobType", ""));
+  const [selectedProvince, setSelectedProvince] = useState(() => getSavedState("selectedProvince", ""));
+  const [selectedStatus, setSelectedStatus] = useState(() => getSavedState("selectedStatus", ""));
+  const [sortBy, setSortBy] = useState(() => getSavedState("sortBy", "newest"));
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() => getSavedState("currentPage", 1));
   const postsPerPage = 12;
+
+  // Save State to sessionStorage when changed
+  useEffect(() => {
+    sessionStorage.setItem(
+      "userHomeSearchState",
+      JSON.stringify({
+        searchTerm,
+        selectedJobType,
+        selectedProvince,
+        selectedStatus,
+        sortBy,
+        currentPage,
+      })
+    );
+  }, [searchTerm, selectedJobType, selectedProvince, selectedStatus, sortBy, currentPage]);
 
   useEffect(() => {
     fetchSuggestedPosts();
@@ -113,7 +143,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
       } catch (err: any) {
         if (err.name !== "AbortError") console.error("Search Error:", err);
       } finally {
-        if (!controller.signal.aborted) setIsSearching(false);
+        if (!controller.signal.aborted) {
+          setIsSearching(false);
+        }
+        setIsLoading(false);
       }
     },
     [selectedJobType, selectedProvince, selectedStatus, sortBy],

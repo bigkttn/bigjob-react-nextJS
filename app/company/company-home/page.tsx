@@ -13,6 +13,21 @@ const WORK_TYPES = [
   "Contract",
 ];
 
+const getSavedState = (key: string, defaultVal: any) => {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = sessionStorage.getItem("companyHomeSearchState");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed[key] !== undefined ? parsed[key] : defaultVal;
+      }
+    } catch (e) {
+      console.error("Failed to parse sessionStorage", e);
+    }
+  }
+  return defaultVal;
+};
+
 const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [company] = useState(initialUser);
   const [users, setUsers] = useState<any[]>([]);
@@ -24,8 +39,12 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [suggestedSeekers, setSuggestedSeekers] = useState<any[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState(() =>
+    getSavedState("searchTerm", ""),
+  );
+  const [searchTerm, setSearchTerm] = useState(() =>
+    getSavedState("searchTerm", ""),
+  );
 
   // Search History State
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -33,19 +52,57 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const searchInputRef = useRef<HTMLDivElement>(null);
 
   // State Filters
-  const [selectedProvince, setSelectedProvince] = useState("");
-  const [selectedWorkType, setSelectedWorkType] = useState("");
-  const [selectedEducation, setSelectedEducation] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState(() =>
+    getSavedState("selectedProvince", ""),
+  );
+  const [selectedWorkType, setSelectedWorkType] = useState(() =>
+    getSavedState("selectedWorkType", ""),
+  );
+  const [selectedEducation, setSelectedEducation] = useState(() =>
+    getSavedState("selectedEducation", ""),
+  );
 
   const MIN_POSSIBLE_AGE = 18;
   const MAX_POSSIBLE_AGE = 60;
-  const [minAge, setMinAge] = useState<number>(20);
-  const [maxAge, setMaxAge] = useState<number>(60);
+  const [minAge, setMinAge] = useState<number>(() =>
+    getSavedState("minAge", 20),
+  );
+  const [maxAge, setMaxAge] = useState<number>(() =>
+    getSavedState("maxAge", 60),
+  );
 
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState(() => getSavedState("sortBy", "newest"));
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(() =>
+    getSavedState("currentPage", 1),
+  );
   const usersPerPage = 12;
+
+  // Save State to sessionStorage when changed
+  useEffect(() => {
+    sessionStorage.setItem(
+      "companyHomeSearchState",
+      JSON.stringify({
+        searchTerm,
+        selectedProvince,
+        selectedWorkType,
+        selectedEducation,
+        minAge,
+        maxAge,
+        sortBy,
+        currentPage,
+      }),
+    );
+  }, [
+    searchTerm,
+    selectedProvince,
+    selectedWorkType,
+    selectedEducation,
+    minAge,
+    maxAge,
+    sortBy,
+    currentPage,
+  ]);
 
   useEffect(() => {
     fetchSuggestedSeekers();
@@ -109,7 +166,10 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
         if (err.name !== "AbortError")
           console.error("Hybrid Search Error:", err);
       } finally {
-        if (!controller.signal.aborted) setIsSearching(false);
+        if (!controller.signal.aborted) {
+          setIsSearching(false);
+        }
+        setIsLoading(false);
       }
     },
     [

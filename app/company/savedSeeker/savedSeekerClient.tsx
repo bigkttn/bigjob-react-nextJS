@@ -31,6 +31,8 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     const fetchSeekers = async () => {
       try {
@@ -55,7 +57,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
         setSeekersData(data);
       } catch (err: any) {
         console.error("Fetch Error:", err);
-        setError(err.message || "Something went wrong");
+        setError(err.message || "เกิดข้อผิดพลาดบางอย่าง");
       } finally {
         setLoading(false);
       }
@@ -65,6 +67,14 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
       fetchSeekers();
     }
   }, [companyId]);
+
+  const filteredData = seekerData.filter((seeker) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      (seeker.name && seeker.name.toLowerCase().includes(term)) ||
+      (seeker.jobtitle && seeker.jobtitle.toLowerCase().includes(term))
+    );
+  });
 
   if (loading)
     return <div className={styles.centerMessage}>กำลังโหลดข้อมูล...</div>;
@@ -84,67 +94,81 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {seekerData.map((seeker, index) => (
-          // 🌟 ป้องกัน Key ซ้ำโดยนำ index มาร่วมต่อ String ด้วยตามข้อผิดพลาดก่อนหน้า
-          <div key={`${seeker.uid}-${index}`} className={styles.card}>
-            <div className={styles.cardFlex}>
-              {/* Image Section */}
-              <div className={styles.imageWrapper}>
-                <img
-                  src={seeker.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(seeker.name || "User")}&background=random`}
-                  alt={seeker.name}
-                  width={240}
-                  height={160}
-                  className={styles.seekerImage}
-                />
-              </div>
+        {/* Search Bar */}
+        <div className={styles.searchWrapper}>
+          <input
+            type="text"
+            placeholder="ค้นหาชื่อผู้สมัคร หรือตำแหน่งงาน..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
 
-              {/* Info Section */}
-              <div className={styles.infoWrapper}>
-                <h2 className={styles.seekerName}>{seeker.name}</h2>
-                <h3 className={styles.seekerPosition}>{seeker.jobtitle}</h3>
+        {filteredData.length === 0 ? (
+          <div className={styles.centerMessage}>ไม่พบข้อมูลที่ค้นหา</div>
+        ) : (
+          filteredData.map((seeker, index) => (
+            // 🌟 ป้องกัน Key ซ้ำโดยนำ index มาร่วมต่อ String ด้วยตามข้อผิดพลาดก่อนหน้า
+            <div key={`${seeker.uid}-${index}`} className={styles.card}>
+              <div className={styles.cardFlex}>
+                {/* Image Section */}
+                <div className={styles.imageWrapper}>
+                  <img
+                    src={seeker.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(seeker.name || "User")}&background=random`}
+                    alt={seeker.name}
+                    width={240}
+                    height={160}
+                    className={styles.seekerImage}
+                  />
+                </div>
 
-                {seeker.details && (
-                  <div className={styles.detailsGrid}>
-                    <p>
-                      <span>Gender:</span> {seeker.details.gender}
-                    </p>
-                    <p>
-                      <span>Age:</span> {seeker.details.age}
-                    </p>
-                    <p className={styles.fullWidth}>
-                      <span>Military Status:</span>{" "}
-                      {seeker.details.militaryStatus}
-                    </p>
-                    <p className={styles.fullWidth}>
-                      <span>Date of Birth:</span> {seeker.details.dateOfBirth}
-                    </p>
-                    <p>
-                      <span>Nationality:</span> {seeker.details.nationality}
-                    </p>
-                    <p>
-                      <span>Religion:</span> {seeker.details.religion}
-                    </p>
-                    <p>
-                      <span>Weight:</span> {seeker.details.weight}
-                    </p>
-                    <p>
-                      <span>Height:</span> {seeker.details.height}
-                    </p>
-                  </div>
-                )}
-              </div>
+                {/* Info Section */}
+                <div className={styles.infoWrapper}>
+                  <h2 className={styles.seekerName}>{seeker.name}</h2>
+                  <h3 className={styles.seekerPosition}>{seeker.jobtitle}</h3>
 
-              {/* Button Section */}
-              <div className={styles.buttonWrapper}>
-                <Link href={`/company/seeker-profile/${seeker.uid}`}>
-                  <button className={styles.infoButton}>See Info</button>
+                  {seeker.details && (
+                    <div className={styles.detailsGrid}>
+                      <p>
+                        <span>เพศ:</span> {seeker.details.gender}
+                      </p>
+                      <p>
+                        <span>อายุ:</span> {seeker.details.age}
+                      </p>
+                      <p className={styles.fullWidth}>
+                        <span>สถานะทางทหาร:</span>{" "}
+                        {seeker.details.militaryStatus}
+                      </p>
+                      <p className={styles.fullWidth}>
+                        <span>วันเกิด:</span> {seeker.details.dateOfBirth}
+                      </p>
+                      <p>
+                        <span>สัญชาติ:</span> {seeker.details.nationality}
+                      </p>
+                      <p>
+                        <span>ศาสนา:</span> {seeker.details.religion}
+                      </p>
+                      <p>
+                        <span>น้ำหนัก (กก.):</span> {seeker.details.weight}
+                      </p>
+                      <p>
+                        <span>ส่วนสูง (ซม.):</span> {seeker.details.height}
+                      </p>
+                    </div>
+                  )}
+                </div>
 
-                </Link>
+                {/* Button Section */}
+                <div className={styles.buttonWrapper}>
+                  <Link href={`/company/seeker-profile/${seeker.uid}`}>
+                    <button className={styles.infoButton}>ดูรายละเอียด</button>
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </main>
     </div>
   );

@@ -1657,7 +1657,7 @@ const SeekerProfile = () => {
                 profile.typing_speeds.map((t, i) => (
                   <ul
                     key={t.typing_id ?? `view-typing-${i}`}
-                    style={{ marginBottom: "1rem" }}
+                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
                   >
                     <li>
                       <h4>{show(t.typing_language)}</h4>
@@ -1716,7 +1716,7 @@ const SeekerProfile = () => {
                 profile.experiences.map((exp, i) => (
                   <ul
                     key={exp.ex_id ?? `view-exp-${i}`}
-                    style={{ marginBottom: "1rem" }}
+                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
                   >
                     <li>
                       - <strong>{show(exp.ex_title)}</strong>
@@ -1839,7 +1839,7 @@ const SeekerProfile = () => {
                 profile.languages.map((lang, i) => (
                   <ul
                     key={lang.language_id ?? `view-lang-${i}`}
-                    style={{ marginBottom: "1rem" }}
+                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
                   >
                     <li>
                       <h4>{show(lang.language_type)}</h4>
@@ -1962,7 +1962,7 @@ const SeekerProfile = () => {
                       return (
                         <div key={fileKey} className={styles.fileContainerBox}>
                           <div className={styles.fileNameDisplay} title={name}>
-                            📄 {shortName}
+                            {shortName}
                             <span
                               className={styles.deleteFileIcon}
                               onClick={() =>
