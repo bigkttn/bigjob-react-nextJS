@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import styles from './applyCompany.module.css'
 import ApplyModal from '@/components/ApplyModal';
 import { apiUrl } from '@/lib/hostURL';
+import TestModal from '@/components/TestModal';
 
 interface ApplyCompanyProps {
   mode?:'apply'|'invite';
@@ -31,8 +32,13 @@ export default function ApplyCompany({
    companyEmail,
    companyId
   }:ApplyCompanyProps) {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isReported, setIsReported] = useState(false);
+  const [isReported, setIsReported] = useState(false); 
+
+  const [hasTest, setHasTest] = useState(false);
+  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+
 // LOG ตรวจสอบค่าที่ส่งมาจาก DetailJob
   // console.log('--- ApplyCompany Props ---', {
   //   jobTitle,
@@ -78,20 +84,52 @@ export default function ApplyCompany({
     }
   };
 
+  const checkTest = async () => {
+    if(!postId) return;
+    try {
+      const response = await fetch(`${apiUrl}/api/question/check-test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: Number(postId) }),
+      });
+
+      
+      if (!response.ok) {
+         console.error("Check Test Error:", response.status);
+         return;
+      }
+
+      const data = await response.json();
+      setHasTest(data.hasTest);
+    } catch (error) {
+      console.error("Error checking test:", error);
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
 
     const timeoutId = window.setTimeout(() => {
       void checkApplied();
+      void checkTest();
     }, 0);
-
     return () => window.clearTimeout(timeoutId);
   }, [userId, postId]);
 
   const handleCloseModal = () => {
      checkApplied();     
     setIsModalOpen(false); 
-   
+  };
+
+  const handleApplyClick = () => {
+    if (hasTest) {
+      // ถ้ามีแบบทดสอบ ให้เปิด Modal แบบทดสอบ (หรือ Redirect ไปหน้าทำแบบทดสอบ)
+      // alert("คุณต้องทำแบบทดสอบความเข้ากันได้กับองค์กรก่อนสมัครงาน");
+      setIsTestModalOpen(true); 
+    } else {
+      // ถ้าไม่มีแบบทดสอบ ให้เปิด Modal ส่งใบสมัครปกติ
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -102,7 +140,7 @@ export default function ApplyCompany({
         {/* ปุ่มกด Apply Now */}
         
        <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleApplyClick}
           className={`${styles.applyBtn} ${isReported ? styles.invitedBtn : ''}`}
           disabled={isReported}
         >
@@ -129,7 +167,19 @@ export default function ApplyCompany({
         existingPostIds={[]}
       />
 
-      
+    {/* เรียกใช้งาน Modal ทำแบบทดสอบ */}
+  <TestModal 
+    isOpen={isTestModalOpen} 
+    onClose={() => setIsTestModalOpen(false)} 
+    postId={Number(postId)}
+    userId={userId}
+    companyName={companyName}
+    seekerName={seekerName}
+    jobTitle={jobTitle}
+    seekerEmail={seekerEmail}
+    companyEmail={companyEmail}
+  />
+
     </main>
   );
 }
