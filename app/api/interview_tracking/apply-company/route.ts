@@ -18,27 +18,59 @@ export async function POST(req: NextRequest) {
   if (!rateLimit(ip, 3, 60_000)) {
     return NextResponse.json(
       { message: "คุณส่งคำขอมากเกินไป กรุณาลองใหม่อีกครั้งในภายหลัง" },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
   try {
     const body = await req.json();
-    const { seekerName, seekerEmail, message, companyEmail, jobTitle, companyName, postId, userId } = body;
+    const {
+      seekerName,
+      seekerEmail,
+      message,
+      companyEmail,
+      jobTitle,
+      companyName,
+      postId,
+      userId,
+    } = body;
 
     const post_id = Number(postId);
     const user_id = Number(userId);
 
-    if (!seekerName || !seekerEmail || !companyEmail || !jobTitle || !companyName) {
-      return NextResponse.json({ message: "กรุณากรอกข้อมูลสำคัญให้ครบถ้วน" }, { status: 400 });
+    if (
+      !seekerName ||
+      !seekerEmail ||
+      !companyEmail ||
+      !jobTitle ||
+      !companyName
+    ) {
+      return NextResponse.json(
+        { message: "กรุณากรอกข้อมูลสำคัญให้ครบถ้วน" },
+        { status: 400 },
+      );
     }
 
     if (!post_id || !user_id) {
-      return NextResponse.json({ message: "ไม่พบข้อมูล postId หรือ userId" }, { status: 400 });
+      return NextResponse.json(
+        { message: "ไม่พบข้อมูล postId หรือ userId" },
+        { status: 400 },
+      );
+    }
+    const [testCheck] = (await db.query(
+      `SELECT question_id FROM question WHERE post_id = ? LIMIT 1`,
+      [post_id],
+    )) as [any[], unknown];
+
+    const hasTest = Array.isArray(testCheck) && testCheck.length > 0;
+
+    if (hasTest) {
+      return NextResponse.json(
+        { message: "ต้องทำแบบทดสอบความเข้ากันได้กับองค์กรก่อนส่งใบสมัคร" },
+        { status: 403 }, // 403 Forbidden ไม่อนุญาตให้ผ่าน
+      );
     }
 
-    // URL เว็บไซต์ของคุณ (ดึงจาก env หรือ fallback)
-    
     const profileLink = `${apiUrl}/seeker/profile/${user_id}`; // ลิงก์ไปยังโปรไฟล์ผู้สมัคร
 
     const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'applied', ?)`;
@@ -76,13 +108,18 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    return NextResponse.json({ message: "ส่งใบสมัครเรียบร้อยแล้ว!" }, { status: 200 });
-
+    return NextResponse.json(
+      { message: "ส่งใบสมัครเรียบร้อยแล้ว!" },
+      { status: 200 },
+    );
   } catch (error: unknown) {
     console.error("Error sending Job Application:", error);
     return NextResponse.json(
-      { message: "เกิดข้อผิดพลาดในการส่งใบสมัคร", error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
+      {
+        message: "เกิดข้อผิดพลาดในการส่งใบสมัคร",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
     );
   }
 }

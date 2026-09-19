@@ -38,14 +38,16 @@ export default function ProfileActionsButton({
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/immutability
     checkSaved();
+    // eslint-disable-next-line react-hooks/immutability
     checkReport();
   }, []);
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
     try {
-      const response = await fetch("/api/seeker/favour_post",
+      const response = await fetch("/api/user/favour_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -77,9 +79,9 @@ export default function ProfileActionsButton({
     }
   };
 
-  const checkSaved = async () => {
+  async function checkSaved() {
     try {
-      const response = await fetch("/api/seeker/check_favour_post",
+      const response = await fetch("/api/user/check_favour_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -98,13 +100,13 @@ export default function ProfileActionsButton({
     } catch (error) {
       console.error("Error in checkSaved:", error);
     }
-  };
+  }
 
   const handleDeleteSaved = async (userId: number, companyId: number) => {
     const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
     if (!confirmDelete) return;
     try {
-      const response = await fetch("/api/seeker/delete_favour_post", {
+      const response = await fetch("/api/user/delete_favour_post", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -145,7 +147,7 @@ export default function ProfileActionsButton({
       return;
     }
     try {
-      const response = await fetch("/api/seeker/report_post", {
+      const response = await fetch("/api/user/report_post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -179,9 +181,9 @@ export default function ProfileActionsButton({
     setIsOpen(false);
   };
 
-   const checkReport = async () => {
+  async function checkReport() {
     try {
-      const response = await fetch("/api/seeker/check_report_post",
+      const response = await fetch("/api/user/check_report_post",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -202,7 +204,7 @@ export default function ProfileActionsButton({
     } catch (error) {
       console.error("Error in checkSaved:", error);
     }
-  };
+  }
 
   return (
     <div
