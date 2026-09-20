@@ -63,7 +63,7 @@ export default function DesktopMenu({
             href="/user/user-profile"
             className={`nav-item ${isActive("/user/user-profile")}`}
           >
-            โปรไฟล์ของฉัน
+            โปรไฟล์
           </Link>
           <button onClick={onLogout} className="nav-btn-logout">
             ออกจากระบบ
@@ -120,13 +120,22 @@ export default function DesktopMenu({
 
       {userRole === "admin" && (
         <>
-          <Link href="/admin/admin-report" className={`nav-item ${isActive("/admin/admin-report")}`}>
+          <Link
+            href="/admin/admin-report"
+            className={`nav-item ${isActive("/admin/admin-report")}`}
+          >
             รายงาน
           </Link>
-          <Link href="/admin/Feedbacks" className={`nav-item ${isActive("/admin/Feedbacks")}`}>
+          <Link
+            href="/admin/Feedbacks"
+            className={`nav-item ${isActive("/admin/Feedbacks")}`}
+          >
             ข้อเสนอแนะ
           </Link>
-          <Link href="/admin/home" className={`nav-item ${isActive("/admin/home")}`}>
+          <Link
+            href="/admin/home"
+            className={`nav-item ${isActive("/admin/home")}`}
+          >
             ยืนยันตัวตน
           </Link>
           <button onClick={onLogout} className="nav-btn-logout">

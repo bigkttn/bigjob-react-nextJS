@@ -37,13 +37,12 @@ export default function MobileMenu({
           </button>
         </div>
         <div className="sidebar-links">
-
           {/* ส่วนแสดงตารางนัดสัมภาษณ์ (แสดงทั้ง PC และ Mobile) แยก Component ออกมา */}
-          <InterviewSchedule 
-            isMenuOpen={isMenuOpen} 
-            userId={userId} 
-            userRole={userRole} 
-            closeMenu={closeMenu} 
+          <InterviewSchedule
+            isMenuOpen={isMenuOpen}
+            userId={userId}
+            userRole={userRole}
+            closeMenu={closeMenu}
           />
 
           {/* ครอบด้วย mobile-only-links: แสดงเมนูพวกนี้เฉพาะบนมือถือเท่านั้น */}
@@ -103,7 +102,7 @@ export default function MobileMenu({
                   className={`side-item ${isActive("/user/user-profile")}`}
                   onClick={closeMenu}
                 >
-                  โปรไฟล์ของฉัน
+                  โปรไฟล์
                 </Link>
                 <button onClick={onLogout} className="side-btn-logout">
                   ออกจากระบบ

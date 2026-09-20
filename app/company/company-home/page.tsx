@@ -32,6 +32,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [company] = useState(initialUser);
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -170,6 +171,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
           setIsSearching(false);
         }
         setIsLoading(false);
+        setIsInitialLoad(false);
       }
     },
     [
@@ -206,6 +208,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
       setUsers([]);
     } finally {
       setIsLoading(false);
+      setIsInitialLoad(false);
     }
   }, [
     selectedProvince,
@@ -217,11 +220,14 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   ]);
 
   useEffect(() => {
-    if (searchTerm.trim()) {
-      performHybridSearch(searchTerm.trim());
-    } else {
-      fetchUsers();
-    }
+    const timer = setTimeout(() => {
+      if (searchTerm.trim()) {
+        performHybridSearch(searchTerm.trim());
+      } else {
+        fetchUsers();
+      }
+    }, 400); // 400ms debounce
+    return () => clearTimeout(timer);
   }, [searchTerm, fetchUsers, performHybridSearch]);
 
   const fetchSuggestedSeekers = async () => {
@@ -355,7 +361,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
     maxAge !== 60 ||
     sortBy !== "newest";
 
-  if (isLoading) {
+  if (isLoading && isInitialLoad) {
     return (
       <div className={styles.skeletonWrapper}>
         <header className={styles.searchSection}>
@@ -475,7 +481,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
           </select>
 
           <div className={styles.ageFilterBox}>
-            <span className={styles.ageLabel}>Age Range</span>
+            <span className={styles.ageLabel}>ช่วงอายุ</span>
             <div className={styles.sliderContainer}>
               <div
                 className={styles.sliderTrack}
@@ -517,7 +523,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
 
           {isFilterActive && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>
-              Clear Filters
+              ล้างตัวกรอง
             </button>
           )}
         </div>
@@ -526,7 +532,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
       <div className={styles.mainLayout}>
         <aside className={styles.leftSidebar}>
           <div className={styles.suggestContent}>
-            <h3>Suggested Seekers</h3>
+            <h3>ผู้สมัครงานที่แนะนำ</h3>
             <div className={styles.verticalList}>
               {isSuggestLoading ? (
                 <p className={styles.subText}>
@@ -564,7 +570,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                         href={`/company/seeker-profile/${seeker.uid}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>Details</button>
+                        <button className={styles.detailsBtn}>ดูรายละเอียด</button>
                       </Link>
                     </div>
                   </div>
@@ -624,7 +630,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                         href={`/company/seeker-profile/${u.uid}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>Details</button>
+                        <button className={styles.detailsBtn}>ดูรายละเอียด</button>
                       </Link>
                     </div>
                   </div>
@@ -641,10 +647,10 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                   disabled={currentPage === 1}
                   className={styles.pageBtn}
                 >
-                  Previous
+                  ก่อนหน้า
                 </button>
                 <span className={styles.pageInfo}>
-                  Page {currentPage} of {totalPages}
+                  หน้า {currentPage} จาก {totalPages}
                 </span>
                 <button
                   onClick={() =>
@@ -653,7 +659,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                   disabled={currentPage === totalPages}
                   className={styles.pageBtn}
                 >
-                  Next
+                  ถัดไป
                 </button>
               </div>
             )}

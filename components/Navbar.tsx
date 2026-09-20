@@ -22,35 +22,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // ดึงข้อมูล Session
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
 
-        if (data.user) {
-          setUserRole(data.user.role);
-          setUserId(data.user.id);
-          setUserName(data.user.email);
-
-          if (data.user.role !== "guest") {
-            fetchNotificationBadge(data.user.id, data.user.role);
-            checkBanStatus(data.user.id, data.user.role);
-          }
-        } else {
-          resetUserState();
-        }
-      } catch (error) {
-        console.error("Failed to fetch session");
-        resetUserState();
-      }
-    };
-
-    fetchSession();
-  }, [pathname]);
-
-  const resetUserState = () => {
+  function resetUserState() {
     setUserRole("guest");
     setUserName("");
     setUserId("");
@@ -59,7 +32,7 @@ export default function Navbar() {
   };
 
   // ฟังก์ชันตรวจสอบการแบน
-  const checkBanStatus = async (uid: string, role: string) => {
+  async function checkBanStatus(uid: string, role: string) {
     try {
       const apiUrl =
         role === "company"
@@ -82,7 +55,7 @@ export default function Navbar() {
   };
 
   // คำนวณวันหมดอายุการแบน
-  const calculateBan = (bannedUntil: string) => {
+  function calculateBan(bannedUntil: string) {
     const banDate = new Date(bannedUntil.replace(" ", "T"));
     const now = new Date();
     const diffMs = banDate.getTime() - now.getTime();
@@ -133,7 +106,7 @@ export default function Navbar() {
   };
 
   // Notification Badge
-  const fetchNotificationBadge = async (uid: string, role: string) => {
+  async function fetchNotificationBadge(uid: string, role: string) {
     try {
       const apiUrl =
         role === "company"
@@ -149,6 +122,34 @@ export default function Navbar() {
       console.error("Notification pull failed", err);
     }
   };
+
+  // ดึงข้อมูล Session
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+
+        if (data.user) {
+          setUserRole(data.user.role);
+          setUserId(data.user.id);
+          setUserName(data.user.email);
+
+          if (data.user.role !== "guest") {
+            fetchNotificationBadge(data.user.id, data.user.role);
+            checkBanStatus(data.user.id, data.user.role);
+          }
+        } else {
+          resetUserState();
+        }
+      } catch (error) {
+        console.error("Failed to fetch session");
+        resetUserState();
+      }
+    };
+
+    fetchSession();
+  }, [pathname]);
 
   useEffect(() => {
     const handleRefreshNotifications = () => {

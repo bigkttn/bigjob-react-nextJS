@@ -380,19 +380,23 @@ const DetailJob = () => {
             <span className={styles.spanMother}>
               <span>{"<"}</span>
               <span>&nbsp;</span>
-              <span>B</span>
-              <span>a</span>
-              <span>c</span>
-              <span>k</span>
+              <span>ย้</span>
+              <span>อ</span>
+              <span>น</span>
+              <span>ก</span>
+              <span>ลั</span>
+              <span>บ</span>
             </span>
 
             <span className={styles.spanMother2}>
               <span>{"<"}</span>
               <span>&nbsp;</span>
-              <span>B</span>
-              <span>a</span>
-              <span>c</span>
-              <span>k</span>
+              <span>ย้</span>
+              <span>อ</span>
+              <span>น</span>
+              <span>ก</span>
+              <span>ลั</span>
+              <span>บ</span>
             </span>
           </button>
 
@@ -456,10 +460,10 @@ const DetailJob = () => {
             {isMode
               ? isSaving
                 ? "กำลังบันทึก..."
-                : "Save Post"
+                : "บันทึกโพสต์"
               : isSavingTest
                 ? "กำลังบันทึก..."
-                : "Save Questions"}
+                : "บันทึกข้อสอบ"}
           </button>
         </div>
 
@@ -498,7 +502,7 @@ const DetailJob = () => {
                 <table className={styles.infoTable}>
                   <tbody>
                     <tr>
-                      <td className={styles.label}>Job Title</td>
+                      <td className={styles.label}>ตำแหน่งงาน</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input
@@ -515,7 +519,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Province</td>
+                      <td className={styles.label}>จังหวัด</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <ProvinceSelect
@@ -531,7 +535,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Work Location </td>
+                      <td className={styles.label}>สถานที่ทำงาน</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <textarea
@@ -549,7 +553,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Salary</td>
+                      <td className={styles.label}>เงินเดือน</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input
@@ -581,7 +585,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Age</td>
+                      <td className={styles.label}>อายุ</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input
@@ -613,7 +617,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Job type</td>
+                      <td className={styles.label}>รูปแบบงาน</td>
                       <td>
                         <select
                           className={styles.selectInput}
@@ -626,7 +630,7 @@ const DetailJob = () => {
                           }
                         >
                           <option value="" disabled>
-                            Select Job Type
+                            เลือกรุปแบบงาน
                           </option>
                           <option value="Full-time">Full-time</option>
                           <option value="Freelance">Freelance</option>
@@ -637,7 +641,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Vacancy</td>
+                      <td className={styles.label}>จำนวนที่รับ</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input
@@ -655,7 +659,7 @@ const DetailJob = () => {
                       </td>
                     </tr>
                     <tr>
-                      <td className={styles.label}>Details</td>
+                      <td className={styles.label}>รายละเอียดงาน</td>
                       <td>
                         <div className={styles.editInputWrapper}>
                           <textarea
@@ -676,7 +680,7 @@ const DetailJob = () => {
 
                 <div style={{ marginTop: "30px" }}>
                   {/* <hr /> */}
-                  <h3 className={styles.sectionTitle}>Qualifications</h3>
+                  <h3 className={styles.sectionTitle}>คุณสมบัติ</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
                       className={styles.inputField}
@@ -694,7 +698,7 @@ const DetailJob = () => {
 
               <div className={styles.rightCol}>
                 <section>
-                  <h3 className={styles.sectionTitle}>Benefits</h3>
+                  <h3 className={styles.sectionTitle}>สวัสดิการ</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
                       className={styles.inputField}
@@ -708,7 +712,7 @@ const DetailJob = () => {
 
                 <section style={{ marginTop: "30px" }}>
                   {/* <hr /> */}
-                  <h3 className={styles.sectionTitle}>How to Apply</h3>
+                  <h3 className={styles.sectionTitle}>วิธีการสมัคร</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
                       className={styles.inputField}
@@ -725,7 +729,7 @@ const DetailJob = () => {
 
                 <section style={{ marginTop: "30px" }}>
                   {/* <hr /> */}
-                  <h3 className={styles.sectionTitle}>Contact</h3>
+                  <h3 className={styles.sectionTitle}>ข้อมูลติดต่อ</h3>
                   <div className={styles.editInputWrapper}>
                     <textarea
                       className={styles.inputField}
@@ -739,7 +743,7 @@ const DetailJob = () => {
 
                 <section style={{ marginTop: "30px" }}>
                   {/* <hr /> */}
-                  <h3 className={styles.sectionTitle}>Application Deadline</h3>
+                  <h3 className={styles.sectionTitle}>วันปิดรับสมัคร</h3>
                   <div className={styles.editInputWrapper}>
                     <input
                       type="datetime-local"

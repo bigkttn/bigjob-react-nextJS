@@ -271,6 +271,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   className={styles.avatar}
                   width={150}
                   height={150}
+                  priority
                   unoptimized
                 />
               </div>

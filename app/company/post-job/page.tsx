@@ -303,7 +303,7 @@ const PostJob = () => {
     <div>
       {/* My Posts */}
       <div className={styles.myPostsSection}>
-        <h2 className={styles.myPostsTitle}>My Posts</h2>
+        <h2 className={styles.myPostsTitle}>โพสต์ของฉัน</h2>
         <div className={styles.item}>
           {myPosts.length > 0 ? (
             myPosts.map((post: any) => (
@@ -319,7 +319,7 @@ const PostJob = () => {
                     <p className={styles.subText}>{post.company_name}</p>
                     <div className={styles.cardFooter}>
                       <Link href={`/company/detail/${post.post_id}`}>
-                        <button className={styles.detailBtn}>Detail</button>
+                        <button className={styles.detailBtn}>ดูรายละเอียด</button>
                       </Link>
                       <button
                         className={styles.DeleteBtn}
@@ -327,7 +327,7 @@ const PostJob = () => {
                         disabled={!isApproved}
                         onClick={() => handleDelete(post.post_id)}
                       >
-                        Delete
+                        ลบ
                       </button>
                     </div>
                   </div>
@@ -363,11 +363,11 @@ const PostJob = () => {
         <div className={styles.postHeader}>
           {isNext ? (
             <button className={styles.nextBtn} onClick={() => setIsNext(false)}>
-              Back
+              ย้อนกลับ
             </button>
           ) : (
             <h2 className={styles.myPostsTitle}>
-              Create Posts {isApproved ? "" : "(View Only)"}
+              สร้างประกาศงาน {isApproved ? "" : "(อ่านเท่านั้น)"}
             </h2>
           )}
 
@@ -378,7 +378,7 @@ const PostJob = () => {
               disabled={!isApproved}
               onClick={handleSubmit}
             >
-              Submit
+              ยืนยัน
             </button>
           ) : (
             <button
@@ -387,7 +387,7 @@ const PostJob = () => {
               disabled={!isApproved}
               onClick={handleNext}
             >
-              Next
+              ถัดไป
             </button>
           )}
         </div>
@@ -396,7 +396,7 @@ const PostJob = () => {
         {isNext ? (
           <div className={styles.container}>
             <div className={styles.headerRow}>
-              <p className={styles.instruction}>Questions mode.</p>
+              <p className={styles.instruction}>สร้างชุดข้อสอบคัดกรอง</p>
             </div>
 
             <div className={styles.questionList}>
@@ -406,7 +406,7 @@ const PostJob = () => {
                     <span className={styles.questionNumber}>{qIndex + 1}.</span>
                     <input
                       type="text"
-                      placeholder="Enter question"
+                      placeholder="กรอกคำถาม"
                       className={styles.mainInput}
                       style={inputStyle}
                       disabled={!isApproved}
@@ -436,7 +436,7 @@ const PostJob = () => {
                         />
                         <input
                           type="text"
-                          placeholder="Option"
+                          placeholder="ตัวเลือก"
                           disabled={!isApproved}
                           className={`${styles.optionInput} ${q.correctIndex === optIndex ? styles.correct : ""}`}
                           style={inputStyle}
@@ -464,7 +464,7 @@ const PostJob = () => {
                       onClick={() => addOption(q.id)}
                       className={styles.addOptionBtn}
                     >
-                      + Add Option
+                      + เพิ่มตัวเลือก
                     </button>
                   </div>
                 </div>
@@ -478,7 +478,7 @@ const PostJob = () => {
                 onClick={addQuestion}
                 className={styles.addBtn}
               >
-                + Add More Question
+                + เพิ่มข้อสอบ
               </button>
             </div>
           </div>
@@ -487,7 +487,7 @@ const PostJob = () => {
           <div className={styles.postForm}>
             <div className={styles.formColumn}>
               <div className={styles.inputGroupInline}>
-                <label>Job Position</label>
+                <label>ตำแหน่งงาน</label>
                 <input
                   type="text"
                   name="jobPosition"
@@ -498,7 +498,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupInline}>
-                <label>Province</label>
+                <label>จังหวัด</label>
                 <ProvinceSelect
                   value={formData.province ?? ""}
                   onChange={(value: string) => {
@@ -510,7 +510,7 @@ const PostJob = () => {
 
           
               <div className={styles.inputGroupFull2}>
-                <label>Work Location</label>
+                <label>สถานที่ทำงาน</label>
                 <textarea
                   name="workLocation"
                   style={inputStyle}
@@ -522,7 +522,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupInline}>
-                <label>Salary Range</label>
+                <label>ช่วงเงินเดือน</label>
                 <input
                   type="number"
                   name="salary_min"
@@ -543,7 +543,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupInline}>
-                <label>Age Range</label>
+                <label>ช่วงอายุ</label>
                 <input
                   type="number"
                   name="age_min"
@@ -565,7 +565,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupInline}>
-                <label>Vacancy</label>
+                <label>จำนวนที่รับ</label>
                 <input
                   type="number"
                   name="vacancy"
@@ -577,7 +577,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupInline}>
-                <label>Job Type</label>
+                <label>รูปแบบงาน</label>
                 <select
                   name="jobType"
                   value={formData.jobType}
@@ -587,7 +587,7 @@ const PostJob = () => {
                   onChange={handleChange}
                 >
                   <option value="" disabled>
-                    Select Job Type
+                    เลือกรุปแบบงาน
                   </option>
                   <option value="Full-time">Full-time</option>
                   <option value="Freelance">Freelance</option>
@@ -597,7 +597,7 @@ const PostJob = () => {
                 </select>
               </div>
               <div className={styles.inputGroupFull}>
-                <label>Deadline</label>
+                <label>วันปิดรับสมัคร</label>
                 <input
                   type="datetime-local"
                   className={styles.dateInput}
@@ -609,7 +609,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupFull}>
-                <label>Job Description</label>
+                <label>รายละเอียดงาน</label>
                 <textarea
                   name="jobDescription"
                   style={inputStyle}
@@ -623,7 +623,7 @@ const PostJob = () => {
 
             <div className={styles.formColumn}>
               <div className={styles.inputGroupFull}>
-                <label>Qualifications</label>
+                <label>คุณสมบัติ</label>
                 <textarea
                   name="qualifications"
                   style={inputStyle}
@@ -634,7 +634,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupFull}>
-                <label>Benefits</label>
+                <label>สวัสดิการ</label>
                 <textarea
                   name="benefits"
                   style={inputStyle}
@@ -645,7 +645,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupFull}>
-                <label>How To Apply</label>
+                <label>วิธีการสมัคร</label>
                 <textarea
                   name="howToApply"
                   style={inputStyle}
@@ -656,7 +656,7 @@ const PostJob = () => {
                 />
               </div>
               <div className={styles.inputGroupFull}>
-                <label>Contact</label>
+                <label>ข้อมูลติดต่อ</label>
                 <textarea
                   name="contact"
                   style={inputStyle}

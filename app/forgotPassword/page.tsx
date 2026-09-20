@@ -160,13 +160,21 @@ export default function ForgotPassword() {
 
             {errorMsg && <div className={styles.fpError}>{errorMsg}</div>}
 
-            <button
-              onClick={sendOtp}
-              className={styles.fpButton}
-              disabled={isLoading}
-            >
-              {isLoading ? "กำลังส่ง..." : "ส่ง OTP"}
-            </button>
+            <div className={styles.buttonGroup}>
+              <button
+                onClick={sendOtp}
+                className={styles.fpButton}
+                disabled={isLoading}
+              >
+                {isLoading ? "กำลังส่ง..." : "ส่ง OTP"}
+              </button>
+              <button
+                onClick={() => router.push("/login")}
+                className={styles.fpBackButton}
+              >
+                ย้อนกลับ
+              </button>
+            </div>
           </>
         )}
 
@@ -192,9 +200,17 @@ export default function ForgotPassword() {
 
             {errorMsg && <div className={styles.fpError}>{errorMsg}</div>}
 
-            <button onClick={verifyOtp} className={styles.fpButton}>
-              ยืนยัน OTP
-            </button>
+            <div className={styles.buttonGroup}>
+              <button onClick={verifyOtp} className={styles.fpButton}>
+                ยืนยัน OTP
+              </button>
+              <button
+                onClick={() => setStep("email")}
+                className={styles.fpBackButton}
+              >
+                ย้อนกลับ
+              </button>
+            </div>
           </>
         )}
 
@@ -212,9 +228,17 @@ export default function ForgotPassword() {
 
             {errorMsg && <div className={styles.fpError}>{errorMsg}</div>}
 
-            <button onClick={resetPassword} className={styles.fpButton}>
-              ยืนยัน
-            </button>
+            <div className={styles.buttonGroup}>
+              <button onClick={resetPassword} className={styles.fpButton}>
+                ยืนยัน
+              </button>
+              <button
+                onClick={() => router.push("/login")}
+                className={styles.fpBackButton}
+              >
+                ยกเลิก
+              </button>
+            </div>
           </>
         )}
       </div>

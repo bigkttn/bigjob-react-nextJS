@@ -147,9 +147,9 @@ export default function Login() {
           </div>
           <div className={styles.slogan}>
             <h1>
-              Find the job you want.
+              ค้นหางานที่คุณต้องการ
               <br />
-              <span>If available.</span>
+              <span>ที่ใช่สำหรับคุณ</span>
             </h1>
           </div>
         </div>
@@ -157,43 +157,43 @@ export default function Login() {
         {/* แถบฟอร์มด้านขวา */}
         <div className={styles.formSide}>
           <div className={styles.formContent}>
-            <h2>Welcome Back!</h2>
+            <h2>ยินดีต้อนรับ!</h2>
             <p style={{ color: "#ccc", marginBottom: "20px" }}>
-              Login to access your account
+              เข้าสู่ระบบเพื่อจัดการบัญชีของคุณ
             </p>
 
             <form onSubmit={onLogin}>
               <div className={styles.inputGroup}>
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">อีเมล</label>
                 <input
                   type="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="กรอกอีเมลของคุณ"
                   required
                 />
               </div>
 
               <div className={styles.inputGroup}>
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">รหัสผ่าน</label>
                 <input
                   type="password"
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder="กรอกรหัสผ่านของคุณ"
                   required
                 />
               </div>
 
               <button type="submit" className={styles.btnLogin}>
-                Login
+                เข้าสู่ระบบ
               </button>
             </form>
 
             <div className={styles.divider}>
-              <span>OR</span>
+              <span>หรือ</span>
             </div>
 
             <div
@@ -207,7 +207,7 @@ export default function Login() {
 
             <div className={styles.footerLink}>
               <p>
-                Don’t have an account? <Link href="/register">Sign up</Link>
+                ยังไม่มีบัญชีผู้ใช้ใช่ไหม? <Link href="/register">สมัครสมาชิก</Link>
               </p>
             </div>
             <div className={styles.footerLink}>

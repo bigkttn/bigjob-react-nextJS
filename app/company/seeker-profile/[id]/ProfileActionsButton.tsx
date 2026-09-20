@@ -37,16 +37,16 @@ export default function ProfileActionsButton({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // useEffect(() => {
-  //   checkSaved();
-  //   checkReport();
-  // }, []);
+  useEffect(() => {
+    checkSaved();
+    checkReport();
+  }, []);
 
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/company/favour_user",
+        "/api/company/favour_user",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -81,7 +81,7 @@ export default function ProfileActionsButton({
   const checkSaved = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/company/check_favour_user",
+        "/api/company/check_favour_user",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -183,7 +183,7 @@ export default function ProfileActionsButton({
    const checkReport = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/company/check_report_user",
+        "/api/company/check_report_user",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

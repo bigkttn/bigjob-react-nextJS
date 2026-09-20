@@ -38,7 +38,7 @@ export default async function Page({ params }: PageProps) {
   if (!viewer) {
     return (
       <div className={styles.centerMessage}>
-        <p>Please log in to view this profile.</p>
+        <p>กรุณาเข้าสู่ระบบเพื่อดูข้อมูลนี้</p>
       </div>
     );
   }
