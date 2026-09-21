@@ -44,7 +44,7 @@ export default function ProfileActionsButton({
     let ignore = false;
     async function checkReport() {
       try {
-        const response = await fetch("/api/seeker/check_report_company", {
+        const response = await fetch("/api/user/check_report_company", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -92,7 +92,7 @@ export default function ProfileActionsButton({
       return;
     }
     try {
-      const response = await fetch("/api/seeker/report_company", {
+      const response = await fetch("/api/user/report_company", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

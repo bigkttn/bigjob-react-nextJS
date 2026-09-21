@@ -31,7 +31,10 @@ export default function InterviewSchedule({
           );
           if (res.ok) {
             const data = await res.json();
-            setInterviews(data.rows || []);
+            const filteredInterviews = (data.rows || []).filter(
+              (job: any) => job.status?.toLowerCase() === "interview",
+            );
+            setInterviews(filteredInterviews);
           }
         } catch (err) {
           console.error("Failed to fetch upcoming interviews", err);
@@ -82,7 +85,7 @@ export default function InterviewSchedule({
   };
 
   const selectedInterviews = useMemo(() => {
-    if (!selectedDate) return [];
+    if (!selectedDate) return interviews;
     return interviews.filter((iv) => {
       const ivDate = new Date(iv.interview_date);
       return isSameDay(ivDate, selectedDate);
@@ -126,30 +129,57 @@ export default function InterviewSchedule({
       className="interview-schedule-container"
       style={{ marginTop: "15px", marginBottom: "5px" }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-        <div className="sidebar-section-title" style={{ marginBottom: 0 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "8px",
+        }}
+      >
+        <div
+          className="sidebar-section-title"
+          style={{ marginBottom: 0, fontSize: "14px" }}
+        >
           {userRole === "seeker" ? "นัดสัมภาษณ์ของคุณ" : "นัดสัมภาษณ์ผู้สมัคร"}
         </div>
-        <button 
-          onClick={() => {
-            const today = new Date();
-            setCurrentMonth(today);
-            setSelectedDate(today);
-          }}
-          style={{
-            backgroundColor: "rgba(56, 189, 248, 0.1)",
-            color: "#38bdf8",
-            border: "1px solid #38bdf8",
-            padding: "4px 12px",
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            transition: "all 0.2s"
-          }}
-        >
-          วันนี้
-        </button>
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button
+            onClick={() => setSelectedDate(null)}
+            style={{
+              backgroundColor: "transparent",
+              color: "#a1a1aa",
+              border: "1px solid #555",
+              padding: "3px 8px",
+              borderRadius: "12px",
+              fontSize: "11px",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+          >
+            ทั้งหมด
+          </button>
+          <button
+            onClick={() => {
+              const today = new Date();
+              setCurrentMonth(today);
+              setSelectedDate(today);
+            }}
+            style={{
+              backgroundColor: "rgba(56, 189, 248, 0.1)",
+              color: "#38bdf8",
+              border: "1px solid #38bdf8",
+              padding: "3px 8px",
+              borderRadius: "12px",
+              fontSize: "11px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+          >
+            วันนี้
+          </button>
+        </div>
       </div>
 
       {/* Calendar UI */}
@@ -346,11 +376,26 @@ export default function InterviewSchedule({
           marginBottom: "12px",
           paddingBottom: "8px",
           borderBottom: "1px solid #333",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        {selectedDate
-          ? `ตารางงานวันที่ ${selectedDate.toLocaleDateString("th-TH", { day: "numeric", month: "long" })}`
-          : "เลือกวันที่เพื่อดูตารางงาน"}
+        <span>
+          {selectedDate
+            ? `ตารางงานวันที่ ${selectedDate.toLocaleDateString("th-TH", { day: "numeric", month: "long" })}`
+            : "ตารางงานทั้งหมดที่ยืนยันแล้ว"}
+        </span>
+        <span style={{
+          backgroundColor: "rgba(56, 189, 248, 0.15)",
+          color: "#38bdf8",
+          border: "1px solid #38bdf8",
+          padding: "2px 8px",
+          borderRadius: "12px",
+          fontSize: "11px",
+        }}>
+          {selectedInterviews.length} รายการ
+        </span>
       </div>
 
       <div
@@ -567,7 +612,7 @@ export default function InterviewSchedule({
                       boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                     }}
                   >
-                    ดูสถานะ / รายละเอียดเพิ่มเติม
+                    รายละเอียดเพิ่มเติม
                   </Link>
                 </div>
               </div>

@@ -21,14 +21,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-
   function resetUserState() {
     setUserRole("guest");
     setUserName("");
     setUserId("");
     setUnreadCount(0);
     setIsBanned(false);
-  };
+  }
 
   // ฟังก์ชันตรวจสอบการแบน
   async function checkBanStatus(uid: string, role: string) {
@@ -51,7 +50,7 @@ export default function Navbar() {
     } catch (error) {
       console.error("Failed to check ban status:", error);
     }
-  };
+  }
 
   // คำนวณวันหมดอายุการแบน
   function calculateBan(bannedUntil: string) {
@@ -102,7 +101,7 @@ export default function Navbar() {
     } else {
       setIsBanned(false);
     }
-  };
+  }
 
   // Notification Badge
   async function fetchNotificationBadge(uid: string, role: string) {
@@ -120,7 +119,7 @@ export default function Navbar() {
     } catch (err) {
       console.error("Notification pull failed", err);
     }
-  };
+  }
 
   // ดึงข้อมูล Session
   useEffect(() => {
@@ -228,20 +227,42 @@ export default function Navbar() {
 
         {userRole === "seeker" && (
           <>
-            <Link href="/user/user-home" className={`${itemClass} ${isActive("/user/user-home")}`} onClick={onLinkClick}>
+            <Link
+              href="/user/user-home"
+              className={`${itemClass} ${isActive("/user/user-home")}`}
+              onClick={onLinkClick}
+            >
               หน้าแรก
             </Link>
-            <Link href={`/user/seeker_tracking/${userId}`} className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)}`} onClick={onLinkClick}>
+            <Link
+              href={`/user/seeker_tracking/${userId}`}
+              className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)}`}
+              onClick={onLinkClick}
+            >
               ติดตามสถานะ
             </Link>
-            <Link href="/user/savedCompany" className={`${itemClass} ${isActive("/user/savedCompany")}`} onClick={onLinkClick}>
+            <Link
+              href="/user/savedCompany"
+              className={`${itemClass} ${isActive("/user/savedCompany")}`}
+              onClick={onLinkClick}
+            >
               ที่บันทึกไว้
             </Link>
-            <Link href="/user/user-feedback" className={`${itemClass} ${isActive("/user/user-feedback")} nav-feedback-link`} onClick={onLinkClick}>
+            <Link
+              href="/user/user-feedback"
+              className={`${itemClass} ${isActive("/user/user-feedback")} nav-feedback-link`}
+              onClick={onLinkClick}
+            >
               ข้อเสนอแนะ
-              {unreadCount > 0 && <span className="shock-badge">! {unreadCount}</span>}
+              {unreadCount > 0 && (
+                <span className="shock-badge">! {unreadCount}</span>
+              )}
             </Link>
-            <Link href="/user/user-profile" className={`${itemClass} ${isActive("/user/user-profile")}`} onClick={onLinkClick}>
+            <Link
+              href="/user/user-profile"
+              className={`${itemClass} ${isActive("/user/user-profile")}`}
+              onClick={onLinkClick}
+            >
               โปรไฟล์
             </Link>
             <button onClick={onLogout} className={logoutClass}>
@@ -252,23 +273,49 @@ export default function Navbar() {
 
         {userRole === "company" && (
           <>
-            <Link href="/company/company-home" className={`${itemClass} ${isActive("/company/company-home")}`} onClick={onLinkClick}>
+            <Link
+              href="/company/company-home"
+              className={`${itemClass} ${isActive("/company/company-home")}`}
+              onClick={onLinkClick}
+            >
               หน้าแรก
             </Link>
-            <Link href={`/company/company_tracking/${userId}`} className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)}`} onClick={onLinkClick}>
+            <Link
+              href={`/company/company_tracking/${userId}`}
+              className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)}`}
+              onClick={onLinkClick}
+            >
               ติดตามสถานะ
             </Link>
-            <Link href="/company/savedSeeker" className={`${itemClass} ${isActive("/company/savedSeeker")}`} onClick={onLinkClick}>
+            <Link
+              href="/company/savedSeeker"
+              className={`${itemClass} ${isActive("/company/savedSeeker")}`}
+              onClick={onLinkClick}
+            >
               ที่บันทึกไว้
             </Link>
-            <Link href="/company/company-feedback" className={`${itemClass} ${isActive("/company/company-feedback")} nav-feedback-link`} onClick={onLinkClick}>
+            <Link
+              href="/company/company-feedback"
+              className={`${itemClass} ${isActive("/company/company-feedback")} nav-feedback-link`}
+              onClick={onLinkClick}
+            >
               ข้อเสนอแนะ
-              {unreadCount > 0 && <span className="shock-badge">! {unreadCount}</span>}
+              {unreadCount > 0 && (
+                <span className="shock-badge">! {unreadCount}</span>
+              )}
             </Link>
-            <Link href="/company/post-job" className={`${itemClass} ${isActive("/company/post-job")}`} onClick={onLinkClick}>
+            <Link
+              href="/company/post-job"
+              className={`${itemClass} ${isActive("/company/post-job")}`}
+              onClick={onLinkClick}
+            >
               ลงประกาศงาน
             </Link>
-            <Link href="/company/profile" className={`${itemClass} ${isActive("/company/profile")}`} onClick={onLinkClick}>
+            <Link
+              href="/company/profile"
+              className={`${itemClass} ${isActive("/company/profile")}`}
+              onClick={onLinkClick}
+            >
               โปรไฟล์
             </Link>
             <button onClick={onLogout} className={logoutClass}>
@@ -279,13 +326,25 @@ export default function Navbar() {
 
         {userRole === "admin" && (
           <>
-            <Link href="/admin/admin-report" className={`${itemClass} ${isActive("/admin/admin-report")}`} onClick={onLinkClick}>
+            <Link
+              href="/admin/admin-report"
+              className={`${itemClass} ${isActive("/admin/admin-report")}`}
+              onClick={onLinkClick}
+            >
               รายงาน
             </Link>
-            <Link href="/admin/Feedbacks" className={`${itemClass} ${isActive("/admin/Feedbacks")}`} onClick={onLinkClick}>
+            <Link
+              href="/admin/Feedbacks"
+              className={`${itemClass} ${isActive("/admin/Feedbacks")}`}
+              onClick={onLinkClick}
+            >
               ข้อเสนอแนะ
             </Link>
-            <Link href="/admin/home" className={`${itemClass} ${isActive("/admin/home")}`} onClick={onLinkClick}>
+            <Link
+              href="/admin/home"
+              className={`${itemClass} ${isActive("/admin/home")}`}
+              onClick={onLinkClick}
+            >
               ยืนยันตัวตน
             </Link>
             <button onClick={onLogout} className={logoutClass}>
@@ -301,12 +360,12 @@ export default function Navbar() {
     <>
       {/* ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
       {isBanned && (
-        <BanPopup 
-          banDetails={banDetails} 
+        <BanPopup
+          banDetails={banDetails}
           onAcknowledge={() => {
             setIsBanned(false);
             forceLogout();
-          }} 
+          }}
         />
       )}
 
@@ -330,9 +389,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className="nav-links desktop-menu">
-            {renderLinks(false)}
-          </div>
+          <div className="nav-links desktop-menu">{renderLinks(false)}</div>
         </div>
 
         {/* Mobile Drawer / Sidebar */}
