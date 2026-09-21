@@ -166,12 +166,20 @@ export default function CompanyApplication({
           setJobs((prev) =>
             prev.map((job) =>
               job.tracking_id === trackingId
-                ? { ...job, status: newStatus }
+                ? { ...job, status: newStatus ,
+                  interview_date: interviewDetails && interviewTime? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime}:00`:job.interview_date,
+                  link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:job.link,
+                  location:interviewDetails.interviewType === "onsite"? interviewDetails.locationName:job.location
+                }
                 : job,
             ),
           );
           setSelectedJob((prev) =>
-            prev ? { ...prev, status: newStatus } : null,
+            prev ? { ...prev, status: newStatus,
+                interview_date: interviewDetails && interviewTime? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime}:00`:prev.interview_date,
+                  link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:prev.link,
+                  location:interviewDetails.interviewType === "onsite"? interviewDetails.locationName:prev.location
+             } : null,
           );
         }
       }
@@ -443,43 +451,50 @@ export default function CompanyApplication({
                               justifyContent: "center",
                             }}
                           >
-                            <button
-                              className={styles.btnSubmitStep}
-                              style={{
-                                marginTop: "15px",
-                                width: "8rem",
-                                // เปลี่ยนสีปุ่มให้เป็นสีเทาถ้าเลือกวันย้อนหลัง
-                                backgroundColor: isPastDate ? "#9e9e9e" : "",
-                                cursor: isPastDate ? "not-allowed" : "pointer",
-                              }}
-                              disabled={Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
-                              onClick={() => {
-                                const finalLocation =
-                                  interviewType === "online"
-                                    ? meetingLink
-                                    : locationName;
-                                handleUpdateStatus(
-                                  selectedJob.tracking_id,
-                                  "screening",
-                                  {
-                                    interviewDate,
-                                    interviewTime,
-                                    locationName: finalLocation,
-                                    interviewType: interviewType,
-                                    latitude:
-                                      interviewType === "onsite"
-                                        ? selectedLat
-                                        : null,
-                                    longitude:
-                                      interviewType === "onsite"
-                                        ? selectedLng
-                                        : null,
-                                  },
-                                );
-                              }}
-                            >
-                              ส่งนัดหมายสัมภาษณ์
-                            </button>
+                            {/* +++ เพิ่มส่วนเช็กความครบถ้วนก่อนกดปุ่ม +++ */}
+                            {(() => {
+                              const isInterviewFormComplete = interviewDate && interviewTime && (interviewType === "online" ? meetingLink : locationName);
+                              
+                              return (
+                                <button
+                                  className={styles.btnSubmitStep}
+                                  style={{
+                                    marginTop: "15px",
+                                    width: "8rem",
+                                    // เปลี่ยนสีปุ่มให้เป็นสีเทาถ้าเลือกวันย้อนหลัง หรือ กรอกไม่ครบ
+                                    backgroundColor: (!isInterviewFormComplete || isPastDate) ? "#9e9e9e" : "",
+                                    cursor: (!isInterviewFormComplete || isPastDate) ? "not-allowed" : "pointer",
+                                  }}
+                                  disabled={!isInterviewFormComplete || Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
+                                  onClick={() => {
+                                    const finalLocation =
+                                      interviewType === "online"
+                                        ? meetingLink
+                                        : locationName;
+                                    handleUpdateStatus(
+                                      selectedJob.tracking_id,
+                                      "screening",
+                                      {
+                                        interviewDate,
+                                        interviewTime,
+                                        locationName: finalLocation,
+                                        interviewType: interviewType,
+                                        latitude:
+                                          interviewType === "onsite"
+                                            ? selectedLat
+                                            : null,
+                                        longitude:
+                                          interviewType === "onsite"
+                                            ? selectedLng
+                                            : null,
+                                      },
+                                    );
+                                  }}
+                                >
+                                  ส่งนัดหมายสัมภาษณ์
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       )}
