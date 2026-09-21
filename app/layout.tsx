@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th" className={kanit.variable}>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+      </head>
      <body className={`${kanit.variable} font-sans antialiased min-h-screen bg-gray-50 flex flex-col`}>
         <Navbar />
         <main className="flex-grow">{children}</main>
