@@ -93,6 +93,16 @@ export default function CompanyApplication({
 
   const status = selectedJob?.status?.toLowerCase() || "pending";
 
+  // หาวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD เพื่อเอาไปบล็อกการเลือกวันย้อนหลัง
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const minDate = `${yyyy}-${mm}-${dd}`;
+
+  // เช็กว่าวันที่เลือกเป็นอดีตหรือไม่
+  const isPastDate = interviewDate && interviewDate < minDate;
+
   const getStatusClass = (status: string = "pending") => {
     const s = status.toLowerCase();
     if (s === "applied") return styles.statusApplied;
@@ -116,6 +126,16 @@ export default function CompanyApplication({
     interviewDetails?: any,
   ) => {
     if (!selectedJob) return;
+    console.log("ข้อมูลที่จะส่งไป API:", {
+      trackingId: trackingId,
+      status: newStatus,
+      companyEmail: selectedJob.company_email || "hr@company.com",
+      seekerEmail: selectedJob.email,
+      companyName: selectedJob.company_name || "บริษัท",
+      seekerName: selectedJob.fullname || "ผู้สมัคร",
+      jobTitle: selectedJob.job_position,
+      ...interviewDetails,
+    });
 
     try {
       const response = await fetch(
@@ -174,14 +194,14 @@ export default function CompanyApplication({
       f.file_category?.toLowerCase() === "resume" ||
       f.file_name.endsWith(".pdf"),
   );
-// --- โลจิกคำนวณเวลาสำหรับพิจารณารับเข้าทำงาน (Offer) ---
+
   const now = new Date();
   let isWaitingForInterviewEnd = false; // ยังไม่ถึงเวลาสัมภาษณ์
-  let canMakeOffer = false;             // สัมภาษณ์แล้ว (อยู่ในช่วง 7 วัน)
-  let isOfferExpired = false;           // เกิน 7 วันหลังสัมภาษณ์
+  let canMakeOffer = false; // สัมภาษณ์แล้ว (อยู่ในช่วง 7 วัน)
+  let isOfferExpired = false; // เกิน 7 วันหลังสัมภาษณ์
 
   let offerStartDateStr = ""; // วันที่เริ่มส่ง offer ได้
-  let offerEndDateStr = "";   // วันสุดท้ายที่ส่ง offer ได้
+  let offerEndDateStr = ""; // วันสุดท้ายที่ส่ง offer ได้
 
   if (status === "interview" && selectedJob?.interview_date) {
     const interviewDateObj = new Date(selectedJob.interview_date);
@@ -198,7 +218,9 @@ export default function CompanyApplication({
       // diffTime เป็นบวก แปลว่า "ถึงเวลา/เลยเวลาสัมภาษณ์มาแล้ว" และยังไม่เกิน 7 วัน
       canMakeOffer = true;
       // คำนวณวันสุดท้ายที่หมดเขต (วันสัมภาษณ์ + 7 วัน)
-      const endDateObj = new Date(interviewDateObj.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const endDateObj = new Date(
+        interviewDateObj.getTime() + 7 * 24 * 60 * 60 * 1000,
+      );
       offerEndDateStr = endDateObj.toLocaleDateString("th-TH");
     } else if (diffDays > 7) {
       // ผ่านไปเกิน 7 วันแล้ว
@@ -274,7 +296,15 @@ export default function CompanyApplication({
                           </p>
                           <button
                             className={styles.txtRejected}
-                            onClick={() => setIsRejectModelOpen(true)}
+                            onClick={() => {
+                              if (selectedJob) {
+                                handleUpdateStatus(
+                                  selectedJob.tracking_id,
+                                  "reject",
+                                );
+                              }
+                              setIsRejectModelOpen(false);
+                            }}
                           >
                             ยกเลิก
                           </button>
@@ -302,11 +332,31 @@ export default function CompanyApplication({
                           }}
                         >
                           <label>วันสัมภาษณ์:</label>
+                          <label>วันสัมภาษณ์:</label>
                           <input
                             type="date"
+                            min={minDate} // ล็อกปฏิทินไม่ให้เลือกวันในอดีตได้
                             value={interviewDate}
                             onChange={(e) => setInterviewDate(e.target.value)}
+                            style={{
+                              borderColor: isPastDate ? "#d32f2f" : "#ccc", // เปลี่ยนกรอบเป็นสีแดงถ้าพิมพ์วันย้อนหลัง
+                              outline: isPastDate ? "none" : "",
+                            }}
                           />
+
+                          {/* แสดงข้อความเตือนสีแดงเล็กๆ หากเป็นวันที่ย้อนหลัง */}
+                          {isPastDate && (
+                            <span
+                              style={{
+                                color: "#d32f2f",
+                                fontSize: "12px",
+                                display: "block",
+                                marginTop: "4px",
+                              }}
+                            >
+                              * ไม่สามารถเลือกวันแบบย้อนหลังได้
+                            </span>
+                          )}
                           <label>เวลาสัมภาษณ์:</label>
                           <input
                             type="time"
@@ -395,7 +445,14 @@ export default function CompanyApplication({
                           >
                             <button
                               className={styles.btnSubmitStep}
-                              style={{ marginTop: "15px", width: "8rem" }}
+                              style={{
+                                marginTop: "15px",
+                                width: "8rem",
+                                // เปลี่ยนสีปุ่มให้เป็นสีเทาถ้าเลือกวันย้อนหลัง
+                                backgroundColor: isPastDate ? "#9e9e9e" : "",
+                                cursor: isPastDate ? "not-allowed" : "pointer",
+                              }}
+                              disabled={Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
                               onClick={() => {
                                 const finalLocation =
                                   interviewType === "online"
@@ -405,7 +462,6 @@ export default function CompanyApplication({
                                   selectedJob.tracking_id,
                                   "screening",
                                   {
-                                    // ส่งสถานะ Screening ให้ผู้สมัคร
                                     interviewDate,
                                     interviewTime,
                                     locationName: finalLocation,
@@ -477,7 +533,7 @@ export default function CompanyApplication({
                                 ).toLocaleDateString("th-TH")
                               : "ไม่ระบุ"}
                           </p>
-                           <p>
+                          <p>
                             <strong>เวลา:</strong>{" "}
                             {selectedJob.interview_date
                               ? new Date(
@@ -508,14 +564,19 @@ export default function CompanyApplication({
                               {selectedJob.location}
                             </a>
                           </p>
-                          <div style={{display:'flex',justifyContent:'center'}}>
-                            <button
-                            className={styles.txtRejected}
-                            style={{ marginTop: "10px" }}
-                            onClick={() => setIsRejectModelOpen(true)}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                            }}
                           >
-                            ยกเลิก
-                          </button>
+                            <button
+                              className={styles.txtRejected}
+                              style={{ marginTop: "10px" }}
+                              onClick={() => setIsRejectModelOpen(true)}
+                            >
+                              ยกเลิก
+                            </button>
                           </div>
                         </div>
                       )}

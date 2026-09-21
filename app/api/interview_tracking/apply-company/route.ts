@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     const profileLink = `${apiUrl}/seeker/profile/${user_id}`; // ลิงก์ไปยังโปรไฟล์ผู้สมัคร
 
-    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'applied', ?)`;
+    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message,date_time) VALUES (?, ?, 'applied', ?,NOW())`;
     await db.query(sql, [post_id, user_id, message || null]);
 
     await transporter.sendMail({
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
             <p style="white-space: pre-line; margin: 0;">${message || "ไม่มีข้อความเพิ่มเติม"}</p>
           </div>
 
-          <!-- 🟢 ปุ่มลิงก์ไปยังเว็บไซต์สำหรับ HR/Company -->
+          <!--ปุ่มลิงก์ไปยังเว็บไซต์สำหรับ HR/Company -->
           <div style="text-align: center; margin: 25px 0;">
             <a href="${profileLink}" target="_blank" style="background-color: #198754; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
               ดูโปรไฟล์ / เรซูเม่ผู้สมัคร

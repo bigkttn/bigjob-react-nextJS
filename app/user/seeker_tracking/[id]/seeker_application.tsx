@@ -246,9 +246,10 @@ export default function SeekerApplication({
         {/* Left Sidebar */}
         <aside className={styles.sidebar}>
           {visibleJobs.length === 0 ? (
-            <p style={{ textAlign: "center", padding: "20px" }}>
+             <p style={{ textAlign: "center", padding: "20px",fontSize:"2rem" }}>
               No applications found.
             </p>
+          
           ) : (
             visibleJobs.map((job) => (
               <div
@@ -386,62 +387,102 @@ export default function SeekerApplication({
                 >
                   <div className={styles.stepIcon}>🔍</div>
                   <span>Screening</span>
-                  {currentStatus === "screening" && (
+               {currentStatus === "screening" && (
                     <div
                       style={{
                         marginTop: "15px",
                         display: "flex",
                         flexDirection: "column",
-                        alignItems: "center",
-                        backgroundColor: "#f9f9f9",
-                        padding: "10px",
-                        borderRadius: "8px",
+                        backgroundColor: "#ffffff",
+                        padding: "15px",
+                        borderRadius: "10px",
+                        border: "1px solid #e0e0e0",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                        width: "100%",
+                        boxSizing: "border-box"
                       }}
                     >
                       <p
                         style={{
-                          fontSize: "13px",
+                          fontSize: "14px",
                           color: "#333",
-                          margin: "0 0 5px 0",
+                          margin: "0 0 12px 0",
                           fontWeight: "bold",
+                          textAlign: "center",
+                          borderBottom: "1px solid #f0f0f0",
+                          paddingBottom: "8px"
                         }}
                       >
                         รายละเอียดนัดสัมภาษณ์
                       </p>
-                      <p style={{ fontSize: "12px", margin: "0 0 5px 0" }}>
-                        📅{" "}
-                        {activeSelectedJob.interview_date
-                          ? new Date(activeSelectedJob.interview_date).toLocaleString(
-                              "th-TH",
-                            )
-                          : "-"}
-                      </p>
-                      <p style={{ fontSize: "12px", margin: "0 0 10px 0" }}>
-                        📍 {activeSelectedJob.location || activeSelectedJob.link || "-"}
-                      </p>
+
+                      {/* 📅 ส่วนแสดงวันที่ */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#1976d2" }}>event</span>
+                        <span style={{ fontSize: "13px", color: "#555" }}>
+                          {activeSelectedJob.interview_date
+                            ? new Date(activeSelectedJob.interview_date).toLocaleDateString("th-TH", {
+                                year: "numeric", month: "long", day: "numeric"
+                              })
+                            : "ไม่ระบุวันที่"}
+                        </span>
+                      </div>
+
+                      {/* ⏰ ส่วนแสดงเวลา */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#ed6c02" }}>schedule</span>
+                        <span style={{ fontSize: "13px", color: "#555" }}>
+                          {activeSelectedJob.interview_date
+                            ? new Date(activeSelectedJob.interview_date).toLocaleTimeString("th-TH", {
+                                hour: "2-digit", minute: "2-digit"
+                              }) + " น."
+                            : "ไม่ระบุเวลา"}
+                        </span>
+                      </div>
+
+                      {/* 📍 ส่วนแสดงสถานที่ (หมุด) หรือ ลิงก์ออนไลน์ (กล้อง) */}
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: "8px", marginBottom: "15px" }}>
+                        {activeSelectedJob.link ? (
+                          <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#9c27b0", marginTop: "2px" }}>video_chat</span>
+                        ) : (
+                          <span className="material-symbols-outlined" style={{ fontSize: "18px", color: "#d32f2f", marginTop: "2px" }}>distance</span>
+                        )}
+                        <div style={{ flex: 1, fontSize: "13px", color: "#555", wordBreak: "break-word" }}>
+                          {activeSelectedJob.link ? (
+                            <a 
+                              href={activeSelectedJob.link.startsWith('http') ? activeSelectedJob.link : `https://${activeSelectedJob.link}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              style={{ color: "#0288d1", textDecoration: "underline" }}
+                            >
+                              {activeSelectedJob.link}
+                            </a>
+                          ) : (
+                            <span>{activeSelectedJob.location || "ไม่ระบุสถานที่"}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 🔘 ปุ่มกดยืนยัน / ปฏิเสธ */}
                       <div
                         className={styles.actionButtons}
                         style={{
                           padding: 0,
                           justifyContent: "center",
-                          marginTop: 0,
+                          marginTop: "5px",
+                          display: "flex",
+                          gap: "10px"
                         }}
                       >
                         <button
                           className={styles.btnAccept}
-                          onClick={() =>
-                            handleUpdateStatus(
-                              activeSelectedJob.tracking_id,
-                              "interview",
-                            )
-                          }
+                          onClick={() => handleUpdateStatus(activeSelectedJob.tracking_id, "interview")}
                         >
                           <span className={styles.iconCheck}>✓</span> ยืนยันนัด
                         </button>
                         <button
                           className={styles.btnReject}
-                          onClick={() => handleOpenRejectModel(activeSelectedJob.tracking_id,"reject")
-                          }
+                          onClick={() => handleOpenRejectModel(activeSelectedJob.tracking_id, "reject")}
                         >
                           <span className={styles.iconCross}>✕</span> ปฏิเสธ
                         </button>
