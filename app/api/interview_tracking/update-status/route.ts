@@ -12,7 +12,6 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       companyName, 
       seekerName, 
       jobTitle,
-      // ---- รับค่าเพิ่มเติมที่ส่งมาจาก Frontend ----
       interviewDate, 
       interviewTime, 
       locationName, 
@@ -23,37 +22,27 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       return NextResponse.json({ message: 'กรุณาระบุ trackingId และ status' }, { status: 400 });
     }
 
-    // ==========================================
-    // 1. สร้างคำสั่ง SQL สำหรับอัปเดตข้อมูลแบบไดนามิก
-    // ==========================================
     let updateSql = `UPDATE interview_tracking SET status = ?`;
     let queryParams = [status];
 
-    // ถ้ามีการส่งวันและเวลามาด้วย ให้จับมารวมกันเป็นฟอร์แมต YYYY-MM-DD HH:mm:ss ของ MySQL
     if (interviewDate && interviewTime) {
       updateSql += `, interview_date = ?`;
       queryParams.push(`${interviewDate} ${interviewTime}:00`);
     }
 
-    // แยกเซฟ Location หรือ Link ตามประเภทการสัมภาษณ์
     if (interviewType === 'online') {
       updateSql += `, link = ?, location = NULL`;
-      queryParams.push(locationName); // ฝั่ง frontend คุณส่งค่าลิงก์มาในชื่อ locationName
+      queryParams.push(locationName); 
     } else if (interviewType === 'onsite') {
       updateSql += `, location = ?, link = NULL`;
       queryParams.push(locationName);
     }
 
-    // เติมเงื่อนไข WHERE ตัวสุดท้าย
     updateSql += ` WHERE tracking_id = ?`;
     queryParams.push(trackingId);
 
-    // ยิงคำสั่งอัปเดตฐานข้อมูลทีเดียว
     await db.query(updateSql, queryParams);
 
-    // ==========================================
-    // 2. ตั้งค่าระบบส่งอีเมล (ใช้โค้ดเดิมของคุณได้เลย)
-    // ==========================================
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {

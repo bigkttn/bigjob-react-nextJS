@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
           interview.tracking_id,
           interview.status,
           interview.interview_date,
+          interview.date_time,
           interview.link,
           interview.location,
           posts.post_id,
