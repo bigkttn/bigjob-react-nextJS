@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import BanPopup from "./navbar/BanPopup";
-import DesktopMenu from "./navbar/DesktopMenu";
-import MobileMenu from "./navbar/MobileMenu";
+import BanPopup from "./BanPopup";
+import InterviewSchedule from "./InterviewSchedule";
 import "./navbar.css";
 
 export default function Navbar() {
@@ -201,6 +200,103 @@ export default function Navbar() {
 
   const isActive = (path: string) => (pathname === path ? "active" : "");
 
+  const renderLinks = (isMobile: boolean) => {
+    const itemClass = isMobile ? "side-item" : "nav-item";
+    const logoutClass = isMobile ? "side-btn-logout" : "nav-btn-logout";
+    const onLinkClick = isMobile ? closeMenu : undefined;
+
+    return (
+      <>
+        {userRole === "guest" && (
+          <>
+            <Link
+              href="/login"
+              className={isMobile ? "side-item" : "nav-btn-outline"}
+              onClick={onLinkClick}
+            >
+              เข้าสู่ระบบ
+            </Link>
+            <Link
+              href="/register"
+              className={isMobile ? "side-item highlight" : "nav-btn-primary"}
+              onClick={onLinkClick}
+            >
+              สมัครสมาชิก
+            </Link>
+          </>
+        )}
+
+        {userRole === "seeker" && (
+          <>
+            <Link href="/user/user-home" className={`${itemClass} ${isActive("/user/user-home")}`} onClick={onLinkClick}>
+              หน้าแรก
+            </Link>
+            <Link href={`/user/seeker_tracking/${userId}`} className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)}`} onClick={onLinkClick}>
+              ติดตามสถานะ
+            </Link>
+            <Link href="/user/savedCompany" className={`${itemClass} ${isActive("/user/savedCompany")}`} onClick={onLinkClick}>
+              ที่บันทึกไว้
+            </Link>
+            <Link href="/user/user-feedback" className={`${itemClass} ${isActive("/user/user-feedback")} nav-feedback-link`} onClick={onLinkClick}>
+              ข้อเสนอแนะ
+              {unreadCount > 0 && <span className="shock-badge">! {unreadCount}</span>}
+            </Link>
+            <Link href="/user/user-profile" className={`${itemClass} ${isActive("/user/user-profile")}`} onClick={onLinkClick}>
+              โปรไฟล์
+            </Link>
+            <button onClick={onLogout} className={logoutClass}>
+              ออกจากระบบ
+            </button>
+          </>
+        )}
+
+        {userRole === "company" && (
+          <>
+            <Link href="/company/company-home" className={`${itemClass} ${isActive("/company/company-home")}`} onClick={onLinkClick}>
+              หน้าแรก
+            </Link>
+            <Link href={`/company/company_tracking/${userId}`} className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)}`} onClick={onLinkClick}>
+              ติดตามสถานะ
+            </Link>
+            <Link href="/company/savedSeeker" className={`${itemClass} ${isActive("/company/savedSeeker")}`} onClick={onLinkClick}>
+              ที่บันทึกไว้
+            </Link>
+            <Link href="/company/company-feedback" className={`${itemClass} ${isActive("/company/company-feedback")} nav-feedback-link`} onClick={onLinkClick}>
+              ข้อเสนอแนะ
+              {unreadCount > 0 && <span className="shock-badge">! {unreadCount}</span>}
+            </Link>
+            <Link href="/company/post-job" className={`${itemClass} ${isActive("/company/post-job")}`} onClick={onLinkClick}>
+              ลงประกาศงาน
+            </Link>
+            <Link href="/company/profile" className={`${itemClass} ${isActive("/company/profile")}`} onClick={onLinkClick}>
+              โปรไฟล์
+            </Link>
+            <button onClick={onLogout} className={logoutClass}>
+              ออกจากระบบ
+            </button>
+          </>
+        )}
+
+        {userRole === "admin" && (
+          <>
+            <Link href="/admin/admin-report" className={`${itemClass} ${isActive("/admin/admin-report")}`} onClick={onLinkClick}>
+              รายงาน
+            </Link>
+            <Link href="/admin/Feedbacks" className={`${itemClass} ${isActive("/admin/Feedbacks")}`} onClick={onLinkClick}>
+              ข้อเสนอแนะ
+            </Link>
+            <Link href="/admin/home" className={`${itemClass} ${isActive("/admin/home")}`} onClick={onLinkClick}>
+              ยืนยันตัวตน
+            </Link>
+            <button onClick={onLogout} className={logoutClass}>
+              ออกจากระบบ
+            </button>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
       {/* ส่วนแสดง Popup หากผู้ใช้ถูกแบน */}
@@ -213,6 +309,9 @@ export default function Navbar() {
           }} 
         />
       )}
+
+      {/* Backdrop overlay สำหรับปิดเมนูเมื่อแตะพื้นหลัง */}
+      {isMenuOpen && <div className="menu-overlay" onClick={closeMenu}></div>}
 
       {/* Navbar Structure */}
       <nav className="navbar">
@@ -231,26 +330,33 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <DesktopMenu 
-            userRole={userRole} 
-            userId={userId} 
-            unreadCount={unreadCount} 
-            isActive={isActive} 
-            onLogout={onLogout} 
-          />
+          <div className="nav-links desktop-menu">
+            {renderLinks(false)}
+          </div>
         </div>
 
         {/* Mobile Drawer / Sidebar */}
-        <MobileMenu 
-          isMenuOpen={isMenuOpen} 
-          closeMenu={closeMenu} 
-          userRole={userRole} 
-          userName={userName} 
-          userId={userId} 
-          unreadCount={unreadCount} 
-          isActive={isActive} 
-          onLogout={onLogout} 
-        />
+        <div className={`sidebar-menu ${isMenuOpen ? "open" : ""}`}>
+          <div className="sidebar-header">
+            <h3 className="logo-text">BIGJOBs</h3>
+            <button className="close-btn" onClick={closeMenu}>
+              ×
+            </button>
+          </div>
+          <div className="sidebar-links">
+            <InterviewSchedule
+              isMenuOpen={isMenuOpen}
+              userId={userId}
+              userRole={userRole}
+              closeMenu={closeMenu}
+            />
+
+            <div className="mobile-only-links">
+              <hr className="sidebar-divider" />
+              {renderLinks(true)}
+            </div>
+          </div>
+        </div>
       </nav>
     </>
   );
