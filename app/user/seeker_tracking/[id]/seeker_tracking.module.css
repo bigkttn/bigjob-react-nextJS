@@ -107,10 +107,11 @@
 /* Stepper */
 .stepperWrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* จัดให้อยู่ระนาบด้านบน ไม่ลอยขึ้นลงตามเนื้อหาด้านล่าง */
   justify-content: space-between;
-  width: 80%;
+  width: 85%;
   margin: 0 auto;
+  position: relative;
 }
 
 .step {
@@ -119,6 +120,8 @@
   align-items: center;
   gap: 10px;
   color: #999;
+  flex: 1;
+  position: relative;
 }
 
 .step.active {
@@ -130,29 +133,57 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: #eee;
+  background-color: #f5f5f5;
+  color: #9e9e9e;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
+/* ขั้นตอนที่ผ่านแล้ว / เปิดใช้งาน: ขอบเขียว เพิ่มมิติ */
 .step.active .stepIcon {
-  background-color: #e8f5e9;
+  background: linear-gradient(145deg, #ffffff 0%, #e8f5e9 100%);
   color: #2e7d32;
-  border: 2px solid #2e7d32;
+  border: 2.5px solid #2e7d32;
+  box-shadow: 
+    0 4px 12px rgba(46, 125, 50, 0.22),
+    0 0 0 3px rgba(46, 125, 50, 0.1),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9);
+}
+
+/* เมื่อถึงสถานะนั้น: เพิ่มความเป็นมิติ และขอบเขียวเด่นชัด */
+.step.currentStep .stepIcon {
+  background: #ffffff;
+  color: #1b5e20;
+  border: 3px solid #2e7d32;
+  box-shadow: 
+    0 6px 18px rgba(46, 125, 50, 0.3),
+    0 0 0 4px rgba(46, 125, 50, 0.18),
+    inset 0 2px 5px rgba(255, 255, 255, 1);
+}
+
+.step.currentStep > span {
+  color: #1b5e20;
+  font-weight: bold;
 }
 
 .stepLine {
   flex: 1;
   height: 4px;
-  background-color: #eee;
-  margin: 0 10px;
-  transform: translateY(-12px);
+  background-color: #e0e0e0;
+  margin: 23px 10px 0 10px; /* ตรงกับจุดกึ่งกลางของ stepIcon (50px / 2 - 2px) เสมอ */
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
 }
 
 .stepLine.activeLine {
   background-color: #2e7d32;
+  box-shadow: 0 1px 4px rgba(46, 125, 50, 0.25);
 }
 
 /* ปุ่ม Accept/Reject */

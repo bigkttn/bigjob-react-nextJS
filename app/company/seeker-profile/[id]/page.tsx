@@ -331,16 +331,18 @@ export default async function SeekerProfilePage({ params }: PageProps) {
           <div className={styles.column}>
             <div className={styles.cardHeader}>ความต้องการในการทำงาน</div>
             <div className={styles.contentPadding}>
-              <section className={styles.section}>
-                <h4>ตำแหน่งงานที่สนใจ</h4>
-                <ol className={styles.plainList}>
-                  {profile.job_titles?.map(
-                    (job: { job_name: string }, i: number) => (
-                      <li key={i}>{fmt(job.job_name)}</li>
-                    ),
-                  )}
-                </ol>
-              </section>
+              {profile.job_titles && profile.job_titles.length > 0 && (
+                <section className={styles.section}>
+                  <h4>ตำแหน่งงานที่สนใจ</h4>
+                  <ol className={styles.plainList}>
+                    {profile.job_titles.map(
+                      (job: { job_name: string }, i: number) => (
+                        <li key={i}>{fmt(job.job_name)}</li>
+                      ),
+                    )}
+                  </ol>
+                </section>
+              )}
 
               <section className={styles.section}>
                 <h4>รูปแบบการทำงาน</h4>
