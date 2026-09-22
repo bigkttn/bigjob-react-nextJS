@@ -85,6 +85,11 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       mailSubject = `[ข้อเสนองาน] ยินดีด้วย! บริษัท ${companyName} ส่งข้อเสนอเริ่มงานตำแหน่ง ${jobTitle}`;
       mailBody = `เรียน คุณ ${seekerName || 'ผู้สมัคร'},\n\nบริษัท ${companyName} มีความยินดีที่จะแจ้งให้ทราบว่าท่านผ่านการสัมภาษณ์ และบริษัทได้ส่งข้อเสนอให้ท่านแล้ว\nกรุณาเข้าสู่ระบบเพื่อตรวจสอบ\n\nตรวจสอบข้อเสนอ: ${platformLink}`;
     }
+    else if (status === 'hired') {
+      targetEmail = companyEmail;
+      mailSubject = `[ตอบรับข้อเสนองาน] คุณ ${seekerName || 'ผู้สมัคร'} ยืนยันตอบรับข้อเสนอตำแหน่ง ${jobTitle}`;
+      mailBody = `เรียน ฝ่าย HR บริษัท ${companyName},\n\nคุณ ${seekerName || 'ผู้สมัคร'} ได้ตอบรับข้อเสนอเริ่มงานในตำแหน่ง ${jobTitle} เรียบร้อยแล้ว\n\nดูรายละเอียด: ${platformLink}`;
+    }
     else if (status === 'reject' || status === 'rejected') {
       targetEmail = companyEmail && seekerEmail ? `${companyEmail}, ${seekerEmail}` : (companyEmail || seekerEmail); 
       mailSubject = `[ยกเลิกการสมัคร] อัปเดตสถานะตำแหน่ง ${jobTitle}`;

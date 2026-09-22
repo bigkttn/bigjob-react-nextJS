@@ -91,6 +91,11 @@ export default function CompanyApplication({
   const [isRejectModalOpen, setIsRejectModelOpen] = useState(false);
   const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
 
+  const handleOpenRejectModal = (trackingId?: number) => {
+    setTargetTrackingId(trackingId || selectedJob?.tracking_id || null);
+    setIsRejectModelOpen(true);
+  };
+
   const status = selectedJob?.status?.toLowerCase() || "pending";
 
   // หาวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD เพื่อเอาไปบล็อกการเลือกวันย้อนหลัง
@@ -167,18 +172,18 @@ export default function CompanyApplication({
             prev.map((job) =>
               job.tracking_id === trackingId
                 ? { ...job, status: newStatus ,
-                  interview_date: interviewDetails && interviewTime? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime}:00`:job.interview_date,
+                  interview_date: interviewDetails && (interviewDetails.interviewTime || interviewTime)? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`:job.interview_date,
                   link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:job.link,
-                  location:interviewDetails.interviewType === "onsite"? interviewDetails.locationName:job.location
+                  location:interviewDetails?.interviewType === "onsite"? interviewDetails.locationName:job.location
                 }
                 : job,
             ),
           );
           setSelectedJob((prev) =>
             prev ? { ...prev, status: newStatus,
-                interview_date: interviewDetails && interviewTime? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime}:00`:prev.interview_date,
+                interview_date: interviewDetails && (interviewDetails.interviewTime || interviewTime)? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`:prev.interview_date,
                   link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:prev.link,
-                  location:interviewDetails.interviewType === "onsite"? interviewDetails.locationName:prev.location
+                  location:interviewDetails?.interviewType === "onsite"? interviewDetails.locationName:prev.location
              } : null,
           );
         }
@@ -294,7 +299,9 @@ export default function CompanyApplication({
                 <div className={styles.trackerBox}>
                   <div className={styles.stepperContainer}>
                     {/* Step 1: Pending */}
-                    <div className={`${styles.step} ${styles.active}`}>
+                    <div
+                      className={`${styles.step} ${styles.active} ${status === "pending" ? styles.currentStep : ""}`}
+                    >
                       <div className={styles.stepIcon}>📄</div>
                       <span className={styles.stepLabel}>Pending</span>
                       {status === "pending" && (
@@ -303,27 +310,22 @@ export default function CompanyApplication({
                             รอผู้สมัครงานตอบกลับ
                           </p>
                           <button
+                            type="button"
                             className={styles.txtRejected}
-                            onClick={() => {
-                              if (selectedJob) {
-                                handleUpdateStatus(
-                                  selectedJob.tracking_id,
-                                  "reject",
-                                );
-                              }
-                              setIsRejectModelOpen(false);
-                            }}
+                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
                           >
                             ยกเลิก
                           </button>
                         </div>
                       )}
                     </div>
-                    <div className={styles.stepLine} />
+                    <div
+                      className={`${styles.stepLine} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                    />
 
                     {/* Step 2: Applied (บริษัทตั้งค่าและกดส่งนัดหมาย Screening) */}
                     <div
-                      className={`${styles.step} ${["applied", "screening"].includes(status) ? styles.active : ""}`}
+                      className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>☑️</div>
                       <span className={styles.stepLabel}>Applied</span>
@@ -449,6 +451,9 @@ export default function CompanyApplication({
                             style={{
                               display: "flex",
                               justifyContent: "center",
+                              alignItems: "center",
+                              gap: "10px",
+                              marginTop: "15px",
                             }}
                           >
                             {/* +++ เพิ่มส่วนเช็กความครบถ้วนก่อนกดปุ่ม +++ */}
@@ -456,68 +461,97 @@ export default function CompanyApplication({
                               const isInterviewFormComplete = interviewDate && interviewTime && (interviewType === "online" ? meetingLink : locationName);
                               
                               return (
-                                <button
-                                  className={styles.btnSubmitStep}
-                                  style={{
-                                    marginTop: "15px",
-                                    width: "8rem",
-                                    // เปลี่ยนสีปุ่มให้เป็นสีเทาถ้าเลือกวันย้อนหลัง หรือ กรอกไม่ครบ
-                                    backgroundColor: (!isInterviewFormComplete || isPastDate) ? "#9e9e9e" : "",
-                                    cursor: (!isInterviewFormComplete || isPastDate) ? "not-allowed" : "pointer",
-                                  }}
-                                  disabled={!isInterviewFormComplete || Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
-                                  onClick={() => {
-                                    const finalLocation =
-                                      interviewType === "online"
-                                        ? meetingLink
-                                        : locationName;
-                                    handleUpdateStatus(
-                                      selectedJob.tracking_id,
-                                      "screening",
-                                      {
-                                        interviewDate,
-                                        interviewTime,
-                                        locationName: finalLocation,
-                                        interviewType: interviewType,
-                                        latitude:
-                                          interviewType === "onsite"
-                                            ? selectedLat
-                                            : null,
-                                        longitude:
-                                          interviewType === "onsite"
-                                            ? selectedLng
-                                            : null,
-                                      },
-                                    );
-                                  }}
-                                >
-                                  ส่งนัดหมายสัมภาษณ์
-                                </button>
+                                <>
+                                  <button
+                                    className={styles.btnSubmitStep}
+                                    style={{
+                                      width: "8rem",
+                                      backgroundColor: (!isInterviewFormComplete || isPastDate) ? "#9e9e9e" : "",
+                                      cursor: (!isInterviewFormComplete || isPastDate) ? "not-allowed" : "pointer",
+                                    }}
+                                    disabled={!isInterviewFormComplete || Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
+                                    onClick={() => {
+                                      const finalLocation =
+                                        interviewType === "online"
+                                          ? meetingLink
+                                          : locationName;
+                                      handleUpdateStatus(
+                                        selectedJob.tracking_id,
+                                        "screening",
+                                        {
+                                          interviewDate,
+                                          interviewTime,
+                                          locationName: finalLocation,
+                                          interviewType: interviewType,
+                                          latitude:
+                                            interviewType === "onsite"
+                                              ? selectedLat
+                                              : null,
+                                          longitude:
+                                            interviewType === "onsite"
+                                              ? selectedLng
+                                              : null,
+                                        },
+                                      );
+                                    }}
+                                  >
+                                    นัดสัมภาษณ์
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={styles.txtRejected}
+                                    style={{ padding: "6px 14px", fontSize: "12px" }}
+                                    onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                  >
+                                    ยกเลิก
+                                  </button>
+                                </>
                               );
                             })()}
                           </div>
                         </div>
                       )}
                     </div>
-                    <div className={styles.stepLine} />
+                    <div
+                      className={`${styles.stepLine} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                    />
 
                     {/* Step 3: Screening / Interview */}
                     <div
-                      className={`${styles.step} ${["screening", "interview"].includes(status) ? styles.active : ""}`}
+                      className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>🎙️</div>
                       <span className={styles.stepLabel}>Interview</span>
 
                       {status === "screening" && (
-                        <p
+                        <div
                           style={{
-                            fontSize: "13px",
-                            color: "#555",
+                            display: "flex",
+                            flexDirection: "column",
+                            width:"10rem",
+                            alignItems: "center",
+                            gap: "8px",
                             marginTop: "10px",
                           }}
                         >
-                          รอผู้สมัครยืนยันการนัดหมาย
-                        </p>
+                          <p
+                            style={{
+                              fontSize: "13px",
+                              color: "#555",
+                              margin: 0,
+                            }}
+                          >
+                            รอผู้สมัครยืนยันการนัดหมาย
+                          </p>
+                          <button
+                            type="button"
+                            className={styles.txtRejected}
+                            style={{ padding: "5px 12px", fontSize: "11px" }}
+                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                          >
+                            ยกเลิก
+                          </button>
+                        </div>
                       )}
 
                       {status === "interview" && (
@@ -586,9 +620,10 @@ export default function CompanyApplication({
                             }}
                           >
                             <button
+                              type="button"
                               className={styles.txtRejected}
                               style={{ marginTop: "10px" }}
-                              onClick={() => setIsRejectModelOpen(true)}
+                              onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
                             >
                               ยกเลิก
                             </button>
@@ -596,11 +631,13 @@ export default function CompanyApplication({
                         </div>
                       )}
                     </div>
-                    <div className={styles.stepLine} />
+                    <div
+                      className={`${styles.stepLine} ${["appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                    />
 
                     {/* Step 4: Appointment / Offer */}
                     <div
-                      className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""}`}
+                      className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["appointment", "offer", "hired"].includes(status) ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>💼</div>
                       <span className={styles.stepLabel}>Appointment</span>
@@ -633,11 +670,19 @@ export default function CompanyApplication({
                                 style={{
                                   fontSize: "12px",
                                   color: "#555",
-                                  margin: 0,
+                                  margin: "0 0 10px 0",
                                 }}
                               >
                                 ประเมินผลได้ตั้งแต่วันที่ {offerStartDateStr}
                               </p>
+                              <button
+                                type="button"
+                                className={styles.txtRejected}
+                                style={{ padding: "5px 12px", fontSize: "11px" }}
+                                onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                              >
+                                ยกเลิก
+                              </button>
                             </div>
                           )}
 
@@ -673,29 +718,40 @@ export default function CompanyApplication({
                                   padding: "5px",
                                 }}
                               />
-                              <button
-                                className={styles.btnSubmitStep}
-                                style={{
-                                  width: "100%",
-                                  backgroundColor: startDate
-                                    ? "#2e7d32"
-                                    : "#9e9e9e",
-                                  color: "#fff",
-                                  border: "none",
-                                  padding: "8px",
-                                  borderRadius: "4px",
-                                  cursor: startDate ? "pointer" : "not-allowed",
-                                }}
-                                onClick={() =>
-                                  handleUpdateStatus(
-                                    selectedJob.tracking_id,
-                                    "appointment",
-                                  )
-                                }
-                                disabled={!startDate} // ปิดปุ่มถ้ายังไม่เลือกวันเริ่มงาน
-                              >
-                                ส่งข้อเสนอเริ่มงาน
-                              </button>
+                              <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "5px" }}>
+                                <button
+                                  className={styles.btnSubmitStep}
+                                  style={{
+                                    flex: 1,
+                                    backgroundColor: startDate
+                                      ? "#2e7d32"
+                                      : "#9e9e9e",
+                                    color: "#fff",
+                                    border: "none",
+                                    padding: "8px",
+                                    borderRadius: "4px",
+                                    cursor: startDate ? "pointer" : "not-allowed",
+                                  }}
+                                  onClick={() =>
+                                    handleUpdateStatus(
+                                      selectedJob.tracking_id,
+                                      "appointment",
+                                      { interviewDate: startDate, interviewTime: "09:00" },
+                                    )
+                                  }
+                                  disabled={!startDate} // ปิดปุ่มถ้ายังไม่เลือกวันเริ่มงาน
+                                >
+                                  ส่งข้อเสนอเริ่มงาน
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.txtRejected}
+                                  style={{ padding: "8px 12px", fontSize: "12px" }}
+                                  onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                >
+                                  ยกเลิก
+                                </button>
+                              </div>
                             </div>
                           )}
 
@@ -732,7 +788,7 @@ export default function CompanyApplication({
                                   borderRadius: "4px",
                                   cursor: "pointer",
                                 }}
-                                onClick={() => setIsRejectModelOpen(true)}
+                                onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
                               >
                                 ปรับสถานะเป็นไม่ผ่าน
                               </button>
@@ -743,19 +799,68 @@ export default function CompanyApplication({
 
                       {/* เมื่อส่งข้อเสนอไปแล้ว จะแสดงข้อความนี้ */}
                       {(status === "appointment" ||
-                        status === "offer" ||
-                        status === "hired") && (
-                        <p
+                        status === "offer") && (
+                        <div
                           style={{
-                            fontSize: "13px",
-                            color: "#2e7d32",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "8px",
                             marginTop: "10px",
-                            fontWeight: "bold",
-                            textAlign: "center",
                           }}
                         >
-                          ส่งข้อเสนองานเรียบร้อยแล้ว
-                        </p>
+                          <p
+                            style={{
+                              fontSize: "13px",
+                              color: "#2e7d32",
+                              margin: 0,
+                              fontWeight: "bold",
+                              textAlign: "center",
+                            }}
+                          >
+                            ส่งข้อเสนองานเรียบร้อยแล้ว
+                          </p>
+                          <button
+                            type="button"
+                            className={styles.txtRejected}
+                            style={{ padding: "5px 12px", fontSize: "11px" }}
+                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                          >
+                            ยกเลิก
+                          </button>
+                        </div>
+                      )}
+
+                      {status === "hired" && (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginTop: "10px",
+                          }}
+                        >
+                          <p
+                            style={{
+                              fontSize: "13px",
+                              color: "#2e7d32",
+                              margin: 0,
+                              fontWeight: "bold",
+                              textAlign: "center",
+                            }}
+                          >
+                            ผู้สมัครตอบรับเข้าทำงานแล้ว
+                          </p>
+                          <button
+                            type="button"
+                            className={styles.txtRejected}
+                            style={{ padding: "5px 12px", fontSize: "11px" }}
+                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                          >
+                            ยกเลิก
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -977,35 +1082,56 @@ export default function CompanyApplication({
                       Job Preferences
                     </h2>
 
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Job Title
-                      </p>
-                      <ol
-                        style={{
-                          margin: 0,
-                          paddingLeft: "20px",
-                          fontSize: "14px",
-                          fontWeight: "bold",
-                          color: "#333",
-                        }}
-                      >
-                        {selectedJob.job_titles &&
-                        selectedJob.job_titles.length > 0 ? (
-                          selectedJob.job_titles.map((jt, i) => (
-                            <li key={i}>{jt.job_name}</li>
-                          ))
-                        ) : (
-                          <li>{selectedJob.job_position || "-"}</li>
-                        )}
-                      </ol>
-                    </div>
+                    {(() => {
+                      let titles: any[] = [];
+                      if (Array.isArray(selectedJob.job_titles)) {
+                        titles = selectedJob.job_titles;
+                      } else if (typeof selectedJob.job_titles === "string") {
+                        try {
+                          const parsed = JSON.parse(selectedJob.job_titles);
+                          if (Array.isArray(parsed)) titles = parsed;
+                        } catch {
+                          titles = [];
+                        }
+                      }
+
+                      const userJobTitles = titles.filter(
+                        (jt: any) =>
+                          (typeof jt === "string" && jt.trim() !== "") ||
+                          (jt?.job_name && String(jt.job_name).trim() !== ""),
+                      );
+
+                      if (userJobTitles.length === 0) return null;
+
+                      return (
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            Job Title
+                          </p>
+                          <ol
+                            style={{
+                              margin: 0,
+                              paddingLeft: "20px",
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                              color: "#333",
+                            }}
+                          >
+                            {userJobTitles.map((jt: any, i: number) => (
+                              <li key={i}>
+                                {typeof jt === "string" ? jt : jt.job_name}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                      );
+                    })()}
 
                     <div style={{ marginBottom: "15px" }}>
                       <p
@@ -1299,7 +1425,10 @@ export default function CompanyApplication({
                 <button
                   className={styles.btnConfirm}
                   onClick={() => {
-                    handleUpdateStatus(targetTrackingId!, "reject");
+                    const idToReject = targetTrackingId || selectedJob?.tracking_id;
+                    if (idToReject) {
+                      handleUpdateStatus(idToReject, "reject");
+                    }
                     setIsRejectModelOpen(false);
                   }}
                 >
