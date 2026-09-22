@@ -4,14 +4,13 @@ import { Kanit } from "next/font/google";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/footer";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import SessionRefresher from "@/components/SessionRefresher";
 
 const kanit = Kanit({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["thai", "latin"],
   variable: "--font-kanit", // ประกาศตัวแปร CSS
 });
-
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,6 +28,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
       </head>
      <body className={`${kanit.variable} font-sans antialiased min-h-screen bg-gray-50 flex flex-col`}>
+        <SessionRefresher />
         <Navbar />
         <main className="flex-grow">{children}</main>
         <Footer />
