@@ -1,48 +1,10 @@
 /* Base Layout & Reset Base */
 .container {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f9fafb;
   min-height: 100vh;
   padding-bottom: 2rem;
 }
-
-/* Navbar Styling */
-.navbar {
-  background-color: #000000;
-  padding: 0.8rem 2rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.navLinks {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.navLinks a {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  padding: 0.4rem 0.8rem;
-  transition: all 0.2s ease;
-}
-
-.navLinks a:hover {
-  opacity: 0.8;
-}
-
-/* Active State (ปุ่ม saved สีขาวตัวหนังสือดำ)
-.activeLink {
-  background-color: #ffffff;
-  color: #000000 !important;
-  border-radius: 20px;
-  padding: 0.4rem 1.2rem !important;
-  font-weight: 600 !important;
-} */
 
 .centerMessage {
   display: flex;
@@ -57,42 +19,60 @@
 .searchWrapper {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filterSelect, .searchInput {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  background-color: #ffffff;
+  color: #374151;
+}
+
+.filterSelect {
+  cursor: pointer;
 }
 
 .searchInput {
   width: 100%;
   max-width: 400px;
-  padding: 0.75rem 1.25rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 9999px;
-  font-size: 1rem;
-  outline: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.searchInput:focus {
-  border-color: #000000;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+.filterSelect:focus, .searchInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* Main Content Container */
 .mainContent {
   max-width: 1100px;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* Seeker Card Styling */
+/* Card Styling */
 .card {
-  background-color: #dbdbdb;
-  border-radius: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
 }
 
 .cardFlex {
@@ -104,17 +84,23 @@
 /* Image Section */
 .imageWrapper {
   flex-shrink: 0;
-  width: 240px;
-  height: 160px;
+  width: 220px;
+  height: 150px;
   position: relative;
   border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .seekerImage {
   object-fit: cover;
   width: 100%;
   height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .seekerImage {
+  transform: scale(1.03);
 }
 
 /* Info Section */
@@ -122,36 +108,100 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .seekerName {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #000000;
-  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.3rem 0;
   text-transform: capitalize;
+  padding-right: 2.5rem; /* space for action menu */
+}
+
+.menuContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+}
+
+.actionMenuBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.actionMenuBtn:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  min-width: 150px;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #ef4444; /* red color for unsave */
+  transition: background-color 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background-color: #fef2f2;
 }
 
 .seekerPosition {
   font-size: 1.05rem;
-  font-weight: 600;
-  color: #111111;
-  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+  color: #4b5563;
+  margin: 0 0 0.8rem 0;
 }
 
 /* Details Typography */
 .detailsGrid {
-  font-size: 0.8rem;
-  color: #333333;
-  line-height: 1.35;
+  font-size: 0.85rem;
+  color: #4b5563;
+  line-height: 1.5;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.4rem;
 }
 
 .detailsGrid p {
-  margin: 0.15rem 0;
+  margin: 0;
 }
 
 .detailsGrid span {
-  color: #666666;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-right: 0.3rem;
 }
 
 /* Button Section */
@@ -163,86 +213,70 @@
 }
 
 .infoButton {
-  background-color: #000000;
+  background-color: #111827;
   color: #ffffff;
   border: none;
-  border-radius: 20px;
-  padding: 0.6rem 1.8rem;
+  border-radius: 10px;
+  padding: 0.6rem 1.4rem;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .infoButton:hover {
-  background-color: #222222;
+  background-color: #374151;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
 }
 
 .infoButton:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 
-/* ==========================================================================
-   Responsive Breakpoints
-   ========================================================================== */
-
-/* สำหรับ Tablet และหน้าจอขนาดกลาง */
+/* Responsive Breakpoints */
 @media (max-width: 850px) {
   .cardFlex {
-    flex-wrap: wrap; /* ให้ดันปุ่มลงไปด้านล่างได้ถ้าพื้นที่ไม่พอ */
+    flex-wrap: wrap;
   }
   
   .buttonWrapper {
     width: 100%;
     margin-left: 0;
     justify-content: flex-end;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 }
 
-/* สำหรับ Mobile / หน้าจอขนาดเล็ก */
 @media (max-width: 576px) {
-  .navbar {
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .navLinks {
-    gap: 0.8rem;
+  .searchWrapper {
     justify-content: center;
   }
 
-  .navLinks a {
-    font-size: 0.85rem;
-    padding: 0.3rem 0.6rem;
+  .filterSelect, .searchInput {
+    width: 100%;
+    max-width: 100%;
   }
 
   .cardFlex {
-    flex-direction: column; /* เปลี่ยนจากแนวนอนเป็นแนวตั้งเพื่อความสบายตาบนมือถือ */
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
   }
 
   .imageWrapper {
     width: 100%;
-    max-width: 300px; /* ให้รูปใหญ่เต็มที่ 300px บนมือถือ */
     height: 180px;
-  }
-
-  .infoWrapper {
-    width: 100%;
-    align-items: flex-start;
   }
 
   .buttonWrapper {
     width: 100%;
-    justify-content: center; /* ให้ปุ่มอยู่ตรงกลางบนจอมือถือ */
+    justify-content: flex-start;
     margin-top: 0.5rem;
   }
   
   .infoButton {
-    width: 100%; /* ให้ปุ่มเต็มความกว้างเพื่อกดง่ายขึ้น */
-    max-width: 200px;
+    width: 100%;
   }
 }

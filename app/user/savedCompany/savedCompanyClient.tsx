@@ -9,6 +9,13 @@ interface Company {
   name: string;
   job_title: string;
   logo: string;
+  created_at?: string;
+  post_created_at?: string;
+  status?: string;
+  province?: string;
+  job_type?: string;
+  salary_min?: number;
+  salary_max?: number;
 }
 
 interface ClientProps {
@@ -21,6 +28,8 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterJobTitle, setFilterJobTitle] = useState("");
+  const [sortTime, setSortTime] = useState("desc");
 
   useEffect(() => {
     const fetchSeekers = async () => {
@@ -56,13 +65,118 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
     }
   }, [userId]);
 
-  const filteredData = compayData.filter((company) => {
+  const uniqueJobTitles = Array.from(
+    new Set(compayData.map((company) => company.job_title).filter(Boolean)),
+  );
+
+  let filteredData = compayData.filter((company) => {
     const term = searchTerm.toLowerCase();
-    return (
+    const matchSearch =
       (company.name && company.name.toLowerCase().includes(term)) ||
-      (company.job_title && company.job_title.toLowerCase().includes(term))
-    );
+      (company.job_title && company.job_title.toLowerCase().includes(term));
+    const matchJobTitle = filterJobTitle
+      ? company.job_title === filterJobTitle
+      : true;
+    return matchSearch && matchJobTitle;
   });
+
+  filteredData = filteredData.sort((a, b) => {
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return sortTime === "desc" ? dateB - dateA : dateA - dateB;
+  });
+
+  const getStatusStyle = (status: string) => {
+    const s = status?.toLowerCase();
+    if (s === "open" || s === "เปิดรับสมัคร")
+      return {
+        color: "#28a745",
+        backgroundColor: "#eaffea",
+        borderColor: "#28a745",
+      };
+    if (s === "closed" || s === "ปิดรับสมัคร")
+      return {
+        color: "#dc3545",
+        backgroundColor: "#ffebeb",
+        borderColor: "#dc3545",
+      };
+    return {
+      color: "#6c757d",
+      backgroundColor: "#f8f9fa",
+      borderColor: "#6c757d",
+    };
+  };
+
+  const formatSalary = (min?: number, max?: number) => {
+    if (!min && !max) return "ไม่ระบุเงินเดือน";
+    if (min && !max) return `฿${min.toLocaleString()}+`;
+    if (!min && max) return `สูงสุด ฿${max.toLocaleString()}`;
+    return `฿ ${min?.toLocaleString()} - ฿ ${max?.toLocaleString()}`;
+  };
+
+  function getTimeAgo(dateString?: string): string {
+    if (!dateString) return "ไม่ระบุเวลา";
+    const createdDate = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor(
+      (now.getTime() - createdDate.getTime()) / 1000,
+    );
+    if (diffInSeconds < 60) return "เมื่อสักครู่";
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} นาทีที่แล้ว`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays} วันที่แล้ว`;
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) return `${diffInMonths} เดือนที่แล้ว`;
+    return `${Math.floor(diffInDays / 365)} ปีที่แล้ว`;
+  }
+
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const toggleMenu = (postId: number) => {
+    setOpenMenuId((prev) => (prev === postId ? null : postId));
+  };
+
+  const handleUnsave = async (postId: number) => {
+    setOpenMenuId(null);
+    const confirmDelete = confirm("ต้องการยกเลิกการบันทึกบริษัทนี้ใช่หรือไม่?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch("/api/user/delete_favour_post", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          post_id: postId,
+        }),
+      });
+
+      if (response.ok) {
+        setCompanyData((prev) => prev.filter((c) => c.post_id !== postId));
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(`ไม่สามารถยกเลิกได้: ${errorData.message || "เกิดข้อผิดพลาด"}`);
+      }
+    } catch (error) {
+      console.error("Error unsaving company:", error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    }
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!target.closest(".menu-container")) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   if (loading)
     return <div className={styles.centerMessage}>กำลังโหลดข้อมูล...</div>;
@@ -80,8 +194,28 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
   return (
     <div className={styles.container}>
       <main className={styles.mainContent}>
-        {/* Search Bar */}
+        {/* Search Bar & Filter */}
         <div className={styles.searchWrapper}>
+          <select
+            value={sortTime}
+            onChange={(e) => setSortTime(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="desc">บันทึกล่าสุด</option>
+            <option value="asc">บันทึกเก่าสุด</option>
+          </select>
+          <select
+            value={filterJobTitle}
+            onChange={(e) => setFilterJobTitle(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="">ตำแหน่งงานทั้งหมด</option>
+            {uniqueJobTitles.map((title, index) => (
+              <option key={index} value={title}>
+                {title}
+              </option>
+            ))}
+          </select>
           <input
             type="text"
             placeholder="ค้นหาชื่อบริษัท หรือตำแหน่งงาน..."
@@ -113,8 +247,44 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
 
                 {/* Info Section */}
                 <div className={styles.infoWrapper}>
-                  <h2 className={styles.seekerName}>{company.name}</h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.3rem' }}>
+                    <h2 className={styles.seekerName} style={{ margin: 0, paddingRight: 0 }}>
+                      {company.name}
+                    </h2>
+                    <span
+                      className={styles.statusBadge}
+                      style={{
+                        ...getStatusStyle(company.status || ""),
+                        margin: 0,
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        padding: '4px 10px',
+                        lineHeight: 1
+                      }}
+                    >
+                      {company.status || "ไม่ระบุ"}
+                    </span>
+                  </div>
                   <h3 className={styles.seekerPosition}>{company.job_title}</h3>
+
+                  <div className={styles.detailsGrid}>
+                    <p>
+                      <span>สถานที่:</span>{" "}
+                      {company.province || "ไม่ระบุสถานที่"}
+                    </p>
+                    <p>
+                      <span>ประเภทงาน:</span>{" "}
+                      {company.job_type || "ไม่ระบุประเภท"}
+                    </p>
+                    <p>
+                      <span>เงินเดือน:</span>{" "}
+                      {formatSalary(company.salary_min, company.salary_max)}
+                    </p>
+                    <p>
+                      <span>ประกาศเมื่อ:</span>{" "}
+                      {getTimeAgo(company.post_created_at)}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Button Section */}
@@ -122,6 +292,32 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
                   <Link href={"/user/user-detail-job/" + company.post_id}>
                     <button className={styles.infoButton}>ดูรายละเอียด</button>
                   </Link>
+                </div>
+
+                {/* 3-Dot Menu */}
+                <div className={`menu-container ${styles.menuContainer}`}>
+                  <button
+                    className={styles.actionMenuBtn}
+                    onClick={() => toggleMenu(company.post_id)}
+                  >
+                    <span className="material-symbols-outlined">more_vert</span>
+                  </button>
+                  {openMenuId === company.post_id && (
+                    <div className={styles.dropdownMenu}>
+                      <button
+                        className={styles.dropdownItem}
+                        onClick={() => handleUnsave(company.post_id)}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "1.1rem" }}
+                        >
+                          bookmark_remove
+                        </span>
+                        ยกเลิกการบันทึก
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

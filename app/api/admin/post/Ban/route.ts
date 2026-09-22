@@ -75,10 +75,10 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // 1. เปลี่ยนสถานะโพสต์กลับเป็น active และล้างค่า ban_until
+    // 1. เปลี่ยนสถานะโพสต์กลับเป็น Open และล้างค่า ban_until
     const query = `
       UPDATE posts
-      SET status = 'active', ban_until = NULL
+      SET status = 'Open', ban_until = NULL
       WHERE post_id = ?
     `;
     const [result]: any = await db.query(query, [post_id]);

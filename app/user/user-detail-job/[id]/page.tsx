@@ -333,17 +333,15 @@ export default async function DetailJob({ params }: PageProps) {
                   <tr>
                     <td className={styles.label}>รายละเอียดงาน</td>
                     <td>
-                      <ul className={styles.list}>
-                        <li
-                          style={{
-                            maxWidth: "450px",
-                            whiteSpace: "pre-line",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {job.job_description || "ไม่ได้ระบุรายละเอียด"}
-                        </li>
-                      </ul>
+                      <div
+                        style={{
+                          maxWidth: "450px",
+                          whiteSpace: "pre-line",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {job.job_description || "ไม่ได้ระบุรายละเอียด"}
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -352,19 +350,17 @@ export default async function DetailJob({ params }: PageProps) {
               <div style={{ marginTop: "30px" }}>
                 <hr />
                 <h3 className={styles.sectionTitle}>คุณสมบัติ</h3>
-                <ol className={styles.list}>
-                  <li
-                    style={{
-                      maxWidth: "450px",
-                      whiteSpace: "pre-line",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {typeof job.preferred_qualifications === "string"
-                      ? job.preferred_qualifications
-                      : "ไม่ได้ระบุคุณสมบัติ"}
-                  </li>
-                </ol>
+                <div
+                  style={{
+                    maxWidth: "450px",
+                    whiteSpace: "pre-line",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {typeof job.preferred_qualifications === "string"
+                    ? job.preferred_qualifications
+                    : "ไม่ได้ระบุคุณสมบัติ"}
+                </div>
               </div>
             </div>
 
@@ -372,55 +368,49 @@ export default async function DetailJob({ params }: PageProps) {
             <div className={styles.rightCol}>
               <section>
                 <h3 className={styles.sectionTitle}>สวัสดิการ</h3>
-                <ul className={styles.list}>
-                  <li
-                    style={{
-                      maxWidth: "450px",
-                      whiteSpace: "pre-line",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {typeof job.Benefits === "string"
-                      ? job.Benefits
-                      : "ไม่ได้ระบุสวัสดิการ"}
-                  </li>
-                </ul>
+                <div
+                  style={{
+                    maxWidth: "450px",
+                    whiteSpace: "pre-line",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {typeof job.Benefits === "string" || typeof job.benefits === "string"
+                    ? (job.Benefits || job.benefits)
+                    : "ไม่ได้ระบุสวัสดิการ"}
+                </div>
               </section>
 
               <section style={{ marginTop: "30px" }}>
                 <hr />
                 <h3 className={styles.sectionTitle}>วิธีการสมัคร</h3>
-                <ul className={styles.list}>
-                  <li
-                    style={{
-                      maxWidth: "450px",
-                      whiteSpace: "pre-line",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {typeof job.how_to_apply === "string"
-                      ? job.how_to_apply
-                      : "ไม่ได้ระบุวิธีการสมัคร"}
-                  </li>
-                </ul>
+                <div
+                  style={{
+                    maxWidth: "450px",
+                    whiteSpace: "pre-line",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {typeof job.how_to_apply === "string"
+                    ? job.how_to_apply
+                    : "ไม่ได้ระบุวิธีการสมัคร"}
+                </div>
               </section>
 
               <section style={{ marginTop: "30px" }}>
                 <hr />
                 <h3 className={styles.sectionTitle}>ช่องทางติดต่อ</h3>
-                <ul className={styles.list}>
-                  <li
-                    style={{
-                      maxWidth: "450px",
-                      whiteSpace: "pre-line",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {typeof job.contact === "string"
-                      ? job.contact
-                      : "ไม่ได้ระบุข้อมูลติดต่อ"}
-                  </li>
-                </ul>
+                <div
+                  style={{
+                    maxWidth: "450px",
+                    whiteSpace: "pre-line",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {typeof job.contact === "string"
+                    ? job.contact
+                    : "ไม่ได้ระบุข้อมูลติดต่อ"}
+                </div>
               </section>
 
               <section style={{ marginTop: "30px" }}>
@@ -428,21 +418,9 @@ export default async function DetailJob({ params }: PageProps) {
                 <h3 className={styles.sectionTitle}>วันปิดรับสมัคร</h3>
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
                     marginTop: "10px",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: "#e67e22",
-                    }}
-                  ></div>
-
                   <span
                     style={{
                       fontSize: "1.1rem",

@@ -36,6 +36,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - ตั้งชื่อฟังก์ชันและตัวแปรทั่วไปเป็น **camelCase**
 - การจัดสไตล์หลักให้ใช้ **CSS Modules (`*.module.css`)** ประจำแต่ละคอมโพเนนต์ เพื่อคุมสโคปคลาสไม่ให้ตีกัน
 - หลีกเลี่ยงการเขียน Logic หรือ State ใหญ่ๆ รวมไว้ใน Component เดียว ให้แยกเป็น Custom Hook หรือ Subcomponent
+- Simple & Clear Logic (KISS Principle): เขียน Logic ให้เรียบง่าย ตรงไปตรงมา ไม่ซับซ้อนเกินจำเป็น หลีกเลี่ยงการใช้ Nested Condition (if-else ซ้อนกันหลายชั้น) หรือ Ternary Operator ซับซ้อน เพื่อให้อ่านโค้ดง่ายและดูแลรักษาต่อได้สะดวก
 - **Next.js 16 Async Rules:** พารามิเตอร์ `params` และ `searchParams` ใน Page และ Route Handler มีสถานะเป็น `Promise` เสมอ ต้องใช้ `const { id } = await params;` หรือใส่ Type `{ params: Promise<{ id: string }> }`
 - **React 19 Hooks Rules:** ห้ามเรียก `setState` แบบ Synchronous ภายในรูทของ `useEffect` เพื่อป้องกันปัญหา Cascading Re-render และ ESLint Warning
 - **Leaflet & Window Check:** Leaflet ใช้งาน `window` ซึ่งรันฝั่ง Server ไม่ได้ ทุกคอมโพเนนต์ที่มีการเรียกใช้แผนที่ต้องโหลดผ่าน `dynamic(() => import(...), { ssr: false })` และมี `'use client'` กำกับเสมอ
