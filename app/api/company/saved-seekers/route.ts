@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       `SELECT 
         fu.favour_id,
         fu.company_id,
+        fu.created_at,
         u.uid,
         u.fullname AS name,
         u.profile_image AS image,
@@ -30,7 +31,8 @@ export async function POST(request: Request) {
         u.nationality,
         u.religion,
         u.weight,
-        u.height 
+        u.height,
+        u.is_visible
       FROM favour_user fu
       INNER JOIN User u ON fu.user_id = u.uid
       LEFT JOIN JobTitle jobU ON u.uid = jobU.user_id
@@ -45,6 +47,8 @@ export async function POST(request: Request) {
       name: row.name,
       jobtitle: row.jobtitle || "General Seeker", //   -- 4. เปลี่ยนจากคำว่า "Seeker" มาใช้ค่าจริงที่ดึงจาก SQL
       image: row.image,
+      created_at: row.created_at,
+      is_visible: row.is_visible,
       details: {
         gender: row.gender,
         age: row.age,

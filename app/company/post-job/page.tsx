@@ -42,6 +42,10 @@ const PostJob = () => {
   });
 
   const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterJobType, setFilterJobType] = useState("");
+
   const [questions, setQuestions] = useState<Question[]>([
     { id: "1", text: "", options: ["", ""], correctIndex: null },
   ]);
@@ -115,6 +119,14 @@ const PostJob = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  let filteredPosts = myPosts.filter((post) => {
+    const term = searchTerm.toLowerCase();
+    const matchSearch = post.job_position?.toLowerCase().includes(term) || post.company_name?.toLowerCase().includes(term);
+    const matchStatus = filterStatus ? post.status === filterStatus : true;
+    const matchJobType = filterJobType ? post.job_type === filterJobType : true;
+    return matchSearch && matchStatus && matchJobType;
+  });
 
   // ── Form handlers (🔓 ทำงานเมื่อ Approved เท่านั้น) ──────────────────────────────
   const handleChange = (
@@ -304,9 +316,43 @@ const PostJob = () => {
       {/* My Posts */}
       <div className={styles.myPostsSection}>
         <h2 className={styles.myPostsTitle}>โพสต์ของฉัน</h2>
+        
+        {/* Filters */}
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="ค้นหาตำแหน่งงาน..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', minWidth: '200px', outline: 'none' }}
+          />
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', outline: 'none' }}
+          >
+            <option value="">ทุกสถานะ</option>
+            <option value="Open">Open</option>
+            <option value="closed">Closed</option>
+            <option value="banned">Banned</option>
+          </select>
+          <select
+            value={filterJobType}
+            onChange={(e) => setFilterJobType(e.target.value)}
+            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', outline: 'none' }}
+          >
+            <option value="">ทุกประเภทงาน</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Internship">Internship</option>
+            <option value="Contract">Contract</option>
+          </select>
+        </div>
+
         <div className={styles.item}>
-          {myPosts.length > 0 ? (
-            myPosts.map((post: any) => (
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post: any) => (
               <div key={post.post_id}>
                 <div className={styles.postMiniCard}>
                   <div className={styles.postMiniCardInfo}>
@@ -335,7 +381,7 @@ const PostJob = () => {
               </div>
             ))
           ) : (
-            <p className={styles.emptyText}>ยังไม่มีรายการประกาศงาน</p>
+            <p className={styles.emptyText}>ไม่พบรายการประกาศงาน</p>
           )}
         </div>
       </div>

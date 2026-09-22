@@ -16,7 +16,17 @@ export async function POST(request: Request) {
       `SELECT 
         fav_post.favour_id,
         fav_post.post_id,
+        fav_post.created_at AS saved_at,
         posts.post_id,
+        CASE 
+            WHEN posts.application_dates < NOW() THEN 'closed'
+            ELSE 'Open' 
+        END AS status,
+        posts.province,
+        posts.job_type,
+        posts.salary_min,
+        posts.salary_max,
+        posts.created_at AS post_created_at,
         co.company_id AS cid,
         co.company_name AS name,
         co.logo_image AS logo,
@@ -34,7 +44,14 @@ export async function POST(request: Request) {
       post_id: row.post_id,
       name: row.name,
       job_title: row.job_title || "General Company",
-      logo: row.logo || null
+      logo: row.logo || null,
+      created_at: row.saved_at,
+      post_created_at: row.post_created_at,
+      status: row.status,
+      province: row.province,
+      job_type: row.job_type,
+      salary_min: row.salary_min,
+      salary_max: row.salary_max
     }));
 
     return NextResponse.json(
