@@ -11,12 +11,14 @@ import SaveAndReportCompany from "./SaveAndReportCompanyBttn";
 import CompanyMapSection from "./map";
 import { getSession, CustomJwtPayload } from "./getSession";
 import BanPopup from "./BanPopup";
+import ReviewSection from "@/components/ReviewSection";
 
 export default function ProfileCompany() {
   const { id } = useParams();
 
   const [company, setCompany] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [viewer, setViewer] = useState<CustomJwtPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export default function ProfileCompany() {
         if (res.ok) {
           setCompany(data.company);
           setPosts(data.posts || []);
+          setReviews(data.reviews || []);
         } else {
           console.error(
             `Failed to fetch company profile. Status: ${res.status}`,
@@ -82,6 +85,29 @@ export default function ProfileCompany() {
 
   const fmt = (val: any) =>
     val !== null && val !== undefined && val !== "" ? String(val) : "-";
+
+  async function deleteReview(trackingId: number) {
+    if (!viewer?.id) return;
+    const ok = confirm("คุณต้องการลบรีวิวนี้ใช่หรือไม่?");
+    if (!ok) return;
+
+    try {
+      const res = await fetch("/api/interview_tracking/delete-review", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tracking_id: trackingId, user_id: viewer.id }),
+      });
+
+      if (res.ok) {
+        setReviews(reviews.filter((r) => r.tracking_id !== trackingId));
+      } else {
+        const data = await res.json();
+        alert(data.error ?? "ไม่สามารถลบรีวิวได้");
+      }
+    } catch (err: any) {
+      alert(`เกิดข้อผิดพลาด: ${err.message}`);
+    }
+  }
 
   // สถานะกำลังโหลด
   if (loading) {
@@ -166,7 +192,10 @@ export default function ProfileCompany() {
 
           <div className={styles.profileCard}>
             <img
-              src={company.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`}
+              src={
+                company.cover_image ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
+              }
               className={styles.banner}
               alt="ภาพหน้าปกบริษัท"
             />
@@ -174,7 +203,8 @@ export default function ProfileCompany() {
             <div className={styles.logoWrapper}>
               <img
                 src={
-                  company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
+                  company.logo_image ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                 }
                 className={styles.logo}
                 alt="โลโก้บริษัท"
@@ -245,12 +275,25 @@ export default function ProfileCompany() {
               <hr />
               <div className={styles.contactGroup}>
                 <h3>ช่องทางการติดต่อและสถานที่ตั้ง</h3>
-                <p><strong>ข้อมูลติดต่อ:</strong> {fmt(company.contact_information)}</p>
-                <p><strong>ที่อยู่:</strong> {fmt(company.full_address)}</p>
-                <p><strong>จังหวัด:</strong> {fmt(company.province)}</p>
-                <p><strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}</p>
-                <p><strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}</p>
-                <p><strong>อีเมล:</strong> {fmt(company.company_email)}</p>
+                <p>
+                  <strong>ข้อมูลติดต่อ:</strong>{" "}
+                  {fmt(company.contact_information)}
+                </p>
+                <p>
+                  <strong>ที่อยู่:</strong> {fmt(company.full_address)}
+                </p>
+                <p>
+                  <strong>จังหวัด:</strong> {fmt(company.province)}
+                </p>
+                <p>
+                  <strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}
+                </p>
+                <p>
+                  <strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}
+                </p>
+                <p>
+                  <strong>อีเมล:</strong> {fmt(company.company_email)}
+                </p>
               </div>
             </div>
           </div>
@@ -261,18 +304,39 @@ export default function ProfileCompany() {
             longitude={company.company_longitude}
           />
         </div>
-        {/* ฝั่งขวา: สถานะยืนยันตัวตน + ตำแหน่งงาน */}
+        {/* ฝั่งขวา: ตำแหน่งงานและรีวิว */}
         <div className={styles.rightSection}>
           <div className={styles.VerifiedConfirm}>
             <div className={styles.certHeader}>
               <div className={styles.certTitleGroup}>
-                <span className="material-symbols-outlined" style={{ fontSize: '32px', color: statusColor }}>
-                  {isVerified ? 'verified_user' : isRejected ? 'gpp_bad' : 'pending_actions'}
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "32px", color: statusColor }}
+                >
+                  {isVerified
+                    ? "verified_user"
+                    : isRejected
+                      ? "gpp_bad"
+                      : "pending_actions"}
                 </span>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
-                  <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                    {isVerified ? 'เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว' : isRejected ? 'เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ' : 'เอกสารนี้อยู่ระหว่างการตรวจสอบ'}
+                  <h3
+                    style={{ margin: 0, fontSize: "1.1rem", color: "#1e293b" }}
+                  >
+                    หนังสือรับรองการจดทะเบียนบริษัท
+                  </h3>
+                  <p
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: "0.85rem",
+                      color: "#64748b",
+                    }}
+                  >
+                    {isVerified
+                      ? "เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว"
+                      : isRejected
+                        ? "เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ"
+                        : "เอกสารนี้อยู่ระหว่างการตรวจสอบ"}
                   </p>
                 </div>
               </div>
@@ -284,19 +348,26 @@ export default function ProfileCompany() {
                   backgroundColor: statusColor,
                   borderRadius: "999px",
                   padding: "6px 16px",
-                  boxShadow: `0 2px 8px ${statusColor}40`
+                  boxShadow: `0 2px 8px ${statusColor}40`,
                 }}
               >
                 {statusLabel}
               </span>
             </div>
-            
+
             {company.company_certificate && (
-              <button 
-                className={styles.viewCertBtn} 
-                onClick={() => window.open(company.company_certificate, '_blank')}
+              <button
+                className={styles.viewCertBtn}
+                onClick={() =>
+                  window.open(company.company_certificate, "_blank")
+                }
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "18px" }}
+                >
+                  description
+                </span>
                 เปิดดูเอกสารรับรอง
               </button>
             )}
@@ -344,6 +415,13 @@ export default function ProfileCompany() {
               ))
             )}
           </div>
+
+          {/* รีวิวบริษัท */}
+          <ReviewSection
+            reviews={reviews}
+            viewerId={viewer?.id}
+            onDeleteReview={deleteReview}
+          />
         </div>
       </div>
     </div>

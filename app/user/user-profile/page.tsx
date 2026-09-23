@@ -97,6 +97,7 @@ interface UserProfile {
   experiences: Experience[];
   languages: Language[];
   files: FileRecord[];
+  reviews: any[];
 }
 
 /* ================= 2) Type ของข้อมูลที่ API ส่งมา ================= */
@@ -177,6 +178,17 @@ interface ApiProfile {
         file_name?: string | null;
         file_type?: string | null;
         file_category?: string | null;
+      }[]
+    | null;
+  reviews?:
+    | {
+        tracking_id?: number;
+        review_rating?: string | number | null;
+        review_comment?: string | null;
+        created_review_at?: string | null;
+        company_name?: string | null;
+        logo_image?: string | null;
+        job_position?: string | null;
       }[]
     | null;
 }
@@ -303,6 +315,8 @@ function cleanProfile(data: ApiProfile): UserProfile {
       file_type: toText(item.file_type),
       file_category: toText(item.file_category),
     })),
+
+    reviews: data.reviews ?? [],
   };
 }
 
@@ -921,6 +935,10 @@ const SeekerProfile = () => {
 
   return (
     <div className={styles.container}>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      />
       <div className={styles.profileGrid}>
         {/* ── Column 1: Personal Info ── */}
         <div className={styles.column}>
@@ -1657,7 +1675,11 @@ const SeekerProfile = () => {
                 profile.typing_speeds.map((t, i) => (
                   <ul
                     key={t.typing_id ?? `view-typing-${i}`}
-                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
                   >
                     <li>
                       <h4>{show(t.typing_language)}</h4>
@@ -1716,7 +1738,11 @@ const SeekerProfile = () => {
                 profile.experiences.map((exp, i) => (
                   <ul
                     key={exp.ex_id ?? `view-exp-${i}`}
-                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
                   >
                     <li>
                       - <strong>{show(exp.ex_title)}</strong>
@@ -1839,7 +1865,11 @@ const SeekerProfile = () => {
                 profile.languages.map((lang, i) => (
                   <ul
                     key={lang.language_id ?? `view-lang-${i}`}
-                    style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
                   >
                     <li>
                       <h4>{show(lang.language_type)}</h4>

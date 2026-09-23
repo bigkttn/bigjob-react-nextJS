@@ -378,7 +378,7 @@ export default async function DetailJob({ params }: PageProps) {
                   }}
                 >
                   {typeof job.Benefits === "string" || typeof job.benefits === "string"
-                    ? (job.Benefits || job.benefits)
+                    ? String(job.Benefits || job.benefits)
                     : "ไม่ได้ระบุสวัสดิการ"}
                 </div>
               </section>

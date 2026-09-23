@@ -42,7 +42,18 @@ export async function GET(
             [companyId],
         );
 
-        return NextResponse.json({ company, posts }, { status: 200 });
+        // ดึงรีวิวของบริษัท
+        const [reviews]: any = await db.query(
+            `SELECT it.tracking_id, it.user_id, it.review_rating, it.review_comment, it.created_review_at, u.profile_image, u.fullname, p.job_position 
+             FROM interview_tracking it
+             JOIN posts p ON it.post_id = p.post_id
+             JOIN User u ON it.user_id = u.uid
+             WHERE p.company_id = ? AND it.review_rating IS NOT NULL
+             ORDER BY it.created_review_at DESC`,
+            [companyId]
+        );
+
+        return NextResponse.json({ company, posts, reviews }, { status: 200 });
     } catch (error: any) {
         console.error("Database Error:", error);
         return NextResponse.json(

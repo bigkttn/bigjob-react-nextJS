@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import ProvinceSelect from "@/components/ProvinceSelect";
+import ReviewSection from "@/components/ReviewSection";
 type LeafletMapProps = {
   lat: number | string | null;
   lng: number | string | null;
@@ -39,6 +40,7 @@ const CompanyProfile = () => {
   const [company, setCompany] = useState<any>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingCert, setUploadingCert] = useState(false);
@@ -76,6 +78,7 @@ const CompanyProfile = () => {
         setCompany(data.company);
         setEditForm(JSON.parse(JSON.stringify(data.company)));
         setPosts(data.posts || []);
+        setReviews(data.reviews || []);
       } else {
         setError(data.error || "Failed to fetch company profile");
       }
@@ -323,9 +326,8 @@ const CompanyProfile = () => {
       <div className={styles.leftSection}>
         <div className={styles.profileCard}>
           <div
-            style={{ position: "relative", cursor: "pointer", }}
+            style={{ position: "relative", cursor: "pointer" }}
             onClick={() => bannerInputRef.current?.click()}
-            
           >
             <input
               type="file"
@@ -335,33 +337,36 @@ const CompanyProfile = () => {
               style={{ display: "none" }}
             />
             <img
-              src={company.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`}
+              src={
+                company.cover_image ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
+              }
               className={styles.banner}
               alt="Banner"
-            /> 
+            />
             <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  // borderRadius: "50%",
-                  backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  color: "#fff",
-                  fontSize: "0.85rem",
-                  fontWeight: "bold",
-                  opacity: 0,
-                  transition: "opacity 0.2s ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
-              >
-                เปลี่ยนรูป
-              </div>
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                // borderRadius: "50%",
+                backgroundColor: "rgba(0, 0, 0, 0.4)", // สีดำโปร่งแสง
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "#fff",
+                fontSize: "0.85rem",
+                fontWeight: "bold",
+                opacity: 0,
+                transition: "opacity 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
+            >
+              เปลี่ยนรูป
+            </div>
           </div>
 
           <div
@@ -379,12 +384,13 @@ const CompanyProfile = () => {
             <div style={{ position: "relative", width: 120, height: 120 }}>
               <img
                 src={
-                  company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
+                  company.logo_image ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                 }
                 className={styles.logo}
                 alt="Logo"
               />
-               <div
+              <div
                 style={{
                   position: "absolute",
                   top: 0,
@@ -408,7 +414,6 @@ const CompanyProfile = () => {
                 เปลี่ยนรูป
               </div>
             </div>
-            
           </div>
 
           <div className={styles.infoArea}>
@@ -484,12 +489,25 @@ const CompanyProfile = () => {
 
               {!editMode ? (
                 <>
-                  <p><strong>ข้อมูลติดต่อ:</strong> {fmt(company.contact_information)}</p>
-                  <p><strong>ที่อยู่:</strong> {fmt(company.full_address)}</p>
-                  <p><strong>จังหวัด:</strong> {fmt(company.province)}</p>
-                  <p><strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}</p>
-                  <p><strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}</p>
-                  <p><strong>อีเมล:</strong> {fmt(company.company_email)}</p>
+                  <p>
+                    <strong>ข้อมูลติดต่อ:</strong>{" "}
+                    {fmt(company.contact_information)}
+                  </p>
+                  <p>
+                    <strong>ที่อยู่:</strong> {fmt(company.full_address)}
+                  </p>
+                  <p>
+                    <strong>จังหวัด:</strong> {fmt(company.province)}
+                  </p>
+                  <p>
+                    <strong>รหัสไปรษณีย์:</strong> {fmt(company.postcode)}
+                  </p>
+                  <p>
+                    <strong>เบอร์โทรศัพท์:</strong> {fmt(company.mobile_phone)}
+                  </p>
+                  <p>
+                    <strong>อีเมล:</strong> {fmt(company.company_email)}
+                  </p>
                   <p style={{ fontSize: "0.85rem", color: "#666" }}>
                     พิกัดแผนที่:{" "}
                     {company.company_latitude
@@ -715,13 +733,32 @@ const CompanyProfile = () => {
         <div className={styles.VerifiedConfirm}>
           <div className={styles.certHeader}>
             <div className={styles.certTitleGroup}>
-              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: statusColor }}>
-                {isVerified ? 'verified_user' : isRejected ? 'gpp_bad' : 'pending_actions'}
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "32px", color: statusColor }}
+              >
+                {isVerified
+                  ? "verified_user"
+                  : isRejected
+                    ? "gpp_bad"
+                    : "pending_actions"}
               </span>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b' }}>หนังสือรับรองการจดทะเบียนบริษัท</h3>
-                <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#64748b' }}>
-                  {isVerified ? 'เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว' : isRejected ? 'เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ' : 'เอกสารนี้อยู่ระหว่างการตรวจสอบ'}
+                <h3 style={{ margin: 0, fontSize: "1.1rem", color: "#1e293b" }}>
+                  หนังสือรับรองการจดทะเบียนบริษัท
+                </h3>
+                <p
+                  style={{
+                    margin: "4px 0 0",
+                    fontSize: "0.85rem",
+                    color: "#64748b",
+                  }}
+                >
+                  {isVerified
+                    ? "เอกสารนี้ได้รับการตรวจสอบและอนุมัติโดยระบบแล้ว"
+                    : isRejected
+                      ? "เอกสารนี้ถูกปฏิเสธหรือไม่ผ่านการตรวจสอบ"
+                      : "เอกสารนี้อยู่ระหว่างการตรวจสอบ"}
                 </p>
               </div>
             </div>
@@ -733,7 +770,7 @@ const CompanyProfile = () => {
                 backgroundColor: statusColor,
                 borderRadius: "999px",
                 padding: "6px 16px",
-                boxShadow: `0 2px 8px ${statusColor}40`
+                boxShadow: `0 2px 8px ${statusColor}40`,
               }}
             >
               {statusLabel}
@@ -742,7 +779,8 @@ const CompanyProfile = () => {
 
           {isRejected && company.verification_comment && (
             <p style={{ margin: 0, fontSize: "0.85rem", color: "#b50000" }}>
-              <strong>เหตุผลที่ถูกปฏิเสธ:</strong> {company.verification_comment}
+              <strong>เหตุผลที่ถูกปฏิเสธ:</strong>{" "}
+              {company.verification_comment}
             </p>
           )}
 
@@ -753,7 +791,12 @@ const CompanyProfile = () => {
                 className={styles.viewCertBtn}
                 onClick={() => setShowPreview(true)}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>description</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "18px" }}
+                >
+                  description
+                </span>
                 เปิดดูไฟล์ที่อัปโหลดล่าสุด
               </button>
             ) : (
@@ -890,7 +933,8 @@ const CompanyProfile = () => {
               <div key={job.post_id} className={styles.jobCard}>
                 <img
                   src={
-                    company.logo_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
+                    company.logo_image ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(company.company_name || "Company")}&background=random`
                   }
                   width={80}
                   height={80}
@@ -913,6 +957,9 @@ const CompanyProfile = () => {
             ))
           )}
         </div>
+
+        {/* รีวิวบริษัท */}
+          <ReviewSection reviews={reviews} />
       </div>
     </div>
   );

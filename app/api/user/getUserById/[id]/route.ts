@@ -38,6 +38,7 @@ export async function GET(
             [experiences],
             [languages],
             [files],
+            [reviews],
         ]: any = await Promise.all([
             // Image 1: table = JobTitle, cols = jobtitle_id, job_name, user_id
             db.query(
@@ -74,6 +75,16 @@ export async function GET(
                 'SELECT file_id, file_path, file_name, file_type, file_category, uploaded_at FROM files WHERE user_id = ? ORDER BY uploaded_at DESC',
                 [id]
             ),
+            // รีวิวที่ผู้ใช้เขียน
+            db.query(
+                `SELECT it.tracking_id, it.review_rating, it.review_comment, it.created_review_at, c.company_name, c.logo_image, p.job_position 
+                 FROM interview_tracking it
+                 JOIN posts p ON it.post_id = p.post_id
+                 JOIN company c ON p.company_id = c.company_id
+                 WHERE it.user_id = ? AND it.review_rating IS NOT NULL
+                 ORDER BY it.created_review_at DESC`,
+                [id]
+            ),
         ]);
 
         const fullProfile = {
@@ -85,6 +96,7 @@ export async function GET(
             experiences: experiences,
             languages: languages,
             files: files,
+            reviews: reviews,
         };
 
         return NextResponse.json({ user: fullProfile }, { status: 200 });

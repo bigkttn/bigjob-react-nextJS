@@ -111,7 +111,7 @@ const LeafletMap = ({
         width: "100%",
         borderRadius: "20px",
         overflow: "hidden",
-        border: isEditMode ? "2px dashed #1d9bf0" : "none", // เพิ่มกรอบประเพื่อให้รู้ว่าอยู่ในโหมดแก้ไข
+        border: isEditMode ? "2px dashed #1d9bf0" : "none",
       }}
     >
       <link
