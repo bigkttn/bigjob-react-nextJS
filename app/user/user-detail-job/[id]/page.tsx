@@ -33,6 +33,8 @@ interface JobPost {
   logo_image?: string;
   status?: string;
   ban_until?: string;
+  Benefits?: string;
+  benefits?: string;
   [key: string]: unknown;
 }
 

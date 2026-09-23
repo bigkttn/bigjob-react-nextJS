@@ -37,11 +37,6 @@ export default function ProfileActionsButton({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    checkSaved();
-    checkReport();
-  }, []);
-
   // โค้ดสำหรับเซฟ/บุ๊กมาร์ก
   const handleBookmark = async () => {
     try {
@@ -78,7 +73,7 @@ export default function ProfileActionsButton({
     }
   };
 
-  const checkSaved = async () => {
+  async function checkSaved() {
     try {
       const response = await fetch(
         "/api/company/check_favour_user",
@@ -100,7 +95,7 @@ export default function ProfileActionsButton({
     } catch (error) {
       console.error("Error in checkSaved:", error);
     }
-  };
+  }
 
   const handleDeleteSaved = async (userId: number, companyId: number) => {
     const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
@@ -180,7 +175,7 @@ export default function ProfileActionsButton({
     setIsOpen(false);
   };
 
-   const checkReport = async () => {
+  async function checkReport() {
     try {
       const response = await fetch(
         "/api/company/check_report_user",
@@ -204,7 +199,19 @@ export default function ProfileActionsButton({
     } catch (error) {
       console.error("Error in checkSaved:", error);
     }
-  };
+  }
+
+  useEffect(() => {
+    let ignore = false;
+    async function loadData() {
+      await checkSaved();
+      await checkReport();
+    }
+    loadData();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <div
