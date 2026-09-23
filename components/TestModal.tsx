@@ -3,6 +3,25 @@
 import { useEffect, useState } from "react";
 import styles from "./ApplyModel.module.css";
 
+interface Choice {
+  choice_id: number;
+  question_id: number;
+  choice: string;
+  correct?: number;
+}
+
+interface Question {
+  question_id: number;
+  post_id: number;
+  question: string;
+  choices: Choice[];
+}
+
+interface AnswerItem {
+  choice_id: number;
+  user_respond: string;
+}
+
 interface TestModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,11 +35,12 @@ interface TestModalProps {
 }
 
 export default function TestModal(props: TestModalProps) {
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [answers, setAnswers] = useState<{ [questionId: number]: any }>({});
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<{ [questionId: number]: AnswerItem }>({});
   const [loading, setLoading] = useState(false);
 
-  // +++ เพิ่ม State ควบคุมป็อปอัพสำเร็จ และแจ้งเตือน Error +++
+  // State ป็อปอัพยืนยันก่อนส่ง และ ป็อปอัพสำเร็จ
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -31,7 +51,7 @@ export default function TestModal(props: TestModalProps) {
           if (!res.ok) throw new Error("Network response was not ok");
           return res.json();
         })
-        .then((data) => setQuestions(data))
+        .then((data: Question[]) => setQuestions(data))
         .catch((err) => console.error("Error fetching questions:", err));
     }
   }, [props.isOpen, props.postId]);
@@ -49,16 +69,27 @@ export default function TestModal(props: TestModalProps) {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // ตรวจสอบความครบถ้วนเมื่อผู้สมัครกดส่งแบบทดสอบ -> แสดงป็อปอัพยืนยัน
+  const handlePreSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
 
-    if (Object.keys(answers).length < questions.length) {
-      setErrorMsg("กรุณาตอบคำถามให้ครบทุกข้อก่อนส่ง");
+    const answeredCount = Object.keys(answers).length;
+    if (answeredCount < questions.length) {
+      setErrorMsg(
+        `กรุณาตอบคำถามให้ครบทุกข้อก่อนส่ง (ตอบแล้ว ${answeredCount}/${questions.length} ข้อ)`,
+      );
       return;
     }
 
+    // เมื่อตอบครบถ้วนแล้ว ให้แสดงป็อปอัพยืนยันก่อนส่งใบสมัคร
+    setShowConfirm(true);
+  };
+
+  // กดยืนยันในป็อปอัพ -> ทำการส่งข้อมูลจริงไปยัง Backend API
+  const handleConfirmSubmit = async () => {
     setLoading(true);
+    setErrorMsg("");
     const formattedAnswers = Object.values(answers);
 
     try {
@@ -78,20 +109,22 @@ export default function TestModal(props: TestModalProps) {
       });
 
       if (res.ok) {
-        // +++ เปลี่ยนจาก alert เป็นการเปิดป็อปอัพสำเร็จ +++
+        setShowConfirm(false);
         setIsSuccess(true);
       } else {
+        setShowConfirm(false);
         setErrorMsg("เกิดข้อผิดพลาดในการส่ง กรุณาลองใหม่อีกครั้ง");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error submitting test:", error);
+      setShowConfirm(false);
       setErrorMsg("ระบบขัดข้อง กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
   };
 
-  // +++ ฟังก์ชันสำหรับปุ่ม "ตกลง" ในป็อปอัพสำเร็จ +++
+  // ฟังก์ชันสำหรับปุ่ม "ตกลง" ในป็อปอัพสำเร็จ
   const handleSuccessOk = () => {
     setIsSuccess(false);
     props.onClose();
@@ -127,7 +160,7 @@ export default function TestModal(props: TestModalProps) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handlePreSubmit}>
             {questions.map((q, index) => (
               <div
                 key={q.question_id}
@@ -149,7 +182,7 @@ export default function TestModal(props: TestModalProps) {
                     gap: "8px",
                   }}
                 >
-                  {q.choices?.map((c: any) => (
+                  {q.choices?.map((c) => (
                     <label
                       key={c.choice_id}
                       style={{
@@ -162,6 +195,7 @@ export default function TestModal(props: TestModalProps) {
                       <input
                         type="radio"
                         name={`question_${q.question_id}`}
+                        checked={answers[q.question_id]?.choice_id === c.choice_id}
                         onChange={() =>
                           handleChoiceSelect(
                             q.question_id,
@@ -192,12 +226,106 @@ export default function TestModal(props: TestModalProps) {
                 className={styles.btnSubmit}
                 disabled={loading}
               >
-                {loading ? "กำลังบันทึก..." : "ส่งคำตอบและสมัครงาน"}
+                ส่งคำตอบและสมัครงาน
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      {/* --- ป็อปอัพยืนยันก่อนส่งแบบทดสอบและใบสมัคร --- */}
+      {showConfirm && (
+        <div className={styles.modalOverlay} style={{ zIndex: 9998 }}>
+          <div className={styles.confirmContainer}>
+            <div className={styles.confirmIconWrapper}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "40px" }}
+              >
+                assignment_turned_in
+              </span>
+            </div>
+
+            <h3 className={styles.confirmTitle}>
+              ยืนยันการส่งแบบทดสอบและใบสมัคร
+            </h3>
+            <p className={styles.confirmSubtitle}>
+              คุณได้ตอบแบบทดสอบครบถ้วน ({questions.length}/{questions.length} ข้อ)
+            </p>
+
+            {/* กล่องสรุปคำตอบที่ผู้สมัครเลือก */}
+            <div className={styles.reviewSection}>
+              <div className={styles.reviewHeader}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "16px", color: "#2563eb" }}
+                >
+                  fact_check
+                </span>
+                สรุปคำตอบที่คุณเลือก:
+              </div>
+
+              {questions.map((q, idx) => (
+                <div key={q.question_id} className={styles.reviewItem}>
+                  <div className={styles.reviewQuestion}>
+                    ข้อ {idx + 1}: {q.question}
+                  </div>
+                  <div className={styles.reviewAnswer}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "16px" }}
+                    >
+                      check_circle
+                    </span>
+                    {answers[q.question_id]?.user_respond || "-"}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.confirmWarning}>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "16px" }}
+              >
+                warning
+              </span>
+              เมื่อส่งแล้วจะไม่สามารถแก้ไขคำตอบได้อีก โปรดตรวจสอบให้แน่ใจ
+            </div>
+
+            <div className={styles.confirmButtonGroup}>
+              <button
+                type="button"
+                className={styles.btnBack}
+                onClick={() => setShowConfirm(false)}
+                disabled={loading}
+              >
+                กลับไปแก้ไขคำตอบ
+              </button>
+              <button
+                type="button"
+                className={styles.btnConfirmAction}
+                onClick={handleConfirmSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  "กำลังส่งใบสมัคร..."
+                ) : (
+                  <>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      send
+                    </span>
+                    ยืนยันส่งใบสมัคร
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- ป็อปอัพสำเร็จ (ซ้อนขึ้นมาเมื่อส่งผ่าน) --- */}
       {isSuccess && (
@@ -206,7 +334,6 @@ export default function TestModal(props: TestModalProps) {
             className={styles.modalContainer}
             style={{ maxWidth: "400px", textAlign: "center", padding: "30px" }}
           >
-            {/* ส่วนที่แก้ไขจากอิโมจิเป็น Google Icon */}
             <div style={{ marginBottom: "10px" }}>
               <span
                 className="material-symbols-outlined"

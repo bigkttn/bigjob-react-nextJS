@@ -5,6 +5,7 @@ import styles from "./company_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import TestResultModal from "@/components/TestResultModal";
 
 const MapComponent = dynamic(() => import("./mapComponent"), {
   ssr: false,
@@ -89,6 +90,7 @@ export default function CompanyApplication({
   const [searchQuery, setSearchQuery] = useState("");
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModelOpen] = useState(false);
+  const [isTestResultModalOpen, setIsTestResultModalOpen] = useState(false);
   const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
 
   const handleOpenRejectModal = (trackingId?: number) => {
@@ -302,7 +304,11 @@ export default function CompanyApplication({
                     <div
                       className={`${styles.step} ${styles.active} ${status === "pending" ? styles.currentStep : ""}`}
                     >
-                      <div className={styles.stepIcon}>📄</div>
+                      <div className={styles.stepIcon}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                          description
+                        </span>
+                      </div>
                       <span className={styles.stepLabel}>Pending</span>
                       {status === "pending" && (
                         <div className={styles.inlineDatePicker}>
@@ -327,7 +333,11 @@ export default function CompanyApplication({
                     <div
                       className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
                     >
-                      <div className={styles.stepIcon}>☑️</div>
+                      <div className={styles.stepIcon}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                          task_alt
+                        </span>
+                      </div>
                       <span className={styles.stepLabel}>Applied</span>
 
                       {status === "applied" && (
@@ -520,7 +530,11 @@ export default function CompanyApplication({
                     <div
                       className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
                     >
-                      <div className={styles.stepIcon}>🎙️</div>
+                      <div className={styles.stepIcon}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                          mic
+                        </span>
+                      </div>
                       <span className={styles.stepLabel}>Interview</span>
 
                       {status === "screening" && (
@@ -639,7 +653,11 @@ export default function CompanyApplication({
                     <div
                       className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["appointment", "offer", "hired"].includes(status) ? styles.currentStep : ""}`}
                     >
-                      <div className={styles.stepIcon}>💼</div>
+                      <div className={styles.stepIcon}>
+                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                          work
+                        </span>
+                      </div>
                       <span className={styles.stepLabel}>Appointment</span>
 
                       {status === "interview" && selectedJob.interview_date && (
@@ -820,14 +838,7 @@ export default function CompanyApplication({
                           >
                             ส่งข้อเสนองานเรียบร้อยแล้ว
                           </p>
-                          <button
-                            type="button"
-                            className={styles.txtRejected}
-                            style={{ padding: "5px 12px", fontSize: "11px" }}
-                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
-                          >
-                            ยกเลิก
-                          </button>
+                      
                         </div>
                       )}
 
@@ -874,13 +885,44 @@ export default function CompanyApplication({
                       style={{
                         backgroundColor: "#fff",
                         padding: "20px",
-                        borderRadius: "8px",
+                        borderRadius: "12px",
+                        width: "90%",
+                        maxWidth: "700px",
                       }}
                     >
-                      <h3>ปักหมุดเลือกสถานที่</h3>
                       <div
                         style={{
-                          height: "350px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: "16px", color: "#1e293b", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span className="material-symbols-outlined" style={{ color: "#3182ce" }}>
+                            map
+                          </span>
+                          ปักหมุดเลือกสถานที่สัมภาษณ์
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setIsMapModalOpen(false)}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            fontSize: "20px",
+                            color: "#64748b",
+                            cursor: "pointer",
+                            lineHeight: 1,
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          height: "480px",
                           width: "100%",
                           margin: "10px 0",
                         }}
@@ -888,6 +930,7 @@ export default function CompanyApplication({
                         <MapComponent
                           selectedLat={selectedLat || 13.7563}
                           selectedLng={selectedLng || 100.5018}
+                          initialAddress={searchQuery || locationName}
                           onLocationSelect={(lat, lng, addressName) => {
                             setSelectedLat(lat);
                             setSelectedLng(lng);
@@ -900,6 +943,7 @@ export default function CompanyApplication({
                           display: "flex",
                           gap: "10px",
                           justifyContent: "flex-end",
+                          marginTop: "10px",
                         }}
                       >
                         <button
@@ -923,17 +967,60 @@ export default function CompanyApplication({
                 )}
 
                 {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
-                <div
-                  style={{
-                    backgroundColor: "#EBEBEB",
-                    padding: "20px",
-                    borderRadius: "15px",
-                    marginTop: "20px",
-                    display: "flex",
-                    gap: "20px",
-                    alignItems: "stretch",
-                  }}
-                >
+                <div style={{ marginTop: "20px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "10px",
+                      padding: "0 4px",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "16px",
+                        fontWeight: "700",
+                        color: "#1e293b",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: "#3182ce", fontSize: "20px" }}
+                      >
+                        badge
+                      </span>
+                      ข้อมูลและประวัติผู้สมัคร
+                    </h3>
+                    <button
+                      type="button"
+                      className={styles.btnViewTestHeader}
+                      onClick={() => setIsTestResultModalOpen(true)}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "18px" }}
+                      >
+                        quiz
+                      </span>
+                      ดูผลแบบทดสอบ
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      backgroundColor: "#EBEBEB",
+                      padding: "20px",
+                      borderRadius: "15px",
+                      display: "flex",
+                      gap: "20px",
+                      alignItems: "stretch",
+                    }}
+                  >
                   {/* Column 1: Personal Info */}
                   <div
                     style={{
@@ -1060,6 +1147,21 @@ export default function CompanyApplication({
                         {resumeFile.file_name || "resume file"}
                       </a>
                     )}
+
+                    <button
+                      type="button"
+                      className={styles.btnViewTest}
+                      style={{ marginTop: resumeFile ? "10px" : "auto" }}
+                      onClick={() => setIsTestResultModalOpen(true)}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "18px" }}
+                      >
+                        quiz
+                      </span>
+                      ดูผลการตอบแบบทดสอบ
+                    </button>
                   </div>
 
                   {/* Column 2: Job Preferences */}
@@ -1390,7 +1492,8 @@ export default function CompanyApplication({
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
+            </>
             ) : (
               <div
                 style={{ textAlign: "center", padding: "50px", color: "#fff" }}
@@ -1444,6 +1547,15 @@ export default function CompanyApplication({
             </div>
           </div>
         )}
+
+        {/* Modal ดูผลแบบทดสอบของผู้สมัคร */}
+        <TestResultModal
+          isOpen={isTestResultModalOpen}
+          onClose={() => setIsTestResultModalOpen(false)}
+          trackingId={selectedJob?.tracking_id || null}
+          candidateName={selectedJob?.fullname}
+          jobPosition={selectedJob?.job_position}
+        />
       </main>
     </div>
   );

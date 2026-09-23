@@ -1,0 +1,346 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.modalContainer {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeader {
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modalSubtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 3px 0 0 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.modalBody {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* แบนเนอร์แสดงคะแนนรวม */
+.scoreBanner {
+  background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.scoreBannerDanger {
+  background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+  border-color: #fecaca;
+}
+
+.scoreBannerWarning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fde68a;
+}
+
+.scoreInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.scoreLabel {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.scoreNumber {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.scoreTotal {
+  font-size: 16px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.scoreBadgeHigh {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.scoreBadgeMedium {
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.scoreBadgeLow {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+/* รายการข้อสอบ */
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.questionCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.questionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.resultTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.resultTagCorrect {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.resultTagIncorrect {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.choiceList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choiceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #334155;
+  transition: border-color 0.2s;
+}
+
+/* ช้อยส์ที่ผู้สมัครเลือก และถูกต้อง */
+.choiceSelectedCorrect {
+  background-color: #ecfdf5;
+  border-color: #22c55e;
+  color: #14532d;
+  font-weight: 600;
+}
+
+/* ช้อยส์ที่ผู้สมัครเลือก แต่ผิด */
+.choiceSelectedIncorrect {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+  color: #7f1d1d;
+  font-weight: 600;
+}
+
+/* ช้อยส์เฉลยที่ถูกต้อง เมื่อผู้สมัครตอบข้ออื่น */
+.choiceCorrectAnswer {
+  background-color: #f0fdf4;
+  border-color: #86efac;
+  border-style: dashed;
+  color: #166534;
+  font-weight: 500;
+}
+
+.choiceTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tagCorrect {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+.tagIncorrect {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.tagAnswerKey {
+  background-color: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.modalFooter {
+  padding: 14px 24px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnClose {
+  background-color: #64748b;
+  color: #ffffff;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btnClose:hover {
+  background-color: #475569;
+}
+
+/* Loading & Empty States */
+.stateContainer {
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.stateIcon {
+  font-size: 48px;
+  color: #94a3b8;
+}
+
+.stateText {
+  font-size: 15px;
+  color: #475569;
+  margin: 0;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
