@@ -15,7 +15,9 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
       interviewDate, 
       interviewTime, 
       locationName, 
-      interviewType
+      interviewType,
+      reviewRating,   // <--- เพิ่มบรรทัดนี้
+      reviewComment   // <--- เพิ่มบรรทัดนี้
     } = await req.json();
 
     if (!trackingId || !status) {
@@ -36,6 +38,11 @@ export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; st
     } else if (interviewType === 'onsite') {
       updateSql += `, location = ?, link = NULL`;
       queryParams.push(locationName);
+    }
+
+    if (reviewRating !== undefined && reviewRating !== null) {
+      updateSql += `, review_rating = ?, review_comment = ?, created_review_at = NOW()`;
+      queryParams.push(reviewRating, reviewComment || null);
     }
 
     updateSql += ` WHERE tracking_id = ?`;

@@ -153,7 +153,7 @@ export default function TestResultModal({
                 assignment_late
               </span>
               <p className={styles.stateText}>
-                {data.message || "ไม่มีข้อมูลแบบทดสอบสำหรับตำแหน่งนี้"}
+               ไม่มีข้อมูลแบบทดสอบสำหรับตำแหน่งนี้
               </p>
             </div>
           )}

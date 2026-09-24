@@ -6,6 +6,7 @@ import { apiUrl } from "@/lib/hostURL";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import TestResultModal from "@/components/TestResultModal";
+import { spawn } from "child_process";
 
 const MapComponent = dynamic(() => import("./mapComponent"), {
   ssr: false,
@@ -15,6 +16,7 @@ const MapComponent = dynamic(() => import("./mapComponent"), {
 });
 
 export interface Applicant {
+  has_test: boolean;
   district: any;
   province: any;
   postal_code: any;
@@ -173,20 +175,46 @@ export default function CompanyApplication({
           setJobs((prev) =>
             prev.map((job) =>
               job.tracking_id === trackingId
-                ? { ...job, status: newStatus ,
-                  interview_date: interviewDetails && (interviewDetails.interviewTime || interviewTime)? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`:job.interview_date,
-                  link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:job.link,
-                  location:interviewDetails?.interviewType === "onsite"? interviewDetails.locationName:job.location
-                }
+                ? {
+                    ...job,
+                    status: newStatus,
+                    interview_date:
+                      interviewDetails &&
+                      (interviewDetails.interviewTime || interviewTime)
+                        ? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`
+                        : job.interview_date,
+                    link:
+                      interviewDetails?.interviewType === "online"
+                        ? interviewDetails.locationName
+                        : job.link,
+                    location:
+                      interviewDetails?.interviewType === "onsite"
+                        ? interviewDetails.locationName
+                        : job.location,
+                  }
                 : job,
             ),
           );
           setSelectedJob((prev) =>
-            prev ? { ...prev, status: newStatus,
-                interview_date: interviewDetails && (interviewDetails.interviewTime || interviewTime)? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`:prev.interview_date,
-                  link:interviewDetails?.interviewType === "online"? interviewDetails.locationName:prev.link,
-                  location:interviewDetails?.interviewType === "onsite"? interviewDetails.locationName:prev.location
-             } : null,
+            prev
+              ? {
+                  ...prev,
+                  status: newStatus,
+                  interview_date:
+                    interviewDetails &&
+                    (interviewDetails.interviewTime || interviewTime)
+                      ? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`
+                      : prev.interview_date,
+                  link:
+                    interviewDetails?.interviewType === "online"
+                      ? interviewDetails.locationName
+                      : prev.link,
+                  location:
+                    interviewDetails?.interviewType === "onsite"
+                      ? interviewDetails.locationName
+                      : prev.location,
+                }
+              : null,
           );
         }
       }
@@ -294,6 +322,7 @@ export default function CompanyApplication({
               height: "auto",
               backgroundColor: "#9D9D9D",
               borderRadius: "10px",
+              padding: "15px",
             }}
           >
             {selectedJob ? (
@@ -305,7 +334,10 @@ export default function CompanyApplication({
                       className={`${styles.step} ${styles.active} ${status === "pending" ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "24px" }}
+                        >
                           description
                         </span>
                       </div>
@@ -318,7 +350,9 @@ export default function CompanyApplication({
                           <button
                             type="button"
                             className={styles.txtRejected}
-                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                            onClick={() =>
+                              handleOpenRejectModal(selectedJob.tracking_id)
+                            }
                           >
                             ยกเลิก
                           </button>
@@ -334,7 +368,10 @@ export default function CompanyApplication({
                       className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "24px" }}
+                        >
                           task_alt
                         </span>
                       </div>
@@ -468,18 +505,32 @@ export default function CompanyApplication({
                           >
                             {/* +++ เพิ่มส่วนเช็กความครบถ้วนก่อนกดปุ่ม +++ */}
                             {(() => {
-                              const isInterviewFormComplete = interviewDate && interviewTime && (interviewType === "online" ? meetingLink : locationName);
-                              
+                              const isInterviewFormComplete =
+                                interviewDate &&
+                                interviewTime &&
+                                (interviewType === "online"
+                                  ? meetingLink
+                                  : locationName);
+
                               return (
                                 <>
                                   <button
                                     className={styles.btnSubmitStep}
                                     style={{
                                       width: "8rem",
-                                      backgroundColor: (!isInterviewFormComplete || isPastDate) ? "#9e9e9e" : "",
-                                      cursor: (!isInterviewFormComplete || isPastDate) ? "not-allowed" : "pointer",
+                                      backgroundColor:
+                                        !isInterviewFormComplete || isPastDate
+                                          ? "#9e9e9e"
+                                          : "",
+                                      cursor:
+                                        !isInterviewFormComplete || isPastDate
+                                          ? "not-allowed"
+                                          : "pointer",
                                     }}
-                                    disabled={!isInterviewFormComplete || Boolean(isPastDate)} // บล็อกไม่ให้กดปุ่มได้
+                                    disabled={
+                                      !isInterviewFormComplete ||
+                                      Boolean(isPastDate)
+                                    } // บล็อกไม่ให้กดปุ่มได้
                                     onClick={() => {
                                       const finalLocation =
                                         interviewType === "online"
@@ -510,8 +561,15 @@ export default function CompanyApplication({
                                   <button
                                     type="button"
                                     className={styles.txtRejected}
-                                    style={{ padding: "6px 14px", fontSize: "12px" }}
-                                    onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                    style={{
+                                      padding: "6px 14px",
+                                      fontSize: "12px",
+                                    }}
+                                    onClick={() =>
+                                      handleOpenRejectModal(
+                                        selectedJob.tracking_id,
+                                      )
+                                    }
                                   >
                                     ยกเลิก
                                   </button>
@@ -531,7 +589,10 @@ export default function CompanyApplication({
                       className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "24px" }}
+                        >
                           mic
                         </span>
                       </div>
@@ -542,7 +603,7 @@ export default function CompanyApplication({
                           style={{
                             display: "flex",
                             flexDirection: "column",
-                            width:"10rem",
+                            width: "10rem",
                             alignItems: "center",
                             gap: "8px",
                             marginTop: "10px",
@@ -561,7 +622,9 @@ export default function CompanyApplication({
                             type="button"
                             className={styles.txtRejected}
                             style={{ padding: "5px 12px", fontSize: "11px" }}
-                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                            onClick={() =>
+                              handleOpenRejectModal(selectedJob.tracking_id)
+                            }
                           >
                             ยกเลิก
                           </button>
@@ -637,7 +700,9 @@ export default function CompanyApplication({
                               type="button"
                               className={styles.txtRejected}
                               style={{ marginTop: "10px" }}
-                              onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                              onClick={() =>
+                                handleOpenRejectModal(selectedJob.tracking_id)
+                              }
                             >
                               ยกเลิก
                             </button>
@@ -654,7 +719,10 @@ export default function CompanyApplication({
                       className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["appointment", "offer", "hired"].includes(status) ? styles.currentStep : ""}`}
                     >
                       <div className={styles.stepIcon}>
-                        <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "24px" }}
+                        >
                           work
                         </span>
                       </div>
@@ -696,8 +764,13 @@ export default function CompanyApplication({
                               <button
                                 type="button"
                                 className={styles.txtRejected}
-                                style={{ padding: "5px 12px", fontSize: "11px" }}
-                                onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                style={{
+                                  padding: "5px 12px",
+                                  fontSize: "11px",
+                                }}
+                                onClick={() =>
+                                  handleOpenRejectModal(selectedJob.tracking_id)
+                                }
                               >
                                 ยกเลิก
                               </button>
@@ -736,7 +809,14 @@ export default function CompanyApplication({
                                   padding: "5px",
                                 }}
                               />
-                              <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "5px" }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  justifyContent: "center",
+                                  marginTop: "5px",
+                                }}
+                              >
                                 <button
                                   className={styles.btnSubmitStep}
                                   style={{
@@ -748,13 +828,18 @@ export default function CompanyApplication({
                                     border: "none",
                                     padding: "8px",
                                     borderRadius: "4px",
-                                    cursor: startDate ? "pointer" : "not-allowed",
+                                    cursor: startDate
+                                      ? "pointer"
+                                      : "not-allowed",
                                   }}
                                   onClick={() =>
                                     handleUpdateStatus(
                                       selectedJob.tracking_id,
                                       "appointment",
-                                      { interviewDate: startDate, interviewTime: "09:00" },
+                                      {
+                                        interviewDate: startDate,
+                                        interviewTime: "09:00",
+                                      },
                                     )
                                   }
                                   disabled={!startDate} // ปิดปุ่มถ้ายังไม่เลือกวันเริ่มงาน
@@ -764,8 +849,15 @@ export default function CompanyApplication({
                                 <button
                                   type="button"
                                   className={styles.txtRejected}
-                                  style={{ padding: "8px 12px", fontSize: "12px" }}
-                                  onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                  style={{
+                                    padding: "8px 12px",
+                                    fontSize: "12px",
+                                  }}
+                                  onClick={() =>
+                                    handleOpenRejectModal(
+                                      selectedJob.tracking_id,
+                                    )
+                                  }
                                 >
                                   ยกเลิก
                                 </button>
@@ -806,7 +898,9 @@ export default function CompanyApplication({
                                   borderRadius: "4px",
                                   cursor: "pointer",
                                 }}
-                                onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                                onClick={() =>
+                                  handleOpenRejectModal(selectedJob.tracking_id)
+                                }
                               >
                                 ปรับสถานะเป็นไม่ผ่าน
                               </button>
@@ -816,8 +910,7 @@ export default function CompanyApplication({
                       )}
 
                       {/* เมื่อส่งข้อเสนอไปแล้ว จะแสดงข้อความนี้ */}
-                      {(status === "appointment" ||
-                        status === "offer") && (
+                      {(status === "appointment" || status === "offer") && (
                         <div
                           style={{
                             display: "flex",
@@ -838,7 +931,6 @@ export default function CompanyApplication({
                           >
                             ส่งข้อเสนองานเรียบร้อยแล้ว
                           </p>
-                      
                         </div>
                       )}
 
@@ -867,7 +959,9 @@ export default function CompanyApplication({
                             type="button"
                             className={styles.txtRejected}
                             style={{ padding: "5px 12px", fontSize: "11px" }}
-                            onClick={() => handleOpenRejectModal(selectedJob.tracking_id)}
+                            onClick={() =>
+                              handleOpenRejectModal(selectedJob.tracking_id)
+                            }
                           >
                             ยกเลิก
                           </button>
@@ -898,8 +992,20 @@ export default function CompanyApplication({
                           marginBottom: "10px",
                         }}
                       >
-                        <h3 style={{ margin: 0, fontSize: "16px", color: "#1e293b", display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span className="material-symbols-outlined" style={{ color: "#3182ce" }}>
+                        <h3
+                          style={{
+                            margin: 0,
+                            fontSize: "16px",
+                            color: "#1e293b",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ color: "#3182ce" }}
+                          >
                             map
                           </span>
                           ปักหมุดเลือกสถานที่สัมภาษณ์
@@ -970,242 +1076,287 @@ export default function CompanyApplication({
                 <div style={{ marginTop: "20px" }}>
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "10px",
-                      padding: "0 4px",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "16px",
-                        fontWeight: "700",
-                        color: "#1e293b",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ color: "#3182ce", fontSize: "20px" }}
-                      >
-                        badge
-                      </span>
-                      ข้อมูลและประวัติผู้สมัคร
-                    </h3>
-                    <button
-                      type="button"
-                      className={styles.btnViewTestHeader}
-                      onClick={() => setIsTestResultModalOpen(true)}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "18px" }}
-                      >
-                        quiz
-                      </span>
-                      ดูผลแบบทดสอบ
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      backgroundColor: "#EBEBEB",
+                      backgroundColor: "#ffffff",
                       padding: "20px",
                       borderRadius: "15px",
                       display: "flex",
-                      gap: "20px",
+                      flexDirection: "column",
+                      gap: "10px",
                       alignItems: "stretch",
                     }}
                   >
-                  {/* Column 1: Personal Info */}
-                  <div
-                    style={{
-                      flex: "1",
-                      backgroundColor: "#F8F8F8",
-                      borderRadius: "12px",
-                      padding: "20px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                    }}
-                  >
-                    <img
-                      src={
-                        selectedJob.profile_image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
-                      }
-                      alt="profile"
+                    <div
                       style={{
-                        width: "100px",
-                        height: "100px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        marginBottom: "10px",
+                        display: "flex",
+                        justifyContent: "space-between", // ดันหัวข้อไว้ซ้าย ปุ่มไว้ขวา
+                        alignItems: "center",
+                        borderBottom: "1px solid #f0f0f0", // เพิ่มเส้นใต้คั่นให้ดูเป็นระเบียบ
+                        paddingBottom: "15px",
                       }}
-                    />
-                    <Link
-                      href={`/company/seeker-profile/${selectedJob.user_id}`}
-                      style={{ textDecoration: "none" }}
                     >
                       <h3
                         style={{
-                          margin: "0 0 5px 0",
-                          fontSize: "18px",
-                          color: "#000000",
+                          margin: 0,
+                          fontSize: "16px",
+                          fontWeight: "700",
+                          color: "#1e293b",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "1px",
                         }}
                       >
-                        {selectedJob.fullname || "ไม่ระบุชื่อ"}
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ color: "#3182ce", fontSize: "20px" }}
+                        >
+                          badge
+                        </span>
+                        ข้อมูลและประวัติผู้สมัคร
                       </h3>
-                    </Link>
-                    <a
-                      href={`mailto:${selectedJob.email}`}
-                      style={{
-                        color: "#555",
-                        textDecoration: "underline",
-                        marginBottom: "20px",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {selectedJob.email || "ไม่ระบุ"}
-                    </a>
-
-                    <div
-                      style={{
-                        textAlign: "left",
-                        width: "100%",
-                        fontSize: "12px",
-                        lineHeight: "1.6",
-                        color: "#555",
-                      }}
-                    >
-                      <p style={{ margin: 0 }}>
-                        <strong>Mobile:</strong>{" "}
-                        {selectedJob.mobile_phone || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Age:</strong> {selectedJob.age || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Gender:</strong> {selectedJob.gender || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Nationality:</strong>{" "}
-                        {selectedJob.nationality || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Military Status:</strong>{" "}
-                        {selectedJob.military_status || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Religion:</strong> {selectedJob.religion || "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Weight / Height:</strong>{" "}
-                        {selectedJob.weight ? `${selectedJob.weight} kg` : "-"}{" "}
-                        /{" "}
-                        {selectedJob.height ? `${selectedJob.height} cm` : "-"}
-                      </p>
-                      <p style={{ margin: 0 }}>
-                        <strong>Current Address:</strong>{" "}
-                        {[
-                          selectedJob.address,
-                          selectedJob.sub_district,
-                          selectedJob.district,
-                          selectedJob.province,
-                          selectedJob.postal_code,
-                        ]
-                          .filter(Boolean)
-                          .join(" ") || "-"}
-                      </p>
+                      {/* ซ่อนปุ่ม และแสดงข้อความแทน ถ้าไม่มีแบบทดสอบ */}
+                      {selectedJob.has_test ? (
+                        <button
+                          type="button"
+                          className={styles.btnViewTestHeader}
+                          onClick={() => setIsTestResultModalOpen(true)}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "18px" }}
+                          >
+                            quiz
+                          </span>
+                          ดูผลแบบทดสอบ
+                        </button>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "#9e9e9e",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          ไม่มีแบบทดสอบของตำแหน่งงานนี้
+                        </span>
+                      )}
                     </div>
 
-                    {resumeFile && (
-                      <a
-                        href={resumeFile.file_path}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          marginTop: "auto",
-                          backgroundColor: "#e2e2e2",
-                          padding: "8px 12px",
-                          borderRadius: "20px",
-                          color: "#000000",
-                          textDecoration: "none",
-                          fontSize: "14px",
-                          fontWeight: "bold",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: "100%",
-                        }}
-                      >
-                        {resumeFile.file_name || "resume file"}
-                      </a>
-                    )}
-
-                    <button
-                      type="button"
-                      className={styles.btnViewTest}
-                      style={{ marginTop: resumeFile ? "10px" : "auto" }}
-                      onClick={() => setIsTestResultModalOpen(true)}
-                    >
-                      <span
-                        className="material-symbols-outlined"
-                        style={{ fontSize: "18px" }}
-                      >
-                        quiz
-                      </span>
-                      ดูผลการตอบแบบทดสอบ
-                    </button>
-                  </div>
-
-                  {/* Column 2: Job Preferences */}
-                  <div
-                    style={{
-                      flex: "1",
-                      backgroundColor: "#DBDBDB",
-                      borderRadius: "12px",
-                      padding: "20px",
-                    }}
-                  >
-                    <h2
+                    {/* Column 1: Personal Info */}
+                    <div
                       style={{
-                        fontSize: "18px",
-                        marginTop: 0,
-                        marginBottom: "20px",
-                        textAlign: "center",
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        gap: "20px",
                       }}
                     >
-                      Job Preferences
-                    </h2>
+                      <div
+                        style={{
+                          flex: "1",
+                          backgroundColor: "#F8F8F8",
+                          borderRadius: "12px",
+                          padding: "20px",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          textAlign: "center",
+                        }}
+                      >
+                        <img
+                          src={
+                            selectedJob.profile_image ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
+                          }
+                          alt="profile"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <Link
+                          href={`/company/seeker-profile/${selectedJob.user_id}`}
+                          style={{ textDecoration: "none" }}
+                        >
+                          <h3
+                            style={{
+                              margin: "0 0 5px 0",
+                              fontSize: "18px",
+                              color: "#000000",
+                            }}
+                          >
+                            {selectedJob.fullname || "ไม่ระบุชื่อ"}
+                          </h3>
+                        </Link>
+                        <a
+                          href={`mailto:${selectedJob.email}`}
+                          style={{
+                            color: "#555",
+                            textDecoration: "underline",
+                            marginBottom: "20px",
+                            fontSize: "14px",
+                          }}
+                        >
+                          {selectedJob.email || "ไม่ระบุ"}
+                        </a>
 
-                    {(() => {
-                      let titles: any[] = [];
-                      if (Array.isArray(selectedJob.job_titles)) {
-                        titles = selectedJob.job_titles;
-                      } else if (typeof selectedJob.job_titles === "string") {
-                        try {
-                          const parsed = JSON.parse(selectedJob.job_titles);
-                          if (Array.isArray(parsed)) titles = parsed;
-                        } catch {
-                          titles = [];
-                        }
-                      }
+                        <div
+                          style={{
+                            textAlign: "left",
+                            width: "100%",
+                            fontSize: "12px",
+                            lineHeight: "1.6",
+                            color: "#555",
+                          }}
+                        >
+                          <p style={{ margin: 0 }}>
+                            <strong>Mobile:</strong>{" "}
+                            {selectedJob.mobile_phone || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Age:</strong> {selectedJob.age || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Gender:</strong> {selectedJob.gender || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Nationality:</strong>{" "}
+                            {selectedJob.nationality || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Military Status:</strong>{" "}
+                            {selectedJob.military_status || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Religion:</strong>{" "}
+                            {selectedJob.religion || "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Weight / Height:</strong>{" "}
+                            {selectedJob.weight
+                              ? `${selectedJob.weight} kg`
+                              : "-"}{" "}
+                            /{" "}
+                            {selectedJob.height
+                              ? `${selectedJob.height} cm`
+                              : "-"}
+                          </p>
+                          <p style={{ margin: 0 }}>
+                            <strong>Current Address:</strong>{" "}
+                            {[
+                              selectedJob.address,
+                              selectedJob.sub_district,
+                              selectedJob.district,
+                              selectedJob.province,
+                              selectedJob.postal_code,
+                            ]
+                              .filter(Boolean)
+                              .join(" ") || "-"}
+                          </p>
+                        </div>
 
-                      const userJobTitles = titles.filter(
-                        (jt: any) =>
-                          (typeof jt === "string" && jt.trim() !== "") ||
-                          (jt?.job_name && String(jt.job_name).trim() !== ""),
-                      );
+                        {resumeFile && (
+                          <a
+                            href={resumeFile.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              marginTop: "auto",
+                              backgroundColor: "#e2e2e2",
+                              padding: "8px 12px",
+                              borderRadius: "20px",
+                              color: "#000000",
+                              textDecoration: "none",
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              maxWidth: "100%",
+                            }}
+                          >
+                            {resumeFile.file_name || "resume file"}
+                          </a>
+                        )}
+                      </div>
 
-                      if (userJobTitles.length === 0) return null;
+                      {/* Column 2: Job Preferences */}
+                      <div
+                        style={{
+                          flex: "1",
+                          backgroundColor: "#DBDBDB",
+                          borderRadius: "12px",
+                          padding: "20px",
+                        }}
+                      >
+                        <h2
+                          style={{
+                            fontSize: "18px",
+                            marginTop: 0,
+                            marginBottom: "20px",
+                            textAlign: "center",
+                          }}
+                        >
+                          งานที่คาดหวัง
+                        </h2>
 
-                      return (
+                        {(() => {
+                          let titles: any[] = [];
+                          if (Array.isArray(selectedJob.job_titles)) {
+                            titles = selectedJob.job_titles;
+                          } else if (
+                            typeof selectedJob.job_titles === "string"
+                          ) {
+                            try {
+                              const parsed = JSON.parse(selectedJob.job_titles);
+                              if (Array.isArray(parsed)) titles = parsed;
+                            } catch {
+                              titles = [];
+                            }
+                          }
+
+                          const userJobTitles = titles.filter(
+                            (jt: any) =>
+                              (typeof jt === "string" && jt.trim() !== "") ||
+                              (jt?.job_name &&
+                                String(jt.job_name).trim() !== ""),
+                          );
+
+                          if (userJobTitles.length === 0) return null;
+
+                          return (
+                            <div style={{ marginBottom: "15px" }}>
+                              <p
+                                style={{
+                                  margin: "0 0 5px 0",
+                                  color: "#555",
+                                  fontSize: "13px",
+                                }}
+                              >
+                                ตำแหน่งงาน
+                              </p>
+                              <ol
+                                style={{
+                                  margin: 0,
+                                  paddingLeft: "20px",
+                                  fontSize: "14px",
+                                  fontWeight: "bold",
+                                  color: "#333",
+                                }}
+                              >
+                                {userJobTitles.map((jt: any, i: number) => (
+                                  <li key={i}>
+                                    {typeof jt === "string" ? jt : jt.job_name}
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          );
+                        })()}
+
                         <div style={{ marginBottom: "15px" }}>
                           <p
                             style={{
@@ -1214,286 +1365,279 @@ export default function CompanyApplication({
                               fontSize: "13px",
                             }}
                           >
-                            Job Title
+                            ประเภทงาน
+                          </p>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "8px",
+                            }}
+                          >
+                            {selectedJob.type_of_work ? (
+                              selectedJob.type_of_work
+                                .split(",")
+                                .map((type, index) => (
+                                  <span
+                                    key={index}
+                                    style={{
+                                      display: "inline-block",
+                                      backgroundColor: "#222",
+                                      color: "#ffffff",
+                                      padding: "4px 12px",
+                                      fontSize: "12px",
+                                      borderRadius: "50px",
+                                    }}
+                                  >
+                                    {type.trim()}
+                                  </span>
+                                ))
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            เงินเดือนที่คาดหวัง
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            {selectedJob.desired_salary || "-"} บาท
+                          </p>
+                        </div>
+
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            สถานที่ทำงานที่คาดหวัง
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            {selectedJob.desired_work_location || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            วันที่สามารถเริ่มงานได้
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            {selectedJob.available_start_date
+                              ? new Date(
+                                  selectedJob.available_start_date,
+                                ).toLocaleDateString("en-GB")
+                              : "-"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Column 3: Skills */}
+                      <div
+                        style={{
+                          flex: "1",
+                          backgroundColor: "#DBDBDB",
+                          borderRadius: "12px",
+                          padding: "20px",
+                        }}
+                      >
+                        <h2
+                          style={{
+                            fontSize: "18px",
+                            marginTop: 0,
+                            marginBottom: "20px",
+                            textAlign: "center",
+                          }}
+                        >
+                          ทักษะ
+                        </h2>
+
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            ทักษะเฉพาะทาง
                           </p>
                           <ol
                             style={{
                               margin: 0,
                               paddingLeft: "20px",
                               fontSize: "14px",
-                              fontWeight: "bold",
                               color: "#333",
                             }}
                           >
-                            {userJobTitles.map((jt: any, i: number) => (
-                              <li key={i}>
-                                {typeof jt === "string" ? jt : jt.job_name}
-                              </li>
-                            ))}
+                            {selectedJob.skills &&
+                            selectedJob.skills.length > 0 ? (
+                              selectedJob.skills.map((s, i) => (
+                                <li key={i}>{s.skill_name}</li>
+                              ))
+                            ) : (
+                              <li>-</li>
+                            )}
                           </ol>
                         </div>
-                      );
-                    })()}
 
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Type Of Work
-                      </p>
-                      <ol
-                        style={{
-                          margin: 0,
-                          paddingLeft: "20px",
-                          fontSize: "14px",
-                          color: "#333",
-                        }}
-                      >
-                        {selectedJob.type_of_work ? (
-                          selectedJob.type_of_work
-                            .split(",")
-                            .map((t, i) => <li key={i}>{t.trim()}</li>)
-                        ) : (
-                          <li>-</li>
-                        )}
-                      </ol>
-                    </div>
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            Typing speed in Thai (wpm)
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            - Thai -{" "}
+                            {selectedJob.typing_speed?.find(
+                              (t) =>
+                                t.typing_language === "Thai" ||
+                                t.typing_language === "ไทย",
+                            )?.typing_wpm || "-"}{" "}
+                            wpm
+                          </p>
+                          <p
+                            style={{
+                              margin: "10px 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            Typing speed in English (wpm)
+                          </p>
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            - English -{" "}
+                            {selectedJob.typing_speed?.find(
+                              (t) =>
+                                t.typing_language === "English" ||
+                                t.typing_language === "อังกฤษ" ||
+                                t.typing_language === "Eng",
+                            )?.typing_wpm || "-"}{" "}
+                            wpm
+                          </p>
+                        </div>
 
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Type of Employment
-                      </p>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          backgroundColor: "#222",
-                          color: "#fff",
-                          padding: "4px 12px",
-                          borderRadius: "15px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Full-time
-                      </span>
-                    </div>
+                        <div style={{ marginBottom: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            ประสบการณ์
+                          </p>
+                          <ul
+                            style={{
+                              margin: 0,
+                              paddingLeft: "20px",
+                              fontSize: "13px",
+                              color: "#333",
+                            }}
+                          >
+                            {selectedJob.experiences &&
+                            selectedJob.experiences.length > 0 ? (
+                              selectedJob.experiences.map((ex, i) => (
+                                <li key={i}>
+                                  <strong>{ex.ex_title}</strong>
+                                  {ex.ex_description
+                                    ? `: ${ex.ex_description}`
+                                    : ""}
+                                </li>
+                              ))
+                            ) : (
+                              <li>-</li>
+                            )}
+                          </ul>
+                        </div>
 
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Desired salary (baht)
-                      </p>
-                      <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                        {selectedJob.desired_salary || "-"}
-                      </p>
-                    </div>
-
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Desired work location
-                      </p>
-                      <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                        {selectedJob.desired_work_location || "-"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Available start date
-                      </p>
-                      <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                        {selectedJob.available_start_date
-                          ? new Date(
-                              selectedJob.available_start_date,
-                            ).toLocaleDateString("en-GB")
-                          : "-"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Column 3: Skills */}
-                  <div
-                    style={{
-                      flex: "1",
-                      backgroundColor: "#DBDBDB",
-                      borderRadius: "12px",
-                      padding: "20px",
-                    }}
-                  >
-                    <h2
-                      style={{
-                        fontSize: "18px",
-                        marginTop: 0,
-                        marginBottom: "20px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Skills
-                    </h2>
-
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Specific skills
-                      </p>
-                      <ol
-                        style={{
-                          margin: 0,
-                          paddingLeft: "20px",
-                          fontSize: "14px",
-                          color: "#333",
-                        }}
-                      >
-                        {selectedJob.skills && selectedJob.skills.length > 0 ? (
-                          selectedJob.skills.map((s, i) => (
-                            <li key={i}>{s.skill_name}</li>
-                          ))
-                        ) : (
-                          <li>-</li>
-                        )}
-                      </ol>
-                    </div>
-
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Typing speed in Thai (wpm)
-                      </p>
-                      <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                        - Thai -{" "}
-                        {selectedJob.typing_speed?.find(
-                          (t) =>
-                            t.typing_language === "Thai" ||
-                            t.typing_language === "ไทย",
-                        )?.typing_wpm || "-"}{" "}
-                        wpm
-                      </p>
-                      <p
-                        style={{
-                          margin: "10px 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Typing speed in English (wpm)
-                      </p>
-                      <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                        - English -{" "}
-                        {selectedJob.typing_speed?.find(
-                          (t) =>
-                            t.typing_language === "English" ||
-                            t.typing_language === "อังกฤษ" ||
-                            t.typing_language === "Eng",
-                        )?.typing_wpm || "-"}{" "}
-                        wpm
-                      </p>
-                    </div>
-
-                    <div style={{ marginBottom: "15px" }}>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Projects, Achievements, and Other Experiences
-                      </p>
-                      <ul
-                        style={{
-                          margin: 0,
-                          paddingLeft: "20px",
-                          fontSize: "13px",
-                          color: "#333",
-                        }}
-                      >
-                        {selectedJob.experiences &&
-                        selectedJob.experiences.length > 0 ? (
-                          selectedJob.experiences.map((ex, i) => (
-                            <li key={i}>
-                              <strong>{ex.ex_title}</strong>
-                              {ex.ex_description
-                                ? `: ${ex.ex_description}`
-                                : ""}
-                            </li>
-                          ))
-                        ) : (
-                          <li>-</li>
-                        )}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <p
-                        style={{
-                          margin: "0 0 5px 0",
-                          color: "#555",
-                          fontSize: "13px",
-                        }}
-                      >
-                        Language Proficiency
-                      </p>
-                      <ul
-                        style={{
-                          margin: 0,
-                          paddingLeft: "20px",
-                          fontSize: "13px",
-                          color: "#333",
-                          listStyleType: "disc",
-                        }}
-                      >
-                        {selectedJob.languages &&
-                        selectedJob.languages.length > 0 ? (
-                          selectedJob.languages.map((l, i) => (
-                            <li key={i}>
-                              {l.language_type} {l.level ? `(${l.level})` : ""}
-                            </li>
-                          ))
-                        ) : (
-                          <li>-</li>
-                        )}
-                      </ul>
+                        <div>
+                          <p
+                            style={{
+                              margin: "0 0 5px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                            }}
+                          >
+                            ความสามารถทางภาษา
+                          </p>
+                          <ul
+                            style={{
+                              margin: 0,
+                              paddingLeft: "20px",
+                              fontSize: "13px",
+                              color: "#333",
+                              listStyleType: "disc",
+                            }}
+                          >
+                            {selectedJob.languages &&
+                            selectedJob.languages.length > 0 ? (
+                              selectedJob.languages.map((l, i) => (
+                                <li key={i}>
+                                  {l.language_type}{" "}
+                                  {l.level ? `(${l.level})` : ""}
+                                </li>
+                              ))
+                            ) : (
+                              <li>-</li>
+                            )}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </>
+              </>
             ) : (
               <div
                 style={{ textAlign: "center", padding: "50px", color: "#fff" }}
@@ -1528,7 +1672,8 @@ export default function CompanyApplication({
                 <button
                   className={styles.btnConfirm}
                   onClick={() => {
-                    const idToReject = targetTrackingId || selectedJob?.tracking_id;
+                    const idToReject =
+                      targetTrackingId || selectedJob?.tracking_id;
                     if (idToReject) {
                       handleUpdateStatus(idToReject, "reject");
                     }
