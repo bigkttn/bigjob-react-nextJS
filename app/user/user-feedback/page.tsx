@@ -27,9 +27,7 @@ export default function UserFeedbackPage() {
         const uid = Number(dataAuth.user.id);
         setUserId(uid);
 
-        // 📥 เช็ค URL ตรงนี้ให้มั่นใจว่าตรงกับโฟลเดอร์หลังบ้าน (มี s หรือไม่มี s)
         const resFb = await fetch(`/api/feedback?userId=${uid}`);
-        // 🌟 ดักดึงข้อมูล: ถ้าหลังบ้านพัง (ไม่ใช่ status 200) ให้หยุดทำงานทันที จะได้ไม่เกิดบั๊ก SyntaxError
         if (!resFb.ok) {
           console.error(
             `Backend returned status ${resFb.status} for feedbacks API`,

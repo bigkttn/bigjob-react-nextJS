@@ -399,6 +399,7 @@ export default function InterviewSchedule({
       </div>
 
       <div
+        className="schedule-scroll"
         style={{
           maxHeight: "calc(100vh - 440px)",
           overflowY: "auto",

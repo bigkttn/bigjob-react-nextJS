@@ -118,13 +118,13 @@ export default function Login() {
   const redirectUser = (role: string) => {
     switch (role) {
       case "seeker":
-        router.push("/user/user-home");
+        router.replace("/user/user-home");
         break;
       case "company":
-        router.push("/company/company-home");
+        router.replace("/company/company-home");
         break;
       case "admin":
-        router.push("/admin/home");
+        router.replace("/admin/home");
         break;
       default:
         alert("Unknown Role: " + role);

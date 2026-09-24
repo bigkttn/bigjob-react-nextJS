@@ -358,3 +358,27 @@
     gap: 10px;
   }
 }
+
+/* =========================
+   CUSTOM SCROLLBAR
+========================= */
+.sidebar-links::-webkit-scrollbar,
+.schedule-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-links::-webkit-scrollbar-track,
+.schedule-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-links::-webkit-scrollbar-thumb,
+.schedule-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.sidebar-links::-webkit-scrollbar-thumb:hover,
+.schedule-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}

@@ -98,9 +98,9 @@ const Register = () => {
               alert('Registration Successful! Welcome');
               localStorage.setItem('currentUser', JSON.stringify(data.user));
                if (data.user.role === 'seeker') {
-                   window.location.href = '/user/user-home';
+                   window.location.replace('/user/user-home');
                } else {
-                    window.location.href = '/company/company-home';
+                    window.location.replace('/company/company-home');
                }
           } else {
                alert('Google Sign-up Failed: ' + (data.message || 'Server Error'));
@@ -189,9 +189,9 @@ const Register = () => {
                  localStorage.setItem('currentUser', JSON.stringify(data.user));
                  
                  if (data.user.role === 'seeker') {
-                      window.location.href = '/user/user-home';
+                      window.location.replace('/user/user-home');
                  } else {
-                      window.location.href = '/company/company-home';
+                      window.location.replace('/company/company-home');
                  }
             } else {
                  alert('Registration Failed: ' + (data.message || 'Something went wrong'));
