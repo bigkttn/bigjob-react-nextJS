@@ -33,6 +33,9 @@ export interface Recruiter {
   company_name?: string;
   company_email?: string;
   logo_image?: string;
+
+  reviewRating:number;
+  reviewComment:string;
 }
 
 interface ComponentProps {
@@ -71,6 +74,11 @@ export default function SeekerApplication({
   );
   const [targetTrackingId, setTargetTrackingId] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState<number>(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [pendingFinalStatus, setPendingFinalStatus] = useState<"hired" | "reject" | null>(null);
 
   const visibleJobs = jobs.filter((job) => !isExcludedStatus(job.status));
   const activeSelectedJob =
@@ -169,7 +177,7 @@ export default function SeekerApplication({
 
   const currentStatus = activeSelectedJob?.status?.toLowerCase() || "applied";
 
-  const handleUpdateStatus = async (trackingId: number, newStatus: string) => {
+  const handleUpdateStatus = async (trackingId: number, newStatus: string ,reviewData?: { rating: number, comment: string }) => {
     if (!activeSelectedJob) return;
 
     try {
@@ -186,6 +194,8 @@ export default function SeekerApplication({
             companyName: activeSelectedJob.company_name,
             seekerName: "ผู้สมัคร",
             jobTitle: activeSelectedJob.job_position,
+            reviewRating: reviewData?.rating,    // <--- ส่งค่ารีวิวพ่วงไป
+          reviewComment: reviewData?.comment,  // <--- ส่งค่าคอมเมนต์พ่วงไป
           }),
         },
       );
@@ -324,7 +334,10 @@ export default function SeekerApplication({
                   className={`${styles.step} ${styles.active} ${["pending", "applied"].includes(currentStatus) ? styles.currentStep : ""}`}
                 >
                   <div className={styles.stepIcon}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "24px" }}
+                    >
                       description
                     </span>
                   </div>
@@ -388,52 +401,54 @@ export default function SeekerApplication({
                     </div>
                   )}
                   {currentStatus === "applied" && (
-                    <><div
-                      style={{
-                        marginTop: "15px",
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        backgroundColor: "#ffffff",
-                        padding: "12px 16px",
-                        borderRadius: "12px",
-                        border: "1.5px solid #2e7d32",
-                        boxShadow: "0 6px 18px rgba(46, 125, 50, 0.12)",
-                        width: "11rem",
-                        boxSizing: "border-box",
-                      }}
-                    >
-                      <p
+                    <>
+                      <div
                         style={{
-                          fontSize: "13px",
-                          color: "#555",
-                          margin: "0 0 10px 0",
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: "#ffffff",
+                          padding: "12px 16px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow: "0 6px 18px rgba(46, 125, 50, 0.12)",
+                          width: "11rem",
+                          boxSizing: "border-box",
                         }}
                       >
-                        รอการตอบกลับจากบริษัท
-                      </p>
-
-                    </div><div
-                      className={styles.actionButtons}
-                      style={{
-                        padding: 0,
-                        justifyContent: "center",
-                        marginTop: 0,
-                      }}
-                    >
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            margin: "0 0 10px 0",
+                          }}
+                        >
+                          รอการตอบกลับจากบริษัท
+                        </p>
+                      </div>
+                      <div
+                        className={styles.actionButtons}
+                        style={{
+                          padding: 0,
+                          justifyContent: "center",
+                          marginTop: 0,
+                        }}
+                      >
                         <button
                           className={styles.btnReject}
-                          onClick={() => handleOpenRejectModel(
-                            activeSelectedJob.tracking_id,
-                            "cancel"
-                          )}
+                          onClick={() =>
+                            handleOpenRejectModel(
+                              activeSelectedJob.tracking_id,
+                              "cancel",
+                            )
+                          }
                         >
                           <span className={styles.iconCross}>✕</span> ยกเลิก
                         </button>
-                      </div></>
-                    
+                      </div>
+                    </>
                   )}
-                
                 </div>
                 <div
                   className={`${styles.stepLine} ${["", "screening", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.activeLine : ""}`}
@@ -444,7 +459,10 @@ export default function SeekerApplication({
                   className={`${styles.step} ${["screening", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.active : ""} ${currentStatus === "screening" ? styles.currentStep : ""}`}
                 >
                   <div className={styles.stepIcon}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "24px" }}
+                    >
                       search
                     </span>
                   </div>
@@ -459,7 +477,8 @@ export default function SeekerApplication({
                         padding: "15px",
                         borderRadius: "12px",
                         border: "1.5px solid #2e7d32",
-                        boxShadow: "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                        boxShadow:
+                          "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
                         width: "100%",
                         maxWidth: "240px",
                         boxSizing: "border-box",
@@ -490,11 +509,25 @@ export default function SeekerApplication({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "#1976d2", flexShrink: 0 }}
+                          style={{
+                            fontSize: "18px",
+                            color: "#1976d2",
+                            flexShrink: 0,
+                          }}
                         >
                           event
                         </span>
-                        <span style={{ fontSize: "13px", color: "#555", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {activeSelectedJob.interview_date
                             ? new Date(
                                 activeSelectedJob.interview_date,
@@ -518,11 +551,25 @@ export default function SeekerApplication({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "#ed6c02", flexShrink: 0 }}
+                          style={{
+                            fontSize: "18px",
+                            color: "#ed6c02",
+                            flexShrink: 0,
+                          }}
                         >
                           schedule
                         </span>
-                        <span style={{ fontSize: "13px", color: "#555", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {activeSelectedJob.interview_date
                             ? new Date(
                                 activeSelectedJob.interview_date,
@@ -674,12 +721,15 @@ export default function SeekerApplication({
                   className={`${styles.step} ${["interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.active : ""} ${currentStatus === "interview" ? styles.currentStep : ""}`}
                 >
                   <div className={styles.stepIcon}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "24px" }}
+                    >
                       mic
                     </span>
                   </div>
                   <span>Interview</span>
-                     {currentStatus === "interview" && (
+                  {currentStatus === "interview" && (
                     <div
                       style={{
                         marginTop: "15px",
@@ -689,41 +739,46 @@ export default function SeekerApplication({
                         padding: "15px",
                         borderRadius: "12px",
                         border: "1.5px solid #2e7d32",
-                        boxShadow: "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                        boxShadow:
+                          "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
                         width: "100%",
                         maxWidth: "240px",
                         boxSizing: "border-box",
                       }}
                     >
-                    <div
-    style={{
-      fontSize: "14px",
-      color: "#333",
-      margin: "0 0 12px 0",
-      fontWeight: "bold",
-      textAlign: "center",
-      borderBottom: "1px solid #f0f0f0", // ตรงนี้มีขีดเส้นใต้อยู่แล้ว 1 เส้น
-      paddingBottom: "8px",
-    }}
-  >
-    รายละเอียดนัดสัมภาษณ์
-    
-    <hr style={{ border: "0", borderTop: "1px solid #e0e0e0", margin: "8px 0" }} />
-    
-    <span 
-      style={{ 
-        whiteSpace: "pre-line", 
-        fontSize: "12px", 
-        color: "#959595", 
-        display: "flex", 
-        flexDirection: "column", 
-        alignItems: "flex-start", // แนะนำให้ใช้ flex-start แทน start เพื่อป้องกันบั๊กในบางเบราว์เซอร์
-        marginBottom: "5px" 
-      }}
-    >
-      โปรดไปตามที่นัดหมาย
-    </span>
-  </div>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: "#333",
+                          margin: "0 0 12px 0",
+                          fontWeight: "bold",
+                          textAlign: "center",
+                          borderBottom: "1px solid #f0f0f0", // ตรงนี้มีขีดเส้นใต้อยู่แล้ว 1 เส้น
+                          paddingBottom: "8px",
+                        }}
+                      >
+                        รายละเอียดนัดสัมภาษณ์
+                        <hr
+                          style={{
+                            border: "0",
+                            borderTop: "1px solid #e0e0e0",
+                            margin: "8px 0",
+                          }}
+                        />
+                        <span
+                          style={{
+                            whiteSpace: "pre-line",
+                            fontSize: "12px",
+                            color: "#959595",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-start", // แนะนำให้ใช้ flex-start แทน start เพื่อป้องกันบั๊กในบางเบราว์เซอร์
+                            marginBottom: "5px",
+                          }}
+                        >
+                          โปรดไปตามที่นัดหมาย
+                        </span>
+                      </div>
                       {/* ส่วนแสดงวันที่ */}
                       <div
                         style={{
@@ -735,11 +790,25 @@ export default function SeekerApplication({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "#1976d2", flexShrink: 0 }}
+                          style={{
+                            fontSize: "18px",
+                            color: "#1976d2",
+                            flexShrink: 0,
+                          }}
                         >
                           event
                         </span>
-                        <span style={{ fontSize: "13px", color: "#555", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {activeSelectedJob.interview_date
                             ? new Date(
                                 activeSelectedJob.interview_date,
@@ -763,11 +832,25 @@ export default function SeekerApplication({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "#ed6c02", flexShrink: 0 }}
+                          style={{
+                            fontSize: "18px",
+                            color: "#ed6c02",
+                            flexShrink: 0,
+                          }}
                         >
                           schedule
                         </span>
-                        <span style={{ fontSize: "13px", color: "#555", flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
                           {activeSelectedJob.interview_date
                             ? new Date(
                                 activeSelectedJob.interview_date,
@@ -884,7 +967,6 @@ export default function SeekerApplication({
                           gap: "10px",
                         }}
                       >
-                
                         <button
                           className={styles.btnReject}
                           onClick={() =>
@@ -909,13 +991,17 @@ export default function SeekerApplication({
                   className={`${styles.step} ${["offer", "appointment", "hired"].includes(currentStatus) ? styles.active : ""} ${["offer", "appointment", "hired"].includes(currentStatus) ? styles.currentStep : ""}`}
                 >
                   <div className={styles.stepIcon}>
-                    <span className="material-symbols-outlined" style={{ fontSize: "24px" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "24px" }}
+                    >
                       work
                     </span>
                   </div>
                   <span>Offer</span>
 
-                  {(currentStatus === "offer" || currentStatus === "appointment") && (
+                  {(currentStatus === "offer" ||
+                    currentStatus === "appointment") && (
                     <div
                       style={{
                         marginTop: "15px",
@@ -925,7 +1011,8 @@ export default function SeekerApplication({
                         padding: "15px",
                         borderRadius: "12px",
                         border: "1.5px solid #2e7d32",
-                        boxShadow: "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                        boxShadow:
+                          "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
                         width: "100%",
                         maxWidth: "240px",
                         boxSizing: "border-box",
@@ -957,12 +1044,22 @@ export default function SeekerApplication({
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ fontSize: "18px", color: "#2e7d32", flexShrink: 0 }}
+                          style={{
+                            fontSize: "18px",
+                            color: "#2e7d32",
+                            flexShrink: 0,
+                          }}
                         >
                           event_available
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <span style={{ fontSize: "11px", color: "#888", display: "block" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              color: "#888",
+                              display: "block",
+                            }}
+                          >
                             วันเริ่มงาน / ข้อเสนอ:
                           </span>
                           <span
@@ -977,13 +1074,17 @@ export default function SeekerApplication({
                             }}
                             title={
                               activeSelectedJob.interview_date
-                                ? new Date(activeSelectedJob.interview_date).toLocaleDateString("th-TH", {
+                                ? new Date(
+                                    activeSelectedJob.interview_date,
+                                  ).toLocaleDateString("th-TH", {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
                                   })
                                 : activeSelectedJob.date_time
-                                  ? new Date(activeSelectedJob.date_time).toLocaleDateString("th-TH", {
+                                  ? new Date(
+                                      activeSelectedJob.date_time,
+                                    ).toLocaleDateString("th-TH", {
                                       year: "numeric",
                                       month: "long",
                                       day: "numeric",
@@ -992,13 +1093,17 @@ export default function SeekerApplication({
                             }
                           >
                             {activeSelectedJob.interview_date
-                              ? new Date(activeSelectedJob.interview_date).toLocaleDateString("th-TH", {
+                              ? new Date(
+                                  activeSelectedJob.interview_date,
+                                ).toLocaleDateString("th-TH", {
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
                                 })
                               : activeSelectedJob.date_time
-                                ? new Date(activeSelectedJob.date_time).toLocaleDateString("th-TH", {
+                                ? new Date(
+                                    activeSelectedJob.date_time,
+                                  ).toLocaleDateString("th-TH", {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
@@ -1019,25 +1124,21 @@ export default function SeekerApplication({
                           gap: "10px",
                         }}
                       >
-                        <button
+                      <button
                           className={styles.btnAccept}
-                          onClick={() =>
-                            handleUpdateStatus(
-                              activeSelectedJob.tracking_id,
-                              "hired",
-                            )
-                          }
+                          onClick={() => {
+                            setPendingFinalStatus("hired");
+                            setIsReviewModalOpen(true);
+                          }}
                         >
                           <span className={styles.iconCheck}>✓</span> ตกลง
                         </button>
                         <button
                           className={styles.btnReject}
-                          onClick={() =>
-                            handleOpenRejectModel(
-                              activeSelectedJob.tracking_id,
-                              "reject",
-                            )
-                          }
+                          onClick={() => {
+                            setPendingFinalStatus("reject");
+                            setIsReviewModalOpen(true);
+                          }}
                         >
                           <span className={styles.iconCross}>✕</span> ปฏิเสธ
                         </button>
@@ -1063,7 +1164,11 @@ export default function SeekerApplication({
                     >
                       <span
                         className="material-symbols-outlined"
-                        style={{ fontSize: "24px", color: "#2e7d32", marginBottom: "4px" }}
+                        style={{
+                          fontSize: "24px",
+                          color: "#2e7d32",
+                          marginBottom: "4px",
+                        }}
                       >
                         verified
                       </span>
@@ -1078,7 +1183,8 @@ export default function SeekerApplication({
                       >
                         ตอบรับเข้าทำงานแล้ว
                       </p>
-                      {(activeSelectedJob.interview_date || activeSelectedJob.date_time) && (
+                      {(activeSelectedJob.interview_date ||
+                        activeSelectedJob.date_time) && (
                         <p
                           style={{
                             fontSize: "11px",
@@ -1089,7 +1195,8 @@ export default function SeekerApplication({
                         >
                           วันเริ่มงาน:{" "}
                           {new Date(
-                            activeSelectedJob.interview_date || activeSelectedJob.date_time!,
+                            activeSelectedJob.interview_date ||
+                              activeSelectedJob.date_time!,
                           ).toLocaleDateString("th-TH", {
                             year: "numeric",
                             month: "short",
@@ -1229,6 +1336,102 @@ export default function SeekerApplication({
         >
           <span style={{ color: "#ff4d4f", fontSize: "18px" }}>✕</span>
           {toastMessage}
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {isReviewModalOpen && pendingFinalStatus !== null && (
+        <div className={styles.modalOverlay}>
+          <div
+            style={{
+              backgroundColor: "#007bff", // สีพื้นหลังน้ำเงินตามภาพต้นแบบ
+              color: "white",
+              padding: "20px 30px",
+              borderRadius: "12px",
+              width: "350px",
+              textAlign: "center",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+              position: "relative",
+            }}
+          >
+            {/* ปุ่มปิด (X) มุมขวาบน */}
+            <span
+              style={{ position: "absolute", top: "10px", right: "15px", cursor: "pointer", fontSize: "18px", fontWeight: "bold" }}
+              onClick={() => {
+                setIsReviewModalOpen(false);
+                setReviewRating(0);
+                setReviewComment("");
+              }}
+            >
+              ✕
+            </span>
+
+            <h3 style={{ margin: "0 0 15px 0", fontSize: "18px" }}>Rate Review</h3>
+
+            {/* ส่วนเลือกดาว */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "15px" }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => setReviewRating(star)}
+                  style={{
+                    cursor: "pointer",
+                    fontSize: "28px",
+                    color: star <= reviewRating ? "#ffeb3b" : "transparent",
+                    textShadow: "0 0 2px rgba(255,255,255,0.8)",
+                    border: star <= reviewRating ? "none" : "1px solid white",
+                    WebkitTextStroke: star <= reviewRating ? "none" : "1.5px white",
+                  }}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            {/* ส่วนกรอกคอมเมนต์ */}
+            <p style={{ margin: "0 0 5px 0", fontSize: "14px" }}>comment</p>
+            <input
+              type="text"
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "20px",
+                border: "none",
+                outline: "none",
+                marginBottom: "15px",
+                boxSizing: "border-box",
+                color: "#333",
+              }}
+            />
+
+            {/* ปุ่ม Submit ส่งข้อมูล */}
+            <button
+              onClick={() => {
+                if (!selectedJob) return;
+                handleUpdateStatus(selectedJob.tracking_id, pendingFinalStatus, {
+                  rating: reviewRating,
+                  comment: reviewComment,
+                });
+                setIsReviewModalOpen(false);
+                setReviewRating(0);
+                setReviewComment("");
+              }}
+              style={{
+                backgroundColor: "black",
+                color: "white",
+                padding: "8px 25px",
+                border: "none",
+                borderRadius: "20px",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontSize: "14px",
+              }}
+            >
+              submit
+            </button>
+          </div>
         </div>
       )}
     </div>

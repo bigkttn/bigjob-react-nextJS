@@ -22,6 +22,7 @@ export async function GET(
         interview.location,
         posts.job_position,
         posts.company_id,
+        EXISTS (SELECT 1 FROM question WHERE question.post_id = posts.post_id) AS has_test,
         u.profile_image,
         u.email,
         u.fullname,
