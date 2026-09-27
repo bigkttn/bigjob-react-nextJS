@@ -39,6 +39,7 @@ export async function GET(
       JOIN posts ON interview.post_id = posts.post_id 
       LEFT JOIN company comp ON posts.company_id = comp.company_id
       WHERE interview.user_id = ?
+      ORDER BY interview.date_time DESC, interview.tracking_id DESC;
     `;
 
     const [rows]: any = await db.query(sql, [id]);

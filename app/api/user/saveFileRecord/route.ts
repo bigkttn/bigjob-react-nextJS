@@ -13,13 +13,23 @@ export async function POST(request: Request) {
         }
 
         // เขียนคำสั่ง INSERT ลงตารางข้อมูลของคุณ (ตัวอย่างตารางชื่อ files)
-        const [result] = await db.query(
+        const [result]: any = await db.query(
             `INSERT INTO files (user_id, file_path, file_name, file_type, file_category) 
              VALUES (?, ?, ?, ?, ?)`,
             [user_id, file_path, file_name, file_type, file_category]
         );
 
-        return NextResponse.json({ success: true, message: 'บันทึกสำเร็จ' }, { status: 200 });
+        return NextResponse.json({
+            success: true,
+            message: 'บันทึกสำเร็จ',
+            file: {
+                file_id: result.insertId,
+                file_path,
+                file_name,
+                file_type,
+                file_category,
+            }
+        }, { status: 200 });
 
     } catch (error: any) {
         console.error('Database Error:', error);

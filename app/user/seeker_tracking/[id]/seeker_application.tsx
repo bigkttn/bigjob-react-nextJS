@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import styles from "./seeker_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
 
@@ -80,13 +80,83 @@ export default function SeekerApplication({
   const [reviewComment, setReviewComment] = useState("");
   const [pendingFinalStatus, setPendingFinalStatus] = useState<"hired" | "reject" | null>(null);
 
+  const [selectedPosition, setSelectedPosition] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // ปิด dropdown เมื่อคลิกพื้นที่ด้านนอก
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterOpen]);
+
   const visibleJobs = jobs.filter((job) => !isExcludedStatus(job.status));
-  const activeSelectedJob =
-    selectedJob && !isExcludedStatus(selectedJob.status)
-      ? selectedJob
-      : visibleJobs.length > 0
-        ? visibleJobs[0]
-        : null;
+
+  // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนงานที่สมัครในแต่ละตำแหน่ง
+  const availablePositions = useMemo(() => {
+    const positionMap = new Map<string, number>();
+    visibleJobs.forEach((job) => {
+      const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+      positionMap.set(pos, (positionMap.get(pos) || 0) + 1);
+    });
+    return Array.from(positionMap.entries()).map(([name, count]) => ({
+      name,
+      count,
+    }));
+  }, [visibleJobs]);
+
+  // คัดกรองรายการงานที่สมัครตามตำแหน่งงานที่เลือกใน dropdown
+  const filteredJobs = useMemo(() => {
+    if (selectedPosition === "all") {
+      return visibleJobs;
+    }
+    return visibleJobs.filter((job) => {
+      const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+      return pos === selectedPosition;
+    });
+  }, [visibleJobs, selectedPosition]);
+
+  // งานที่เลือกในปัจจุบัน (สัมพันธ์กับรายการที่ผ่านการคัดกรอง)
+  const activeSelectedJob = useMemo(() => {
+    if (
+      selectedJob &&
+      !isExcludedStatus(selectedJob.status) &&
+      filteredJobs.some((j) => j.tracking_id === selectedJob.tracking_id)
+    ) {
+      return selectedJob;
+    }
+    return filteredJobs.length > 0 ? filteredJobs[0] : null;
+  }, [selectedJob, filteredJobs]);
+
+  // จัดการเมื่อผู้ใช้เลือกตำแหน่งงานใน dropdown
+  const handleSelectPosition = (newPosition: string) => {
+    setSelectedPosition(newPosition);
+    setIsFilterOpen(false);
+
+    const nextFiltered =
+      newPosition === "all"
+        ? visibleJobs
+        : visibleJobs.filter((job) => {
+            const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+            return pos === newPosition;
+          });
+
+    if (!nextFiltered.some((j) => j.tracking_id === selectedJob?.tracking_id)) {
+      setSelectedJob(nextFiltered.length > 0 ? nextFiltered[0] : null);
+    }
+  };
 
   const getStatusBadge = (status: string = "pending") => {
     const s = status.toLowerCase();
@@ -286,14 +356,119 @@ export default function SeekerApplication({
       <main className={styles.mainContent}>
         {/* Left Sidebar */}
         <aside className={styles.sidebar}>
-          {visibleJobs.length === 0 ? (
+          {/* แถบตัวกรองตำแหน่งงาน (มีเพียงไอคอน filter เมื่อคลิกจึงแสดง dropdown รายการตำแหน่งงาน) */}
+          <div className={styles.filterTopBar}>
+            {selectedPosition !== "all" && (
+              <div className={styles.activeFilterChip}>
+                <span className={styles.activeFilterText}>
+                  {selectedPosition}
+                </span>
+                <button
+                  type="button"
+                  className={styles.clearChipBtn}
+                  onClick={() => handleSelectPosition("all")}
+                  title="ล้างตัวกรอง"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            <div className={styles.filterDropdownWrapper} ref={filterRef}>
+              <button
+                type="button"
+                className={`${styles.filterIconButton} ${isFilterOpen || selectedPosition !== "all" ? styles.filterIconActive : ""}`}
+                onClick={() => setIsFilterOpen((prev) => !prev)}
+                title="คัดกรองตำแหน่งงาน"
+                aria-label="คัดกรองตำแหน่งงาน"
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "20px" }}
+                >
+                  filter_alt
+                </span>
+                {selectedPosition !== "all" && (
+                  <span className={styles.filterActiveDot} />
+                )}
+              </button>
+
+              {isFilterOpen && (
+                <div className={styles.dropdownMenu}>
+                  <div className={styles.dropdownHeader}>
+                    <span>เลือกตำแหน่งงาน</span>
+                    <span style={{ fontSize: "11px", color: "#9ca3af" }}>
+                      ({availablePositions.length} ตำแหน่ง)
+                    </span>
+                  </div>
+                  <div className={styles.dropdownList}>
+                    <button
+                      type="button"
+                      className={`${styles.dropdownItem} ${selectedPosition === "all" ? styles.selectedItem : ""}`}
+                      onClick={() => handleSelectPosition("all")}
+                    >
+                      <span className={styles.itemText}>ทุกตำแหน่งงาน</span>
+                      <span className={styles.itemCount}>
+                        ({visibleJobs.length})
+                      </span>
+                      {selectedPosition === "all" && (
+                        <span
+                          className="material-symbols-outlined"
+                          style={{
+                            fontSize: "16px",
+                            color: "#2563eb",
+                            marginLeft: "auto",
+                          }}
+                        >
+                          check
+                        </span>
+                      )}
+                    </button>
+
+                    {availablePositions.map(({ name, count }) => (
+                      <button
+                        key={name}
+                        type="button"
+                        className={`${styles.dropdownItem} ${selectedPosition === name ? styles.selectedItem : ""}`}
+                        onClick={() => handleSelectPosition(name)}
+                      >
+                        <span className={styles.itemText}>{name}</span>
+                        <span className={styles.itemCount}>({count})</span>
+                        {selectedPosition === name && (
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "16px",
+                              color: "#2563eb",
+                              marginLeft: "auto",
+                            }}
+                          >
+                            check
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {filteredJobs.length === 0 ? (
             <p
-              style={{ textAlign: "center", padding: "20px", fontSize: "2rem" }}
+              style={{
+                textAlign: "center",
+                padding: "20px",
+                color: "#666",
+                fontSize: "14px",
+              }}
             >
-              No applications found.
+              {visibleJobs.length === 0
+                ? "ไม่พบข้อมูลการสมัครงาน"
+                : `ไม่พบตำแหน่งงาน "${selectedPosition}"`}
             </p>
           ) : (
-            visibleJobs.map((job) => (
+            filteredJobs.map((job) => (
               <div
                 key={job.tracking_id}
                 className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
@@ -1013,8 +1188,8 @@ export default function SeekerApplication({
                         border: "1.5px solid #2e7d32",
                         boxShadow:
                           "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
-                        width: "100%",
-                        maxWidth: "240px",
+                        width: "10rem",
+                       
                         boxSizing: "border-box",
                       }}
                     >
@@ -1340,100 +1515,156 @@ export default function SeekerApplication({
       )}
 
       {/* Review Modal */}
-      {isReviewModalOpen && pendingFinalStatus !== null && (
-        <div className={styles.modalOverlay}>
-          <div
-            style={{
-              backgroundColor: "#007bff", // สีพื้นหลังน้ำเงินตามภาพต้นแบบ
-              color: "white",
-              padding: "20px 30px",
-              borderRadius: "12px",
-              width: "350px",
-              textAlign: "center",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-              position: "relative",
-            }}
-          >
-            {/* ปุ่มปิด (X) มุมขวาบน */}
-            <span
-              style={{ position: "absolute", top: "10px", right: "15px", cursor: "pointer", fontSize: "18px", fontWeight: "bold" }}
-              onClick={() => {
-                setIsReviewModalOpen(false);
-                setReviewRating(0);
-                setReviewComment("");
-              }}
-            >
-              ✕
-            </span>
+{isReviewModalOpen && pendingFinalStatus !== null && (
+  <div className={styles.modalOverlay}>
+    <div
+      style={{
+        backgroundColor: "#ffffff",
+        color: "#1e293b",
+        padding: "32px 28px",
+        borderRadius: "20px",
+        width: "360px",
+        textAlign: "center",
+        boxShadow: "0 20px 40px -10px rgba(0, 123, 255, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.05)",
+        border: "1.5px solid #60a5fa", // เส้นขอบสีฟ้าโมเดิร์น
+        position: "relative",
+        boxSizing: "border-box",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
+      {/* ปุ่มปิด (✕) มุมขวาบน */}
+      <span
+        style={{
+          position: "absolute",
+          top: "16px",
+          right: "18px",
+          cursor: "pointer",
+          fontSize: "18px",
+          color: "#94a3b8",
+          lineHeight: "1",
+          transition: "color 0.2s",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#1e293b")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+        onClick={() => {
+          setIsReviewModalOpen(false);
+          setReviewRating(0);
+          setReviewComment("");
+        }}
+      >
+        ✕
+      </span>
 
-            <h3 style={{ margin: "0 0 15px 0", fontSize: "18px" }}>Rate Review</h3>
+      <h3 style={{ margin: "0 0 6px 0", fontSize: "20px", fontWeight: "700", color: "#0f172a" }}>
+        Rate Review
+      </h3>
+      <p style={{ margin: "0 0 20px 0", fontSize: "13px", color: "#64748b" }}>
+        กรุณาให้คะแนนและแสดงความคิดเห็น
+      </p>
 
-            {/* ส่วนเลือกดาว */}
-            <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginBottom: "15px" }}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <span
-                  key={star}
-                  onClick={() => setReviewRating(star)}
-                  style={{
-                    cursor: "pointer",
-                    fontSize: "28px",
-                    color: star <= reviewRating ? "#ffeb3b" : "transparent",
-                    textShadow: "0 0 2px rgba(255,255,255,0.8)",
-                    border: star <= reviewRating ? "none" : "1px solid white",
-                    WebkitTextStroke: star <= reviewRating ? "none" : "1.5px white",
-                  }}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
+      {/* ส่วนเลือกดาว */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "22px" }}>
+  {[1, 2, 3, 4, 5].map((star) => {
+    const isFilled = star <= reviewRating;
+    return (
+      <button
+        type="button"
+        key={star}
+        onClick={() => setReviewRating(star)}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          outline: "none",
+          transition: "transform 0.15s ease",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      >
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill={isFilled ? "#f59e0b" : "#e2e8f0"}
+          stroke={isFilled ? "#f59e0b" : "#cbd5e1"}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ transition: "fill 0.2s, stroke 0.2s" }}
+        >
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      </button>
+    );
+  })}
+</div>
+      {/* ส่วนกรอกคอมเมนต์ */}
+      <div style={{ textAlign: "left", marginBottom: "20px" }}>
+        <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>
+          Comment
+        </label>
+        <textarea
+          rows={3}
+          value={reviewComment}
+          placeholder="พิมพ์ข้อความที่นี่..."
+          onChange={(e) => setReviewComment(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            borderRadius: "12px",
+            border: "1.5px solid #e2e8f0",
+            outline: "none",
+            boxSizing: "border-box",
+            fontSize: "14px",
+            color: "#1e293b",
+            resize: "none",
+            transition: "border-color 0.2s, box-shadow 0.2s",
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "#3b82f6";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "#e2e8f0";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        />
+      </div>
 
-            {/* ส่วนกรอกคอมเมนต์ */}
-            <p style={{ margin: "0 0 5px 0", fontSize: "14px" }}>comment</p>
-            <input
-              type="text"
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "20px",
-                border: "none",
-                outline: "none",
-                marginBottom: "15px",
-                boxSizing: "border-box",
-                color: "#333",
-              }}
-            />
-
-            {/* ปุ่ม Submit ส่งข้อมูล */}
-            <button
-              onClick={() => {
-                if (!selectedJob) return;
-                handleUpdateStatus(selectedJob.tracking_id, pendingFinalStatus, {
-                  rating: reviewRating,
-                  comment: reviewComment,
-                });
-                setIsReviewModalOpen(false);
-                setReviewRating(0);
-                setReviewComment("");
-              }}
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                padding: "8px 25px",
-                border: "none",
-                borderRadius: "20px",
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: "14px",
-              }}
-            >
-              submit
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ปุ่ม Submit */}
+      <button
+        onClick={() => {
+          if (!selectedJob) return;
+          handleUpdateStatus(selectedJob.tracking_id, pendingFinalStatus, {
+            rating: reviewRating,
+            comment: reviewComment,
+          });
+          setIsReviewModalOpen(false);
+          setReviewRating(0);
+          setReviewComment("");
+        }}
+        style={{
+          width: "100%",
+          background: "linear-gradient(135deg, #0070f3, #2563eb)",
+          color: "white",
+          padding: "10px 0",
+          border: "none",
+          borderRadius: "12px",
+          cursor: "pointer",
+          fontWeight: "600",
+          fontSize: "15px",
+          boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+          transition: "opacity 0.2s, transform 0.1s",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.92")}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

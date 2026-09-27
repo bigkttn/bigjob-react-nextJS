@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import nodemailer from 'nodemailer';
 
-export async function PATCH(req: { json: () => PromiseLike<{ trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; interviewDate: any; interviewTime: any; locationName: any; interviewType: any; }> | { trackingId: any; status: any; companyEmail: any; seekerEmail: any; companyName: any; seekerName: any; jobTitle: any; interviewDate: any; interviewTime: any; locationName: any; interviewType: any; }; }) {
+export async function PATCH(req: NextRequest) {
   try {
     const { 
       trackingId, 

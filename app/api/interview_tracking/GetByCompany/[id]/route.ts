@@ -60,6 +60,7 @@ export async function GET(
        JOIN posts ON interview.post_id = posts.post_id 
        JOIN company comp ON posts.company_id = comp.company_id
       WHERE posts.company_id = ?
+      ORDER BY interview.date_time DESC, interview.tracking_id DESC;
     `;
 
     const [applicants] = await db.query(sqlMain, [id]) as [any[], unknown];
@@ -74,38 +75,33 @@ export async function GET(
     if (userIds.length > 0) {
       const placeholders = userIds.map(() => "?").join(",");
 
-      const [jobTitles] = await db.query(
-        `SELECT * FROM JobTitle WHERE user_id IN (${placeholders})`,userIds
-      ) as [any[], unknown];
-
-      const [skills] = await db.query(
-        `SELECT * FROM skills WHERE user_id IN (${placeholders})`, userIds
-      ) as [any[], unknown];
-
-      const [experiences] = await db.query(
-        `SELECT * FROM experiences WHERE user_id IN (${placeholders})`, userIds
-      ) as [any[], unknown];
-
-      const [files] = await db.query(
-        `SELECT * FROM files WHERE user_id IN (${placeholders})`, userIds
-      ) as [any[], unknown];
-
-      const [languages] = await db.query(
-        `SELECT * FROM language_proficiency WHERE user_id IN (${placeholders})`, userIds
-      ) as [any[], unknown];
-
-      const [typingSpeed] = await db.query(
-        `SELECT * FROM typing_speed WHERE user_id IN (${placeholders})`, userIds
-      ) as [any[], unknown];
+      const [
+        [jobTitles],
+        [educations],
+        [skills],
+        [experiences],
+        [files],
+        [languages],
+        [typingSpeed],
+      ] = (await Promise.all([
+        db.query(`SELECT * FROM JobTitle WHERE user_id IN (${placeholders})`, userIds),
+        db.query(`SELECT * FROM education WHERE user_id IN (${placeholders}) ORDER BY year_start DESC`, userIds),
+        db.query(`SELECT * FROM skills WHERE user_id IN (${placeholders})`, userIds),
+        db.query(`SELECT * FROM experiences WHERE user_id IN (${placeholders})`, userIds),
+        db.query(`SELECT * FROM files WHERE user_id IN (${placeholders}) ORDER BY uploaded_at DESC, file_id DESC`, userIds),
+        db.query(`SELECT * FROM language_proficiency WHERE user_id IN (${placeholders})`, userIds),
+        db.query(`SELECT * FROM typing_speed WHERE user_id IN (${placeholders})`, userIds),
+      ])) as [any[], unknown][];
 
       // 3. นำข้อมูลย่อยแมปเข้ากับผู้สมัครแต่ละคน
       applicants.forEach((applicant) => {
-        applicant.job_titles = jobTitles.filter((j) => j.user_id === applicant.user_id);
-        applicant.skills = skills.filter((s) => s.user_id === applicant.user_id);
-        applicant.experiences = experiences.filter((e) => e.user_id === applicant.user_id);
-        applicant.files = files.filter((f) => f.user_id === applicant.user_id);
-        applicant.languages = languages.filter((l) => l.user_id === applicant.user_id);
-        applicant.typing_speed = typingSpeed.filter((t) => t.user_id === applicant.user_id);
+        applicant.job_titles = (jobTitles as any[]).filter((j) => String(j.user_id) === String(applicant.user_id));
+        applicant.educations = (educations as any[]).filter((ed) => String(ed.user_id) === String(applicant.user_id));
+        applicant.skills = (skills as any[]).filter((s) => String(s.user_id) === String(applicant.user_id));
+        applicant.experiences = (experiences as any[]).filter((e) => String(e.user_id) === String(applicant.user_id));
+        applicant.files = (files as any[]).filter((f) => String(f.user_id) === String(applicant.user_id));
+        applicant.languages = (languages as any[]).filter((l) => String(l.user_id) === String(applicant.user_id));
+        applicant.typing_speed = (typingSpeed as any[]).filter((t) => String(t.user_id) === String(applicant.user_id));
       });
     }
 
