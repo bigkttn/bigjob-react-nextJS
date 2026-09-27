@@ -752,14 +752,19 @@ const SeekerProfile = () => {
     if (userId === "") return;
     setSaving(true);
     try {
+      const payload = {
+        ...form,
+        military_status: form.gender === "หญิง" ? "" : form.military_status,
+      };
       const res = await fetch(`/api/user/updateProfile/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        setProfile(form);
+        setProfile(payload);
+        setForm(payload);
         setEditMode(false);
         alert("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
         window.location.reload();
@@ -874,7 +879,22 @@ const SeekerProfile = () => {
       });
 
       if (res.ok) {
-        loadProfile(userId);
+        const data: { file?: FileRecord } = await res.json();
+        const newFile: FileRecord = data.file ?? {
+          file_id: Date.now(),
+          file_path: url,
+          file_name: file.name,
+          file_type: file.type,
+          file_category: category,
+        };
+        setProfile((prev) => ({
+          ...prev,
+          files: [newFile, ...prev.files],
+        }));
+        setForm((prev) => ({
+          ...prev,
+          files: [newFile, ...prev.files],
+        }));
       } else {
         const data: { error?: string } = await res.json();
         alert(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
@@ -901,7 +921,14 @@ const SeekerProfile = () => {
         method: "DELETE",
       });
       if (res.ok) {
-        loadProfile(userId);
+        setProfile((prev) => ({
+          ...prev,
+          files: prev.files.filter((f) => f.file_id !== fileId),
+        }));
+        setForm((prev) => ({
+          ...prev,
+          files: prev.files.filter((f) => f.file_id !== fileId),
+        }));
       } else {
         alert("ไม่สามารถลบแถวข้อมูลได้");
       }
@@ -1094,21 +1121,29 @@ const SeekerProfile = () => {
                 editing={editMode}
                 value={editMode ? form.gender : profile.gender}
                 options={["ชาย", "หญิง", "อื่นๆ"]}
-                onChange={(v) => changeText("gender", v)}
+                onChange={(v) => {
+                  if (v === "หญิง") {
+                    setForm((prev) => ({ ...prev, gender: v, military_status: "" }));
+                  } else {
+                    changeText("gender", v);
+                  }
+                }}
               />
-              <InfoRow
-                label="สถานะทางทหาร"
-                editing={editMode}
-                value={
-                  editMode ? form.military_status : profile.military_status
-                }
-                options={[
-                  "ได้รับการยกเว้น",
-                  "ผ่านการเกณฑ์ทหารแล้ว",
-                  "ยังไม่ผ่านการเกณฑ์ทหาร",
-                ]}
-                onChange={(v) => changeText("military_status", v)}
-              />
+              {(editMode ? form.gender : profile.gender)?.trim() !== "หญิง" && (
+                <InfoRow
+                  label="สถานะทางทหาร"
+                  editing={editMode}
+                  value={
+                    editMode ? form.military_status : profile.military_status
+                  }
+                  options={[
+                    "ได้รับการยกเว้น",
+                    "ผ่านการเกณฑ์ทหารแล้ว",
+                    "ยังไม่ผ่านการเกณฑ์ทหาร",
+                  ]}
+                  onChange={(v) => changeText("military_status", v)}
+                />
+              )}
               <InfoRow
                 label="วันเกิด"
                 type="date"

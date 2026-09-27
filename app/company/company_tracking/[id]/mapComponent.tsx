@@ -200,6 +200,7 @@ export default function MapComponent({
   );
 
   // Search places via Nominatim
+  // Search places via Nominatim
   const executeSearch = useCallback(async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -215,10 +216,10 @@ export default function MapComponent({
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           trimmed
-        )}&accept-language=th&limit=6&addressdetails=1`
+        )}&countrycodes=th&accept-language=th&limit=10&addressdetails=1`
       );
       if (!res.ok) throw new Error("Search request failed");
-      const data: SearchResult[] = await res.json();
+      const data = (await res.json()) as SearchResult[];
       setSearchResults(data || []);
     } catch (err) {
       console.error("Search error:", err);
@@ -432,3 +433,4 @@ export default function MapComponent({
     </div>
   );
 }
+

@@ -2,19 +2,10 @@ import styles from "./seeker_tracking.module.css";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { apiUrl } from "@/lib/hostURL";
-import SeekerApplication from "./seeker_application";
+import SeekerApplication, { Recruiter } from "./seeker_application";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
-}
-
-interface AppliedJobItem {
-  tracking_id: number;
-  post_id: number;
-  user_id: number;
-  status: string;
-  job_position: string;
-  [key: string]: unknown;
 }
 
 interface PageProps {
@@ -46,7 +37,7 @@ export default async function SeekerTracking({ params }: PageProps) {
       </div>
     );
   }
-  let trackingList: AppliedJobItem[] = [];
+  let trackingList: Recruiter[] = [];
   try {
     const res = await fetch(
       `${apiUrl}/api/interview_tracking/GetByUser/${userId}`,
@@ -56,7 +47,7 @@ export default async function SeekerTracking({ params }: PageProps) {
     );
     if (res.ok) {
       const data = await res.json();
-      trackingList = data.rows || [];
+      trackingList = (data.rows || []) as Recruiter[];
       console.log("trackingList", trackingList);
     }
   } catch (error) {

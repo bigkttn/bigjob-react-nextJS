@@ -24,7 +24,205 @@
   gap: 12px;
   max-height: 85vh;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid #ccc;
+  position: relative;
+}
+
+/* Position Filter Icon & Dropdown */
+.filterTopBar {
+  position: sticky;
+  top: -16px;
+  margin: -16px -16px 4px -16px;
+  z-index: 30;
+  background-color: #f5f5f5;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  min-height: 44px;
+}
+
+.activeFilterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 3px 8px 3px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 230px;
+  margin-right: auto;
+}
+
+.activeFilterText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clearChipBtn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.clearChipBtn:hover {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.filterDropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filterIconButton {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.filterIconButton:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-color: #9ca3af;
+}
+
+.filterIconActive {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+.filterActiveDot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  background-color: #2563eb;
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+}
+
+/* Floating Dropdown Menu */
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 250px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownHeader {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdownList {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdownItem {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.dropdownItem:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.selectedItem {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  font-weight: 600;
+}
+
+.itemText {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemCount {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.selectedItem .itemCount {
+  color: #3b82f6;
 }
 
 .jobCard {

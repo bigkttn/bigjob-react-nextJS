@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import styles from "./company_tracking.module.css";
 import { apiUrl } from "@/lib/hostURL";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import TestResultModal from "@/components/TestResultModal";
-import { spawn } from "child_process";
 
 const MapComponent = dynamic(() => import("./mapComponent"), {
   ssr: false,
@@ -14,6 +13,25 @@ const MapComponent = dynamic(() => import("./mapComponent"), {
     <p style={{ textAlign: "center", padding: "20px" }}>กำลังโหลดแผนที่...</p>
   ),
 });
+
+export interface Education {
+  education_id?: number;
+  level?: string;
+  institution?: string;
+  faculty?: string;
+  major?: string;
+  year_start?: string | number;
+  year_end?: string | number;
+}
+
+export interface FileRecord {
+  file_id: number;
+  user_id?: number;
+  file_path: string;
+  file_name: string;
+  file_type?: string;
+  file_category?: string;
+}
 
 export interface Applicant {
   has_test: boolean;
@@ -46,11 +64,12 @@ export interface Applicant {
   desired_salary?: string;
   desired_work_location?: string;
   available_start_date?: string;
+  educations?: Education[];
   skills?: any[];
   experiences?: any[];
   languages?: any[];
   typing_speed?: any[];
-  files?: any[];
+  files?: FileRecord[];
   profile_image?: string;
   company_full_address?: string;
   company_sub_district?: string;
@@ -78,6 +97,72 @@ export default function CompanyApplication({
     initialJobs && initialJobs.length > 0 ? initialJobs[0] : null,
   );
   console.log("data รายการผู้สมัครงาน tracking:", initialJobs);
+
+  const [selectedPosition, setSelectedPosition] = useState<string>("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const [previewResume, setPreviewResume] = useState<FileRecord | null>(null);
+
+  // ปิด dropdown เมื่อคลิกพื้นที่ด้านนอก
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterRef.current &&
+        !filterRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterOpen(false);
+      }
+    };
+    if (isFilterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isFilterOpen]);
+
+  // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนผู้สมัครในแต่ละตำแหน่ง
+  const availablePositions = useMemo(() => {
+    const positionMap = new Map<string, number>();
+    jobs.forEach((job) => {
+      const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+      positionMap.set(pos, (positionMap.get(pos) || 0) + 1);
+    });
+    return Array.from(positionMap.entries()).map(([name, count]) => ({
+      name,
+      count,
+    }));
+  }, [jobs]);
+
+  // คัดกรองรายชื่อผู้สมัครตามตำแหน่งงานที่เลือกใน dropdown
+  const filteredJobs = useMemo(() => {
+    if (selectedPosition === "all") {
+      return jobs;
+    }
+    return jobs.filter((job) => {
+      const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+      return pos === selectedPosition;
+    });
+  }, [jobs, selectedPosition]);
+
+  // จัดการเมื่อผู้ใช้เลือกตำแหน่งงานใน dropdown
+  const handleSelectPosition = (newPosition: string) => {
+    setSelectedPosition(newPosition);
+    setIsFilterOpen(false);
+
+    const nextFiltered =
+      newPosition === "all"
+        ? jobs
+        : jobs.filter((job) => {
+            const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
+            return pos === newPosition;
+          });
+
+    // หากผู้สมัครคนเดิมไม่อยู่ในรายการที่ผ่านการคัดกรอง ให้สลับไปเลือกคนแรกของรายการใหม่ หรือ null
+    if (!nextFiltered.some((j) => j.tracking_id === selectedJob?.tracking_id)) {
+      setSelectedJob(nextFiltered.length > 0 ? nextFiltered[0] : null);
+    }
+  };
 
   const [interviewDate, setInterviewDate] = useState("");
   const [interviewTime, setInterviewTime] = useState("");
@@ -232,11 +317,25 @@ export default function CompanyApplication({
     setIsMapModalOpen(true);
   };
 
-  const resumeFile = selectedJob?.files?.find(
-    (f) =>
-      f.file_category?.toLowerCase() === "resume" ||
-      f.file_name.endsWith(".pdf"),
-  );
+  const resumeFiles =
+    selectedJob?.files?.filter(
+      (f) =>
+        f?.file_category?.toLowerCase() === "resume" ||
+        f?.file_category === "เรซูเม่" ||
+        f?.file_name?.toLowerCase().includes("resume") ||
+        f?.file_name?.includes("เรซูเม่"),
+    ) || [];
+
+  const resumeFile =
+    resumeFiles.length > 0
+      ? resumeFiles[0]
+      : selectedJob?.files?.find(
+          (f) =>
+            f?.file_category?.toLowerCase() !== "transcript" &&
+            f?.file_category?.toLowerCase() !== "portfolio" &&
+            f?.file_category?.toLowerCase() !== "certificate" &&
+            Boolean(f?.file_name?.toLowerCase().endsWith(".pdf")),
+        );
 
   const now = new Date();
   let isWaitingForInterviewEnd = false; // ยังไม่ถึงเวลาสัมภาษณ์
@@ -277,13 +376,118 @@ export default function CompanyApplication({
       <main className={styles.mainContent}>
         {/* Left Sidebar */}
         <div className={styles.cardScollBar}>
+          {/* แถบตัวกรองตำแหน่งงาน (มีเพียงไอคอน filter เมื่อคลิกจึงแสดง dropdown รายการตำแหน่งงาน) */}
+          <div className={styles.filterTopBar}>
+            {selectedPosition !== "all" && (
+              <div className={styles.activeFilterChip}>
+                <span className={styles.activeFilterText}>
+                  {selectedPosition}
+                </span>
+                <button
+                  type="button"
+                  className={styles.clearChipBtn}
+                  onClick={() => handleSelectPosition("all")}
+                  title="ล้างตัวกรอง"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            <div className={styles.filterDropdownWrapper} ref={filterRef}>
+              <button
+                type="button"
+                className={`${styles.filterIconButton} ${isFilterOpen || selectedPosition !== "all" ? styles.filterIconActive : ""}`}
+                onClick={() => setIsFilterOpen((prev) => !prev)}
+                title="คัดกรองตำแหน่งงาน"
+                aria-label="คัดกรองตำแหน่งงาน"
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "20px" }}
+                >
+                  filter_alt
+                </span>
+                {selectedPosition !== "all" && (
+                  <span className={styles.filterActiveDot} />
+                )}
+              </button>
+
+              {isFilterOpen && (
+                <div className={styles.dropdownMenu}>
+                  <div className={styles.dropdownHeader}>
+                    <span>เลือกตำแหน่งงาน</span>
+                    <span style={{ fontSize: "11px", color: "#9ca3af" }}>
+                      ({availablePositions.length} ตำแหน่ง)
+                    </span>
+                  </div>
+                  <div className={styles.dropdownList}>
+                    <button
+                      type="button"
+                      className={`${styles.dropdownItem} ${selectedPosition === "all" ? styles.selectedItem : ""}`}
+                      onClick={() => handleSelectPosition("all")}
+                    >
+                      <span className={styles.itemText}>ทุกตำแหน่งงาน</span>
+                      <span className={styles.itemCount}>({jobs.length})</span>
+                      {selectedPosition === "all" && (
+                        <span
+                          className="material-symbols-outlined"
+                          style={{
+                            fontSize: "16px",
+                            color: "#2563eb",
+                            marginLeft: "auto",
+                          }}
+                        >
+                          check
+                        </span>
+                      )}
+                    </button>
+
+                    {availablePositions.map(({ name, count }) => (
+                      <button
+                        key={name}
+                        type="button"
+                        className={`${styles.dropdownItem} ${selectedPosition === name ? styles.selectedItem : ""}`}
+                        onClick={() => handleSelectPosition(name)}
+                      >
+                        <span className={styles.itemText}>{name}</span>
+                        <span className={styles.itemCount}>({count})</span>
+                        {selectedPosition === name && (
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "16px",
+                              color: "#2563eb",
+                              marginLeft: "auto",
+                            }}
+                          >
+                            check
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           <aside className={styles.sidebar}>
-            {jobs.length === 0 ? (
-              <p style={{ textAlign: "center", padding: "20px" }}>
-                ไม่พบข้อมูลผู้สมัคร
+            {filteredJobs.length === 0 ? (
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#666",
+                  fontSize: "14px",
+                }}
+              >
+                {jobs.length === 0
+                  ? "ไม่พบข้อมูลผู้สมัคร"
+                  : `ไม่พบผู้สมัครในตำแหน่ง "${selectedPosition}"`}
               </p>
             ) : (
-              jobs.map((job) => (
+              filteredJobs.map((job) => (
                 <div
                   key={job.tracking_id}
                   className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
@@ -741,7 +945,7 @@ export default function CompanyApplication({
                         >
                           {/* กรณีที่ 1: ยังไม่ถึง 1 วันหลังสัมภาษณ์ */}
                           {isWaitingForInterviewEnd && (
-                            <div style={{ textAlign: "center" }}>
+                            <div style={{ textAlign: "center",width:"10rem" }}>
                               <p
                                 style={{
                                   fontSize: "13px",
@@ -918,6 +1122,7 @@ export default function CompanyApplication({
                             alignItems: "center",
                             gap: "8px",
                             marginTop: "10px",
+                            width:"10rem"
                           }}
                         >
                           <p
@@ -941,6 +1146,7 @@ export default function CompanyApplication({
                             flexDirection: "column",
                             alignItems: "center",
                             gap: "8px",
+                            width:"10rem",
                             marginTop: "10px",
                           }}
                         >
@@ -955,16 +1161,7 @@ export default function CompanyApplication({
                           >
                             ผู้สมัครตอบรับเข้าทำงานแล้ว
                           </p>
-                          <button
-                            type="button"
-                            className={styles.txtRejected}
-                            style={{ padding: "5px 12px", fontSize: "11px" }}
-                            onClick={() =>
-                              handleOpenRejectModal(selectedJob.tracking_id)
-                            }
-                          >
-                            ยกเลิก
-                          </button>
+                        
                         </div>
                       )}
                     </div>
@@ -1113,8 +1310,18 @@ export default function CompanyApplication({
                         </span>
                         ข้อมูลและประวัติผู้สมัคร
                       </h3>
-                      {/* ซ่อนปุ่ม และแสดงข้อความแทน ถ้าไม่มีแบบทดสอบ */}
-                      {selectedJob.has_test ? (
+                      {/* หากบริษัทเป็นฝ่ายเชิญสัมภาษณ์ก่อน (สถานะฝั่งบริษัทเป็น pending) ให้แสดงข้อความว่าผู้สมัครถูกเชิญสัมภาษณ์แล้ว */}
+                      {status === "pending" ? (
+                        <span className={styles.invitedBadge}>
+                          <span
+                            className="material-symbols-outlined"
+                            style={{ fontSize: "18px", color: "#0288d1" }}
+                          >
+                            mail
+                          </span>
+                          ผู้สมัครถูกเชิญสัมภาษณ์แล้ว
+                        </span>
+                      ) : selectedJob.has_test ? (
                         <button
                           type="button"
                           className={styles.btnViewTestHeader}
@@ -1258,29 +1465,161 @@ export default function CompanyApplication({
                           </p>
                         </div>
 
-                        {resumeFile && (
-                          <a
-                            href={resumeFile.file_path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              marginTop: "auto",
-                              backgroundColor: "#e2e2e2",
-                              padding: "8px 12px",
-                              borderRadius: "20px",
-                              color: "#000000",
-                              textDecoration: "none",
-                              fontSize: "14px",
-                              fontWeight: "bold",
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              maxWidth: "100%",
-                            }}
-                          >
-                            {resumeFile.file_name || "resume file"}
-                          </a>
-                        )}
+                        <div
+                          style={{
+                            width: "100%",
+                            marginTop: "auto",
+                            paddingTop: "15px",
+                          }}
+                        >
+                          {resumeFile ? (
+                            <div
+                              style={{
+                                backgroundColor: "#ffffff",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "10px",
+                                padding: "10px 12px",
+                                textAlign: "center",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: "6px",
+                                  marginBottom: "6px",
+                                }}
+                              >
+                                <span style={{ fontSize: "16px" }}>📄</span>
+                                <span
+                                  style={{
+                                    fontWeight: "bold",
+                                    fontSize: "13px",
+                                    color: "#1f2937",
+                                  }}
+                                >
+                                  เรซูเม่ (Resume)
+                                </span>
+                              </div>
+                              <p
+                                style={{
+                                  margin: "0 0 10px 0",
+                                  fontSize: "12px",
+                                  color: "#4b5563",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                                title={resumeFile.file_name}
+                              >
+                                {resumeFile.file_name || "Resume File"}
+                              </p>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => setPreviewResume(resumeFile)}
+                                  style={{
+                                    backgroundColor: "#2563eb",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    padding: "6px 12px",
+                                    fontSize: "12px",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                  }}
+                                >
+                                  ดูเรซูเม่ 👁️
+                                </button>
+                                <a
+                                  href={resumeFile.file_path}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  download
+                                  style={{
+                                    backgroundColor: "#f3f4f6",
+                                    color: "#374151",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "6px",
+                                    padding: "6px 10px",
+                                    fontSize: "12px",
+                                    fontWeight: "600",
+                                    textDecoration: "none",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "4px",
+                                  }}
+                                >
+                                  ดาวน์โหลด ⬇️
+                                </a>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                backgroundColor: "#f9fafb",
+                                border: "1px dashed #d1d5db",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                textAlign: "center",
+                                color: "#9ca3af",
+                                fontSize: "12px",
+                              }}
+                            >
+                              📄 ยังไม่มีไฟล์เรซูเม่
+                            </div>
+                          )}
+
+                          {selectedJob.files && selectedJob.files.length > 1 && (
+                            <div style={{ marginTop: "10px", textAlign: "center" }}>
+                              <span style={{ fontSize: "11px", color: "#6b7280" }}>
+                                เอกสารอื่น ๆ ({selectedJob.files.filter((f) => f.file_id !== resumeFile?.file_id).length} ไฟล์):
+                              </span>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: "4px",
+                                  justifyContent: "center",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                {selectedJob.files
+                                  .filter((f) => f.file_id !== resumeFile?.file_id)
+                                  .map((f, idx) => (
+                                    <button
+                                      key={f.file_id ?? idx}
+                                      type="button"
+                                      onClick={() => setPreviewResume(f)}
+                                      style={{
+                                        fontSize: "11px",
+                                        padding: "3px 8px",
+                                        borderRadius: "4px",
+                                        border: "1px solid #d1d5db",
+                                        backgroundColor: "#ffffff",
+                                        cursor: "pointer",
+                                        color: "#374151",
+                                      }}
+                                      title={f.file_name}
+                                    >
+                                      📎 {f.file_name?.length > 14 ? f.file_name.substring(0, 12) + "..." : f.file_name}
+                                    </button>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Column 2: Job Preferences */}
@@ -1463,6 +1802,64 @@ export default function CompanyApplication({
                                 ).toLocaleDateString("en-GB")
                               : "-"}
                           </p>
+                        </div>
+
+                        <div style={{ marginTop: "15px" }}>
+                          <p
+                            style={{
+                              margin: "0 0 10px 0",
+                              color: "#555",
+                              fontSize: "13px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            ประวัติการศึกษา
+                          </p>
+                          {selectedJob.educations &&
+                          selectedJob.educations.length > 0 ? (
+                            <div className={styles.Educontainer}>
+                              <div className={styles.timeline}>
+                                <div className={styles.centralLine} />
+                                {selectedJob.educations.map((item, index) => (
+                                  <div
+                                    key={item.education_id ?? index}
+                                    className={`${styles.timelineItem} ${
+                                      index % 2 === 0
+                                        ? styles.left
+                                        : styles.right
+                                    }`}
+                                  >
+                                    <div className={styles.content}>
+                                      <p className={styles.level}>
+                                        {item.level || "-"}
+                                      </p>
+                                      <h4 className={styles.degree}>
+                                        {item.major || "-"}
+                                      </h4>
+                                      <p className={styles.school}>
+                                        {item.institution || "-"}
+                                      </p>
+                                      <p className={styles.yearText}>
+                                        {item.year_start || "-"} –{" "}
+                                        {item.year_end || "-"}
+                                      </p>
+                                    </div>
+                                    <div className={styles.connector} />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <p
+                              style={{
+                                margin: 0,
+                                fontSize: "14px",
+                                color: "#333",
+                              }}
+                            >
+                              -
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1700,7 +2097,122 @@ export default function CompanyApplication({
           trackingId={selectedJob?.tracking_id || null}
           candidateName={selectedJob?.fullname}
           jobPosition={selectedJob?.job_position}
+          candidateStatus={status}
         />
+
+        {/* Modal พรีวิวเรซูเม่ / ไฟล์เอกสาร */}
+        {previewResume && (
+          <div
+            className={styles.modalOverlay}
+            onClick={() => setPreviewResume(null)}
+            style={{ zIndex: 9999 }}
+          >
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                width: "85%",
+                maxWidth: "920px",
+                height: "85vh",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  padding: "14px 20px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderBottom: "1px solid #e5e7eb",
+                  backgroundColor: "#f9fafb",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "15px",
+                    color: "#111827",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  📄 ตัวอย่างไฟล์: {previewResume.file_name}
+                </span>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                  }}
+                >
+                  <a
+                    href={previewResume.file_path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      backgroundColor: "#2563eb",
+                      color: "#fff",
+                      padding: "6px 14px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      textDecoration: "none",
+                      fontWeight: "600",
+                    }}
+                  >
+                    เปิดแท็บใหม่ ↗
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewResume(null)}
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      fontSize: "18px",
+                      cursor: "pointer",
+                      color: "#6b7280",
+                      padding: "4px 8px",
+                    }}
+                  >
+                    ✖
+                  </button>
+                </div>
+              </div>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: "#525659",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  overflow: "hidden",
+                }}
+              >
+                {previewResume.file_path?.toLowerCase().includes(".pdf") ? (
+                  <iframe
+                    src={previewResume.file_path}
+                    style={{ width: "100%", height: "100%", border: "none" }}
+                    title="Resume PDF Preview"
+                  />
+                ) : (
+                  <img
+                    src={previewResume.file_path}
+                    alt="Resume Preview"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

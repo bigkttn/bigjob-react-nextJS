@@ -37,6 +37,7 @@ interface TestResultModalProps {
   trackingId: number | null;
   candidateName?: string;
   jobPosition?: string;
+  candidateStatus?: string;
 }
 
 export default function TestResultModal({
@@ -45,6 +46,7 @@ export default function TestResultModal({
   trackingId,
   candidateName = "ผู้สมัคร",
   jobPosition = "ตำแหน่งงาน",
+  candidateStatus,
 }: TestResultModalProps) {
   const [data, setData] = useState<TestResultData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -162,12 +164,22 @@ export default function TestResultModal({
             <div className={styles.stateContainer}>
               <span
                 className={`material-symbols-outlined ${styles.stateIcon}`}
-                style={{ color: "#f59e0b" }}
+                style={{
+                  color: candidateStatus === "pending" ? "#0288d1" : "#f59e0b",
+                }}
               >
-                pending_actions
+                {candidateStatus === "pending" ? "mail" : "pending_actions"}
               </span>
-              <p className={styles.stateText}>
-                ผู้สมัครรายนี้ยังไม่ได้ส่งคำตอบแบบทดสอบ
+              <p
+                className={styles.stateText}
+                style={{
+                  color: candidateStatus === "pending" ? "#0369a1" : undefined,
+                  fontWeight: candidateStatus === "pending" ? "600" : undefined,
+                }}
+              >
+                {candidateStatus === "pending"
+                  ? "ผู้สมัครถูกเชิญสัมภาษณ์แล้ว"
+                  : "ผู้สมัครรายนี้ยังไม่ได้ส่งคำตอบแบบทดสอบ"}
               </p>
             </div>
           )}
