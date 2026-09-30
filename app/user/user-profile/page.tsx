@@ -324,6 +324,23 @@ const emptyProfile: UserProfile = cleanProfile({});
 
 /* ================= 4) Styles & Components สำหรับ UI ================= */
 
+const NATIVE_LANGUAGE_OPTIONS = [
+  "ไทย",
+  "English",
+  "中文",
+  "日本語",
+  "한국어",
+  "မြန်မာ",
+  "ភាសាខ្មែរ",
+  "ພາສາລາວ",
+  "Tiếng Việt",
+  "Français",
+  "Deutsch",
+  "Español",
+  "Русский",
+  "อื่นๆ",
+];
+
 const baseInputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem 0.75rem",
@@ -1739,15 +1756,23 @@ const SeekerProfile = () => {
                         gap: "0.5rem",
                       }}
                     >
-                      <input
+                      <select
                         style={{ ...baseInputStyle, flex: 2 }}
-                        type="text"
-                        placeholder="ภาษา (เช่น ภาษาไทย)"
                         value={t.typing_language}
                         onChange={(e) =>
                           changeTypingLanguage(i, e.target.value)
                         }
-                      />
+                      >
+                        <option value="" disabled>เลือกภาษา</option>
+                        {t.typing_language && !NATIVE_LANGUAGE_OPTIONS.includes(t.typing_language) && (
+                          <option value={t.typing_language}>{t.typing_language}</option>
+                        )}
+                        {NATIVE_LANGUAGE_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
                       <input
                         style={{ ...baseInputStyle, flex: 1 }}
                         type="number"
@@ -1940,44 +1965,81 @@ const SeekerProfile = () => {
                         border: "1px solid #e5e7eb",
                       }}
                     >
-                      <input
+                      <select
                         style={{ ...baseInputStyle, flex: "1 1 120px" }}
-                        type="text"
-                        placeholder="ภาษา (เช่น ภาษาอังกฤษ)"
                         value={lang.language_type}
                         onChange={(e) =>
                           changeLanguage(i, "language_type", e.target.value)
                         }
-                      />
-                      <input
+                      >
+                        <option value="" disabled>เลือกภาษา</option>
+                        {lang.language_type && !NATIVE_LANGUAGE_OPTIONS.includes(lang.language_type) && (
+                          <option value={lang.language_type}>{lang.language_type}</option>
+                        )}
+                        {NATIVE_LANGUAGE_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <select
                         style={{ ...baseInputStyle, flex: "1 1 100px" }}
-                        type="text"
-                        placeholder="ระดับภาษา (เช่น ระดับสูง)"
                         value={lang.level}
                         onChange={(e) =>
                           changeLanguage(i, "level", e.target.value)
                         }
-                      />
+                      >
+                        <option value="" disabled>เลือกระดับทั่วไป</option>
+                        {lang.level && !["พื้นฐาน", "ปานกลาง", "ดี", "ดีเยี่ยม", "เจ้าของภาษา"].includes(lang.level) && (
+                           <option value={lang.level}>{lang.level}</option>
+                        )}
+                        <option value="พื้นฐาน">พื้นฐาน (Beginner)</option>
+                        <option value="ปานกลาง">ปานกลาง (Intermediate)</option>
+                        <option value="ดี">ดี (Advanced)</option>
+                        <option value="ดีเยี่ยม">ดีเยี่ยม (Fluent)</option>
+                        <option value="เจ้าของภาษา">เจ้าของภาษา (Native)</option>
+                      </select>
                       <input
                         style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
-                        placeholder="การทดสอบ (เช่น TOEIC)"
+                        placeholder={
+                          lang.language_type === "日本語" ? "การทดสอบ (เช่น JLPT)" :
+                          lang.language_type === "中文" ? "การทดสอบ (เช่น HSK)" :
+                          "การทดสอบ (เช่น TOEIC)"
+                        }
                         value={lang.test_name}
                         onChange={(e) =>
                           changeLanguage(i, "test_name", e.target.value)
                         }
                       />
-                      <input
-                        style={{ ...baseInputStyle, flex: "0 1 80px" }}
-                        type="number"
-                        step="any"
-                        placeholder="คะแนน"
-                        value={lang.score}
-                        onChange={(e) =>
-                          changeLanguage(i, "score", e.target.value)
-                        }
-                        onKeyDown={blockInvalidKeys}
-                      />
+                      {lang.language_type === "日本語" ? (
+                        <div style={{ display: "flex", alignItems: "center", border: "1px solid #d1d5db", borderRadius: "6px", backgroundColor: "#fff", flex: "0 1 80px" }}>
+                          <span style={{ paddingLeft: "0.5rem", color: "#6b7280", fontWeight: "bold" }}>N</span>
+                          <input
+                            style={{ ...baseInputStyle, border: "none", paddingLeft: "0.25rem", width: "100%", backgroundColor: "transparent" }}
+                            type="number"
+                            min="1"
+                            max="5"
+                            placeholder="1-5"
+                            value={lang.score.replace(/^N/i, "")}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              changeLanguage(i, "score", val ? "N" + val : "");
+                            }}
+                            onKeyDown={blockInvalidKeys}
+                          />
+                        </div>
+                      ) : (
+                        <input
+                          style={{ ...baseInputStyle, flex: "0 1 80px" }}
+                          type="text"
+                          placeholder="คะแนน"
+                          value={lang.score}
+                          onChange={(e) =>
+                            changeLanguage(i, "score", e.target.value)
+                          }
+                        />
+                      )}
                       <RemoveButton onClick={() => removeLanguage(i)} />
                     </div>
                   ))}

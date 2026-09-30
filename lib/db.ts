@@ -2,11 +2,11 @@
 import mysql from 'mysql2/promise';
 
 const db = mysql.createPool({
-    host: '202.28.34.210',
-    port: 3309,
-    user: '66011212075',
-    password: '0934308887',
-    database: 'db66011212075',
+    host: process.env.DB_HOST ,
+    port: Number(process.env.DB_PORT) ,
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD ,
+    database: process.env.DB_NAME ,
 
     waitForConnections: true,
     connectionLimit: 10,

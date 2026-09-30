@@ -9,3 +9,22 @@ body * {
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
 }
+@source "../lib";
+
+/* SweetAlert2 Premium Styles */
+.premium-swal-popup {
+  border-radius: 24px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+  background: #ffffff !important;
+}
+.premium-swal-btn {
+  border-radius: 9999px !important;
+  padding: 12px 32px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+.premium-swal-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 15px -3px rgba(17, 24, 39, 0.3) !important;
+  background-color: #000000 !important;
+}

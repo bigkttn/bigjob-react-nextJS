@@ -1,4 +1,5 @@
 "use client"; 
+import { showAlert } from "@/lib/customAlert";
 import React, { useState, useEffect } from 'react'; 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -80,7 +81,7 @@ const Register = () => {
           payload.mobile_phone = registerData.phone;    
 
           if (!registerData.companyName || !registerData.businessType || !registerData.phone) {
-               alert('Please complete all the required company information !!')
+               showAlert.info("แจ้งเตือน", 'Please complete all the required company information !!')
                return;
           }
         }
@@ -95,7 +96,7 @@ const Register = () => {
           const data = await res.json();
 
           if (res.ok) {
-              alert('Registration Successful! Welcome');
+              showAlert.success("แจ้งเตือน", 'Registration Successful! Welcome');
               localStorage.setItem('currentUser', JSON.stringify(data.user));
                if (data.user.role === 'seeker') {
                    window.location.replace('/user/user-home');
@@ -103,16 +104,16 @@ const Register = () => {
                     window.location.replace('/company/company-home');
                }
           } else {
-               alert('Google Sign-up Failed: ' + (data.message || 'Server Error'));
+               showAlert.error("แจ้งเตือน", 'Google Sign-up Failed: ' + (data.message || 'Server Error'));
           }
       } catch (err) {
           console.error('Google Sign-up Error:', err);
-          alert('Network Error: ติดต่อ Server ไม่ได้');
+          showAlert.error("แจ้งเตือน", 'Network Error: ติดต่อ Server ไม่ได้');
       }
   };
 
   const requestOtp = async () => {
-        if (!registerData.email) return alert('กรุณากรอกอีเมลก่อนขอรหัส OTP');
+        if (!registerData.email) return showAlert.error("แจ้งเตือน", 'กรุณากรอกอีเมลก่อนขอรหัส OTP');
         setIsLoadingOtp(true);
         
         try {
@@ -127,13 +128,13 @@ const Register = () => {
 
             if (res.ok) {
                 setIsOtpSent(true);
-                alert('✅ ' + data.message); // แสดงข้อความ "ส่ง OTP สำเร็จ"
+                showAlert.success("แจ้งเตือน", '' + data.message); // แสดงข้อความ "ส่ง OTP สำเร็จ"
             } else {
-                alert('❌ เกิดข้อผิดพลาด: ' + data.message);
+                showAlert.error("แจ้งเตือน", 'เกิดข้อผิดพลาด: ' + data.message);
             }
         } catch (error) {
             console.error('Request OTP Error:', error);
-            alert('Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+            showAlert.error("แจ้งเตือน", 'Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
         } finally {
             setIsLoadingOtp(false); // ปิดสถานะโหลดไม่ว่าจะสำเร็จหรือล้มเหลว
         }
@@ -146,17 +147,17 @@ const Register = () => {
         e.preventDefault();
         
         // 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
-        if (!captchaToken) return alert('Please complete the CAPTCHA');
-        if (registerData.password !== registerData.confirmPassword) return alert('Password mismatch!');
-        if (!otpCode) return alert('Please enter and verify OTP first!'); // เช็ค OTP
+        if (!captchaToken) return showAlert.info("แจ้งเตือน", 'Please complete the CAPTCHA');
+        if (registerData.password !== registerData.confirmPassword) return showAlert.error("แจ้งเตือน", 'Password mismatch!');
+        if (!otpCode) return showAlert.info("แจ้งเตือน", 'Please enter and verify OTP first!'); // เช็ค OTP
 
         if (userType === 'company') {
              if (!registerData.companyName || !registerData.phone) {
-                  return alert('Please fill in all required company information!');
+                  return showAlert.info("แจ้งเตือน", 'Please fill in all required company information!');
              }
         } else {
              if (!registerData.fullname) {
-                  return alert('Please enter your full name!');
+                  return showAlert.info("แจ้งเตือน", 'Please enter your full name!');
              }
         }
 
@@ -185,7 +186,7 @@ const Register = () => {
             const data = await res.json();
 
             if (res.ok) {
-                 alert('Registration Successful! Welcome to BIGJOBs');
+                 showAlert.success("แจ้งเตือน", 'Registration Successful! Welcome to BIGJOBs');
                  localStorage.setItem('currentUser', JSON.stringify(data.user));
                  
                  if (data.user.role === 'seeker') {
@@ -194,12 +195,12 @@ const Register = () => {
                       window.location.replace('/company/company-home');
                  }
             } else {
-                 alert('Registration Failed: ' + (data.message || 'Something went wrong'));
+                 showAlert.error("แจ้งเตือน", 'Registration Failed: ' + (data.message || 'Something went wrong'));
             }
 
         } catch (error) {
              console.error('Registration Error:', error);
-             alert('Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+             showAlert.error("แจ้งเตือน", 'Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
         }
     };
 

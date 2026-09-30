@@ -170,9 +170,7 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >
-          Applied
-        </span>
+        >ยื่นใบสมัคร</span>
       );
     if (s === "screening")
       return (
@@ -184,9 +182,7 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >
-          Screening
-        </span>
+        >นัดสัมภาษณ์</span>
       );
     if (s === "interview")
       return (
@@ -198,9 +194,7 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >
-          Interview
-        </span>
+        >สัมภาษณ์งาน</span>
       );
     if (s === "offer" || s === "appointment" || s === "hired")
       return (
@@ -212,9 +206,7 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >
-          Offer
-        </span>
+        >ผลการพิจารณา</span>
       );
     if (s === "rejected" || s === "reject")
       return (
@@ -226,9 +218,7 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >
-          Rejected
-        </span>
+        >ไม่ผ่านพิจารณา</span>
       );
     return (
       <span
@@ -239,9 +229,7 @@ export default function SeekerApplication({
           borderRadius: "12px",
           color: "#fff",
         }}
-      >
-        Pending
-      </span>
+      >รอดำเนินการ</span>
     );
   };
 
@@ -516,7 +504,7 @@ export default function SeekerApplication({
                       description
                     </span>
                   </div>
-                  <span>Applied</span>
+                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>ยื่นใบสมัคร</span>
                   {currentStatus === "pending" && (
                     <div
                       style={{
@@ -641,7 +629,7 @@ export default function SeekerApplication({
                       search
                     </span>
                   </div>
-                  <span>Screening</span>
+                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>นัดสัมภาษณ์</span>
                   {currentStatus === "screening" && (
                     <div
                       style={{
@@ -903,7 +891,7 @@ export default function SeekerApplication({
                       mic
                     </span>
                   </div>
-                  <span>Interview</span>
+                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>สัมภาษณ์งาน</span>
                   {currentStatus === "interview" && (
                     <div
                       style={{
@@ -1173,7 +1161,7 @@ export default function SeekerApplication({
                       work
                     </span>
                   </div>
-                  <span>Offer</span>
+                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>ผลการพิจารณา</span>
 
                   {(currentStatus === "offer" ||
                     currentStatus === "appointment") && (

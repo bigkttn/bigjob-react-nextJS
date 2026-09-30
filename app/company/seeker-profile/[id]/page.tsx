@@ -31,6 +31,8 @@ interface Education {
 
 interface Skills {
   skill_name?: unknown;
+  skill_category?: unknown;
+  skill_detail?: unknown;
 }
 
 interface TypingSpeed {
@@ -41,6 +43,7 @@ interface TypingSpeed {
 interface Experiences {
   ex_title?: unknown;
   ex_description?: unknown;
+  type?: unknown;
   start_date?: string | null;
   end_date?: string | null;
 }
@@ -373,27 +376,29 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                 <p>{fmt(profile.desired_salary)} บาท</p>
               </section>
 
-              <section className={styles.Educontainer}>
+              <section className={styles.section}>
                 <h4 style={{ marginBottom: "1rem" }}>ประวัติการศึกษา</h4>
-                <div className={styles.timeline}>
-                  <div className={styles.centralLine} />
-                  {profile.educations?.map((item: Education, index: number) => (
-                    <div
-                      key={index}
-                      className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
-                    >
-                      <div className={styles.content}>
-                        <p className={styles.level}>{fmt(item.level)}</p>
-                        <h4 className={styles.degree}>{fmt(item.major)}</h4>
-                        <p className={styles.school}>{fmt(item.institution)}</p>
-                        <p>
-                          {fmt(item.year_start)} – {fmt(item.year_end)}
-                        </p>
+                <section className={styles.Educontainer}>
+                  <div className={styles.timeline}>
+                    <div className={styles.centralLine} />
+                    {profile.educations?.map((item: Education, index: number) => (
+                      <div
+                        key={index}
+                        className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
+                      >
+                        <div className={styles.content}>
+                          <p className={styles.level}>{fmt(item.level)}</p>
+                          <h4 className={styles.degree}>{fmt(item.major)}</h4>
+                          <p className={styles.school}>{fmt(item.institution)}</p>
+                          <p>
+                            {fmt(item.year_start)} – {fmt(item.year_end)}
+                          </p>
+                        </div>
+                        <div className={styles.connector} />
                       </div>
-                      <div className={styles.connector} />
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </section>
               </section>
             </div>
           </div>
@@ -406,7 +411,19 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                 <h4>ทักษะเฉพาะทาง</h4>
                 <ol className={styles.plainList}>
                   {profile.skills?.map((s: Skills, i: number) => (
-                    <li key={i}>{fmt(s.skill_name)}</li>
+                    <li key={i}>
+                      <strong>{fmt(s.skill_name)}</strong>
+                      {s.skill_category && s.skill_category !== "General" && s.skill_category !== "-" && (
+                        <span style={{ color: "#666", fontSize: "0.9em", marginLeft: "4px" }}>
+                          ({fmt(s.skill_category)})
+                        </span>
+                      )}
+                      {s.skill_detail && s.skill_detail !== "-" && (
+                        <div style={{ fontSize: "0.9em", color: "#555", marginTop: "2px" }}>
+                          - {fmt(s.skill_detail)}
+                        </div>
+                      )}
+                    </li>
                   ))}
                 </ol>
               </section>
@@ -429,6 +446,11 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
                     <li>
                       – <strong>{fmt(exp.ex_title)}</strong>
+                      {exp.type && exp.type !== "-" && (
+                        <span style={{ color: "#666", fontSize: "0.9em", marginLeft: "4px" }}>
+                          ({fmt(exp.type)})
+                        </span>
+                      )}
                     </li>
                     <li className={styles.setLi}>{fmt(exp.ex_description)}</li>
                     <li className={`${styles.setLi} ${styles.dateText}`}>

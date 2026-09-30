@@ -211,7 +211,13 @@ export default function CompanyApplication({
   // +++ เพิ่มฟังก์ชันนี้เข้าไปใหม่ +++
   const getDisplayStatus = (status: string = "pending") => {
     const s = status.toLowerCase();
-    if (s === "screening") return "Interview";
+    if (s === "pending") return "ยื่นใบสมัคร";
+    if (s === "applied") return "นัดสัมภาษณ์";
+    if (s === "screening") return "นัดสัมภาษณ์";
+    if (s === "interview") return "สัมภาษณ์งาน";
+    if (s === "offer" || s === "appointment" || s === "hired")
+      return "ผลการพิจารณา";
+    if (s === "reject" || s === "rejected") return "ไม่ผ่านพิจารณา";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
   const handleUpdateStatus = async (
@@ -520,542 +526,472 @@ export default function CompanyApplication({
 
         {/* Right Panel */}
         <section className={styles.rightPanel}>
-          <div
-            style={{
-              width: "100%",
-              height: "auto",
-              backgroundColor: "#9D9D9D",
-              borderRadius: "10px",
-              padding: "15px",
-            }}
-          >
-            {selectedJob ? (
-              <>
-                <div className={styles.trackerBox}>
-                  <div className={styles.stepperContainer}>
-                    {/* Step 1: Pending */}
-                    <div
-                      className={`${styles.step} ${styles.active} ${status === "pending" ? styles.currentStep : ""}`}
-                    >
-                      <div className={styles.stepIcon}>
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "24px" }}
-                        >
-                          description
-                        </span>
-                      </div>
-                      <span className={styles.stepLabel}>Pending</span>
-                      {status === "pending" && (
-                        <div className={styles.inlineDatePicker}>
-                          <p className={styles.txtWaiting}>
-                            รอผู้สมัครงานตอบกลับ
-                          </p>
-                          <button
-                            type="button"
-                            className={styles.txtRejected}
-                            onClick={() =>
-                              handleOpenRejectModal(selectedJob.tracking_id)
-                            }
-                          >
-                            ยกเลิก
-                          </button>
-                        </div>
-                      )}
+          {selectedJob ? (
+            <>
+              <div className={styles.trackerBox}>
+                <div className={styles.stepperContainer}>
+                  {/* Step 1: Pending */}
+                  <div
+                    className={`${styles.step} ${styles.active} ${status === "pending" ? styles.currentStep : ""}`}
+                  >
+                    <div className={styles.stepIcon}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "24px" }}
+                      >
+                        description
+                      </span>
                     </div>
-                    <div
-                      className={`${styles.stepLine} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
-                    />
-
-                    {/* Step 2: Applied (บริษัทตั้งค่าและกดส่งนัดหมาย Screening) */}
-                    <div
-                      className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
+                    <span
+                      className={styles.stepLabel}
+                      style={{
+                        display: "block",
+                        width: "120px",
+                        textAlign: "center",
+                        lineHeight: "1.3",
+                      }}
                     >
-                      <div className={styles.stepIcon}>
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "24px" }}
-                        >
-                          task_alt
-                        </span>
-                      </div>
-                      <span className={styles.stepLabel}>Applied</span>
+                      ยื่นใบสมัคร
+                    </span>
 
-                      {status === "applied" && (
-                        <div
-                          className={styles.inlineDatePicker}
+                    {status === "pending" && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p
                           style={{
-                            backgroundColor: "#fff",
-                            padding: "15px",
-                            borderRadius: "8px",
-                            border: "1px solid #ccc",
-                            marginTop: "10px",
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
+                            width: "100%",
                           }}
                         >
-                          <label>วันสัมภาษณ์:</label>
-                          <label>วันสัมภาษณ์:</label>
-                          <input
-                            type="date"
-                            min={minDate} // ล็อกปฏิทินไม่ให้เลือกวันในอดีตได้
-                            value={interviewDate}
-                            onChange={(e) => setInterviewDate(e.target.value)}
-                            style={{
-                              borderColor: isPastDate ? "#d32f2f" : "#ccc", // เปลี่ยนกรอบเป็นสีแดงถ้าพิมพ์วันย้อนหลัง
-                              outline: isPastDate ? "none" : "",
-                            }}
-                          />
-
-                          {/* แสดงข้อความเตือนสีแดงเล็กๆ หากเป็นวันที่ย้อนหลัง */}
-                          {isPastDate && (
-                            <span
-                              style={{
-                                color: "#d32f2f",
-                                fontSize: "12px",
-                                display: "block",
-                                marginTop: "4px",
-                              }}
-                            >
-                              * ไม่สามารถเลือกวันแบบย้อนหลังได้
-                            </span>
-                          )}
-                          <label>เวลาสัมภาษณ์:</label>
-                          <input
-                            type="time"
-                            value={interviewTime}
-                            onChange={(e) => setInterviewTime(e.target.value)}
-                          />
-
-                          <label style={{ marginTop: "10px" }}>
-                            รูปแบบการสัมภาษณ์:
-                          </label>
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "15px",
-                              marginBottom: "10px",
-                            }}
-                          >
-                            <label>
-                              <input
-                                type="radio"
-                                value="onsite"
-                                checked={interviewType === "onsite"}
-                                onChange={() => setInterviewType("onsite")}
-                              />{" "}
-                              On-site
-                            </label>
-                            <label>
-                              <input
-                                type="radio"
-                                value="online"
-                                checked={interviewType === "online"}
-                                onChange={() => setInterviewType("online")}
-                              />{" "}
-                              Online
-                            </label>
-                          </div>
-
-                          {interviewType === "onsite" ? (
-                            <>
-                              <label>สถานที่สัมภาษณ์:</label>
-                              <div className={styles.mapContainer}>
-                                <input
-                                  className={styles.inputMap}
-                                  type="text"
-                                  placeholder={
-                                    [
-                                      selectedJob.company_full_address,
-                                      selectedJob.company_sub_district,
-                                      selectedJob.company_province,
-                                    ]
-                                      .filter(Boolean)
-                                      .join(" ") || "ปักหมุดสถานที่"
-                                  }
-                                  value={locationName}
-                                  onChange={(e) =>
-                                    setLocationName(e.target.value)
-                                  }
-                                />
-                                <button
-                                  type="button"
-                                  className={styles.btnMap}
-                                  onClick={handleOpenMap}
-                                >
-                                  ปักหมุด
-                                </button>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <label>ลิงก์สัมภาษณ์:</label>
-                              <input
-                                type="text"
-                                placeholder="วางลิงก์ที่นี่..."
-                                value={meetingLink}
-                                onChange={(e) => setMeetingLink(e.target.value)}
-                                style={{ width: "100%", padding: "8px" }}
-                              />
-                            </>
-                          )}
-
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              gap: "10px",
-                              marginTop: "15px",
-                            }}
-                          >
-                            {/* +++ เพิ่มส่วนเช็กความครบถ้วนก่อนกดปุ่ม +++ */}
-                            {(() => {
-                              const isInterviewFormComplete =
-                                interviewDate &&
-                                interviewTime &&
-                                (interviewType === "online"
-                                  ? meetingLink
-                                  : locationName);
-
-                              return (
-                                <>
-                                  <button
-                                    className={styles.btnSubmitStep}
-                                    style={{
-                                      width: "8rem",
-                                      backgroundColor:
-                                        !isInterviewFormComplete || isPastDate
-                                          ? "#9e9e9e"
-                                          : "",
-                                      cursor:
-                                        !isInterviewFormComplete || isPastDate
-                                          ? "not-allowed"
-                                          : "pointer",
-                                    }}
-                                    disabled={
-                                      !isInterviewFormComplete ||
-                                      Boolean(isPastDate)
-                                    } // บล็อกไม่ให้กดปุ่มได้
-                                    onClick={() => {
-                                      const finalLocation =
-                                        interviewType === "online"
-                                          ? meetingLink
-                                          : locationName;
-                                      handleUpdateStatus(
-                                        selectedJob.tracking_id,
-                                        "screening",
-                                        {
-                                          interviewDate,
-                                          interviewTime,
-                                          locationName: finalLocation,
-                                          interviewType: interviewType,
-                                          latitude:
-                                            interviewType === "onsite"
-                                              ? selectedLat
-                                              : null,
-                                          longitude:
-                                            interviewType === "onsite"
-                                              ? selectedLng
-                                              : null,
-                                        },
-                                      );
-                                    }}
-                                  >
-                                    นัดสัมภาษณ์
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className={styles.txtRejected}
-                                    style={{
-                                      padding: "6px 14px",
-                                      fontSize: "12px",
-                                    }}
-                                    onClick={() =>
-                                      handleOpenRejectModal(
-                                        selectedJob.tracking_id,
-                                      )
-                                    }
-                                  >
-                                    ยกเลิก
-                                  </button>
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={`${styles.stepLine} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
-                    />
-
-                    {/* Step 3: Screening / Interview */}
-                    <div
-                      className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
-                    >
-                      <div className={styles.stepIcon}>
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "24px" }}
+                          ยื่นใบสมัคร
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            marginBottom: "15px",
+                          }}
                         >
-                          mic
-                        </span>
-                      </div>
-                      <span className={styles.stepLabel}>Interview</span>
-
-                      {status === "screening" && (
+                          รอผู้สมัครงานตอบกลับ
+                        </p>
                         <div
                           style={{
                             display: "flex",
                             flexDirection: "column",
-                            width: "10rem",
                             alignItems: "center",
-                            gap: "8px",
-                            marginTop: "10px",
                           }}
                         >
-                          <p
-                            style={{
-                              fontSize: "13px",
-                              color: "#555",
-                              margin: 0,
-                            }}
-                          >
-                            รอผู้สมัครยืนยันการนัดหมาย
-                          </p>
                           <button
                             type="button"
-                            className={styles.txtRejected}
-                            style={{ padding: "5px 12px", fontSize: "11px" }}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              background: "none",
+                              border: "none",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                              color: "#333",
+                            }}
                             onClick={() =>
                               handleOpenRejectModal(selectedJob.tracking_id)
                             }
                           >
+                            <div
+                              style={{
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "50%",
+                                backgroundColor: "#d32f2f",
+                                color: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "16px" }}
+                              >
+                                close
+                              </span>
+                            </div>
                             ยกเลิก
                           </button>
                         </div>
-                      )}
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.stepLine} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                  />
 
-                      {status === "interview" && (
-                        <div
-                          className={styles.interviewDetailsCard}
+                  {/* Step 2: Applied */}
+                  <div
+                    className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
+                  >
+                    <div className={styles.stepIcon}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "24px" }}
+                      >
+                        search
+                      </span>
+                    </div>
+                    <span
+                      className={styles.stepLabel}
+                      style={{
+                        display: "block",
+                        width: "120px",
+                        textAlign: "center",
+                        lineHeight: "1.3",
+                      }}
+                    >
+                      นัดสัมภาษณ์
+                    </span>
+
+                    {status === "applied" && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          textAlign: "left",
+                        }}
+                      >
+                        <p
                           style={{
-                            backgroundColor: "#fff",
-                            padding: "15px",
-                            borderRadius: "8px",
-                            border: "1px solid #ccc",
-                            marginTop: "10px",
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <h3
+                          สร้างนัดหมาย
+                        </p>
+                        <label
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          วันสัมภาษณ์:
+                        </label>
+                        <input
+                          type="date"
+                          min={minDate}
+                          value={interviewDate}
+                          onChange={(e) => setInterviewDate(e.target.value)}
+                          style={{
+                            borderColor: isPastDate ? "#d32f2f" : "#ccc",
+                            outline: isPastDate ? "none" : "",
+                            marginBottom: "8px",
+                            padding: "6px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            width: "100%",
+                            boxSizing: "border-box",
+                          }}
+                        />
+                        {isPastDate && (
+                          <span
                             style={{
-                              borderBottom: "1px solid #333",
-                              paddingBottom: "4px",
-                              fontSize: "14px",
+                              color: "#d32f2f",
+                              fontSize: "11px",
+                              display: "block",
+                              marginBottom: "8px",
                             }}
                           >
-                            รายละเอียดการนัดหมาย
-                          </h3>
-                          <p>
-                            <strong>วัน:</strong>{" "}
-                            {selectedJob.interview_date
-                              ? new Date(
-                                  selectedJob.interview_date,
-                                ).toLocaleDateString("th-TH")
-                              : "ไม่ระบุ"}
-                          </p>
-                          <p>
-                            <strong>เวลา:</strong>{" "}
-                            {selectedJob.interview_date
-                              ? new Date(
-                                  selectedJob.interview_date,
-                                ).toLocaleTimeString("th-TH")
-                              : "ไม่ระบุ"}
-                          </p>
-                          <p>
-                            <strong>สถานที่:</strong>
-                            <a
-                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedJob.location || "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            * ไม่สามารถเลือกวันย้อนหลังได้
+                          </span>
+                        )}
+
+                        <label
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          เวลาสัมภาษณ์:
+                        </label>
+                        <input
+                          type="time"
+                          value={interviewTime}
+                          onChange={(e) => setInterviewTime(e.target.value)}
+                          style={{
+                            marginBottom: "12px",
+                            padding: "6px",
+                            borderRadius: "4px",
+                            border: "1px solid #ccc",
+                            width: "100%",
+                            boxSizing: "border-box",
+                          }}
+                        />
+
+                        <label
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          รูปแบบการสัมภาษณ์:
+                        </label>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "15px",
+                            marginBottom: "12px",
+                          }}
+                        >
+                          <label style={{ fontSize: "12px" }}>
+                            <input
+                              type="radio"
+                              value="onsite"
+                              checked={interviewType === "onsite"}
+                              onChange={() => setInterviewType("onsite")}
+                            />{" "}
+                            On-site
+                          </label>
+                          <label style={{ fontSize: "12px" }}>
+                            <input
+                              type="radio"
+                              value="online"
+                              checked={interviewType === "online"}
+                              onChange={() => setInterviewType("online")}
+                            />{" "}
+                            Online
+                          </label>
+                        </div>
+
+                        {interviewType === "onsite" ? (
+                          <>
+                            <label
                               style={{
-                                color: "#0288d1",
-                                textDecoration: "underline",
-                                display: "inline-block",
-                                maxWidth:
-                                  "70%" /* ให้กว้างสุดเท่าที่กล่องจะรับได้ */,
-                                whiteSpace:
-                                  "nowrap" /* บังคับไม่ให้ขึ้นบรรทัดใหม่ */,
-                                overflow: "hidden" /* ซ่อนข้อความที่ล้น */,
-                                textOverflow:
-                                  "ellipsis" /* ใส่ ... ตรงที่ล้น */,
-                                verticalAlign: "bottom",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                marginBottom: "4px",
                               }}
                             >
-                              {selectedJob.location}
-                            </a>
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <button
-                              type="button"
-                              className={styles.txtRejected}
-                              style={{ marginTop: "10px" }}
-                              onClick={() =>
-                                handleOpenRejectModal(selectedJob.tracking_id)
-                              }
+                              สถานที่สัมภาษณ์:
+                            </label>
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "8px",
+                                marginBottom: "15px",
+                              }}
                             >
-                              ยกเลิก
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className={`${styles.stepLine} ${["appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
-                    />
-
-                    {/* Step 4: Appointment / Offer */}
-                    <div
-                      className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["appointment", "offer", "hired"].includes(status) ? styles.currentStep : ""}`}
-                    >
-                      <div className={styles.stepIcon}>
-                        <span
-                          className="material-symbols-outlined"
-                          style={{ fontSize: "24px" }}
-                        >
-                          work
-                        </span>
-                      </div>
-                      <span className={styles.stepLabel}>Appointment</span>
-
-                      {status === "interview" && selectedJob.interview_date && (
-                        <div
-                          style={{
-                            backgroundColor: "#fff",
-                            padding: "15px",
-                            borderRadius: "8px",
-                            // border: "1px solid #ccc",
-                            marginTop: "10px",
-                            width: "100%",
-                          }}
-                        >
-                          {/* กรณีที่ 1: ยังไม่ถึง 1 วันหลังสัมภาษณ์ */}
-                          {isWaitingForInterviewEnd && (
-                            <div style={{ textAlign: "center",width:"10rem" }}>
-                              <p
-                                style={{
-                                  fontSize: "13px",
-                                  color: "#ff9800",
-                                  margin: "0 0 5px 0",
-                                  fontWeight: "bold",
-                                }}
-                              >
-                                รอการสัมภาษณ์เสร็จสิ้น
-                              </p>
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#555",
-                                  margin: "0 0 10px 0",
-                                }}
-                              >
-                                ประเมินผลได้ตั้งแต่วันที่ {offerStartDateStr}
-                              </p>
-                              <button
-                                type="button"
-                                className={styles.txtRejected}
-                                style={{
-                                  padding: "5px 12px",
-                                  fontSize: "11px",
-                                }}
-                                onClick={() =>
-                                  handleOpenRejectModal(selectedJob.tracking_id)
-                                }
-                              >
-                                ยกเลิก
-                              </button>
-                            </div>
-                          )}
-
-                          {/* กรณีที่ 2: อยู่ในช่วง 1 - 7 วัน (เปิดให้กรอกวันเริ่มงาน) */}
-                          {canMakeOffer && (
-                            <div className={styles.inlineDatePicker}>
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#d32f2f",
-                                  margin: "0 0 10px 0",
-                                  textAlign: "center",
-                                }}
-                              >
-                                * ตัดสินใจได้ถึงวันที่ {offerEndDateStr}
-                              </p>
-                              <label
-                                style={{
-                                  fontSize: "13px",
-                                  display: "block",
-                                  marginBottom: "5px",
-                                }}
-                              >
-                                กำหนดวันเริ่มงาน:
-                              </label>
                               <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
+                                type="text"
+                                placeholder={
+                                  [
+                                    selectedJob.company_full_address,
+                                    selectedJob.company_sub_district,
+                                    selectedJob.company_province,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" ") || "ปักหมุดสถานที่"
+                                }
+                                value={locationName}
+                                onChange={(e) =>
+                                  setLocationName(e.target.value)
+                                }
                                 style={{
-                                  width: "100%",
-                                  marginBottom: "10px",
-                                  padding: "5px",
+                                  flex: 1,
+                                  padding: "6px",
+                                  borderRadius: "4px",
+                                  border: "1px solid #ccc",
+                                  minWidth: 0,
                                 }}
                               />
-                              <div
+                              <button
+                                type="button"
+                                onClick={handleOpenMap}
                                 style={{
-                                  display: "flex",
-                                  gap: "8px",
-                                  justifyContent: "center",
-                                  marginTop: "5px",
+                                  padding: "6px",
+                                  backgroundColor: "#2e7d32",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  cursor: "pointer",
+                                  fontSize: "12px",
                                 }}
                               >
+                                ปักหมุด
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <label
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              ลิงก์สัมภาษณ์:
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="วางลิงก์ที่นี่..."
+                              value={meetingLink}
+                              onChange={(e) => setMeetingLink(e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "6px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                marginBottom: "15px",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </>
+                        )}
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "15px",
+                            marginTop: "auto",
+                            borderTop: "1px solid #f0f0f0",
+                            paddingTop: "15px",
+                          }}
+                        >
+                          {(() => {
+                            const isInterviewFormComplete =
+                              interviewDate &&
+                              interviewTime &&
+                              (interviewType === "online"
+                                ? meetingLink
+                                : locationName);
+                            return (
+                              <>
                                 <button
-                                  className={styles.btnSubmitStep}
                                   style={{
-                                    flex: 1,
-                                    backgroundColor: startDate
-                                      ? "#2e7d32"
-                                      : "#9e9e9e",
-                                    color: "#fff",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    background: "none",
                                     border: "none",
-                                    padding: "8px",
-                                    borderRadius: "4px",
-                                    cursor: startDate
-                                      ? "pointer"
-                                      : "not-allowed",
+                                    fontSize: "12px",
+                                    fontWeight: "bold",
+                                    cursor:
+                                      !isInterviewFormComplete || isPastDate
+                                        ? "not-allowed"
+                                        : "pointer",
+                                    color:
+                                      !isInterviewFormComplete || isPastDate
+                                        ? "#9e9e9e"
+                                        : "#333",
                                   }}
-                                  onClick={() =>
+                                  disabled={
+                                    !isInterviewFormComplete ||
+                                    Boolean(isPastDate)
+                                  }
+                                  onClick={() => {
+                                    const finalLocation =
+                                      interviewType === "online"
+                                        ? meetingLink
+                                        : locationName;
                                     handleUpdateStatus(
                                       selectedJob.tracking_id,
-                                      "appointment",
+                                      "screening",
                                       {
-                                        interviewDate: startDate,
-                                        interviewTime: "09:00",
+                                        interviewDate,
+                                        interviewTime,
+                                        locationName: finalLocation,
+                                        interviewType: interviewType,
+                                        latitude:
+                                          interviewType === "onsite"
+                                            ? selectedLat
+                                            : null,
+                                        longitude:
+                                          interviewType === "onsite"
+                                            ? selectedLng
+                                            : null,
                                       },
-                                    )
-                                  }
-                                  disabled={!startDate} // ปิดปุ่มถ้ายังไม่เลือกวันเริ่มงาน
+                                    );
+                                  }}
                                 >
-                                  ส่งข้อเสนอเริ่มงาน
+                                  <div
+                                    style={{
+                                      width: "32px",
+                                      height: "32px",
+                                      borderRadius: "50%",
+                                      backgroundColor:
+                                        !isInterviewFormComplete || isPastDate
+                                          ? "#ccc"
+                                          : "#2e7d32",
+                                      color: "#fff",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    <span
+                                      className="material-symbols-outlined"
+                                      style={{ fontSize: "16px" }}
+                                    >
+                                      check
+                                    </span>
+                                  </div>
+                                  ยืนยัน
                                 </button>
                                 <button
                                   type="button"
-                                  className={styles.txtRejected}
                                   style={{
-                                    padding: "8px 12px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    background: "none",
+                                    border: "none",
                                     fontSize: "12px",
+                                    fontWeight: "bold",
+                                    cursor: "pointer",
+                                    color: "#333",
                                   }}
                                   onClick={() =>
                                     handleOpenRejectModal(
@@ -1063,486 +999,1190 @@ export default function CompanyApplication({
                                     )
                                   }
                                 >
+                                  <div
+                                    style={{
+                                      width: "32px",
+                                      height: "32px",
+                                      borderRadius: "50%",
+                                      backgroundColor: "#d32f2f",
+                                      color: "#fff",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      marginBottom: "4px",
+                                    }}
+                                  >
+                                    <span
+                                      className="material-symbols-outlined"
+                                      style={{ fontSize: "16px" }}
+                                    >
+                                      close
+                                    </span>
+                                  </div>
                                   ยกเลิก
                                 </button>
-                              </div>
-                            </div>
-                          )}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.stepLine} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                  />
 
-                          {/* กรณีที่ 3: หมดเวลาพิจารณา (เกิน 7 วัน) */}
-                          {isOfferExpired && (
-                            <div style={{ textAlign: "center" }}>
-                              <p
+                  {/* Step 3: Screening / Interview */}
+                  <div
+                    className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
+                  >
+                    <div className={styles.stepIcon}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "24px" }}
+                      >
+                        mic
+                      </span>
+                    </div>
+                    <span
+                      className={styles.stepLabel}
+                      style={{
+                        display: "block",
+                        width: "120px",
+                        textAlign: "center",
+                        lineHeight: "1.3",
+                      }}
+                    >
+                      สัมภาษณ์งาน
+                    </span>
+
+                    {status === "screening" && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
+                            width: "100%",
+                          }}
+                        >
+                          รอการยืนยัน
+                        </p>
+                        <p
+                          style={{
+                            fontSize: "13px",
+                            color: "#555",
+                            marginBottom: "15px",
+                            textAlign: "center",
+                          }}
+                        >
+                          รอผู้สมัครยืนยันนัดหมาย
+                        </p>
+                        <button
+                          type="button"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            background: "none",
+                            border: "none",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            color: "#333",
+                          }}
+                          onClick={() =>
+                            handleOpenRejectModal(selectedJob.tracking_id)
+                          }
+                        >
+                          <div
+                            style={{
+                              width: "32px",
+                              height: "32px",
+                              borderRadius: "50%",
+                              backgroundColor: "#d32f2f",
+                              color: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginBottom: "4px",
+                            }}
+                          >
+                            <span
+                              className="material-symbols-outlined"
+                              style={{ fontSize: "16px" }}
+                            >
+                              close
+                            </span>
+                          </div>
+                          ยกเลิกนัด
+                        </button>
+                      </div>
+                    )}
+
+                    {status === "interview" && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          textAlign: "left",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          รายละเอียดนัดสัมภาษณ์
+                        </p>
+
+                        {/* ส่วนแสดงวันที่ */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "18px",
+                              color: "#1976d2",
+                              flexShrink: 0,
+                            }}
+                          >
+                            event
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "#555",
+                              flex: 1,
+                              minWidth: 0,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {selectedJob.interview_date
+                              ? new Date(
+                                  selectedJob.interview_date,
+                                ).toLocaleDateString("th-TH", {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })
+                              : "ไม่ระบุวันที่"}
+                          </span>
+                        </div>
+
+                        {/* ส่วนแสดงเวลา */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "18px",
+                              color: "#ed6c02",
+                              flexShrink: 0,
+                            }}
+                          >
+                            schedule
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "#555",
+                              flex: 1,
+                              minWidth: 0,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {selectedJob.interview_date
+                              ? new Date(
+                                  selectedJob.interview_date,
+                                ).toLocaleTimeString("th-TH", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }) + " น."
+                              : "ไม่ระบุเวลา"}
+                          </span>
+                        </div>
+
+                        {/* ส่วนแสดงสถานที่ */}
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "15px",
+                            width: "100%",
+                          }}
+                        >
+                          <span
+                            className="material-symbols-outlined"
+                            style={{
+                              fontSize: "18px",
+                              color: "#000000",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {selectedJob.location &&
+                            (selectedJob.location.startsWith("http") ||
+                              selectedJob.location
+                                .toLowerCase()
+                                .includes("meet") ||
+                              selectedJob.location
+                                .toLowerCase()
+                                .includes("zoom"))
+                              ? "video_chat"
+                              : "distance"}
+                          </span>
+                          <div
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              fontSize: "13px",
+                              color: "#555",
+                            }}
+                          >
+                            {selectedJob.location ? (
+                              <a
+                                href={
+                                  selectedJob.location.startsWith("http")
+                                    ? selectedJob.location
+                                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedJob.location)}`
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={selectedJob.location}
+                                style={{
+                                  color: "#0288d1",
+                                  textDecoration: "underline",
+                                  display: "block",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {selectedJob.location}
+                              </a>
+                            ) : (
+                              <span
+                                style={{
+                                  display: "block",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                ไม่ระบุสถานที่
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "auto",
+                            borderTop: "1px solid #f0f0f0",
+                            paddingTop: "15px",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              background: "none",
+                              border: "none",
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                              color: "#333",
+                            }}
+                            onClick={() =>
+                              handleOpenRejectModal(selectedJob.tracking_id)
+                            }
+                          >
+                            <div
+                              style={{
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "50%",
+                                backgroundColor: "#d32f2f",
+                                color: "#fff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              <span
+                                className="material-symbols-outlined"
+                                style={{ fontSize: "16px" }}
+                              >
+                                close
+                              </span>
+                            </div>
+                            ยกเลิกนัด
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div
+                    className={`${styles.stepLine} ${["appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                  />
+
+                  {/* Step 4: Appointment / Offer */}
+                  <div
+                    className={`${styles.step} ${["appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["appointment", "offer", "hired"].includes(status) ? styles.currentStep : ""}`}
+                  >
+                    <div className={styles.stepIcon}>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "24px" }}
+                      >
+                        work
+                      </span>
+                    </div>
+                    <span
+                      className={styles.stepLabel}
+                      style={{
+                        display: "block",
+                        width: "120px",
+                        textAlign: "center",
+                        lineHeight: "1.3",
+                      }}
+                    >
+                      ผลการพิจารณา
+                    </span>
+
+                    {/* --- Offer block logic is now purely based on status === "appointment" OR "offer" to avoid rendering 2 boxes at once --- */}
+                    {(status === "appointment" ||
+                      status === "offer" ||
+                      (status === "interview" &&
+                        selectedJob.interview_date)) && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          textAlign: "left",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          ข้อเสนอรับเข้าทำงาน
+                        </p>
+
+                        {status === "interview" && isWaitingForInterviewEnd && (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#ff9800",
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                                margin: "0 0 5px 0",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              รอการสัมภาษณ์เสร็จสิ้น
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "12px",
+                                color: "#555",
+                                margin: 0,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              ประเมินผลได้ตั้งแต่วันที่ {offerStartDateStr}
+                            </p>
+                          </div>
+                        )}
+
+                        {status === "interview" && canMakeOffer && (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#d32f2f",
+                                textAlign: "center",
+                                fontSize: "11px",
+                                margin: "0 0 10px 0",
+                              }}
+                            >
+                              * ตัดสินใจได้ถึงวันที่ {offerEndDateStr}
+                            </p>
+                            <label
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              กำหนดวันเริ่มงาน:
+                            </label>
+                            <input
+                              type="date"
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                              style={{
+                                padding: "6px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccc",
+                                marginBottom: "5px",
+                                width: "100%",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {status === "interview" && isOfferExpired && (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#d32f2f",
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                                margin: "0 0 5px 0",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              หมดเวลาพิจารณา
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "12px",
+                                color: "#555",
+                                margin: 0,
+                              }}
+                            >
+                              เกินกำหนด 7 วันหลังสัมภาษณ์
+                            </p>
+                          </div>
+                        )}
+
+                        {(status === "appointment" || status === "offer") && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <span
+                              className="material-symbols-outlined"
+                              style={{
+                                fontSize: "18px",
+                                color: "#2e7d32",
+                                flexShrink: 0,
+                              }}
+                            >
+                              event_available
+                            </span>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                minWidth: 0,
+                                flex: 1,
+                              }}
+                            >
+                              <span style={{ fontSize: "10px", color: "#888" }}>
+                                วันเริ่มงาน / ข้อเสนอ:
+                              </span>
+                              <span
                                 style={{
                                   fontSize: "13px",
-                                  color: "#d32f2f",
-                                  margin: "0 0 5px 0",
+                                  color: "#333",
                                   fontWeight: "bold",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
                               >
-                                หมดเวลาพิจารณารับเข้าทำงาน
-                              </p>
-                              <p
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#555",
-                                  margin: "0 0 10px 0",
-                                }}
-                              >
-                                เกินกำหนด 7 วันหลังการสัมภาษณ์
-                              </p>
+                                {selectedJob.interview_date
+                                  ? new Date(
+                                      selectedJob.interview_date,
+                                    ).toLocaleDateString("th-TH", {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })
+                                  : "ไม่ระบุ"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "15px",
+                            marginTop: "auto",
+                            borderTop: "1px solid #f0f0f0",
+                            paddingTop: "15px",
+                          }}
+                        >
+                          {status === "interview" && canMakeOffer && (
+                            <>
                               <button
-                                className={styles.btnReject}
                                 style={{
-                                  width: "100%",
-                                  backgroundColor: "#d32f2f",
-                                  color: "#fff",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  background: "none",
                                   border: "none",
-                                  padding: "8px",
-                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
+                                  cursor: startDate ? "pointer" : "not-allowed",
+                                  color: startDate ? "#333" : "#9e9e9e",
+                                }}
+                                onClick={() =>
+                                  handleUpdateStatus(
+                                    selectedJob.tracking_id,
+                                    "appointment",
+                                    {
+                                      interviewDate: startDate,
+                                      interviewTime: "09:00",
+                                    },
+                                  )
+                                }
+                                disabled={!startDate}
+                              >
+                                <div
+                                  style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "50%",
+                                    backgroundColor: startDate
+                                      ? "#2e7d32"
+                                      : "#ccc",
+                                    color: "#fff",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    check
+                                  </span>
+                                </div>
+                                ส่งข้อเสนอ
+                              </button>
+                              <button
+                                type="button"
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  background: "none",
+                                  border: "none",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
                                   cursor: "pointer",
+                                  color: "#333",
                                 }}
                                 onClick={() =>
                                   handleOpenRejectModal(selectedJob.tracking_id)
                                 }
                               >
-                                ปรับสถานะเป็นไม่ผ่าน
+                                <div
+                                  style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "#d32f2f",
+                                    color: "#fff",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    close
+                                  </span>
+                                </div>
+                                ปฏิเสธ
                               </button>
-                            </div>
+                            </>
+                          )}
+
+                          {status === "interview" &&
+                            (isWaitingForInterviewEnd || isOfferExpired) && (
+                              <button
+                                type="button"
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  background: "none",
+                                  border: "none",
+                                  fontSize: "12px",
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                  color: "#333",
+                                }}
+                                onClick={() =>
+                                  handleOpenRejectModal(selectedJob.tracking_id)
+                                }
+                              >
+                                <div
+                                  style={{
+                                    width: "32px",
+                                    height: "32px",
+                                    borderRadius: "50%",
+                                    backgroundColor: "#d32f2f",
+                                    color: "#fff",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  <span
+                                    className="material-symbols-outlined"
+                                    style={{ fontSize: "16px" }}
+                                  >
+                                    close
+                                  </span>
+                                </div>
+                                {isOfferExpired ? "ปรับเป็นไม่ผ่าน" : "ยกเลิก"}
+                              </button>
+                            )}
+
+                          {(status === "appointment" || status === "offer") && (
+                            <span
+                              style={{
+                                fontSize: "13px",
+                                color: "#2e7d32",
+                                fontWeight: "bold",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              ส่งข้อเสนองานเรียบร้อยแล้ว
+                            </span>
                           )}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* เมื่อส่งข้อเสนอไปแล้ว จะแสดงข้อความนี้ */}
-                      {(status === "appointment" || status === "offer") && (
-                        <div
+                    {status === "hired" && (
+                      <div
+                        style={{
+                          marginTop: "15px",
+                          display: "flex",
+                          flexDirection: "column",
+                          backgroundColor: "#ffffff",
+                          padding: "15px",
+                          borderRadius: "12px",
+                          border: "1.5px solid #2e7d32",
+                          boxShadow:
+                            "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
+                          width: "100%",
+                          maxWidth: "240px",
+                          boxSizing: "border-box",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "8px",
-                            marginTop: "10px",
-                            width:"10rem"
+                            fontSize: "14px",
+                            color: "#333",
+                            margin: "0 0 12px 0",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingBottom: "8px",
+                            whiteSpace: "nowrap",
+                            width: "100%",
                           }}
                         >
-                          <p
-                            style={{
-                              fontSize: "13px",
-                              color: "#2e7d32",
-                              margin: 0,
-                              fontWeight: "bold",
-                              textAlign: "center",
-                            }}
-                          >
-                            ส่งข้อเสนองานเรียบร้อยแล้ว
-                          </p>
-                        </div>
-                      )}
-
-                      {status === "hired" && (
-                        <div
+                          ตอบรับเข้าทำงาน
+                        </p>
+                        <span
                           style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "8px",
-                            width:"10rem",
-                            marginTop: "10px",
+                            fontSize: "13px",
+                            color: "#2e7d32",
+                            fontWeight: "bold",
+                            whiteSpace: "nowrap",
                           }}
                         >
-                          <p
-                            style={{
-                              fontSize: "13px",
-                              color: "#2e7d32",
-                              margin: 0,
-                              fontWeight: "bold",
-                              textAlign: "center",
-                            }}
-                          >
-                            ผู้สมัครตอบรับเข้าทำงานแล้ว
-                          </p>
-                        
-                        </div>
-                      )}
-                    </div>
+                          ผู้สมัครตอบรับเข้าทำงานแล้ว
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* แผนที่ Modal */}
-                {isMapModalOpen && (
-                  <div className={styles.modalOverlay}>
-                    <div
-                      className={styles.mapModalContent}
-                      style={{
-                        backgroundColor: "#fff",
-                        padding: "20px",
-                        borderRadius: "12px",
-                        width: "90%",
-                        maxWidth: "700px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        <h3
-                          style={{
-                            margin: 0,
-                            fontSize: "16px",
-                            color: "#1e293b",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ color: "#3182ce" }}
-                          >
-                            map
-                          </span>
-                          ปักหมุดเลือกสถานที่สัมภาษณ์
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={() => setIsMapModalOpen(false)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            fontSize: "20px",
-                            color: "#64748b",
-                            cursor: "pointer",
-                            lineHeight: 1,
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-
-                      <div
-                        style={{
-                          height: "480px",
-                          width: "100%",
-                          margin: "10px 0",
-                        }}
-                      >
-                        <MapComponent
-                          selectedLat={selectedLat || 13.7563}
-                          selectedLng={selectedLng || 100.5018}
-                          initialAddress={searchQuery || locationName}
-                          onLocationSelect={(lat, lng, addressName) => {
-                            setSelectedLat(lat);
-                            setSelectedLng(lng);
-                            setSearchQuery(addressName);
-                          }}
-                        />
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          justifyContent: "flex-end",
-                          marginTop: "10px",
-                        }}
-                      >
-                        <button
-                          className={styles.btnConfirm}
-                          onClick={() => {
-                            setLocationName(searchQuery);
-                            setIsMapModalOpen(false);
-                          }}
-                        >
-                          ยืนยัน
-                        </button>
-                        <button
-                          className={styles.btnCancel}
-                          onClick={() => setIsMapModalOpen(false)}
-                        >
-                          ยกเลิก
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
-                <div style={{ marginTop: "20px" }}>
+              </div>
+              {/* แผนที่ Modal */}
+              {isMapModalOpen && (
+                <div className={styles.modalOverlay}>
                   <div
+                    className={styles.mapModalContent}
                     style={{
-                      backgroundColor: "#ffffff",
+                      backgroundColor: "#fff",
                       padding: "20px",
-                      borderRadius: "15px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                      alignItems: "stretch",
+                      borderRadius: "12px",
+                      width: "90%",
+                      maxWidth: "700px",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between", // ดันหัวข้อไว้ซ้าย ปุ่มไว้ขวา
+                        justifyContent: "space-between",
                         alignItems: "center",
-                        borderBottom: "1px solid #f0f0f0", // เพิ่มเส้นใต้คั่นให้ดูเป็นระเบียบ
-                        paddingBottom: "15px",
+                        marginBottom: "10px",
                       }}
                     >
                       <h3
                         style={{
                           margin: 0,
                           fontSize: "16px",
-                          fontWeight: "700",
                           color: "#1e293b",
                           display: "flex",
                           alignItems: "center",
-                          gap: "1px",
+                          gap: "6px",
                         }}
                       >
                         <span
                           className="material-symbols-outlined"
-                          style={{ color: "#3182ce", fontSize: "20px" }}
+                          style={{ color: "#3182ce" }}
                         >
-                          badge
+                          map
                         </span>
-                        ข้อมูลและประวัติผู้สมัคร
+                        ปักหมุดเลือกสถานที่สัมภาษณ์
                       </h3>
-                      {/* หากบริษัทเป็นฝ่ายเชิญสัมภาษณ์ก่อน (สถานะฝั่งบริษัทเป็น pending) ให้แสดงข้อความว่าผู้สมัครถูกเชิญสัมภาษณ์แล้ว */}
-                      {status === "pending" ? (
-                        <span className={styles.invitedBadge}>
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: "18px", color: "#0288d1" }}
-                          >
-                            mail
-                          </span>
-                          ผู้สมัครถูกเชิญสัมภาษณ์แล้ว
-                        </span>
-                      ) : selectedJob.has_test ? (
-                        <button
-                          type="button"
-                          className={styles.btnViewTestHeader}
-                          onClick={() => setIsTestResultModalOpen(true)}
-                        >
-                          <span
-                            className="material-symbols-outlined"
-                            style={{ fontSize: "18px" }}
-                          >
-                            quiz
-                          </span>
-                          ดูผลแบบทดสอบ
-                        </button>
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: "13px",
-                            color: "#9e9e9e",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          ไม่มีแบบทดสอบของตำแหน่งงานนี้
-                        </span>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setIsMapModalOpen(false)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          fontSize: "20px",
+                          color: "#64748b",
+                          cursor: "pointer",
+                          lineHeight: 1,
+                        }}
+                      >
+                        ✕
+                      </button>
                     </div>
 
-                    {/* Column 1: Personal Info */}
+                    <div
+                      style={{
+                        height: "480px",
+                        width: "100%",
+                        margin: "10px 0",
+                      }}
+                    >
+                      <MapComponent
+                        selectedLat={selectedLat || 13.7563}
+                        selectedLng={selectedLng || 100.5018}
+                        initialAddress={searchQuery || locationName}
+                        onLocationSelect={(lat, lng, addressName) => {
+                          setSelectedLat(lat);
+                          setSelectedLng(lng);
+                          setSearchQuery(addressName);
+                        }}
+                      />
+                    </div>
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        gap: "20px",
+                        gap: "10px",
+                        justifyContent: "flex-end",
+                        marginTop: "10px",
                       }}
                     >
-                      <div
-                        style={{
-                          flex: "1",
-                          backgroundColor: "#F8F8F8",
-                          borderRadius: "12px",
-                          padding: "20px",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          textAlign: "center",
+                      <button
+                        className={styles.btnConfirm}
+                        onClick={() => {
+                          setLocationName(searchQuery);
+                          setIsMapModalOpen(false);
                         }}
                       >
-                        <img
-                          src={
-                            selectedJob.profile_image ||
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
-                          }
-                          alt="profile"
-                          style={{
-                            width: "100px",
-                            height: "100px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            marginBottom: "10px",
-                          }}
-                        />
-                        <Link
-                          href={`/company/seeker-profile/${selectedJob.user_id}`}
-                          style={{ textDecoration: "none" }}
+                        ยืนยัน
+                      </button>
+                      <button
+                        className={styles.btnCancel}
+                        onClick={() => setIsMapModalOpen(false)}
+                      >
+                        ยกเลิก
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
+              <div style={{ marginTop: "20px" }}>
+                <div
+                  style={{
+                    backgroundColor: "#ffffff",
+                    padding: "20px",
+                    borderRadius: "15px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                    alignItems: "stretch",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between", // ดันหัวข้อไว้ซ้าย ปุ่มไว้ขวา
+                      alignItems: "center",
+                      borderBottom: "1px solid #f0f0f0", // เพิ่มเส้นใต้คั่นให้ดูเป็นระเบียบ
+                      paddingBottom: "15px",
+                    }}
+                  >
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "16px",
+                        fontWeight: "700",
+                        color: "#1e293b",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "1px",
+                      }}
+                    >
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: "#3182ce", fontSize: "20px" }}
+                      >
+                        badge
+                      </span>
+                      ข้อมูลและประวัติผู้สมัคร
+                    </h3>
+                    {/* หากบริษัทเป็นฝ่ายเชิญสัมภาษณ์ก่อน (สถานะฝั่งบริษัทเป็น pending) ให้แสดงข้อความว่าผู้สมัครถูกเชิญสัมภาษณ์แล้ว */}
+                    {status === "pending" ? (
+                      <span className={styles.invitedBadge}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px", color: "#0288d1" }}
                         >
-                          <h3
+                          mail
+                        </span>
+                        ผู้สมัครถูกเชิญสัมภาษณ์แล้ว
+                      </span>
+                    ) : selectedJob.has_test ? (
+                      <button
+                        type="button"
+                        className={styles.btnViewTestHeader}
+                        onClick={() => setIsTestResultModalOpen(true)}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px" }}
+                        >
+                          quiz
+                        </span>
+                        ดูผลแบบทดสอบ
+                      </button>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          color: "#9e9e9e",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        ไม่มีแบบทดสอบของตำแหน่งงานนี้
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Column 1: Personal Info */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      gap: "20px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: "1",
+                        backgroundColor: "#F8F8F8",
+                        borderRadius: "12px",
+                        padding: "20px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        textAlign: "center",
+                      }}
+                    >
+                      <img
+                        src={
+                          selectedJob.profile_image ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
+                        }
+                        alt="profile"
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                          marginBottom: "10px",
+                        }}
+                      />
+                      <Link
+                        href={`/company/seeker-profile/${selectedJob.user_id}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <h3
+                          style={{
+                            margin: "0 0 5px 0",
+                            fontSize: "18px",
+                            color: "#000000",
+                          }}
+                        >
+                          {selectedJob.fullname || "ไม่ระบุชื่อ"}
+                        </h3>
+                      </Link>
+                      <a
+                        href={`mailto:${selectedJob.email}`}
+                        style={{
+                          color: "#555",
+                          textDecoration: "underline",
+                          marginBottom: "20px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {selectedJob.email || "ไม่ระบุ"}
+                      </a>
+
+                      <div
+                        style={{
+                          textAlign: "left",
+                          width: "100%",
+                          fontSize: "12px",
+                          lineHeight: "1.6",
+                          color: "#555",
+                        }}
+                      >
+                        <p style={{ margin: 0 }}>
+                          <strong>Mobile:</strong>{" "}
+                          {selectedJob.mobile_phone || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Age:</strong> {selectedJob.age || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Gender:</strong> {selectedJob.gender || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Nationality:</strong>{" "}
+                          {selectedJob.nationality || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Military Status:</strong>{" "}
+                          {selectedJob.military_status || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Religion:</strong>{" "}
+                          {selectedJob.religion || "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Weight / Height:</strong>{" "}
+                          {selectedJob.weight
+                            ? `${selectedJob.weight} kg`
+                            : "-"}{" "}
+                          /{" "}
+                          {selectedJob.height
+                            ? `${selectedJob.height} cm`
+                            : "-"}
+                        </p>
+                        <p style={{ margin: 0 }}>
+                          <strong>Current Address:</strong>{" "}
+                          {[
+                            selectedJob.address,
+                            selectedJob.sub_district,
+                            selectedJob.district,
+                            selectedJob.province,
+                            selectedJob.postal_code,
+                          ]
+                            .filter(Boolean)
+                            .join(" ") || "-"}
+                        </p>
+                      </div>
+
+                      <div
+                        style={{
+                          width: "100%",
+                          marginTop: "20px",
+                          paddingTop: "15px",
+                        }}
+                      >
+                        {resumeFile ? (
+                          <div
                             style={{
-                              margin: "0 0 5px 0",
-                              fontSize: "18px",
-                              color: "#000000",
+                              // backgroundColor: "#ffffff",
+                              //border: "1px solid #d1d5db",
+                              //borderRadius: "10px",
+                              padding: "10px 12px",
+                              textAlign: "center",
+                              //boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                             }}
                           >
-                            {selectedJob.fullname || "ไม่ระบุชื่อ"}
-                          </h3>
-                        </Link>
-                        <a
-                          href={`mailto:${selectedJob.email}`}
-                          style={{
-                            color: "#555",
-                            textDecoration: "underline",
-                            marginBottom: "20px",
-                            fontSize: "14px",
-                          }}
-                        >
-                          {selectedJob.email || "ไม่ระบุ"}
-                        </a>
-
-                        <div
-                          style={{
-                            textAlign: "left",
-                            width: "100%",
-                            fontSize: "12px",
-                            lineHeight: "1.6",
-                            color: "#555",
-                          }}
-                        >
-                          <p style={{ margin: 0 }}>
-                            <strong>Mobile:</strong>{" "}
-                            {selectedJob.mobile_phone || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Age:</strong> {selectedJob.age || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Gender:</strong> {selectedJob.gender || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Nationality:</strong>{" "}
-                            {selectedJob.nationality || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Military Status:</strong>{" "}
-                            {selectedJob.military_status || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Religion:</strong>{" "}
-                            {selectedJob.religion || "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Weight / Height:</strong>{" "}
-                            {selectedJob.weight
-                              ? `${selectedJob.weight} kg`
-                              : "-"}{" "}
-                            /{" "}
-                            {selectedJob.height
-                              ? `${selectedJob.height} cm`
-                              : "-"}
-                          </p>
-                          <p style={{ margin: 0 }}>
-                            <strong>Current Address:</strong>{" "}
-                            {[
-                              selectedJob.address,
-                              selectedJob.sub_district,
-                              selectedJob.district,
-                              selectedJob.province,
-                              selectedJob.postal_code,
-                            ]
-                              .filter(Boolean)
-                              .join(" ") || "-"}
-                          </p>
-                        </div>
-
-                        <div
-                          style={{
-                            width: "100%",
-                            marginTop: "auto",
-                            paddingTop: "15px",
-                          }}
-                        >
-                          {resumeFile ? (
                             <div
                               style={{
-                                backgroundColor: "#ffffff",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "10px",
-                                padding: "10px 12px",
-                                textAlign: "center",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "6px",
+                                marginBottom: "6px",
+                              }}
+                            ></div>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "8px",
+                                justifyContent: "center",
                               }}
                             >
-                              <div
+                              <button
+                                type="button"
+                                onClick={() => setPreviewResume(resumeFile)}
                                 style={{
+                                  backgroundColor: "#2563eb",
+                                  color: "#ffffff",
+                                  border: "none",
+                                  borderRadius: "12px",
+                                  padding: "6px 12px",
+                                  fontSize: "12px",
+                                  fontWeight: "600",
+                                  cursor: "pointer",
                                   display: "flex",
                                   alignItems: "center",
-                                  justifyContent: "center",
-                                  gap: "6px",
-                                  marginBottom: "6px",
+                                  gap: "4px",
                                 }}
                               >
-                                <span style={{ fontSize: "16px" }}>📄</span>
-                                <span
-                                  style={{
-                                    fontWeight: "bold",
-                                    fontSize: "13px",
-                                    color: "#1f2937",
-                                  }}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
                                 >
-                                  เรซูเม่ (Resume)
-                                </span>
-                              </div>
-                              <p
-                                style={{
-                                  margin: "0 0 10px 0",
-                                  fontSize: "12px",
-                                  color: "#4b5563",
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                }}
-                                title={resumeFile.file_name}
-                              >
-                                {resumeFile.file_name || "Resume File"}
-                              </p>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  gap: "8px",
-                                  justifyContent: "center",
-                                }}
-                              >
-                                <button
-                                  type="button"
-                                  onClick={() => setPreviewResume(resumeFile)}
-                                  style={{
-                                    backgroundColor: "#2563eb",
-                                    color: "#ffffff",
-                                    border: "none",
-                                    borderRadius: "6px",
-                                    padding: "6px 12px",
-                                    fontSize: "12px",
-                                    fontWeight: "600",
-                                    cursor: "pointer",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "4px",
-                                  }}
-                                >
-                                  ดูเรซูเม่ 👁️
-                                </button>
-                                <a
+                                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                  <polyline points="14 2 14 8 20 8" />
+                                  <line x1="16" y1="13" x2="8" y2="13" />
+                                  <line x1="16" y1="17" x2="8" y2="17" />
+                                  <line x1="10" y1="9" x2="8" y2="9" />
+                                </svg>
+                                {resumeFile.file_name}
+                              </button>
+                              {/* <a
                                   href={resumeFile.file_path}
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -1561,488 +2201,450 @@ export default function CompanyApplication({
                                     gap: "4px",
                                   }}
                                 >
-                                  ดาวน์โหลด ⬇️
-                                </a>
-                              </div>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                  ดาวน์โหลด
+                                </a> */}
                             </div>
-                          ) : (
-                            <div
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: "#f9fafb",
+                              border: "1px dashed #d1d5db",
+                              borderRadius: "10px",
+                              padding: "10px",
+                              textAlign: "center",
+                              color: "#9ca3af",
+                              fontSize: "12px",
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              style={{ marginBottom: "8px" }}
+                            >
+                              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                              <polyline points="14 2 14 8 20 8" />
+                              <circle cx="12" cy="18" r="1" />
+                              <path d="M12 14c0-1.5 2-2 2-3s-1-2-2-2-2 1-2 2" />
+                            </svg>
+                            ยังไม่มีไฟล์เรซูเม่
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Column 2: Job Preferences */}
+                    <div
+                      style={{
+                        flex: "1",
+                        backgroundColor: "#DBDBDB",
+                        borderRadius: "12px",
+                        padding: "20px",
+                      }}
+                    >
+                      <h2
+                        style={{
+                          fontSize: "18px",
+                          marginTop: 0,
+                          marginBottom: "20px",
+                          textAlign: "center",
+                        }}
+                      >
+                        งานที่คาดหวัง
+                      </h2>
+
+                      {(() => {
+                        let titles: any[] = [];
+                        if (Array.isArray(selectedJob.job_titles)) {
+                          titles = selectedJob.job_titles;
+                        } else if (typeof selectedJob.job_titles === "string") {
+                          try {
+                            const parsed = JSON.parse(selectedJob.job_titles);
+                            if (Array.isArray(parsed)) titles = parsed;
+                          } catch {
+                            titles = [];
+                          }
+                        }
+
+                        const userJobTitles = titles.filter(
+                          (jt: any) =>
+                            (typeof jt === "string" && jt.trim() !== "") ||
+                            (jt?.job_name && String(jt.job_name).trim() !== ""),
+                        );
+
+                        if (userJobTitles.length === 0) return null;
+
+                        return (
+                          <div style={{ marginBottom: "15px" }}>
+                            <p
                               style={{
-                                backgroundColor: "#f9fafb",
-                                border: "1px dashed #d1d5db",
-                                borderRadius: "10px",
-                                padding: "10px",
-                                textAlign: "center",
-                                color: "#9ca3af",
-                                fontSize: "12px",
+                                margin: "0 0 5px 0",
+                                color: "#555",
+                                fontSize: "13px",
                               }}
                             >
-                              📄 ยังไม่มีไฟล์เรซูเม่
-                            </div>
-                          )}
+                              ตำแหน่งงาน
+                            </p>
+                            <ol
+                              style={{
+                                margin: 0,
+                                paddingLeft: "20px",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                                color: "#333",
+                              }}
+                            >
+                              {userJobTitles.map((jt: any, i: number) => (
+                                <li key={i}>
+                                  {typeof jt === "string" ? jt : jt.job_name}
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        );
+                      })()}
 
-                          {selectedJob.files && selectedJob.files.length > 1 && (
-                            <div style={{ marginTop: "10px", textAlign: "center" }}>
-                              <span style={{ fontSize: "11px", color: "#6b7280" }}>
-                                เอกสารอื่น ๆ ({selectedJob.files.filter((f) => f.file_id !== resumeFile?.file_id).length} ไฟล์):
-                              </span>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: "4px",
-                                  justifyContent: "center",
-                                  marginTop: "4px",
-                                }}
-                              >
-                                {selectedJob.files
-                                  .filter((f) => f.file_id !== resumeFile?.file_id)
-                                  .map((f, idx) => (
-                                    <button
-                                      key={f.file_id ?? idx}
-                                      type="button"
-                                      onClick={() => setPreviewResume(f)}
-                                      style={{
-                                        fontSize: "11px",
-                                        padding: "3px 8px",
-                                        borderRadius: "4px",
-                                        border: "1px solid #d1d5db",
-                                        backgroundColor: "#ffffff",
-                                        cursor: "pointer",
-                                        color: "#374151",
-                                      }}
-                                      title={f.file_name}
-                                    >
-                                      📎 {f.file_name?.length > 14 ? f.file_name.substring(0, 12) + "..." : f.file_name}
-                                    </button>
-                                  ))}
-                              </div>
-                            </div>
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                          }}
+                        >
+                          ประเภทงาน
+                        </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "8px",
+                          }}
+                        >
+                          {selectedJob.type_of_work ? (
+                            selectedJob.type_of_work
+                              .split(",")
+                              .map((type, index) => (
+                                <span
+                                  key={index}
+                                  style={{
+                                    display: "inline-block",
+                                    backgroundColor: "#222",
+                                    color: "#ffffff",
+                                    padding: "4px 12px",
+                                    fontSize: "12px",
+                                    borderRadius: "50px",
+                                  }}
+                                >
+                                  {type.trim()}
+                                </span>
+                              ))
+                          ) : (
+                            <span>-</span>
                           )}
                         </div>
                       </div>
 
-                      {/* Column 2: Job Preferences */}
-                      <div
-                        style={{
-                          flex: "1",
-                          backgroundColor: "#DBDBDB",
-                          borderRadius: "12px",
-                          padding: "20px",
-                        }}
-                      >
-                        <h2
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
                           style={{
-                            fontSize: "18px",
-                            marginTop: 0,
-                            marginBottom: "20px",
-                            textAlign: "center",
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
                           }}
                         >
-                          งานที่คาดหวัง
-                        </h2>
+                          เงินเดือนที่คาดหวัง
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "14px",
+                            color: "#333",
+                          }}
+                        >
+                          {selectedJob.desired_salary || "-"} บาท
+                        </p>
+                      </div>
 
-                        {(() => {
-                          let titles: any[] = [];
-                          if (Array.isArray(selectedJob.job_titles)) {
-                            titles = selectedJob.job_titles;
-                          } else if (
-                            typeof selectedJob.job_titles === "string"
-                          ) {
-                            try {
-                              const parsed = JSON.parse(selectedJob.job_titles);
-                              if (Array.isArray(parsed)) titles = parsed;
-                            } catch {
-                              titles = [];
-                            }
-                          }
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                          }}
+                        >
+                          สถานที่ทำงานที่คาดหวัง
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "14px",
+                            color: "#333",
+                          }}
+                        >
+                          {selectedJob.desired_work_location || "-"}
+                        </p>
+                      </div>
 
-                          const userJobTitles = titles.filter(
-                            (jt: any) =>
-                              (typeof jt === "string" && jt.trim() !== "") ||
-                              (jt?.job_name &&
-                                String(jt.job_name).trim() !== ""),
-                          );
+                      <div>
+                        <p
+                          style={{
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                          }}
+                        >
+                          วันที่สามารถเริ่มงานได้
+                        </p>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontSize: "14px",
+                            color: "#333",
+                          }}
+                        >
+                          {selectedJob.available_start_date
+                            ? new Date(
+                                selectedJob.available_start_date,
+                              ).toLocaleDateString("en-GB")
+                            : "-"}
+                        </p>
+                      </div>
 
-                          if (userJobTitles.length === 0) return null;
-
-                          return (
-                            <div style={{ marginBottom: "15px" }}>
-                              <p
-                                style={{
-                                  margin: "0 0 5px 0",
-                                  color: "#555",
-                                  fontSize: "13px",
-                                }}
-                              >
-                                ตำแหน่งงาน
-                              </p>
-                              <ol
-                                style={{
-                                  margin: 0,
-                                  paddingLeft: "20px",
-                                  fontSize: "14px",
-                                  fontWeight: "bold",
-                                  color: "#333",
-                                }}
-                              >
-                                {userJobTitles.map((jt: any, i: number) => (
-                                  <li key={i}>
-                                    {typeof jt === "string" ? jt : jt.job_name}
-                                  </li>
-                                ))}
-                              </ol>
-                            </div>
-                          );
-                        })()}
-
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            ประเภทงาน
-                          </p>
-                          <div
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "8px",
-                            }}
-                          >
-                            {selectedJob.type_of_work ? (
-                              selectedJob.type_of_work
-                                .split(",")
-                                .map((type, index) => (
-                                  <span
-                                    key={index}
-                                    style={{
-                                      display: "inline-block",
-                                      backgroundColor: "#222",
-                                      color: "#ffffff",
-                                      padding: "4px 12px",
-                                      fontSize: "12px",
-                                      borderRadius: "50px",
-                                    }}
-                                  >
-                                    {type.trim()}
-                                  </span>
-                                ))
-                            ) : (
-                              <span>-</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            เงินเดือนที่คาดหวัง
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            {selectedJob.desired_salary || "-"} บาท
-                          </p>
-                        </div>
-
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            สถานที่ทำงานที่คาดหวัง
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            {selectedJob.desired_work_location || "-"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            วันที่สามารถเริ่มงานได้
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            {selectedJob.available_start_date
-                              ? new Date(
-                                  selectedJob.available_start_date,
-                                ).toLocaleDateString("en-GB")
-                              : "-"}
-                          </p>
-                        </div>
-
-                        <div style={{ marginTop: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 10px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            ประวัติการศึกษา
-                          </p>
-                          {selectedJob.educations &&
-                          selectedJob.educations.length > 0 ? (
-                            <div className={styles.Educontainer}>
-                              <div className={styles.timeline}>
-                                <div className={styles.centralLine} />
-                                {selectedJob.educations.map((item, index) => (
-                                  <div
-                                    key={item.education_id ?? index}
-                                    className={`${styles.timelineItem} ${
-                                      index % 2 === 0
-                                        ? styles.left
-                                        : styles.right
-                                    }`}
-                                  >
-                                    <div className={styles.content}>
-                                      <p className={styles.level}>
-                                        {item.level || "-"}
-                                      </p>
-                                      <h4 className={styles.degree}>
-                                        {item.major || "-"}
-                                      </h4>
-                                      <p className={styles.school}>
-                                        {item.institution || "-"}
-                                      </p>
-                                      <p className={styles.yearText}>
-                                        {item.year_start || "-"} –{" "}
-                                        {item.year_end || "-"}
-                                      </p>
-                                    </div>
-                                    <div className={styles.connector} />
+                      <div style={{ marginTop: "15px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 10px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ประวัติการศึกษา
+                        </p>
+                        {selectedJob.educations &&
+                        selectedJob.educations.length > 0 ? (
+                          <div className={styles.Educontainer}>
+                            <div className={styles.timeline}>
+                              <div className={styles.centralLine} />
+                              {selectedJob.educations.map((item, index) => (
+                                <div
+                                  key={item.education_id ?? index}
+                                  className={`${styles.timelineItem} ${
+                                    index % 2 === 0 ? styles.left : styles.right
+                                  }`}
+                                >
+                                  <div className={styles.content}>
+                                    <p className={styles.level}>
+                                      {item.level || "-"}
+                                    </p>
+                                    <h4 className={styles.degree}>
+                                      {item.major || "-"}
+                                    </h4>
+                                    <p className={styles.school}>
+                                      {item.institution || "-"}
+                                    </p>
+                                    <p className={styles.yearText}>
+                                      {item.year_start || "-"} –{" "}
+                                      {item.year_end || "-"}
+                                    </p>
                                   </div>
-                                ))}
-                              </div>
+                                  <div className={styles.connector} />
+                                </div>
+                              ))}
                             </div>
+                          </div>
+                        ) : (
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            -
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Column 3: Skills */}
+                    <div
+                      style={{
+                        flex: "1",
+                        backgroundColor: "#DBDBDB",
+                        borderRadius: "12px",
+                        padding: "20px",
+                      }}
+                    >
+                      <h2
+                        style={{
+                          fontSize: "18px",
+                          marginTop: 0,
+                          marginBottom: "20px",
+                          textAlign: "center",
+                        }}
+                      >
+                        ทักษะ
+                      </h2>
+
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                          }}
+                        >
+                          ทักษะเฉพาะทาง
+                        </p>
+                        <ol
+                          style={{
+                            margin: 0,
+                            paddingLeft: "20px",
+                            fontSize: "14px",
+                            color: "#333",
+                          }}
+                        >
+                          {selectedJob.skills &&
+                          selectedJob.skills.length > 0 ? (
+                            selectedJob.skills.map((s, i) => (
+                              <li key={i}>{s.skill_name}</li>
+                            ))
                           ) : (
+                            <li>-</li>
+                          )}
+                        </ol>
+                      </div>
+
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
+                          style={{
+                            margin: "0 0 8px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ความเร็วในการพิมพ์ (Typing speed)
+                        </p>
+                        {selectedJob.typing_speed && selectedJob.typing_speed.length > 0 ? (
+                          selectedJob.typing_speed.map((t, idx) => (
                             <p
+                              key={idx}
                               style={{
-                                margin: 0,
+                                margin: "0 0 5px 0",
                                 fontSize: "14px",
                                 color: "#333",
                               }}
                             >
-                              -
+                              - {t.typing_language} - {t.typing_wpm || "-"} wpm
                             </p>
-                          )}
-                        </div>
+                          ))
+                        ) : (
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: "14px",
+                              color: "#333",
+                            }}
+                          >
+                            -
+                          </p>
+                        )}
                       </div>
 
-                      {/* Column 3: Skills */}
-                      <div
-                        style={{
-                          flex: "1",
-                          backgroundColor: "#DBDBDB",
-                          borderRadius: "12px",
-                          padding: "20px",
-                        }}
-                      >
-                        <h2
+                      <div style={{ marginBottom: "15px" }}>
+                        <p
                           style={{
-                            fontSize: "18px",
-                            marginTop: 0,
-                            marginBottom: "20px",
-                            textAlign: "center",
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
                           }}
                         >
-                          ทักษะ
-                        </h2>
+                          ประสบการณ์
+                        </p>
+                        <ul
+                          style={{
+                            margin: 0,
+                            paddingLeft: "20px",
+                            fontSize: "13px",
+                            color: "#333",
+                          }}
+                        >
+                          {selectedJob.experiences &&
+                          selectedJob.experiences.length > 0 ? (
+                            selectedJob.experiences.map((ex, i) => (
+                              <li key={i}>
+                                <strong>{ex.ex_title}</strong>
+                                {ex.ex_description
+                                  ? `: ${ex.ex_description}`
+                                  : ""}
+                              </li>
+                            ))
+                          ) : (
+                            <li>-</li>
+                          )}
+                        </ul>
+                      </div>
 
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            ทักษะเฉพาะทาง
-                          </p>
-                          <ol
-                            style={{
-                              margin: 0,
-                              paddingLeft: "20px",
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            {selectedJob.skills &&
-                            selectedJob.skills.length > 0 ? (
-                              selectedJob.skills.map((s, i) => (
-                                <li key={i}>{s.skill_name}</li>
-                              ))
-                            ) : (
-                              <li>-</li>
-                            )}
-                          </ol>
-                        </div>
-
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            Typing speed in Thai (wpm)
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            - Thai -{" "}
-                            {selectedJob.typing_speed?.find(
-                              (t) =>
-                                t.typing_language === "Thai" ||
-                                t.typing_language === "ไทย",
-                            )?.typing_wpm || "-"}{" "}
-                            wpm
-                          </p>
-                          <p
-                            style={{
-                              margin: "10px 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            Typing speed in English (wpm)
-                          </p>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: "14px",
-                              color: "#333",
-                            }}
-                          >
-                            - English -{" "}
-                            {selectedJob.typing_speed?.find(
-                              (t) =>
-                                t.typing_language === "English" ||
-                                t.typing_language === "อังกฤษ" ||
-                                t.typing_language === "Eng",
-                            )?.typing_wpm || "-"}{" "}
-                            wpm
-                          </p>
-                        </div>
-
-                        <div style={{ marginBottom: "15px" }}>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            ประสบการณ์
-                          </p>
-                          <ul
-                            style={{
-                              margin: 0,
-                              paddingLeft: "20px",
-                              fontSize: "13px",
-                              color: "#333",
-                            }}
-                          >
-                            {selectedJob.experiences &&
-                            selectedJob.experiences.length > 0 ? (
-                              selectedJob.experiences.map((ex, i) => (
-                                <li key={i}>
-                                  <strong>{ex.ex_title}</strong>
-                                  {ex.ex_description
-                                    ? `: ${ex.ex_description}`
-                                    : ""}
-                                </li>
-                              ))
-                            ) : (
-                              <li>-</li>
-                            )}
-                          </ul>
-                        </div>
-
-                        <div>
-                          <p
-                            style={{
-                              margin: "0 0 5px 0",
-                              color: "#555",
-                              fontSize: "13px",
-                            }}
-                          >
-                            ความสามารถทางภาษา
-                          </p>
-                          <ul
-                            style={{
-                              margin: 0,
-                              paddingLeft: "20px",
-                              fontSize: "13px",
-                              color: "#333",
-                              listStyleType: "disc",
-                            }}
-                          >
-                            {selectedJob.languages &&
-                            selectedJob.languages.length > 0 ? (
-                              selectedJob.languages.map((l, i) => (
-                                <li key={i}>
-                                  {l.language_type}{" "}
-                                  {l.level ? `(${l.level})` : ""}
-                                </li>
-                              ))
-                            ) : (
-                              <li>-</li>
-                            )}
-                          </ul>
-                        </div>
+                      <div>
+                        <p
+                          style={{
+                            margin: "0 0 5px 0",
+                            color: "#555",
+                            fontSize: "13px",
+                          }}
+                        >
+                          ความสามารถทางภาษา
+                        </p>
+                        <ul
+                          style={{
+                            margin: 0,
+                            paddingLeft: "20px",
+                            fontSize: "13px",
+                            color: "#333",
+                            listStyleType: "disc",
+                          }}
+                        >
+                          {selectedJob.languages &&
+                          selectedJob.languages.length > 0 ? (
+                            selectedJob.languages.map((l, i) => (
+                              <li key={i}>
+                                {l.language_type}{" "}
+                                {l.level ? `(${l.level})` : ""}
+                              </li>
+                            ))
+                          ) : (
+                            <li>-</li>
+                          )}
+                        </ul>
                       </div>
                     </div>
                   </div>
                 </div>
-              </>
-            ) : (
-              <div
-                style={{ textAlign: "center", padding: "50px", color: "#fff" }}
-              >
-                กรุณาเลือกผู้สมัครจากรายการด้านซ้าย
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div
+              style={{ textAlign: "center", padding: "50px", color: "#666" }}
+            >
+              กรุณาเลือกผู้สมัครจากรายการด้านซ้าย
+            </div>
+          )}
         </section>
 
         {/* Modal ปฏิเสธ */}

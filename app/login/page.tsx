@@ -1,4 +1,5 @@
 "use client";
+import { showAlert } from "@/lib/customAlert";
 import React, { useState, useEffect } from "react"; // เอา useEffect ออก
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -62,7 +63,7 @@ export default function Login() {
 
       if (!res.ok) {
         if (res.status === 404) {
-          alert("ไม่พบข้อมูลบัญชี Google นี้ กรุณาสมัครสมาชิกก่อน");
+          showAlert.error("แจ้งเตือน", "ไม่พบข้อมูลบัญชี Google นี้ กรุณาสมัครสมาชิกก่อน");
           router.push("/register");
           return;
         }
@@ -78,7 +79,7 @@ export default function Login() {
       redirectUser(data.user.role);
     } catch (err: any) {
       console.error(err);
-      alert("เข้าสู่ระบบไม่สำเร็จ: " + err.message);
+      showAlert.error("แจ้งเตือน", "เข้าสู่ระบบไม่สำเร็จ: " + err.message);
     }
   };
 
@@ -87,7 +88,7 @@ export default function Login() {
     e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บ Refresh เมื่อกด Submit
 
     if (!email || !password) {
-      alert("Please enter both email and password.");
+      showAlert.info("แจ้งเตือน", "Please enter both email and password.");
       return;
     }
 
@@ -110,7 +111,7 @@ export default function Login() {
       redirectUser(data.user.role);
     } catch (err: any) {
       console.error(err);
-      alert(err.message);
+      showAlert.info("แจ้งเตือน", err.message);
     }
   };
 
@@ -127,7 +128,7 @@ export default function Login() {
         router.replace("/admin/home");
         break;
       default:
-        alert("Unknown Role: " + role);
+        showAlert.info("แจ้งเตือน", "Unknown Role: " + role);
     }
   };
 

@@ -1,41 +1,49 @@
 .container {
   max-width: 1500px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f5f7;
+  min-height: 100vh;
+  padding: 24px;
+  background-color: #d9d9d9;
+  font-family: sans-serif;
 }
 
 .mainContent {
   display: grid;
-  grid-template-columns: 360px 1fr;
-  gap: 5px;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .cardScollBar {
   display: flex;
-  flex-direction: column; /* จัดองค์ประกอบเรียงต่อกันแนวตั้ง */
-  max-height: 730px; /* กำหนดความสูงสูงสุดเพื่อให้เกิด overflow */
-  overflow-y: auto; /* แสดง scrollbar แนวตั้งเมื่อเนื้อหาล้น */
-  overflow-x: hidden; /* ซ่อน scrollbar แนวนอน */
-  background-color: white;
-  border: 1px solid #000000; /* กรอบเส้นทึบ หนา 1px สีเทาอ่อน */
-  border-radius: 20px; /* เพิ่มความโค้งมนให้มุมกรอบ (ใส่หรือไม่ใส่ก็ได้) */
+  flex-direction: column;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  padding: 16px;
+  gap: 12px;
+  position: relative;
 }
 
 /* Position Filter Icon & Dropdown */
 .filterTopBar {
   position: sticky;
-  top: 0;
+  top: -16px;
+  margin: -16px -16px 4px -16px;
   z-index: 30;
-  background-color: #ffffff;
-  padding: 8px 12px;
+  background-color: #f5f5f5;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  border-bottom: 1px solid #f0f0f0;
-  border-top-left-radius: 19px;
-  border-top-right-radius: 19px;
+  border-bottom: 1px solid #e0e0e0;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
   min-height: 44px;
 }
 
@@ -238,7 +246,8 @@
 
 .jobCard.selected {
   background: #ffffff;
-  border-color: #333;
+  border-color: #ccc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .cardLeft {
@@ -246,15 +255,15 @@
   align-items: center;
   gap: 12px;
   flex: 1;
+  min-width: 0;
 }
 
 .profileLeft {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  flex-shrink: 0; /* ป้องกันรูปภาพโดนบีบเบี้ยว */
-  margin-right: 0; /* ลบ margin-right 50px ออกเพื่อแก้ปัญหาช่องว่างเกิน */
+  flex-shrink: 0;
 }
 
 .profileRight {
@@ -266,16 +275,26 @@
   margin: 0 auto;
 }
 
+.cardDetails {
+  min-width: 0;
+}
+
 .cardDetails h4 {
-  margin: 2px 0 0;
-  font-size: 16px;
+  margin: 0;
+  font-size: 14px;
   font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cardDetails p {
   margin: 2px 0 0;
-  font-size: 13px;
+  font-size: 12px;
   color: #555;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .statusBadge {
@@ -283,7 +302,8 @@
   border-radius: 12px;
   font-size: 11px;
   font-weight: bold;
-  /* background-color: fuchsia; */
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .statusPending {
@@ -319,20 +339,21 @@
   gap: 20px;
 }
 
-.trackerBox {
+.trackerBox, .detailsCard {
   margin: 15px 15px;
   background: #ffffff;
-  box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border-radius: 16px;
-  padding: 20px;
+  padding: 30px;
 }
 
 /* Stepper Section */
 .stepperContainer {
   display: flex;
-  align-items: flex-start; /* จัดให้อยู่ระนาบด้านบน ไม่ลอยขึ้นลงตามเนื้อหาด้านล่าง */
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 15px;
+  width: 100%;
+  margin: 0 auto 15px auto;
   position: relative;
 }
 
@@ -687,13 +708,14 @@
   flex-direction: column;
   gap: 6px;
   background: #ffffff;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
-  width: 200px; /* กำหนดความกว้างให้พอดี */
-  z-index: 2;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1.5px solid #2e7d32;
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04);
+  margin-top: 15px;
+  width: 100%;
+  max-width: 240px;
+  box-sizing: border-box;
 }
 
 .inlineDatePicker label {
@@ -1058,4 +1080,48 @@
   font-size: 0.75rem;
   color: #555;
   margin: 0;
+}
+
+/* =========================================
+   Step Details (Decoupled from Stepper)
+   ========================================= */
+.stepDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 30px;
+  width: 100%;
+}
+
+/* Card Styling to exactly match Seeker prototype */
+.detailsCard {
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1.5px solid #2e7d32;
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04);
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsCard h3, .detailsCard .cardTitle {
+  font-size: 14px;
+  color: #333;
+  margin: 0 0 12px 0;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.detailsCard p {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 8px 0;
+}
+
+.detailsCard strong {
+  color: #333;
 }

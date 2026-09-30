@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { apiUrl } from "./hostURL";
 
 export const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -69,7 +70,7 @@ export async function sendWarningEmail(
 
                   <!-- ปุ่มกลับสู่หน้าเว็บ (ปุ่มสีดำสไตล์ BIGJOBs) -->
                   <div style="text-align: center; margin: 32px 0 16px 0;">
-                    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "#"}" target="_blank" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; transition: all 0.2s ease;">
+                    <a href="${apiUrl}" target="_blank" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; transition: all 0.2s ease;">
                       เข้าสู่ระบบ BIGJOBs
                     </a>
                   </div>

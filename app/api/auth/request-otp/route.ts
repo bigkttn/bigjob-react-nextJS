@@ -3,6 +3,7 @@ import { otpStore } from "@/lib/otpStore"; // นำเข้า temp table ข�
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
+import db from "@/lib/db";
 
 // ตั้งค่า Email Transporter (ใส่ค่าของคุณ)
 const transporter = nodemailer.createTransport({
@@ -26,6 +27,20 @@ export async function POST(req: NextRequest) {
 
         if (!email) {
             return NextResponse.json({ message: 'กรุณาระบุอีเมล' }, { status: 400 });
+        }
+
+        // ตรวจสอบว่ามีอีเมลนี้ในระบบหรือไม่ (ทั้ง User และ Company)
+        const [userRows]: any = await db.query(
+            "SELECT email FROM User WHERE email = ?",
+            [email]
+        );
+        const [companyRows]: any = await db.query(
+            "SELECT company_email FROM company WHERE company_email = ?",
+            [email]
+        );
+
+        if (userRows.length === 0 && companyRows.length === 0) {
+            return NextResponse.json({ message: 'ไม่พบอีเมลนี้ในระบบ โปรดตรวจสอบอีกครั้ง' }, { status: 404 });
         }
 
         // สุ่ม OTP 6 หลัก

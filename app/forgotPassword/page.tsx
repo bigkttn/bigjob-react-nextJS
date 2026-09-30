@@ -1,4 +1,5 @@
 "use client";
+import { showAlert } from "@/lib/customAlert";
 import React, { useState, useEffect } from "react";
 import styles from "./forgotPassword.module.css";
 import { useRouter } from "next/navigation";
@@ -127,7 +128,7 @@ export default function ForgotPassword() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("เปลี่ยนรหัสผ่านสำเร็จ");
+        showAlert.success("แจ้งเตือน", "เปลี่ยนรหัสผ่านสำเร็จ");
         setStep("email");
         setEmail("");
         setOtp("");
