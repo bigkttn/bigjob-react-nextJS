@@ -43,13 +43,7 @@ interface ComponentProps {
   userId: string; // รับ Email หรือชื่อผู้สมัครเข้ามา
 }
 
-const EXCLUDED_STATUSES = [
-  "reject",
-  "rejected",
-  "cancle",
-  "cancel",
-  "canceled",
-];
+const EXCLUDED_STATUSES: string[] = [];
 
 const isExcludedStatus = (status?: string): boolean => {
   if (!status) return false;
@@ -234,6 +228,47 @@ export default function SeekerApplication({
   };
 
   const currentStatus = activeSelectedJob?.status?.toLowerCase() || "applied";
+
+  const handleDeleteTracking = async (trackingId: number) => {
+    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
+    try {
+      const response = await fetch(`/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
+        if (selectedJob?.tracking_id === trackingId) {
+          setSelectedJob(null);
+        }
+      } else {
+        alert("เกิดข้อผิดพลาดในการลบรายการ");
+      }
+    } catch (error) {
+      console.error("Error deleting tracking:", error);
+    }
+  };
+
+  const handleCardClick = async (job: Recruiter) => {
+    setSelectedJob(job);
+    if (job.status_notification === "unread_user" || job.status_notification === "unread_both") {
+      try {
+        await fetch("/api/interview_tracking/notifications/read", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trackingId: job.tracking_id, userType: "user" }),
+        });
+        setJobs((prev) =>
+          prev.map((j) =>
+            j.tracking_id === job.tracking_id
+              ? { ...j, status_notification: j.status_notification === "unread_both" ? "unread_company" : "read" }
+              : j
+          )
+        );
+      } catch (error) {
+        console.error("Failed to mark as read", error);
+      }
+    }
+  };
 
   const handleUpdateStatus = async (trackingId: number, newStatus: string ,reviewData?: { rating: number, comment: string }) => {
     if (!activeSelectedJob) return;
@@ -456,35 +491,44 @@ export default function SeekerApplication({
                 : `ไม่พบตำแหน่งงาน "${selectedPosition}"`}
             </p>
           ) : (
-            filteredJobs.map((job) => (
-              <div
-                key={job.tracking_id}
-                className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
-                onClick={() => setSelectedJob(job)}
-              >
-                <div className={styles.cardLeft}>
-                  <img
-                    src={
-                      job.logo_image ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
-                    }
-                    alt="company logo"
-                    className={styles.sidebarLogo}
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/50";
-                    }}
-                  />
-                  <div className={styles.cardDetails}>
-                    <h4>{job.job_position || "Unknown Position"}</h4>
-                    <p>{job.company_name || "Unknown Company"}</p>
+              filteredJobs.map((job) => {
+                const isUnread = job.status_notification === "unread_user" || job.status_notification === "unread_both";
+                return (
+                  <div
+                    key={job.tracking_id}
+                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                    style={isUnread ? { backgroundColor: "#fff8e1", borderLeft: "4px solid #ffb300" } : {}}
+                    onClick={() => handleCardClick(job)}
+                  >
+                    <div className={styles.cardLeft}>
+                      <img
+                        src={
+                          job.logo_image ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
+                        }
+                        alt="company logo"
+                        className={styles.sidebarLogo}
+                        onError={(e) => {
+                          e.currentTarget.src = "https://via.placeholder.com/50";
+                        }}
+                      />
+                      <div className={styles.cardDetails}>
+                        <h4>{job.job_position || "ไม่ระบุตำแหน่ง"}</h4>
+                        <p>{job.company_name || "ไม่ระบุบริษัท"}</p>
+                      </div>
+                    </div>
+                    <div className={styles.badgeContainer} style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
+                      {getStatusBadge(job.status)}
+                      {isUnread && (
+                        <span style={{ fontSize: "11px", backgroundColor: "#c8e6c9", color: "#2e7d32", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>
+                          มีการอัปเดต
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className={styles.badgeContainer}>
-                  {getStatusBadge(job.status)}
-                </div>
-              </div>
-            ))
-          )}
+                );
+              })
+            )}
         </aside>
 
         {/* Right Panel */}
@@ -1384,18 +1428,36 @@ export default function SeekerApplication({
                   alt="logo"
                   className={styles.detailsLogo}
                 />
-                <h2>{activeSelectedJob.company_name || "Unknown Company"}</h2>
+                <h2>{activeSelectedJob.company_name || "ไม่ระบุบริษัท"}</h2>
+                {(currentStatus === "reject" || currentStatus === "rejected" || currentStatus === "cancel" || currentStatus === "canceled") && (
+                  <button
+                    onClick={() => handleDeleteTracking(activeSelectedJob.tracking_id)}
+                    style={{
+                      marginLeft: "auto",
+                      padding: "6px 12px",
+                      backgroundColor: "#ffebee",
+                      color: "#d32f2f",
+                      border: "1px solid #d32f2f",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ลบรายการ
+                  </button>
+                )}
               </div>
               <div className={styles.detailsGrid}>
                 <div className={styles.leftCol}>
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Job Title</span>
+                    <span className={styles.infoLabel}>ตำแหน่งงาน</span>
                     <span className={styles.infoValue}>
                       {activeSelectedJob.job_position || "-"}
                     </span>
                   </div>
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Work Location</span>
+                    <span className={styles.infoLabel}>สถานที่ทำงาน</span>
                     <span className={styles.infoValue}>
                       {activeSelectedJob.work_location ||
                         activeSelectedJob.province ||
@@ -1403,7 +1465,7 @@ export default function SeekerApplication({
                     </span>
                   </div>
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Salary</span>
+                    <span className={styles.infoLabel}>เงินเดือน</span>
                     <span className={styles.infoValue}>
                       {activeSelectedJob.salary_min &&
                       activeSelectedJob.salary_max
@@ -1412,7 +1474,7 @@ export default function SeekerApplication({
                     </span>
                   </div>
                   <div className={styles.infoRow}>
-                    <span className={styles.infoLabel}>Rate</span>
+                    <span className={styles.infoLabel}>จำนวนรับ</span>
                     <span className={styles.infoValue}>
                       {activeSelectedJob.rate ||
                         activeSelectedJob.vacancy ||
@@ -1420,21 +1482,21 @@ export default function SeekerApplication({
                     </span>
                   </div>
                   <div className={styles.sectionBlock}>
-                    <span className={styles.sectionTitle}>Details</span>
+                    <span className={styles.sectionTitle}>รายละเอียดงาน</span>
                     <p>{activeSelectedJob.details || "-"}</p>
                   </div>
                   <div className={styles.sectionBlock}>
-                    <span className={styles.sectionTitle}>Qualifications</span>
+                    <span className={styles.sectionTitle}>คุณสมบัติ</span>
                     <p>{activeSelectedJob.preferred_qualifications || "-"}</p>
                   </div>
                 </div>
                 <div className={styles.rightCol}>
                   <div className={styles.sectionBlock} style={{ marginTop: 0 }}>
-                    <span className={styles.sectionTitle}>Benefits</span>
+                    <span className={styles.sectionTitle}>สวัสดิการ</span>
                     <p>{activeSelectedJob.Benefits || "-"}</p>
                   </div>
                   <div className={styles.sectionBlock}>
-                    <span className={styles.sectionTitle}>Contact</span>
+                    <span className={styles.sectionTitle}>ช่องทางการติดต่อ</span>
                     <p>{activeSelectedJob.contact || "-"}</p>
                   </div>
                 </div>

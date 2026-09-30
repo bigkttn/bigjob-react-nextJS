@@ -220,6 +220,47 @@ export default function CompanyApplication({
     if (s === "reject" || s === "rejected") return "ไม่ผ่านพิจารณา";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
+  const handleDeleteTracking = async (trackingId: number) => {
+    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
+    try {
+      const response = await fetch(`${apiUrl}/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
+        if (selectedJob?.tracking_id === trackingId) {
+          setSelectedJob(null);
+        }
+      } else {
+        alert("เกิดข้อผิดพลาดในการลบรายการ");
+      }
+    } catch (error) {
+      console.error("Error deleting tracking:", error);
+    }
+  };
+
+  const handleCardClick = async (job: any) => {
+    setSelectedJob(job);
+    if (job.status_notification === "unread_company" || job.status_notification === "unread_both") {
+      try {
+        await fetch("/api/interview_tracking/notifications/read", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trackingId: job.tracking_id, userType: "company" }),
+        });
+        setJobs((prev) =>
+          prev.map((j) =>
+            j.tracking_id === job.tracking_id
+              ? { ...j, status_notification: j.status_notification === "unread_both" ? "unread_user" : "read" }
+              : j
+          )
+        );
+      } catch (error) {
+        console.error("Failed to mark as read", error);
+      }
+    }
+  };
+
   const handleUpdateStatus = async (
     trackingId: number,
     newStatus: string,
@@ -257,57 +298,50 @@ export default function CompanyApplication({
       );
 
       if (response.ok) {
-        if (newStatus === "reject" || newStatus === "rejected") {
-          setJobs((prev) =>
-            prev.filter((job) => job.tracking_id !== trackingId),
-          );
-          setSelectedJob(null);
-        } else {
-          setJobs((prev) =>
-            prev.map((job) =>
-              job.tracking_id === trackingId
-                ? {
-                    ...job,
-                    status: newStatus,
-                    interview_date:
-                      interviewDetails &&
-                      (interviewDetails.interviewTime || interviewTime)
-                        ? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`
-                        : job.interview_date,
-                    link:
-                      interviewDetails?.interviewType === "online"
-                        ? interviewDetails.locationName
-                        : job.link,
-                    location:
-                      interviewDetails?.interviewType === "onsite"
-                        ? interviewDetails.locationName
-                        : job.location,
-                  }
-                : job,
-            ),
-          );
-          setSelectedJob((prev) =>
-            prev
+        setJobs((prev) =>
+          prev.map((job) =>
+            job.tracking_id === trackingId
               ? {
-                  ...prev,
+                  ...job,
                   status: newStatus,
                   interview_date:
                     interviewDetails &&
                     (interviewDetails.interviewTime || interviewTime)
                       ? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`
-                      : prev.interview_date,
+                      : job.interview_date,
                   link:
                     interviewDetails?.interviewType === "online"
                       ? interviewDetails.locationName
-                      : prev.link,
+                      : job.link,
                   location:
                     interviewDetails?.interviewType === "onsite"
                       ? interviewDetails.locationName
-                      : prev.location,
+                      : job.location,
                 }
-              : null,
-          );
-        }
+              : job,
+          ),
+        );
+        setSelectedJob((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: newStatus,
+                interview_date:
+                  interviewDetails &&
+                  (interviewDetails.interviewTime || interviewTime)
+                    ? `${interviewDetails.interviewDate}T${interviewDetails.interviewTime || interviewTime}:00`
+                    : prev.interview_date,
+                link:
+                  interviewDetails?.interviewType === "online"
+                    ? interviewDetails.locationName
+                    : prev.link,
+                location:
+                  interviewDetails?.interviewType === "onsite"
+                    ? interviewDetails.locationName
+                    : prev.location,
+              }
+            : null,
+        );
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -493,13 +527,16 @@ export default function CompanyApplication({
                   : `ไม่พบผู้สมัครในตำแหน่ง "${selectedPosition}"`}
               </p>
             ) : (
-              filteredJobs.map((job) => (
-                <div
-                  key={job.tracking_id}
-                  className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
-                  onClick={() => setSelectedJob(job)}
-                >
-                  <div className={styles.cardLeft}>
+              filteredJobs.map((job) => {
+                const isUnread = job.status_notification === "unread_company" || job.status_notification === "unread_both";
+                return (
+                  <div
+                    key={job.tracking_id}
+                    className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                    style={isUnread ? { backgroundColor: "#fff8e1", borderLeft: "4px solid #ffb300" } : {}}
+                    onClick={() => handleCardClick(job)}
+                  >
+                    <div className={styles.cardLeft}>
                     <img
                       src={
                         job.profile_image ||
@@ -513,14 +550,22 @@ export default function CompanyApplication({
                       <p>{job.job_position || "ไม่ระบุตำแหน่ง"}</p>
                     </div>
                   </div>
-                  <span
-                    className={`${styles.statusBadge} ${getStatusClass(job.status)}`}
-                  >
-                    {getDisplayStatus(job.status)}
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
+                    <span
+                      className={`${styles.statusBadge} ${getStatusClass(job.status)}`}
+                    >
+                      {getDisplayStatus(job.status)}
+                    </span>
+                    {isUnread && (
+                      <span style={{ fontSize: "11px", backgroundColor: "#c8e6c9", color: "#2e7d32", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>
+                        มีการอัปเดต
+                      </span>
+                    )}
+                  </div>
                 </div>
-              ))
-            )}
+              );
+            })
+          )}
           </aside>
         </div>
 
@@ -2055,6 +2100,26 @@ export default function CompanyApplication({
                       >
                         {selectedJob.email || "ไม่ระบุ"}
                       </a>
+
+                      {(status === "reject" || status === "rejected") && (
+                        <button
+                          onClick={() => handleDeleteTracking(selectedJob.tracking_id)}
+                          style={{
+                            marginTop: "-10px",
+                            marginBottom: "20px",
+                            padding: "6px 12px",
+                            backgroundColor: "#ffebee",
+                            color: "#d32f2f",
+                            border: "1px solid #d32f2f",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ลบรายการ
+                        </button>
+                      )}
 
                       <div
                         style={{

@@ -14,6 +14,26 @@ const Register = () => {
      const [otpCode, setOtpCode] = useState('');
      const [isOtpSent, setIsOtpSent]  = useState(false);
      const [isLoadingOtp, setIsLoadingOtp] = useState(false);
+     const [countdown, setCountdown] = useState(0);
+     const [isOtpVerified, setIsOtpVerified] = useState(false);
+
+     useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (countdown > 0 && !isOtpVerified) {
+            timer = setInterval(() => {
+                setCountdown(prev => prev - 1);
+            }, 1000);
+        }
+        return () => {
+            if (timer) clearInterval(timer);
+        };
+     }, [countdown, isOtpVerified]);
+
+     const countdownDisplay = () => {
+        const m = Math.floor(countdown / 60);
+        const s = countdown % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+     };
 
      const [registerData, setRegisterData] = useState({
           email: '',
@@ -121,13 +141,14 @@ const Register = () => {
             const res = await fetch('/api/auth/request-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: registerData.email })
+                body: JSON.stringify({ email: registerData.email, purpose: 'register' })
             });
 
             const data = await res.json();
 
             if (res.ok) {
                 setIsOtpSent(true);
+                setCountdown(300);
                 showAlert.success("แจ้งเตือน", '' + data.message); // แสดงข้อความ "ส่ง OTP สำเร็จ"
             } else {
                 showAlert.error("แจ้งเตือน", 'เกิดข้อผิดพลาด: ' + data.message);
@@ -140,6 +161,31 @@ const Register = () => {
         }
     };
 
+    const verifyOtp = async () => {
+        if (!otpCode) return showAlert.info("แจ้งเตือน", 'กรุณากรอกรหัส OTP');
+        
+        try {
+            const res = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: registerData.email, otp: otpCode })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setIsOtpVerified(true);
+                setCountdown(0);
+                showAlert.success("แจ้งเตือน", 'ยืนยัน OTP สำเร็จ กรุณากรอกข้อมูลส่วนอื่นต่อได้เลย');
+            } else {
+                showAlert.error("แจ้งเตือน", data.message);
+            }
+        } catch (error) {
+            console.error('Verify OTP Error:', error);
+            showAlert.error("แจ้งเตือน", 'ไม่สามารถยืนยัน OTP ได้');
+        }
+    };
+
     // --------------------------------------------------------
     // อัปเดต: ฟังก์ชันสมัครสมาชิกแบบปกติ
     // --------------------------------------------------------
@@ -148,8 +194,9 @@ const Register = () => {
         
         // 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
         if (!captchaToken) return showAlert.info("แจ้งเตือน", 'Please complete the CAPTCHA');
+        if (registerData.password.length < 8) return showAlert.error("แจ้งเตือน", 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
         if (registerData.password !== registerData.confirmPassword) return showAlert.error("แจ้งเตือน", 'Password mismatch!');
-        if (!otpCode) return showAlert.info("แจ้งเตือน", 'Please enter and verify OTP first!'); // เช็ค OTP
+        if (!isOtpVerified) return showAlert.info("แจ้งเตือน", 'Please click Verify OTP first!'); // เช็ค OTP
 
         if (userType === 'company') {
              if (!registerData.companyName || !registerData.phone) {
@@ -211,7 +258,7 @@ const Register = () => {
                 {/* Brand Side */}
                 <div className={styles.brandSide}>
                     <div className={styles.logo}>
-                        <span className={styles.icon}>☰</span> BIGJOBs
+                        BIGJOBs
                     </div>
                     <div className={styles.slogan}>
                         <h1>
@@ -282,18 +329,41 @@ const Register = () => {
                                         onChange={(e) => setOtpCode(e.target.value)}
                                         style={{ flex: 1, textAlign: 'center', letterSpacing: '2px', fontWeight: 'bold' }}
                                         required 
+                                        disabled={isOtpVerified}
                                     />
-                                    <button 
-                                        type="button" 
-                                        onClick={requestOtp}
-                                        disabled={!registerData.email || isLoadingOtp}
-                                        className={styles.otpRequestBtn} 
-                                        style={{ padding: '0 15px', borderRadius: '5px', border: 'none', backgroundColor: '#333', color: '#fff', cursor: 'pointer', fontSize: '14px', minWidth: '100px' }}
-                                    >
-                                        {isLoadingOtp ? 'กำลังส่ง...' : (isOtpSent ? 'ส่งอีกครั้ง' : 'รับ OTP')}
-                                    </button>
+                                    {isOtpSent && !isOtpVerified && (
+                                        <button 
+                                            type="button" 
+                                            onClick={verifyOtp}
+                                            disabled={!otpCode || otpCode.length < 6}
+                                            style={{ padding: '0 15px', borderRadius: '5px', border: 'none', backgroundColor: '#0d6efd', color: '#fff', cursor: 'pointer', fontSize: '14px', minWidth: '100px' }}
+                                        >
+                                            ยืนยัน OTP
+                                        </button>
+                                    )}
+                                    {isOtpVerified && (
+                                        <button 
+                                            type="button" 
+                                            disabled
+                                            style={{ padding: '0 15px', borderRadius: '5px', border: 'none', backgroundColor: '#28a745', color: '#fff', cursor: 'not-allowed', fontSize: '14px', minWidth: '100px' }}
+                                        >
+                                            ยืนยันแล้ว
+                                        </button>
+                                    )}
+                                    {!isOtpVerified && (
+                                        <button 
+                                            type="button" 
+                                            onClick={requestOtp}
+                                            disabled={!registerData.email || isLoadingOtp || countdown > 0}
+                                            className={styles.otpRequestBtn} 
+                                            style={{ padding: '0 15px', borderRadius: '5px', border: 'none', backgroundColor: '#333', color: '#fff', cursor: 'pointer', fontSize: '14px', minWidth: '100px' }}
+                                        >
+                                            {isLoadingOtp ? 'กำลังส่ง...' : (countdown > 0 ? countdownDisplay() : (isOtpSent ? 'ส่งอีกครั้ง' : 'รับ OTP'))}
+                                        </button>
+                                    )}
                                 </div>
-                                {isOtpSent && <small style={{ color: '#28a745', marginTop: '5px', display: 'block' }}>✅ ส่ง OTP แล้ว</small>}
+                                {isOtpSent && !isOtpVerified && <small style={{ color: '#28a745', marginTop: '5px', display: 'block' }}>ส่ง OTP แล้ว {countdown > 0 && `(ส่งใหม่ได้ใน ${countdownDisplay()})`}</small>}
+                                {isOtpVerified && <small style={{ color: '#28a745', marginTop: '5px', display: 'block' }}>อีเมลได้รับการยืนยันแล้ว สามารถกรอกข้อมูลและกดสมัครสมาชิกได้เลย (ไม่ต้องกังวลเรื่องเวลา)</small>}
                             </div>
 
                             {/* Password Row */}
@@ -302,7 +372,8 @@ const Register = () => {
                                     <label>รหัสผ่าน</label>
                                     <input 
                                         type="password" 
-                                        placeholder="รหัสผ่าน" 
+                                        placeholder="รหัสผ่าน (อย่างน้อย 8 ตัวอักษร)" 
+                                        minLength={8}
                                         value={registerData.password}
                                         onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
                                         required 
@@ -313,6 +384,7 @@ const Register = () => {
                                     <input 
                                         type="password" 
                                         placeholder="ยืนยันรหัสผ่าน" 
+                                        minLength={8}
                                         value={registerData.confirmPassword}
                                         onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
                                         required 

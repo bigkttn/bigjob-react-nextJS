@@ -45,6 +45,12 @@ export async function PATCH(req: NextRequest) {
       queryParams.push(reviewRating, reviewComment || null);
     }
 
+    if (['screening', 'appointment', 'offer', 'reject', 'rejected'].includes(status)) {
+      updateSql += `, status_notification = 'unread_user'`;
+    } else if (['applied', 'interview', 'hired', 'cancel', 'canceled'].includes(status)) {
+      updateSql += `, status_notification = 'unread_company'`;
+    }
+
     updateSql += ` WHERE tracking_id = ?`;
     queryParams.push(trackingId);
 

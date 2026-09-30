@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     }
     try {
         const body = await req.json();
-        const { email } = body;
+        const { email, purpose } = body;
 
         if (!email) {
             return NextResponse.json({ message: 'กรุณาระบุอีเมล' }, { status: 400 });
@@ -39,8 +39,15 @@ export async function POST(req: NextRequest) {
             [email]
         );
 
-        if (userRows.length === 0 && companyRows.length === 0) {
-            return NextResponse.json({ message: 'ไม่พบอีเมลนี้ในระบบ โปรดตรวจสอบอีกครั้ง' }, { status: 404 });
+        if (purpose === 'register') {
+            if (userRows.length > 0 || companyRows.length > 0) {
+                return NextResponse.json({ message: 'อีเมลนี้มีอยู่ในระบบแล้ว โปรดเข้าสู่ระบบ' }, { status: 400 });
+            }
+        } else {
+            // ค่าเริ่มต้น ถ้าไม่ได้ระบุ purpose คือลืมรหัสผ่าน (forgot password)
+            if (userRows.length === 0 && companyRows.length === 0) {
+                return NextResponse.json({ message: 'ไม่พบอีเมลนี้ในระบบ โปรดตรวจสอบอีกครั้ง' }, { status: 404 });
+            }
         }
 
         // สุ่ม OTP 6 หลัก

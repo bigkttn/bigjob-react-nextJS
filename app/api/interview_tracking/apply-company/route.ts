@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     const profileLink = `${apiUrl}/seeker/profile/${user_id}`; // ลิงก์ไปยังโปรไฟล์ผู้สมัคร
 
-    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message,date_time) VALUES (?, ?, 'applied', ?,NOW())`;
+    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message,date_time, status_notification) VALUES (?, ?, 'applied', ?,NOW(), 'unread_company')`;
     await db.query(sql, [post_id, user_id, message || null]);
 
     await transporter.sendMail({

@@ -22,28 +22,28 @@ interface PageProps {
 }
 
 interface Education {
-  level?: unknown;
-  major?: unknown;
-  institution?: unknown;
-  year_start?: unknown;
-  year_end?: unknown;
+  level?: string;
+  major?: string;
+  institution?: string;
+  year_start?: string;
+  year_end?: string;
 }
 
 interface Skills {
-  skill_name?: unknown;
-  skill_category?: unknown;
-  skill_detail?: unknown;
+  skill_name?: string;
+  skill_category?: string;
+  skill_detail?: string;
 }
 
 interface TypingSpeed {
-  typing_language?: unknown;
-  typing_wpm?: unknown;
+  typing_language?: string;
+  typing_wpm?: string;
 }
 
 interface Experiences {
-  ex_title?: unknown;
-  ex_description?: unknown;
-  type?: unknown;
+  ex_title?: string;
+  ex_description?: string;
+  type?: string;
   start_date?: string | null;
   end_date?: string | null;
 }

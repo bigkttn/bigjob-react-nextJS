@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     const jobLink = `${apiUrl}/jobs/${post_id}`;
 
-    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message) VALUES (?, ?, 'pending', ?)`;
+    const sql = `INSERT INTO interview_tracking (post_id, user_id, status, interview_message, status_notification) VALUES (?, ?, 'pending', ?, 'unread_user')`;
     await db.query(sql, [post_id, user_id, message || null]);
 
     // ส่งอีเมลไปหาผู้สมัคร (Seeker)

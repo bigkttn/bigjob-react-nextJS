@@ -462,3 +462,67 @@
 .addBtn:hover {
   background: #e0e0e0;
 }
+.deleteQBtn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #dc2626;
+  background: transparent;
+  color: #dc2626;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.deleteQBtn:hover {
+  background: #fee2e2;
+}
+.radioCircle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.radioCircleActive {
+  width: 20px;
+  height: 20px;
+  border: 5px solid #000;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: #fff;
+}
+.deleteOptBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.deleteOptBtn:hover {
+  color: #dc2626;
+}
+.testCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  margin-left: 45px;
+  width: 350px;
+}
+.addOptBtn {
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px dashed #000;
+  background: transparent;
+  color: #374151;
+  cursor: pointer;
+  font-weight: 500;
+}
+.addOptBtn:hover {
+  background: #f3f4f6;
+}

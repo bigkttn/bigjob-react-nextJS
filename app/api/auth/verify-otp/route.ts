@@ -37,6 +37,9 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // 🌟 ต่อเวลาให้กรอกข้อมูลต่อได้ 30 นาที
+        data.expires_at = Date.now() + 30 * 60 * 1000;
+
         return NextResponse.json({ message: "OTP ถูกต้อง" });
     } catch (err: any) {
         return NextResponse.json({ message: err.message }, { status: 500 });

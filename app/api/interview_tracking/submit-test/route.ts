@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     const user_id = Number(userId);
 
     // 1. สร้างใบสมัครลง interview_tracking ก่อน เพื่อเอา tracking_id
-    const insertAppSql = `INSERT INTO interview_tracking (post_id, user_id, status) VALUES (?, ?, 'applied')`;
+    const insertAppSql = `INSERT INTO interview_tracking (post_id, user_id, status, status_notification) VALUES (?, ?, 'applied', 'unread_company')`;
     const [appResult] = await db.query(insertAppSql, [post_id, user_id]) as [any, unknown];
     
     const tracking_id = appResult.insertId; // ดึง ID ที่เพิ่งถูกสร้างขึ้นมา

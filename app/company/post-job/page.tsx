@@ -449,10 +449,10 @@ const PostJob = () => {
               {questions.map((q, qIndex) => (
                 <div key={q.id} className={styles.questionBlock}>
                   <div className={styles.inputWrapper}>
-                    <span className={styles.questionNumber}>{qIndex + 1}.</span>
+                    <span className={styles.questionNumber}>{qIndex + 1}</span>
                     <input
                       type="text"
-                      placeholder="กรอกคำถาม"
+                      placeholder="กรอกคำถามที่นี่..."
                       className={styles.mainInput}
                       style={inputStyle}
                       disabled={!isApproved}
@@ -460,31 +460,34 @@ const PostJob = () => {
                       onChange={(e) => updateQuestionText(q.id, e.target.value)}
                     />
                     <button
-                      className={styles.deleteQuestionBtn}
+                      className={styles.deleteQBtn}
                       style={btnStyle}
                       disabled={!isApproved}
                       onClick={() => deleteQuestion(q.id)}
                     >
-                      🗑️
+                      ลบ
                     </button>
                   </div>
 
                   <div className={styles.optionsBox}>
                     {q.options.map((opt, optIndex) => (
                       <div key={optIndex} className={styles.optionRow}>
-                        <input
-                          type="radio"
-                          name={`correct-${q.id}`}
-                          disabled={!isApproved}
-                          checked={q.correctIndex === optIndex}
-                          onChange={() => setCorrectAnswer(q.id, optIndex)}
-                          className={styles.radioInput}
+                        <div
+                          className={
+                            q.correctIndex === optIndex
+                              ? styles.radioCircleActive
+                              : styles.radioCircle
+                          }
+                          style={!isApproved ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+                          onClick={() => {
+                            if (isApproved) setCorrectAnswer(q.id, optIndex);
+                          }}
                         />
                         <input
                           type="text"
-                          placeholder="ตัวเลือก"
+                          placeholder={`ตัวเลือกที่ ${optIndex + 1}`}
                           disabled={!isApproved}
-                          className={`${styles.optionInput} ${q.correctIndex === optIndex ? styles.correct : ""}`}
+                          className={styles.optionInput}
                           style={inputStyle}
                           value={opt}
                           onChange={(e) =>
@@ -494,24 +497,38 @@ const PostJob = () => {
                         {q.options.length > 2 && (
                           <button
                             disabled={!isApproved}
+                            className={styles.deleteOptBtn}
                             style={btnStyle}
                             onClick={() => deleteOption(q.id, optIndex)}
-                            className={styles.removeOptionBtn}
                           >
-                            ✕
+                            ×
                           </button>
                         )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      disabled={!isApproved}
-                      style={btnStyle}
-                      onClick={() => addOption(q.id)}
-                      className={styles.addOptionBtn}
+                  </div>
+
+                  <div className={styles.testCardFooter}>
+                    <span
+                      style={{
+                        fontSize: "11px",
+                        color: "#9ca3af",
+                        fontStyle: "italic",
+                      }}
                     >
-                      + เพิ่มตัวเลือก
-                    </button>
+                      คลิกวงกลมเพื่อเลือกคำตอบที่ถูก
+                    </span>
+                    {q.options.length < 6 && (
+                      <button
+                        type="button"
+                        disabled={!isApproved}
+                        style={btnStyle}
+                        className={styles.addOptBtn}
+                        onClick={() => addOption(q.id)}
+                      >
+                        + เพิ่มตัวเลือก
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

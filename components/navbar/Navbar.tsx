@@ -13,6 +13,7 @@ export default function Navbar() {
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState("");
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [trackingUnreadCount, setTrackingUnreadCount] = useState<number>(0);
 
   // State สำหรับจัดการ Popup การแบน
   const [isBanned, setIsBanned] = useState(false);
@@ -121,6 +122,19 @@ export default function Navbar() {
     }
   }
 
+  // Tracking Notification Badge
+  async function fetchTrackingNotificationBadge(uid: string, role: string) {
+    try {
+      const res = await fetch(`/api/interview_tracking/notifications?userId=${uid}&role=${role}`);
+      if (res.ok) {
+        const data = await res.json();
+        setTrackingUnreadCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error("Tracking notification pull failed", err);
+    }
+  }
+
   // ดึงข้อมูล Session
   useEffect(() => {
     const fetchSession = async () => {
@@ -135,6 +149,7 @@ export default function Navbar() {
 
           if (data.user.role !== "guest") {
             fetchNotificationBadge(data.user.id, data.user.role);
+            fetchTrackingNotificationBadge(data.user.id, data.user.role);
             checkBanStatus(data.user.id, data.user.role);
           }
         } else {
@@ -153,6 +168,7 @@ export default function Navbar() {
     const handleRefreshNotifications = () => {
       if (userId && userRole !== "guest") {
         fetchNotificationBadge(userId, userRole);
+        fetchTrackingNotificationBadge(userId, userRole);
       }
     };
     window.addEventListener("refreshNotifications", handleRefreshNotifications);
@@ -181,6 +197,19 @@ export default function Navbar() {
       router.push("/login");
     } catch (error) {
       console.error("Logout failed", error);
+    }
+  };
+
+  const onTrackingClick = async (roleType: string) => {
+    try {
+      await fetch("/api/interview_tracking/notifications/read", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, role: roleType }),
+      });
+      setTrackingUnreadCount(0);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -236,10 +265,16 @@ export default function Navbar() {
             </Link>
             <Link
               href={`/user/seeker_tracking/${userId}`}
-              className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)}`}
-              onClick={onLinkClick}
+              className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)} nav-feedback-link`}
+              onClick={() => {
+                if (onLinkClick) onLinkClick();
+                onTrackingClick("seeker");
+              }}
             >
               ติดตามสถานะ
+              {trackingUnreadCount > 0 && (
+                <span className="shock-badge">! {trackingUnreadCount}</span>
+              )}
             </Link>
             <Link
               href="/user/savedCompany"
@@ -282,10 +317,16 @@ export default function Navbar() {
             </Link>
             <Link
               href={`/company/company_tracking/${userId}`}
-              className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)}`}
-              onClick={onLinkClick}
+              className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)} nav-feedback-link`}
+              onClick={() => {
+                if (onLinkClick) onLinkClick();
+                onTrackingClick("company");
+              }}
             >
               ติดตามสถานะ
+              {trackingUnreadCount > 0 && (
+                <span className="shock-badge">! {trackingUnreadCount}</span>
+              )}
             </Link>
             <Link
               href="/company/savedSeeker"
@@ -389,7 +430,9 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className="nav-links desktop-menu">{renderLinks(false)}</div>
+          <div className="nav-links desktop-menu">
+            {renderLinks(false)}
+          </div>
         </div>
 
         {/* Mobile Drawer / Sidebar */}

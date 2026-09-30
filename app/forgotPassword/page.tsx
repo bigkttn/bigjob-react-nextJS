@@ -118,6 +118,11 @@ export default function ForgotPassword() {
       return;
     }
 
+    if (newPassword.length < 8) {
+      setErrorMsg("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
@@ -222,7 +227,8 @@ export default function ForgotPassword() {
 
             <input
               type="password"
-              placeholder="New password"
+              placeholder="New password (อย่างน้อย 8 ตัวอักษร)"
+              minLength={8}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
