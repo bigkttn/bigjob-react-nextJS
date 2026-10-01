@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import React, { useEffect, useState } from "react";
 import styles from "./seekerProfile.module.css";
 import {
@@ -783,14 +784,14 @@ const SeekerProfile = () => {
         setProfile(payload);
         setForm(payload);
         setEditMode(false);
-        alert("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
+        Swal.fire("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
         window.location.reload();
       } else {
         const data: { error?: string } = await res.json();
-        alert(data.error ?? "เกิดข้อผิดพลาดในการบันทึก");
+        Swal.fire(data.error ?? "เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (err: unknown) {
-      alert(getErrorText(err));
+      Swal.fire(getErrorText(err));
     } finally {
       setSaving(false);
     }
@@ -820,10 +821,10 @@ const SeekerProfile = () => {
         setForm({ ...form, is_visible: newValue });
       } else {
         const data: { error?: string } = await res.json();
-        alert(data.error ?? "ไม่สามารถเปลี่ยนสถานะการมองเห็นได้");
+        Swal.fire(data.error ?? "ไม่สามารถเปลี่ยนสถานะการมองเห็นได้");
       }
     } catch (err: unknown) {
-      alert(`เกิดข้อผิดพลาด: ${getErrorText(err)}`);
+      Swal.fire(`เกิดข้อผิดพลาด: ${getErrorText(err)}`);
     } finally {
       setTogglingVisibility(false);
     }
@@ -850,12 +851,12 @@ const SeekerProfile = () => {
       if (res.ok) {
         setProfile({ ...profile, profile_image: url });
         setForm({ ...form, profile_image: url });
-        alert("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว! 📷✨");
+        Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว! 📷✨");
       } else {
-        alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
+        Swal.fire("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
       }
     } catch (err: unknown) {
-      alert(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
+      Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
       setSaving(false);
     }
@@ -914,18 +915,18 @@ const SeekerProfile = () => {
         }));
       } else {
         const data: { error?: string } = await res.json();
-        alert(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
+        Swal.fire(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
       }
     } catch (err: unknown) {
-      alert(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
+      Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
       setUploadingCategory("");
     }
   }
 
   async function deleteFile(fileId: number, filePath: string) {
-    const ok = confirm("คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร? ❌");
-    if (!ok) return;
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     try {
       await deleteObject(ref(storage, filePath));
@@ -947,10 +948,10 @@ const SeekerProfile = () => {
           files: prev.files.filter((f) => f.file_id !== fileId),
         }));
       } else {
-        alert("ไม่สามารถลบแถวข้อมูลได้");
+        Swal.fire("ไม่สามารถลบแถวข้อมูลได้");
       }
     } catch (err: unknown) {
-      alert(`การลบล้มเหลว: ${getErrorText(err)}`);
+      Swal.fire(`การลบล้มเหลว: ${getErrorText(err)}`);
     }
   }
 
@@ -2092,11 +2093,9 @@ const SeekerProfile = () => {
                             {shortName}
                             <span
                               className={styles.deleteFileIcon}
-                              onClick={() =>
-                                deleteFile(file.file_id, file.file_path)
-                              }
+                              onClick={() => deleteFile(file.file_id, file.file_path)}
                             >
-                              ❌
+                              ลบ
                             </span>
                           </div>
                           <div

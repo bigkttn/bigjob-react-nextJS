@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import UserHomeClient from "./userhome-client";
 import { JwtPayload } from "jsonwebtoken";
-export const dynamic = "force-dynamic"; // ✅ ต้องอยู่ที่นี่
+export const dynamic = "force-dynamic"; //  ต้องอยู่ที่นี่
 
 export default async function Page() {
   const cookieStore = await cookies();

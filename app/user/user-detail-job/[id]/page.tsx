@@ -377,7 +377,8 @@ export default async function DetailJob({ params }: PageProps) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {typeof job.Benefits === "string" || typeof job.benefits === "string"
+                  {typeof job.Benefits === "string" ||
+                  typeof job.benefits === "string"
                     ? String(job.Benefits || job.benefits)
                     : "ไม่ได้ระบุสวัสดิการ"}
                 </div>

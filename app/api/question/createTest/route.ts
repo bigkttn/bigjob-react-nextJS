@@ -5,8 +5,8 @@ export async function POST(request: Request) {
     const connection = await db.getConnection();
     try {
         const { postId, questions } = await request.json();
-        console.log("Post ID:", postId); // เช็คว่ามีค่าไหม
-        console.log("Questions:", questions); // เช็คว่ามีคำถามไหม
+        /* console.log("Post ID:", postId) */; // เช็คว่ามีค่าไหม
+        /* console.log("Questions:", questions) */; // เช็คว่ามีคำถามไหม
         await connection.beginTransaction();
 
         for (const q of questions) {

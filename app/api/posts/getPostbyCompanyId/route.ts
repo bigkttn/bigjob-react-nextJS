@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
         // const decoded: any = jwt.decode(token);
         const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
         const company_id = decoded.id;
-        console.log(company_id);
+        /* console.log(company_id) */;
 
         const [rows] = await db.query(
             `SELECT *,

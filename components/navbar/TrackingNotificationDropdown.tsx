@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import "./tracking-notification.css";
 
@@ -26,25 +25,32 @@ export default function TrackingNotificationDropdown({ userId, userRole }: Props
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch(`/api/interview_tracking/notifications?userId=${userId}&role=${userRole}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
-      }
-    } catch (err) {
-      console.error("Failed to fetch tracking notifications", err);
-    }
-  };
-
   useEffect(() => {
-    if (userId && userRole && userRole !== "guest") {
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
-      return () => clearInterval(interval);
-    }
+    if (!userId || !userRole || userRole === "guest" || userRole === "admin") return;
+
+    let isMounted = true;
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/interview_tracking/notifications?userId=${userId}&role=${userRole}`);
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          setNotifications(data.notifications || []);
+          setUnreadCount(data.unreadCount || 0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch tracking notifications", err);
+      }
+    };
+
+    load();
+    const interval = setInterval(load, 30000); // Poll every 30s
+    window.addEventListener("refreshNotifications", load);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener("refreshNotifications", load);
+    };
   }, [userId, userRole]);
 
   useEffect(() => {
@@ -57,23 +63,12 @@ export default function TrackingNotificationDropdown({ userId, userRole }: Props
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleNotificationClick = async (trackingId: number) => {
-    try {
-      await fetch("/api/interview_tracking/notifications/read", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingId, role: userRole }),
-      });
-      fetchNotifications();
-      setIsOpen(false);
-      
-      if (userRole === "seeker") {
-        router.push(`/user/seeker_tracking/${userId}`);
-      } else if (userRole === "company") {
-        router.push(`/company/company_tracking/${userId}`);
-      }
-    } catch (error) {
-      console.error("Failed to mark as read", error);
+  const handleNotificationClick = () => {
+    setIsOpen(false);
+    if (userRole === "seeker") {
+      router.push(`/user/seeker_tracking/${userId}`);
+    } else if (userRole === "company") {
+      router.push(`/company/company_tracking/${userId}`);
     }
   };
 
@@ -118,7 +113,7 @@ export default function TrackingNotificationDropdown({ userId, userRole }: Props
                 <div 
                   key={notif.tracking_id} 
                   className="notification-item unread"
-                  onClick={() => handleNotificationClick(notif.tracking_id)}
+                  onClick={handleNotificationClick}
                 >
                   <div className="notification-content">
                     <p className="notification-title">

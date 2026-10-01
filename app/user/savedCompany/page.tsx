@@ -29,7 +29,7 @@ export default async function Page({
       console.error("Token invalid");
     }
   }
-  console.log("1111111111111111111111", viewer);
+  /* console.log("1111111111111111111111", viewer) */;
 
   if (!viewer) {
     return (

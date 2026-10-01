@@ -1,4 +1,5 @@
 'use client';
+import Swal from "sweetalert2";
 
 import { useEffect, useState } from 'react';
 import styles from './applyCompany.module.css'
@@ -70,7 +71,7 @@ export default function ApplyCompany({
       const text = await response.text();
     const data = text ? JSON.parse(text) : {};
      
-      console.log("Check Applied Response:", data);
+      /* console.log("Check Applied Response:", data) */;
 
       const isAlreadyApplied = 
         Boolean(data?.exists) || 
@@ -124,7 +125,7 @@ export default function ApplyCompany({
   const handleApplyClick = () => {
     if (hasTest) {
       // ถ้ามีแบบทดสอบ ให้เปิด Modal แบบทดสอบ (หรือ Redirect ไปหน้าทำแบบทดสอบ)
-      // alert("คุณต้องทำแบบทดสอบความเข้ากันได้กับองค์กรก่อนสมัครงาน");
+      // Swal.fire("คุณต้องทำแบบทดสอบความเข้ากันได้กับองค์กรก่อนสมัครงาน");
       setIsTestModalOpen(true); 
     } else {
       // ถ้าไม่มีแบบทดสอบ ให้เปิด Modal ส่งใบสมัครปกติ

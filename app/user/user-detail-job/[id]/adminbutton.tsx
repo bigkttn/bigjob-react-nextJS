@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -68,10 +69,8 @@ export default function AdminButton({
   }, [ban_until]);
 
   const handleDelete = async () => {
-    const isConfirm = confirm(
-      `คุณต้องการลบโพสต์ ID: ${post_id} ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
-    );
-    if (!isConfirm) return;
+    const result = await Swal.fire({ title: "ยืนยัน", text: "คุณต้องการทำรายการนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     setIsLoading(true);
     try {
@@ -79,16 +78,16 @@ export default function AdminButton({
         method: "DELETE",
       });
       if (response.ok) {
-        alert("ลบโพสต์สำเร็จ!");
+        Swal.fire("ลบโพสต์สำเร็จ!");
         router.back();
       } else {
         const errorData = await response.json();
         console.error("Error deleting post:", errorData);
-        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถลบโพสต์ได้"}`);
+        Swal.fire(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถลบโพสต์ได้"}`);
       }
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
+      Swal.fire("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);
     }
@@ -96,10 +95,8 @@ export default function AdminButton({
 
   const handleBan = async () => {
     const durationText = banDuration === "999" ? "ถาวร" : `${banDuration} วัน`;
-    const isConfirm = confirm(
-      `คุณต้องการแบนโพสต์ ID: ${post_id} เป็นเวลา ${durationText} ใช่หรือไม่?`,
-    );
-    if (!isConfirm) return;
+    const result = await Swal.fire({ title: "ยืนยัน", text: "คุณต้องการทำรายการนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     setIsLoading(true);
     try {
@@ -115,25 +112,23 @@ export default function AdminButton({
       const result = await res.json();
 
       if (res.ok) {
-        alert(`แบนโพสต์สำเร็จ! (ระยะเวลา: ${durationText})`);
+        Swal.fire(`แบนโพสต์สำเร็จ! (ระยะเวลา: ${durationText})`);
         setIsOpen(false);
         router.refresh();
       } else {
-        alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถแบนโพสต์ได้"}`);
+        Swal.fire(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถแบนโพสต์ได้"}`);
       }
     } catch (error) {
       console.error("Ban error:", error);
-      alert("เกิดข้อผิดพลาดในการแบนโพสต์");
+      Swal.fire("เกิดข้อผิดพลาดในการแบนโพสต์");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleUnban = async () => {
-    const isConfirm = confirm(
-      `คุณต้องการปลดแบนโพสต์ ID: ${post_id} ใช่หรือไม่?`,
-    );
-    if (!isConfirm) return;
+    const result = await Swal.fire({ title: "ยืนยัน", text: "คุณต้องการทำรายการนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     setIsLoading(true);
     try {
@@ -144,15 +139,15 @@ export default function AdminButton({
       const result = await res.json();
 
       if (res.ok) {
-        alert("ปลดแบนสำเร็จ!");
+        Swal.fire("ปลดแบนสำเร็จ!");
         setIsOpen(false);
         router.refresh();
       } else {
-        alert(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถปลดแบนได้"}`);
+        Swal.fire(`เกิดข้อผิดพลาด: ${result.error || "ไม่สามารถปลดแบนได้"}`);
       }
     } catch (error) {
       console.error("Unban error:", error);
-      alert("เกิดข้อผิดพลาดในการปลดแบน");
+      Swal.fire("เกิดข้อผิดพลาดในการปลดแบน");
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +155,7 @@ export default function AdminButton({
 
   const handleSendWarning = async () => {
     if (!warnMessage.trim()) {
-      alert("กรุณากรอกข้อความตักเตือน");
+      Swal.fire("กรุณากรอกข้อความตักเตือน");
       return;
     }
 
@@ -178,14 +173,14 @@ export default function AdminButton({
 
       const data = await res.json();
       if (res.ok) {
-        alert("ส่งอีเมลตักเตือนสำเร็จ!");
+        Swal.fire("ส่งอีเมลตักเตือนสำเร็จ!");
         setWarnMessage("");
       } else {
-        alert(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถส่งข้อความได้"}`);
+        Swal.fire(`เกิดข้อผิดพลาด: ${data.error || "ไม่สามารถส่งข้อความได้"}`);
       }
     } catch (error) {
       console.error("Warn error:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     } finally {
       setWarnLoading(false);
     }

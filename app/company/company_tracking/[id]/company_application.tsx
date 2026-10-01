@@ -81,6 +81,7 @@ export interface Applicant {
   interview_date?: string;
   link?: string;
   location?: string;
+  status_notification?: string;
 }
 
 interface ComponentProps {
@@ -218,14 +219,18 @@ export default function CompanyApplication({
     if (s === "offer" || s === "appointment" || s === "hired")
       return "ผลการพิจารณา";
     if (s === "reject" || s === "rejected") return "ไม่ผ่านพิจารณา";
+    if (s === "cancel" || s === "cancelled") return "ผู้สมัครยกเลิก";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
   const handleDeleteTracking = async (trackingId: number) => {
     if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
     try {
-      const response = await fetch(`${apiUrl}/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `${apiUrl}/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (response.ok) {
         setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
         if (selectedJob?.tracking_id === trackingId) {
@@ -241,19 +246,31 @@ export default function CompanyApplication({
 
   const handleCardClick = async (job: any) => {
     setSelectedJob(job);
-    if (job.status_notification === "unread_company" || job.status_notification === "unread_both") {
+    if (
+      job.status_notification === "unread_company" ||
+      job.status_notification === "unread_both"
+    ) {
       try {
         await fetch("/api/interview_tracking/notifications/read", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ trackingId: job.tracking_id, userType: "company" }),
+          body: JSON.stringify({
+            trackingId: job.tracking_id,
+            userType: "company",
+          }),
         });
         setJobs((prev) =>
           prev.map((j) =>
             j.tracking_id === job.tracking_id
-              ? { ...j, status_notification: j.status_notification === "unread_both" ? "unread_user" : "read" }
-              : j
-          )
+              ? {
+                  ...j,
+                  status_notification:
+                    j.status_notification === "unread_both"
+                      ? "unread_user"
+                      : "read",
+                }
+              : j,
+          ),
         );
       } catch (error) {
         console.error("Failed to mark as read", error);
@@ -528,44 +545,56 @@ export default function CompanyApplication({
               </p>
             ) : (
               filteredJobs.map((job) => {
-                const isUnread = job.status_notification === "unread_company" || job.status_notification === "unread_both";
+                const isUnread =
+                  job.status_notification === "unread_company" ||
+                  job.status_notification === "unread_both";
                 return (
                   <div
                     key={job.tracking_id}
                     className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
-                    style={isUnread ? { backgroundColor: "#fff8e1", borderLeft: "4px solid #ffb300" } : {}}
+                    style={{
+                      cursor: "pointer",
+                      backgroundColor: isUnread ? "#fff7ed" : undefined,
+                      borderColor: isUnread ? "#ffedd5" : undefined,
+                      borderWidth: isUnread ? "1px" : undefined,
+                      borderStyle: isUnread ? "solid" : undefined,
+                      transition: "all 0.2s ease",
+                    }}
                     onClick={() => handleCardClick(job)}
                   >
                     <div className={styles.cardLeft}>
-                    <img
-                      src={
-                        job.profile_image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(job.fullname || "Seeker")}&background=random`
-                      }
-                      alt="seeker profile"
-                      className={styles.profileLeft}
-                    />
-                    <div className={styles.cardDetails}>
-                      <h4>{job.fullname || "ไม่ระบุชื่อ"}</h4>
-                      <p>{job.job_position || "ไม่ระบุตำแหน่ง"}</p>
+                      <img
+                        src={
+                          job.profile_image ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(job.fullname || "Seeker")}&background=random`
+                        }
+                        alt="seeker profile"
+                        className={styles.profileLeft}
+                      />
+                      <div className={styles.cardDetails}>
+                        <h4>{job.fullname || "ไม่ระบุชื่อ"}</h4>
+                        <p>{job.job_position || "ไม่ระบุตำแหน่ง"}</p>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: "8px",
+                        gap: "8px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span
+                        className={`${styles.statusBadge} ${getStatusClass(job.status)}`}
+                      >
+                        {getDisplayStatus(job.status)}
+                      </span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
-                    <span
-                      className={`${styles.statusBadge} ${getStatusClass(job.status)}`}
-                    >
-                      {getDisplayStatus(job.status)}
-                    </span>
-                    {isUnread && (
-                      <span style={{ fontSize: "11px", backgroundColor: "#c8e6c9", color: "#2e7d32", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>
-                        มีการอัปเดต
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
           </aside>
         </div>
 
@@ -2061,20 +2090,25 @@ export default function CompanyApplication({
                         textAlign: "center",
                       }}
                     >
-                      <img
-                        src={
-                          selectedJob.profile_image ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
-                        }
-                        alt="profile"
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          marginBottom: "10px",
-                        }}
-                      />
+                      <Link
+                        href={`/company/seeker-profile/${selectedJob.user_id}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <img
+                          src={
+                            selectedJob.profile_image ||
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
+                          }
+                          alt="profile"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            marginBottom: "10px",
+                          }}
+                        />
+                      </Link>
                       <Link
                         href={`/company/seeker-profile/${selectedJob.user_id}`}
                         style={{ textDecoration: "none" }}
@@ -2103,7 +2137,9 @@ export default function CompanyApplication({
 
                       {(status === "reject" || status === "rejected") && (
                         <button
-                          onClick={() => handleDeleteTracking(selectedJob.tracking_id)}
+                          onClick={() =>
+                            handleDeleteTracking(selectedJob.tracking_id)
+                          }
                           style={{
                             marginTop: "-10px",
                             marginBottom: "20px",
@@ -2606,7 +2642,8 @@ export default function CompanyApplication({
                         >
                           ความเร็วในการพิมพ์ (Typing speed)
                         </p>
-                        {selectedJob.typing_speed && selectedJob.typing_speed.length > 0 ? (
+                        {selectedJob.typing_speed &&
+                        selectedJob.typing_speed.length > 0 ? (
                           selectedJob.typing_speed.map((t, idx) => (
                             <p
                               key={idx}

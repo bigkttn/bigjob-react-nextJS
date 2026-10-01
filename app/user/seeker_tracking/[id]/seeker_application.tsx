@@ -1,4 +1,6 @@
 "use client";
+import Swal from "sweetalert2";
+import Link from "next/link";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import styles from "./seeker_tracking.module.css";
@@ -31,11 +33,13 @@ export interface Recruiter {
   age_max?: number;
 
   company_name?: string;
+  company_id?: number | string;
   company_email?: string;
   logo_image?: string;
+  status_notification?: string;
 
-  reviewRating:number;
-  reviewComment:string;
+  reviewRating: number;
+  reviewComment: string;
 }
 
 interface ComponentProps {
@@ -72,7 +76,9 @@ export default function SeekerApplication({
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState<number>(0);
   const [reviewComment, setReviewComment] = useState("");
-  const [pendingFinalStatus, setPendingFinalStatus] = useState<"hired" | "reject" | null>(null);
+  const [pendingFinalStatus, setPendingFinalStatus] = useState<
+    "hired" | "reject" | null
+  >(null);
 
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -164,7 +170,9 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >ยื่นใบสมัคร</span>
+        >
+          ยื่นใบสมัคร
+        </span>
       );
     if (s === "screening")
       return (
@@ -176,7 +184,9 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >นัดสัมภาษณ์</span>
+        >
+          นัดสัมภาษณ์
+        </span>
       );
     if (s === "interview")
       return (
@@ -188,7 +198,9 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >สัมภาษณ์งาน</span>
+        >
+          สัมภาษณ์งาน
+        </span>
       );
     if (s === "offer" || s === "appointment" || s === "hired")
       return (
@@ -200,7 +212,9 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >ผลการพิจารณา</span>
+        >
+          ผลการพิจารณา
+        </span>
       );
     if (s === "rejected" || s === "reject")
       return (
@@ -212,7 +226,9 @@ export default function SeekerApplication({
             borderRadius: "12px",
             color: "#fff",
           }}
-        >ไม่ผ่านพิจารณา</span>
+        >
+          ไม่ผ่านพิจารณา
+        </span>
       );
     return (
       <span
@@ -223,25 +239,39 @@ export default function SeekerApplication({
           borderRadius: "12px",
           color: "#fff",
         }}
-      >รอดำเนินการ</span>
+      >
+        รอดำเนินการ
+      </span>
     );
   };
 
   const currentStatus = activeSelectedJob?.status?.toLowerCase() || "applied";
 
   const handleDeleteTracking = async (trackingId: number) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
     try {
-      const response = await fetch(`/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (response.ok) {
         setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
         if (selectedJob?.tracking_id === trackingId) {
           setSelectedJob(null);
         }
       } else {
-        alert("เกิดข้อผิดพลาดในการลบรายการ");
+        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
       }
     } catch (error) {
       console.error("Error deleting tracking:", error);
@@ -250,27 +280,44 @@ export default function SeekerApplication({
 
   const handleCardClick = async (job: Recruiter) => {
     setSelectedJob(job);
-    if (job.status_notification === "unread_user" || job.status_notification === "unread_both") {
+    if (
+      job.status_notification === "unread_user" ||
+      job.status_notification === "unread_both"
+    ) {
       try {
         await fetch("/api/interview_tracking/notifications/read", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ trackingId: job.tracking_id, userType: "user" }),
+          body: JSON.stringify({
+            trackingId: job.tracking_id,
+            userType: "user",
+          }),
         });
         setJobs((prev) =>
           prev.map((j) =>
             j.tracking_id === job.tracking_id
-              ? { ...j, status_notification: j.status_notification === "unread_both" ? "unread_company" : "read" }
-              : j
-          )
+              ? {
+                  ...j,
+                  status_notification:
+                    j.status_notification === "unread_both"
+                      ? "unread_company"
+                      : "read",
+                }
+              : j,
+          ),
         );
+        window.dispatchEvent(new Event("refreshNotifications"));
       } catch (error) {
         console.error("Failed to mark as read", error);
       }
     }
   };
 
-  const handleUpdateStatus = async (trackingId: number, newStatus: string ,reviewData?: { rating: number, comment: string }) => {
+  const handleUpdateStatus = async (
+    trackingId: number,
+    newStatus: string,
+    reviewData?: { rating: number; comment: string },
+  ) => {
     if (!activeSelectedJob) return;
 
     try {
@@ -287,8 +334,8 @@ export default function SeekerApplication({
             companyName: activeSelectedJob.company_name,
             seekerName: "ผู้สมัคร",
             jobTitle: activeSelectedJob.job_position,
-            reviewRating: reviewData?.rating,    // <--- ส่งค่ารีวิวพ่วงไป
-          reviewComment: reviewData?.comment,  // <--- ส่งค่าคอมเมนต์พ่วงไป
+            reviewRating: reviewData?.rating, // <--- ส่งค่ารีวิวพ่วงไป
+            reviewComment: reviewData?.comment, // <--- ส่งค่าคอมเมนต์พ่วงไป
           }),
         },
       );
@@ -491,44 +538,56 @@ export default function SeekerApplication({
                 : `ไม่พบตำแหน่งงาน "${selectedPosition}"`}
             </p>
           ) : (
-              filteredJobs.map((job) => {
-                const isUnread = job.status_notification === "unread_user" || job.status_notification === "unread_both";
-                return (
-                  <div
-                    key={job.tracking_id}
-                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
-                    style={isUnread ? { backgroundColor: "#fff8e1", borderLeft: "4px solid #ffb300" } : {}}
-                    onClick={() => handleCardClick(job)}
-                  >
-                    <div className={styles.cardLeft}>
-                      <img
-                        src={
-                          job.logo_image ||
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
-                        }
-                        alt="company logo"
-                        className={styles.sidebarLogo}
-                        onError={(e) => {
-                          e.currentTarget.src = "https://via.placeholder.com/50";
-                        }}
-                      />
-                      <div className={styles.cardDetails}>
-                        <h4>{job.job_position || "ไม่ระบุตำแหน่ง"}</h4>
-                        <p>{job.company_name || "ไม่ระบุบริษัท"}</p>
-                      </div>
-                    </div>
-                    <div className={styles.badgeContainer} style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-end' }}>
-                      {getStatusBadge(job.status)}
-                      {isUnread && (
-                        <span style={{ fontSize: "11px", backgroundColor: "#c8e6c9", color: "#2e7d32", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold" }}>
-                          มีการอัปเดต
-                        </span>
-                      )}
+            filteredJobs.map((job) => {
+              const isUnread =
+                job.status_notification === "unread_user" ||
+                job.status_notification === "unread_both";
+              return (
+                <div
+                  key={job.tracking_id}
+                  className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                  style={{
+                    cursor: isUnread ? "pointer" : "default",
+                    backgroundColor: isUnread ? "#fff7ed" : undefined,
+                    borderColor: isUnread ? "#ffedd5" : undefined,
+                    borderWidth: isUnread ? "1px" : undefined,
+                    borderStyle: isUnread ? "solid" : undefined,
+                    transition: "all 0.2s ease",
+                  }}
+                  onClick={() => handleCardClick(job)}
+                >
+                  <div className={styles.cardLeft}>
+                    <img
+                      src={
+                        job.logo_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
+                      }
+                      alt="company logo"
+                      className={styles.sidebarLogo}
+                      onError={(e) => {
+                        e.currentTarget.src = "https://via.placeholder.com/50";
+                      }}
+                    />
+                    <div className={styles.cardDetails}>
+                      <h4>{job.job_position || "ไม่ระบุตำแหน่ง"}</h4>
+                      <p>{job.company_name || "ไม่ระบุบริษัท"}</p>
                     </div>
                   </div>
-                );
-              })
-            )}
+                  <div
+                    className={styles.badgeContainer}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "5px",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    {getStatusBadge(job.status)}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </aside>
 
         {/* Right Panel */}
@@ -548,7 +607,16 @@ export default function SeekerApplication({
                       description
                     </span>
                   </div>
-                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>ยื่นใบสมัคร</span>
+                  <span
+                    style={{
+                      display: "block",
+                      width: "120px",
+                      textAlign: "center",
+                      lineHeight: "1.3",
+                    }}
+                  >
+                    ยื่นใบสมัคร
+                  </span>
                   {currentStatus === "pending" && (
                     <div
                       style={{
@@ -673,7 +741,16 @@ export default function SeekerApplication({
                       search
                     </span>
                   </div>
-                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>นัดสัมภาษณ์</span>
+                  <span
+                    style={{
+                      display: "block",
+                      width: "120px",
+                      textAlign: "center",
+                      lineHeight: "1.3",
+                    }}
+                  >
+                    นัดสัมภาษณ์
+                  </span>
                   {currentStatus === "screening" && (
                     <div
                       style={{
@@ -935,7 +1012,16 @@ export default function SeekerApplication({
                       mic
                     </span>
                   </div>
-                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>สัมภาษณ์งาน</span>
+                  <span
+                    style={{
+                      display: "block",
+                      width: "120px",
+                      textAlign: "center",
+                      lineHeight: "1.3",
+                    }}
+                  >
+                    สัมภาษณ์งาน
+                  </span>
                   {currentStatus === "interview" && (
                     <div
                       style={{
@@ -1205,7 +1291,16 @@ export default function SeekerApplication({
                       work
                     </span>
                   </div>
-                  <span style={{ display: 'block', width: '120px', textAlign: 'center', lineHeight: '1.3' }}>ผลการพิจารณา</span>
+                  <span
+                    style={{
+                      display: "block",
+                      width: "120px",
+                      textAlign: "center",
+                      lineHeight: "1.3",
+                    }}
+                  >
+                    ผลการพิจารณา
+                  </span>
 
                   {(currentStatus === "offer" ||
                     currentStatus === "appointment") && (
@@ -1221,7 +1316,7 @@ export default function SeekerApplication({
                         boxShadow:
                           "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
                         width: "10rem",
-                       
+
                         boxSizing: "border-box",
                       }}
                     >
@@ -1331,7 +1426,7 @@ export default function SeekerApplication({
                           gap: "10px",
                         }}
                       >
-                      <button
+                        <button
                           className={styles.btnAccept}
                           onClick={() => {
                             setPendingFinalStatus("hired");
@@ -1420,18 +1515,38 @@ export default function SeekerApplication({
             {/* Details Card (ด้านล่าง) */}
             <div className={styles.detailsCard}>
               <div className={styles.detailsHeader}>
-                <img
-                  src={
-                    activeSelectedJob.logo_image ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(activeSelectedJob.company_name || "Company")}&background=random`
-                  }
-                  alt="logo"
-                  className={styles.detailsLogo}
-                />
-                <h2>{activeSelectedJob.company_name || "ไม่ระบุบริษัท"}</h2>
-                {(currentStatus === "reject" || currentStatus === "rejected" || currentStatus === "cancel" || currentStatus === "canceled") && (
+                <Link
+                  href={`/user/userProfileCompany/${activeSelectedJob.company_id}`}
+                >
+                  <img
+                    src={
+                      activeSelectedJob.logo_image ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(activeSelectedJob.company_name || "Company")}&background=random`
+                    }
+                    alt="logo"
+                    className={styles.detailsLogo}
+                  />
+                </Link>
+                <Link
+                  href={`/user/userProfileCompany/${activeSelectedJob.company_id}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "15px",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <h2>{activeSelectedJob.company_name || "ไม่ระบุบริษัท"}</h2>
+                </Link>
+                {(currentStatus === "reject" ||
+                  currentStatus === "rejected" ||
+                  currentStatus === "cancel" ||
+                  currentStatus === "canceled") && (
                   <button
-                    onClick={() => handleDeleteTracking(activeSelectedJob.tracking_id)}
+                    onClick={() =>
+                      handleDeleteTracking(activeSelectedJob.tracking_id)
+                    }
                     style={{
                       marginLeft: "auto",
                       padding: "6px 12px",
@@ -1496,7 +1611,9 @@ export default function SeekerApplication({
                     <p>{activeSelectedJob.Benefits || "-"}</p>
                   </div>
                   <div className={styles.sectionBlock}>
-                    <span className={styles.sectionTitle}>ช่องทางการติดต่อ</span>
+                    <span className={styles.sectionTitle}>
+                      ช่องทางการติดต่อ
+                    </span>
                     <p>{activeSelectedJob.contact || "-"}</p>
                   </div>
                 </div>
@@ -1565,156 +1682,194 @@ export default function SeekerApplication({
       )}
 
       {/* Review Modal */}
-{isReviewModalOpen && pendingFinalStatus !== null && (
-  <div className={styles.modalOverlay}>
-    <div
-      style={{
-        backgroundColor: "#ffffff",
-        color: "#1e293b",
-        padding: "32px 28px",
-        borderRadius: "20px",
-        width: "360px",
-        textAlign: "center",
-        boxShadow: "0 20px 40px -10px rgba(0, 123, 255, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.05)",
-        border: "1.5px solid #60a5fa", // เส้นขอบสีฟ้าโมเดิร์น
-        position: "relative",
-        boxSizing: "border-box",
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      {/* ปุ่มปิด (✕) มุมขวาบน */}
-      <span
-        style={{
-          position: "absolute",
-          top: "16px",
-          right: "18px",
-          cursor: "pointer",
-          fontSize: "18px",
-          color: "#94a3b8",
-          lineHeight: "1",
-          transition: "color 0.2s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#1e293b")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
-        onClick={() => {
-          setIsReviewModalOpen(false);
-          setReviewRating(0);
-          setReviewComment("");
-        }}
-      >
-        ✕
-      </span>
+      {isReviewModalOpen && pendingFinalStatus !== null && (
+        <div className={styles.modalOverlay}>
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              color: "#1e293b",
+              padding: "32px 28px",
+              borderRadius: "20px",
+              width: "360px",
+              textAlign: "center",
+              boxShadow:
+                "0 20px 40px -10px rgba(0, 123, 255, 0.15), 0 10px 20px -5px rgba(0, 0, 0, 0.05)",
+              border: "1.5px solid #60a5fa", // เส้นขอบสีฟ้าโมเดิร์น
+              position: "relative",
+              boxSizing: "border-box",
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            {/* ปุ่มปิด (✕) มุมขวาบน */}
+            <span
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "18px",
+                cursor: "pointer",
+                fontSize: "18px",
+                color: "#94a3b8",
+                lineHeight: "1",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#1e293b")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+              onClick={() => {
+                setIsReviewModalOpen(false);
+                setReviewRating(0);
+                setReviewComment("");
+              }}
+            >
+              ✕
+            </span>
 
-      <h3 style={{ margin: "0 0 6px 0", fontSize: "20px", fontWeight: "700", color: "#0f172a" }}>
-        Rate Review
-      </h3>
-      <p style={{ margin: "0 0 20px 0", fontSize: "13px", color: "#64748b" }}>
-        กรุณาให้คะแนนและแสดงความคิดเห็น
-      </p>
+            <h3
+              style={{
+                margin: "0 0 6px 0",
+                fontSize: "20px",
+                fontWeight: "700",
+                color: "#0f172a",
+              }}
+            >
+              Rate Review
+            </h3>
+            <p
+              style={{
+                margin: "0 0 20px 0",
+                fontSize: "13px",
+                color: "#64748b",
+              }}
+            >
+              กรุณาให้คะแนนและแสดงความคิดเห็น
+            </p>
 
-      {/* ส่วนเลือกดาว */}
-      <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "22px" }}>
-  {[1, 2, 3, 4, 5].map((star) => {
-    const isFilled = star <= reviewRating;
-    return (
-      <button
-        type="button"
-        key={star}
-        onClick={() => setReviewRating(star)}
-        style={{
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          outline: "none",
-          transition: "transform 0.15s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-      >
-        <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill={isFilled ? "#f59e0b" : "#e2e8f0"}
-          stroke={isFilled ? "#f59e0b" : "#cbd5e1"}
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ transition: "fill 0.2s, stroke 0.2s" }}
-        >
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-        </svg>
-      </button>
-    );
-  })}
-</div>
-      {/* ส่วนกรอกคอมเมนต์ */}
-      <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#475569", marginBottom: "6px" }}>
-          Comment
-        </label>
-        <textarea
-          rows={3}
-          value={reviewComment}
-          placeholder="พิมพ์ข้อความที่นี่..."
-          onChange={(e) => setReviewComment(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 14px",
-            borderRadius: "12px",
-            border: "1.5px solid #e2e8f0",
-            outline: "none",
-            boxSizing: "border-box",
-            fontSize: "14px",
-            color: "#1e293b",
-            resize: "none",
-            transition: "border-color 0.2s, box-shadow 0.2s",
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = "#3b82f6";
-            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.15)";
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = "#e2e8f0";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        />
-      </div>
+            {/* ส่วนเลือกดาว */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "10px",
+                marginBottom: "22px",
+              }}
+            >
+              {[1, 2, 3, 4, 5].map((star) => {
+                const isFilled = star <= reviewRating;
+                return (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setReviewRating(star)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      outline: "none",
+                      transition: "transform 0.15s ease",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.transform = "scale(1.2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.transform = "scale(1)")
+                    }
+                  >
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill={isFilled ? "#f59e0b" : "#e2e8f0"}
+                      stroke={isFilled ? "#f59e0b" : "#cbd5e1"}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      style={{ transition: "fill 0.2s, stroke 0.2s" }}
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
+                );
+              })}
+            </div>
+            {/* ส่วนกรอกคอมเมนต์ */}
+            <div style={{ textAlign: "left", marginBottom: "20px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#475569",
+                  marginBottom: "6px",
+                }}
+              >
+                Comment
+              </label>
+              <textarea
+                rows={3}
+                value={reviewComment}
+                placeholder="พิมพ์ข้อความที่นี่..."
+                onChange={(e) => setReviewComment(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: "12px",
+                  border: "1.5px solid #e2e8f0",
+                  outline: "none",
+                  boxSizing: "border-box",
+                  fontSize: "14px",
+                  color: "#1e293b",
+                  resize: "none",
+                  transition: "border-color 0.2s, box-shadow 0.2s",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#3b82f6";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 3px rgba(59, 130, 246, 0.15)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#e2e8f0";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+            </div>
 
-      {/* ปุ่ม Submit */}
-      <button
-        onClick={() => {
-          if (!selectedJob) return;
-          handleUpdateStatus(selectedJob.tracking_id, pendingFinalStatus, {
-            rating: reviewRating,
-            comment: reviewComment,
-          });
-          setIsReviewModalOpen(false);
-          setReviewRating(0);
-          setReviewComment("");
-        }}
-        style={{
-          width: "100%",
-          background: "linear-gradient(135deg, #0070f3, #2563eb)",
-          color: "white",
-          padding: "10px 0",
-          border: "none",
-          borderRadius: "12px",
-          cursor: "pointer",
-          fontWeight: "600",
-          fontSize: "15px",
-          boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
-          transition: "opacity 0.2s, transform 0.1s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.92")}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-      >
-        Submit
-      </button>
-    </div>
-  </div>
-)}
+            {/* ปุ่ม Submit */}
+            <button
+              onClick={() => {
+                if (!selectedJob) return;
+                handleUpdateStatus(
+                  selectedJob.tracking_id,
+                  pendingFinalStatus,
+                  {
+                    rating: reviewRating,
+                    comment: reviewComment,
+                  },
+                );
+                setIsReviewModalOpen(false);
+                setReviewRating(0);
+                setReviewComment("");
+              }}
+              style={{
+                width: "100%",
+                background: "linear-gradient(135deg, #0070f3, #2563eb)",
+                color: "white",
+                padding: "10px 0",
+                border: "none",
+                borderRadius: "12px",
+                cursor: "pointer",
+                fontWeight: "600",
+                fontSize: "15px",
+                boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+                transition: "opacity 0.2s, transform 0.1s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.92")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

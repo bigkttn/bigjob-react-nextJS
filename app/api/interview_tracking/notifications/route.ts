@@ -26,7 +26,7 @@ export async function GET(request: Request) {
                 FROM interview_tracking it
                 JOIN posts p ON it.post_id = p.post_id
                 JOIN company c ON p.company_id = c.company_id
-                WHERE it.user_id = ? AND it.status_notification = 'unread_user'
+                WHERE it.user_id = ? AND it.status_notification IN ('unread_user', 'unread_both')
                 ORDER BY it.date_time DESC
             `;
             params = [Number(userId)];
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
                 FROM interview_tracking it
                 JOIN posts p ON it.post_id = p.post_id
                 JOIN User u ON it.user_id = u.uid
-                WHERE p.company_id = ? AND it.status_notification = 'unread_company'
+                WHERE p.company_id = ? AND it.status_notification IN ('unread_company', 'unread_both')
                 ORDER BY it.date_time DESC
             `;
             params = [Number(userId)];

@@ -6,7 +6,7 @@ export async function POST() {
     try {
         const cookieStore = await cookies();
         const hasVisited = cookieStore.get("hasVisited");
-        console.log("sss", hasVisited)
+        /* console.log("sss", hasVisited) */
 
         if (hasVisited) {
             return NextResponse.json({

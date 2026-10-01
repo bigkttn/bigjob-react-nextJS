@@ -118,7 +118,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 export async function warmup() {
   try {
     await getEmbedding("warmup");
-    console.log("[embedding] model ready");
+    /* console.log("[embedding] model ready") */;
   } catch (e) {
     console.error("[embedding] warmup failed", e);
   }

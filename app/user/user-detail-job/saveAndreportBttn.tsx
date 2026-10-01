@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
@@ -60,14 +61,14 @@ export default function ProfileActionsButton({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API Error Details:", errorData);
-        alert(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
+        Swal.fire(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
         return;
       }
       setIsSaved(true);
-      alert("Saved Successfully!");
+      Swal.fire("Saved Successfully!");
     } catch (error) {
       console.error("Network Error:", error);
-      alert("Unable to connect to the server.");
+      Swal.fire("Unable to connect to the server.");
     }
   };
 
@@ -103,8 +104,8 @@ export default function ProfileActionsButton({
   }
 
   const handleDeleteSaved = async (userId: number, companyId: number) => {
-    const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบผู้สมัครงานออกจากรายการบันทึก?");
-    if (!confirmDelete) return;
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณแน่ใจหรือไม่ว่าต้องการลบออกจากรายการบันทึก?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
     try {
       const response = await fetch("/api/user/delete_favour_post", {
         method: "DELETE",
@@ -116,21 +117,21 @@ export default function ProfileActionsButton({
       });
       if (response.ok) {
         setIsSaved(false);
-        alert("ลบออกจากรายการบันทึกแล้ว");
+        Swal.fire("ลบออกจากรายการบันทึกแล้ว");
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`ไม่สามารถลบได้: ${errorData.message || 'เกิดข้อผิดพลาด'}`);
+        Swal.fire(`ไม่สามารถลบได้: ${errorData.message || 'เกิดข้อผิดพลาด'}`);
       }
     } catch (error) {
       console.error("Error in handleDeleteSaved:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
   };
 
   
   const openReportModal = () => {
     if (isReported) {
-      alert("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
+      Swal.fire("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
       setIsModalOpen(false);
     }else{
     setSelectedType("");
@@ -143,7 +144,7 @@ export default function ProfileActionsButton({
 
   const handleReport = async (reportType: ReportType, description: string) => {
      if (!selectedType || !description.trim()) {
-      alert("กรุณาเลือกประเภทการรายงานและกรอกรายละเอียดให้ครบถ้วน");
+      Swal.fire("กรุณาเลือกประเภทการรายงานและกรอกรายละเอียดให้ครบถ้วน");
       return;
     }
     try {
@@ -159,24 +160,24 @@ export default function ProfileActionsButton({
       });
 
       if (response.status === 409) {
-        alert("คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ");
+        Swal.fire("คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
         setIsOpen(false);      // ปิดเมนูสามจุด
         return;
       }
       
       if (response.ok) {
-        console.log("reported!!");
+        /* console.log("reported!!") */;
         setIsReported(true); //  แก้ไขชื่อตัวแปรให้ตรงกับ State
-        alert("Reported Successfully!");
+        Swal.fire("Reported Successfully!");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
       } else {
-        console.log("fail report!!");
-        alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์");
+        /* console.log("fail report!!") */;
+        Swal.fire("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์");
       }
     } catch (error) {
       console.error("Error Report", error);
-      alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
     setIsOpen(false);
   };
@@ -195,7 +196,7 @@ export default function ProfileActionsButton({
       );
       const data = await response.json();
       if (data && data.rows && data.rows.length > 0) {
-        // alert("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
+        // Swal.fire("คุณ report ผู้สมัครงานรายนี้เรียบร้อยแล้ว")
         setIsReported(true);
       } else {
         

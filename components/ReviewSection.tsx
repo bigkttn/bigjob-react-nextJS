@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import styles from "./ReviewSection.module.css";
+import Link from "next/link";
 
 type ReviewType = {
   tracking_id: number;
@@ -18,9 +19,10 @@ type ReviewSectionProps = {
   viewerId?: string | number | null;
   onDeleteReview?: (trackingId: number) => void;
   maxHeight?: string;
+  profileLinkPrefix?: string;
 };
 
-export default function ReviewSection({ reviews, viewerId, onDeleteReview, maxHeight = "400px" }: ReviewSectionProps) {
+export default function ReviewSection({ reviews, viewerId, onDeleteReview, maxHeight = "400px", profileLinkPrefix }: ReviewSectionProps) {
   if (!reviews || reviews.length === 0) return null;
 
   return (
@@ -136,28 +138,55 @@ export default function ReviewSection({ reviews, viewerId, onDeleteReview, maxHe
                 </button>
               )}
               <div className={styles.reviewHeader}>
-                <div className={styles.userInfo}>
-                  <img
-                    src={
-                      r.profile_image ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        r.fullname || "User"
-                      )}&background=random`
-                    }
-                    className={styles.avatar}
-                    alt="User Avatar"
-                  />
-                  <div className={styles.namePosition}>
-                    <span className={styles.fullname}>
-                      {r.fullname}
-                    </span>
-                    {r.job_position && (
-                      <span className={styles.jobPosition}>
-                        {r.job_position}
+                {profileLinkPrefix ? (
+                  <Link href={`${profileLinkPrefix}${r.user_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className={styles.userInfo} style={{ cursor: 'pointer' }}>
+                      <img
+                        src={
+                          r.profile_image ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            r.fullname || "User"
+                          )}&background=random`
+                        }
+                        className={styles.avatar}
+                        alt="User Avatar"
+                      />
+                      <div className={styles.namePosition}>
+                        <span className={styles.fullname}>
+                          {r.fullname}
+                        </span>
+                        {r.job_position && (
+                          <span className={styles.jobPosition}>
+                            {r.job_position}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ) : (
+                  <div className={styles.userInfo}>
+                    <img
+                      src={
+                        r.profile_image ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          r.fullname || "User"
+                        )}&background=random`
+                      }
+                      className={styles.avatar}
+                      alt="User Avatar"
+                    />
+                    <div className={styles.namePosition}>
+                      <span className={styles.fullname}>
+                        {r.fullname}
                       </span>
-                    )}
+                      {r.job_position && (
+                        <span className={styles.jobPosition}>
+                          {r.job_position}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Date moved here */}
                 <span

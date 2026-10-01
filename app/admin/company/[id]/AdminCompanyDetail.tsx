@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -99,7 +100,8 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   // จัดการการอนุมัติ
   const handleApprove = async () => {
-    if (!confirm("คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?")) return;
+    const result = await Swal.fire({ title: "ยืนยันการอนุมัติ", text: "คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?", icon: "question", showCancelButton: true, confirmButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
     try {
       setActing(true);
       const res = await fetch(`/api/admin/verify/${companyId}`, {
@@ -108,16 +110,16 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         body: JSON.stringify({ verification_status: "Approved" }),
       });
       if (res.ok) {
-        alert("ดำเนินการอนุมัติบริษัทเรียบร้อยแล้ว");
+        Swal.fire("ดำเนินการอนุมัติบริษัทเรียบร้อยแล้ว");
         await fetchCompany();
       } else {
         const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
+        Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      alert(errorMessage);
+      Swal.fire(errorMessage);
     } finally {
       setActing(false);
     }
@@ -138,16 +140,16 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         }),
       });
       if (res.ok) {
-        alert("ดำเนินการปฏิเสธบริษัทเรียบร้อยแล้ว");
+        Swal.fire("ดำเนินการปฏิเสธบริษัทเรียบร้อยแล้ว");
         await fetchCompany();
       } else {
         const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
+        Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      alert(errorMessage);
+      Swal.fire(errorMessage);
     } finally {
       setActing(false);
     }

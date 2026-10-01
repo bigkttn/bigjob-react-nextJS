@@ -63,7 +63,10 @@ export default function Login() {
 
       if (!res.ok) {
         if (res.status === 404) {
-          showAlert.error("แจ้งเตือน", "ไม่พบข้อมูลบัญชี Google นี้ กรุณาสมัครสมาชิกก่อน");
+          showAlert.error(
+            "แจ้งเตือน",
+            "ไม่พบข้อมูลบัญชี Google นี้ กรุณาสมัครสมาชิกก่อน",
+          );
           router.push("/register");
           return;
         }
@@ -71,7 +74,7 @@ export default function Login() {
       }
 
       const data = await res.json();
-      console.log("Google Login Success:", data);
+      /* console.log("Google Login Success:", data) */;
 
       // TODO: เก็บ Session/Token (เช่น localStorage, Cookies, หรือ Context)
       // authService.login(data.user);
@@ -104,7 +107,7 @@ export default function Login() {
         throw new Error("Login failed. Please check your email/password.");
 
       const data = await res.json();
-      console.log("Login Success:", data);
+      /* console.log("Login Success:", data) */;
 
       // TODO: เก็บ Session/Token
 
@@ -143,9 +146,7 @@ export default function Login() {
       <div className={styles.loginCard}>
         {/* แถบด้านซ้าย */}
         <div className={styles.brandSide}>
-          <div className={styles.logo}>
-            <span className={styles.icon}>☰</span> BIGJOBs
-          </div>
+          <div className={styles.logo}>BIGJOBs</div>
           <div className={styles.slogan}>
             <h1>
               ค้นหางานที่คุณต้องการ
@@ -208,7 +209,8 @@ export default function Login() {
 
             <div className={styles.footerLink}>
               <p>
-                ยังไม่มีบัญชีผู้ใช้ใช่ไหม? <Link href="/register">สมัครสมาชิก</Link>
+                ยังไม่มีบัญชีผู้ใช้ใช่ไหม?{" "}
+                <Link href="/register">สมัครสมาชิก</Link>
               </p>
             </div>
             <div className={styles.footerLink}>

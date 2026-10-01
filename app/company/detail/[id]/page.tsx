@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
@@ -172,15 +173,15 @@ const DetailJob = () => {
       });
       if (res.ok) {
         setJob(editData);
-        alert("บันทึกสำเร็จ ✅");
+        Swal.fire("บันทึกสำเร็จ");
         window.location.reload();
       } else {
         const err = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${err.message}`);
+        Swal.fire(`เกิดข้อผิดพลาด: ${err.message}`);
       }
     } catch (error) {
       console.error("Save error:", error);
-      alert("ไม่สามารถบันทึกได้ กรุณาลองใหม่");
+      Swal.fire("ไม่สามารถบันทึกได้ กรุณาลองใหม่");
     } finally {
       setIsSaving(false);
     }
@@ -219,22 +220,23 @@ const DetailJob = () => {
         body: JSON.stringify({ postId, questions }),
       });
       if (res.ok) {
-        alert("บันทึกชุดข้อสอบสำเร็จ ✅");
+        Swal.fire("บันทึกชุดข้อสอบสำเร็จ");
         await fetchTestData();
       } else {
         const err = await res.json();
-        alert(`เกิดข้อผิดพลาดในการบันทึกข้อสอบ: ${err.message}`);
+        Swal.fire(`เกิดข้อผิดพลาดในการบันทึกข้อสอบ: ${err.message}`);
       }
     } catch (error) {
       console.error("Save test error:", error);
-      alert("ไม่สามารถบันทึกข้อสอบได้ กรุณาลองใหม่");
+      Swal.fire("ไม่สามารถบันทึกข้อสอบได้ กรุณาลองใหม่");
     } finally {
       setIsSavingTest(false);
     }
   };
 
-  const handleDeleteQuestion = (qIndex: number) => {
-    if (!confirm("ลบข้อสอบข้อนี้?")) return;
+  const handleDeleteQuestion = async (qIndex: number) => {
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "ลบข้อสอบข้อนี้?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
     setQuestions((prev) => prev.filter((_, i) => i !== qIndex));
   };
 

@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
           posts.post_id,
           posts.job_position,
           u.fullname as applicant_name ,
-          IF((SELECT COUNT(*) FROM question WHERE question.post_id = post.post_id) > 0,true,false) as has_test
+          IF((SELECT COUNT(*) FROM question WHERE question.post_id = posts.post_id) > 0,true,false) as has_test
         FROM interview_tracking interview
         JOIN posts ON interview.post_id = posts.post_id 
         JOIN User u ON interview.user_id = u.uid

@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useEffect, useMemo } from "react";
 import { IFeedback, ApiResponse } from "@/app/api/admin/feedbacks/route";
@@ -115,7 +116,7 @@ export default function AdminFeedbackPage() {
     const text = replyTexts[key]?.trim() || "";
 
     if (!text) {
-      alert("กรุณาระบุข้อความตอบกลับก่อนส่ง");
+      Swal.fire("กรุณาระบุข้อความตอบกลับก่อนส่ง");
       return;
     }
 
@@ -133,14 +134,14 @@ export default function AdminFeedbackPage() {
       });
 
       if (res.ok) {
-        alert("บันทึกคำตอบกลับเรียบร้อยแล้ว!");
+        Swal.fire("บันทึกคำตอบกลับเรียบร้อยแล้ว!");
         fetchFeedbacks();
       } else {
-        alert("เกิดข้อผิดพลาด ไม่สามารถบันทึกคำตอบกลับได้");
+        Swal.fire("เกิดข้อผิดพลาด ไม่สามารถบันทึกคำตอบกลับได้");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
     } finally {
       setSubmittingStates((prev) => ({ ...prev, [key]: false }));
     }
@@ -150,7 +151,8 @@ export default function AdminFeedbackPage() {
     feedback_id: number,
     source_type: string,
   ): Promise<void> => {
-    if (!confirm("คุณต้องการลบข้อเสนอแนะ (Feedback) นี้ใช่หรือไม่?")) return;
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณต้องการลบข้อเสนอแนะ (Feedback) นี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch(
@@ -166,7 +168,7 @@ export default function AdminFeedbackPage() {
           ),
         );
       } else {
-        alert("เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้");
+        Swal.fire("เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้");
       }
     } catch (err) {
       console.error(err);

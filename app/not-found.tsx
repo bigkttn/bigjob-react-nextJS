@@ -16,7 +16,7 @@ export default async function NotFound() {
     try {
       const secret = process.env.JWT_SECRET || "fallback_secret";
       user = jwt.verify(token, secret) as CustomJwtPayload;
-      console.log("User from token:", user);
+      /* console.log("User from token:", user) */;
     } catch (error) {
       console.error("Token invalid");
     }

@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -184,7 +185,8 @@ export default function Navbar() {
   const closeMenu = () => setIsMenuOpen(false);
 
   const onLogout = async () => {
-    if (confirm("Are you sure you want to logout?")) {
+    const result = await Swal.fire({ title: "ออกจากระบบ", text: "คุณต้องการออกจากระบบใช่หรือไม่?", icon: "question", showCancelButton: true, confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (result.isConfirmed) {
       await forceLogout();
     }
   };
@@ -200,18 +202,6 @@ export default function Navbar() {
     }
   };
 
-  const onTrackingClick = async (roleType: string) => {
-    try {
-      await fetch("/api/interview_tracking/notifications/read", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, role: roleType }),
-      });
-      setTrackingUnreadCount(0);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const getDashboardRoute = () => {
     switch (userRole) {
@@ -239,14 +229,14 @@ export default function Navbar() {
           <>
             <Link
               href="/login"
-              className={isMobile ? "side-item" : "nav-btn-outline"}
+              className={isMobile ? "side-item" : (pathname === "/login" ? "nav-btn-primary" : "nav-btn-outline")}
               onClick={onLinkClick}
             >
               เข้าสู่ระบบ
             </Link>
             <Link
               href="/register"
-              className={isMobile ? "side-item highlight" : "nav-btn-primary"}
+              className={isMobile ? "side-item highlight" : (pathname === "/register" ? "nav-btn-primary" : "nav-btn-outline")}
               onClick={onLinkClick}
             >
               สมัครสมาชิก
@@ -266,10 +256,7 @@ export default function Navbar() {
             <Link
               href={`/user/seeker_tracking/${userId}`}
               className={`${itemClass} ${isActive(`/user/seeker_tracking/${userId}`)} nav-feedback-link`}
-              onClick={() => {
-                if (onLinkClick) onLinkClick();
-                onTrackingClick("seeker");
-              }}
+              onClick={onLinkClick}
             >
               ติดตามสถานะ
               {trackingUnreadCount > 0 && (
@@ -318,10 +305,7 @@ export default function Navbar() {
             <Link
               href={`/company/company_tracking/${userId}`}
               className={`${itemClass} ${isActive(`/company/company_tracking/${userId}`)} nav-feedback-link`}
-              onClick={() => {
-                if (onLinkClick) onLinkClick();
-                onTrackingClick("company");
-              }}
+              onClick={onLinkClick}
             >
               ติดตามสถานะ
               {trackingUnreadCount > 0 && (

@@ -48,7 +48,7 @@ export default async function SeekerTracking({ params }: PageProps) {
     if (res.ok) {
       const data = await res.json();
       trackingList = (data.rows || []) as Recruiter[];
-      console.log("trackingList", trackingList);
+      /* console.log("trackingList", trackingList) */;
     }
   } catch (error) {
     console.error("Error fetching tracking list:", error);

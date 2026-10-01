@@ -84,7 +84,7 @@ const Register = () => {
   }, [userType]);
 
   const handleGoogleCredentialResponse = async (response: any) => {
-    console.log("Google Token:", response.credential);
+    /* console.log("Google Token:", response.credential) */;
 
     let payload: any = {
       token: response.credential,

@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -106,11 +107,11 @@ export default function MapComponent({
         // ส่งพิกัดและชื่อสถานที่กลับไปยังคอมโพเนนต์หลัก
         onLocationSelect(lat, lng, address);
       } else {
-        alert("ไม่พบสถานที่นี้ ลองระบุชื่อหรือเขต/จังหวัดให้ละเอียดขึ้นครับ");
+        Swal.fire("ไม่พบสถานที่นี้ ลองระบุชื่อหรือเขต/จังหวัดให้ละเอียดขึ้นครับ");
       }
     } catch (error) {
       console.error("Search location error:", error);
-      alert("เกิดข้อผิดพลาดในการค้นหาสถานที่");
+      Swal.fire("เกิดข้อผิดพลาดในการค้นหาสถานที่");
     } finally {
       setIsSearching(false);
     }

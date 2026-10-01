@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
@@ -83,7 +84,8 @@ const Home = () => {
 
   // ─── อนุมัติบริษัท ───
   const handleApprove = async (id: number) => {
-    if (!confirm("คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?")) return;
+    const result = await Swal.fire({ title: "ยืนยันการอนุมัติ", text: "คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?", icon: "question", showCancelButton: true, confirmButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
     try {
       setActingId(id);
       const res = await fetch(`/api/admin/verify/${id}`, {
@@ -95,12 +97,12 @@ const Home = () => {
         setCompanies((prev) => prev.filter((c) => c.company_id !== id));
       } else {
         const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
+        Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      alert(errorMessage);
+      Swal.fire(errorMessage);
     } finally {
       setActingId(null);
     }
@@ -125,12 +127,12 @@ const Home = () => {
         setCompanies((prev) => prev.filter((c) => c.company_id !== id));
       } else {
         const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
+        Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      alert(errorMessage);
+      Swal.fire(errorMessage);
     } finally {
       setActingId(null);
     }

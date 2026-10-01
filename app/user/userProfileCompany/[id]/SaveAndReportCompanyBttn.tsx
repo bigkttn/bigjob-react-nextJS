@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useRef, useEffect } from "react";
 import "material-symbols";
@@ -76,7 +77,7 @@ export default function ProfileActionsButton({
 
   const openReportModal = () => {
     if (isReported) {
-      alert("คุณได้ทำการรายงานบริษัทนี้เรียบร้อยแล้ว");
+      Swal.fire("คุณได้ทำการรายงานบริษัทนี้เรียบร้อยแล้ว");
       setIsModalOpen(false);
     } else {
       setSelectedType("");
@@ -88,7 +89,7 @@ export default function ProfileActionsButton({
 
   const handleReport = async (reportType: ReportType, description: string) => {
     if (!selectedType || !description.trim()) {
-      alert("กรุณาเลือกประเภทการรายงานและกรอกรายละเอียดให้ครบถ้วน");
+      Swal.fire("กรุณาเลือกประเภทการรายงานและกรอกรายละเอียดให้ครบถ้วน");
       return;
     }
     try {
@@ -104,7 +105,7 @@ export default function ProfileActionsButton({
       });
 
       if (response.status === 409) {
-        alert(
+        Swal.fire(
           "คุณเคยส่งรายงานสำหรับบริษัทนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ",
         );
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
@@ -113,17 +114,17 @@ export default function ProfileActionsButton({
       }
 
       if (response.ok) {
-        console.log("reported!!");
+        /* console.log("reported!!") */;
         setIsReported(true);
-        alert("ส่งรายงานสำเร็จแล้ว");
+        Swal.fire("ส่งรายงานสำเร็จแล้ว");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
       } else {
-        console.log("fail report!!");
-        alert("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์");
+        /* console.log("fail report!!") */;
+        Swal.fire("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์");
       }
     } catch (error) {
       console.error("Error Report", error);
-      alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
     setIsOpen(false);
   };

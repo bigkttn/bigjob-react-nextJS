@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./savedCompany.module.css";
@@ -141,8 +142,8 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
 
   const handleUnsave = async (postId: number) => {
     setOpenMenuId(null);
-    const confirmDelete = confirm("ต้องการยกเลิกการบันทึกบริษัทนี้ใช่หรือไม่?");
-    if (!confirmDelete) return;
+    const result = await Swal.fire({ title: "ยืนยันการยกเลิก", text: "ต้องการยกเลิกการบันทึกบริษัทนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch("/api/user/delete_favour_post", {
@@ -158,11 +159,11 @@ export default function SavedSeekerClient({ userId }: ClientProps) {
         setCompanyData((prev) => prev.filter((c) => c.post_id !== postId));
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`ไม่สามารถยกเลิกได้: ${errorData.message || "เกิดข้อผิดพลาด"}`);
+        Swal.fire(`ไม่สามารถยกเลิกได้: ${errorData.message || "เกิดข้อผิดพลาด"}`);
       }
     } catch (error) {
       console.error("Error unsaving company:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
   };
 

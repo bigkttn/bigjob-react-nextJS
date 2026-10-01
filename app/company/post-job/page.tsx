@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import { FormEvent, useEffect, useState } from "react";
 import styles from "./postjob.module.css";
 import Link from "next/link";
@@ -50,8 +51,8 @@ const PostJob = () => {
     { id: "1", text: "", options: ["", ""], correctIndex: null },
   ]);
 
-  const blockInvalidKeys = (e: { key: string; preventDefault: () => void; }) => {
-    if (["e", "E", "+", "-", ".","="].includes(e.key)) {
+  const blockInvalidKeys = (e: { key: string; preventDefault: () => void }) => {
+    if (["e", "E", "+", "-", ".", "="].includes(e.key)) {
       e.preventDefault();
     }
   };
@@ -87,7 +88,7 @@ const PostJob = () => {
       const companyResponse = await fetch(
         `/api/company/getCompanyById/${userData.id}`,
       );
-      console.log(userData.id);
+      // console.log(userData.id);
 
       //  เช็คก่อนแปลงเป็น JSON ว่าไม่ได้ส่ง HTML Error กลับมา
       if (companyResponse.ok) {
@@ -122,7 +123,9 @@ const PostJob = () => {
 
   let filteredPosts = myPosts.filter((post) => {
     const term = searchTerm.toLowerCase();
-    const matchSearch = post.job_position?.toLowerCase().includes(term) || post.company_name?.toLowerCase().includes(term);
+    const matchSearch =
+      post.job_position?.toLowerCase().includes(term) ||
+      post.company_name?.toLowerCase().includes(term);
     const matchStatus = filterStatus ? post.status === filterStatus : true;
     const matchJobType = filterJobType ? post.job_type === filterJobType : true;
     return matchSearch && matchStatus && matchJobType;
@@ -146,18 +149,19 @@ const PostJob = () => {
 
   const handleSubmit = async () => {
     if (!isApproved) return;
-    if (!formData.jobPosition 
-      || !formData.province 
-      || !formData.workLocation 
-      || !formData.jobType 
-      || !formData.deadline
-      || !formData.jobDescription
-      || !formData.qualifications
-      || !formData.benefits
-      || !formData.howToApply
-      || !formData.contact
-      ) {
-      alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+    if (
+      !formData.jobPosition ||
+      !formData.province ||
+      !formData.workLocation ||
+      !formData.jobType ||
+      !formData.deadline ||
+      !formData.jobDescription ||
+      !formData.qualifications ||
+      !formData.benefits ||
+      !formData.howToApply ||
+      !formData.contact
+    ) {
+      Swal.fire("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
       return;
     }
 
@@ -170,7 +174,7 @@ const PostJob = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log("Post created successfully:", data);
+        // console.log("Post created successfully:", data);
         setPostId(data.postId);
         const testResponse = await fetch("/api/question/createTest", {
           method: "POST",
@@ -190,21 +194,21 @@ const PostJob = () => {
       }
     } catch (error) {
       console.error("Error creating post:", error);
-      alert("เกิดข้อผิดพลาดในการสร้างประกาศงาน กรุณาลองใหม่อีกครั้ง");
+      Swal.fire("เกิดข้อผิดพลาดในการสร้างประกาศงาน กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);
     }
     // โค้ดส่งข้อมูลไปหลังบ้านของคุณ
-    console.log("Submitting...", formData, questions);
+    // console.log("Submitting...", formData, questions);
   };
 
   const handleDelete = async (id: number) => {
     if (!isApproved) {
-      alert("ไม่สามารถลบได้เนื่องจากบัญชียังไม่ได้รับการอนุมัติ");
+      Swal.fire("ไม่สามารถลบได้เนื่องจากบัญชียังไม่ได้รับการอนุมัติ");
       return;
     }
-    const confirmDelete = confirm("คุณแน่ใจหรือไม่ว่าต้องการลบประกาศงานนี้?");
-    if (!confirmDelete) return;
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณแน่ใจหรือไม่ว่าต้องการลบประกาศงานนี้?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     setIsLoading(true);
     try {
@@ -212,7 +216,7 @@ const PostJob = () => {
         method: "DELETE",
       });
       if (response.ok) {
-        console.log("Post deleted successfully");
+        // console.log("Post deleted successfully");
         // อัปเดตรายการโพสต์หลังจากลบ
         setMyPosts((prev) => prev.filter((post) => post.post_id !== id));
       } else {
@@ -221,7 +225,7 @@ const PostJob = () => {
       }
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
+      Swal.fire("เกิดข้อผิดพลาดในการลบประกาศงาน กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);
     }
@@ -309,27 +313,43 @@ const PostJob = () => {
     );
   }
 
-  
-
   return (
     <div>
       {/* My Posts */}
       <div className={styles.myPostsSection}>
         <h2 className={styles.myPostsTitle}>โพสต์ของฉัน</h2>
-        
+
         {/* Filters */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginBottom: "15px",
+            flexWrap: "wrap",
+          }}
+        >
           <input
             type="text"
             placeholder="ค้นหาตำแหน่งงาน..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', minWidth: '200px', outline: 'none' }}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              minWidth: "200px",
+              outline: "none",
+            }}
           />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', outline: 'none' }}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              outline: "none",
+            }}
           >
             <option value="">ทุกสถานะ</option>
             <option value="Open">Open</option>
@@ -339,7 +359,12 @@ const PostJob = () => {
           <select
             value={filterJobType}
             onChange={(e) => setFilterJobType(e.target.value)}
-            style={{ padding: '8px 12px', border: '1px solid #ccc', borderRadius: '8px', outline: 'none' }}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              outline: "none",
+            }}
           >
             <option value="">ทุกประเภทงาน</option>
             <option value="Full-time">Full-time</option>
@@ -365,7 +390,9 @@ const PostJob = () => {
                     <p className={styles.subText}>{post.company_name}</p>
                     <div className={styles.cardFooter}>
                       <Link href={`/company/detail/${post.post_id}`}>
-                        <button className={styles.detailBtn}>ดูรายละเอียด</button>
+                        <button className={styles.detailBtn}>
+                          ดูรายละเอียด
+                        </button>
                       </Link>
                       <button
                         className={styles.DeleteBtn}
@@ -478,7 +505,11 @@ const PostJob = () => {
                               ? styles.radioCircleActive
                               : styles.radioCircle
                           }
-                          style={!isApproved ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+                          style={
+                            !isApproved
+                              ? { opacity: 0.5, cursor: "not-allowed" }
+                              : {}
+                          }
                           onClick={() => {
                             if (isApproved) setCorrectAnswer(q.id, optIndex);
                           }}
@@ -571,7 +602,6 @@ const PostJob = () => {
                 />
               </div>
 
-          
               <div className={styles.inputGroupFull2}>
                 <label>สถานที่ทำงาน</label>
                 <textarea
@@ -581,7 +611,7 @@ const PostJob = () => {
                   value={formData.workLocation}
                   onKeyDown={blockInvalidKeys}
                   onChange={handleChange}
-                   rows={3}
+                  rows={3}
                 />
               </div>
               <div className={styles.inputGroupInline}>
@@ -592,7 +622,7 @@ const PostJob = () => {
                   disabled={!isApproved}
                   value={formData.salary_min}
                   onChange={handleChange}
-                  onKeyDown={blockInvalidKeys} 
+                  onKeyDown={blockInvalidKeys}
                   style={{ ...inputStyle, width: "100%" }}
                 />
                 -

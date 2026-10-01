@@ -30,8 +30,8 @@ export default async function Page({ params }: PageProps) {
       console.error("Token invalid");
     }
   }
-  console.log("company_id:",viewer);
-  console.log(":",viewer);
+  /* console.log("company_id:",viewer) */;
+  /* console.log(":",viewer) */;
 
 
   

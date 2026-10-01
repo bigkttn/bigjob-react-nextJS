@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useState, useEffect, FormEvent } from "react";
 import styles from "./CompanyFeedback.module.css";
@@ -76,7 +77,7 @@ export default function CompanyFeedbackPage() {
         setMessage("");
         await initFeedbackDashboard();
       } else {
-        alert("ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+        Swal.fire("ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
       }
     } catch (err) {
       console.error("Submit error", err);

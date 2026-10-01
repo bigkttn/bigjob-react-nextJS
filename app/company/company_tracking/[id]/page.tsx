@@ -16,7 +16,7 @@ interface PageProps{
 export default async function CompanyTracking({params}:PageProps) {
   const resParams = await params;
   const companyId = resParams.id;
-  console.log("companyId",companyId);
+  /* console.log("companyId",companyId) */;
 
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -50,7 +50,7 @@ export default async function CompanyTracking({params}:PageProps) {
      const data = await res.json();
     if(res.ok){
       trackingList = (Array.isArray(data) ? data : data.rows || []) as ComponentProps<typeof CompanyApplication>["initialJobs"];
-      console.log("data รายการผู้สมัครงาน tracking:",trackingList);
+      /* console.log("data รายการผู้สมัครงาน tracking:",trackingList) */;
     }
     
   } catch (error) {

@@ -20,6 +20,7 @@ export async function GET(
         interview.interview_date,
         interview.link,
         interview.location,
+        interview.status_notification,
         posts.job_position,
         posts.company_id,
         EXISTS (SELECT 1 FROM question WHERE question.post_id = posts.post_id) AS has_test,

@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./savedSeeker.module.css";
@@ -56,7 +57,7 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
         }
 
         const data = await res.json();
-        console.log("data of savedSeekerClient:", data);
+        /* console.log("data of savedSeekerClient:", data) */;
 
         setSeekersData(data);
       } catch (err: any) {
@@ -101,10 +102,8 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
 
   const handleUnsave = async (seekerUid: number) => {
     setOpenMenuId(null);
-    const confirmDelete = confirm(
-      "ต้องการยกเลิกการบันทึกผู้สมัครงานคนนี้ใช่หรือไม่?",
-    );
-    if (!confirmDelete) return;
+    const result = await Swal.fire({ title: "ยืนยันการยกเลิก", text: "ต้องการยกเลิกการบันทึกผู้สมัครงานคนนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", cancelButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch("/api/company/delete_favour_user", {
@@ -120,11 +119,11 @@ export default function SavedSeekerClient({ companyId }: ClientProps) {
         setSeekersData((prev) => prev.filter((s) => s.uid !== seekerUid));
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert(`ไม่สามารถยกเลิกได้: ${errorData.message || "เกิดข้อผิดพลาด"}`);
+        Swal.fire(`ไม่สามารถยกเลิกได้: ${errorData.message || "เกิดข้อผิดพลาด"}`);
       }
     } catch (error) {
       console.error("Error unsaving seeker:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
   };
 

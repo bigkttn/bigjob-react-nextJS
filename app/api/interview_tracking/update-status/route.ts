@@ -51,6 +51,8 @@ export async function PATCH(req: NextRequest) {
       updateSql += `, status_notification = 'unread_company'`;
     }
 
+    updateSql += `, date_time = NOW()`;
+
     updateSql += ` WHERE tracking_id = ?`;
     queryParams.push(trackingId);
 

@@ -1,5 +1,6 @@
 // 📂 app/company/profile/CompanyProfile.tsx
 "use client";
+import Swal from "sweetalert2";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import styles from "./companyProfile.module.css";
@@ -124,10 +125,10 @@ const CompanyProfile = () => {
         setCompany((prev: any) => ({ ...prev, [targetField]: downloadURL }));
         setEditForm((prev: any) => ({ ...prev, [targetField]: downloadURL }));
       } else {
-        alert("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
+        Swal.fire("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
       }
     } catch (err: any) {
-      alert(`อัปโหลดล้มเหลว: ${err.message}`);
+      Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
     } finally {
       setSaving(false);
     }
@@ -163,7 +164,7 @@ const CompanyProfile = () => {
     if (file) {
       const allowedExtensions = /(\.pdf|\.jpg|\.jpeg|\.png|\.docx)$/i;
       if (!allowedExtensions.exec(file.name)) {
-        alert("รองรับเฉพาะไฟล์ PDF, JPG, PNG, DOCX เท่านั้นครับ");
+        Swal.fire("รองรับเฉพาะไฟล์ PDF, JPG, PNG, DOCX เท่านั้นครับ");
         return;
       }
       setSelectedCertFile(file);
@@ -193,15 +194,15 @@ const CompanyProfile = () => {
         setEditForm(JSON.parse(JSON.stringify(data.company)));
         setSelectedCertFile(null); // เคลียร์ไฟล์เก่าออกหลังอัปโหลดเสร็จเรียบร้อย
         if (certInputRef.current) certInputRef.current.value = "";
-        alert(
+        Swal.fire(
           "อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง 📄",
         );
       } else {
         const errData = await res.json();
-        alert(errData.error || "เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
+        Swal.fire(errData.error || "เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
       }
     } catch (err: any) {
-      alert(`อัปโหลดล้มเหลว: ${err.message}`);
+      Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
     } finally {
       setUploadingCert(false);
     }
@@ -232,13 +233,13 @@ const CompanyProfile = () => {
       if (res.ok) {
         setCompany((prev: any) => ({ ...prev, ...payload }));
         setEditMode(false);
-        alert("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
+        Swal.fire("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
       } else {
         const data = await res.json();
-        alert(data.error || "เกิดข้อผิดพลาดในการบันทึก");
+        Swal.fire(data.error || "เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (err: any) {
-      alert(err.message);
+      Swal.fire(err.message);
     } finally {
       setSaving(false);
     }
@@ -959,7 +960,10 @@ const CompanyProfile = () => {
         </div>
 
         {/* รีวิวบริษัท */}
-          <ReviewSection reviews={reviews} />
+        <ReviewSection
+          reviews={reviews}
+          profileLinkPrefix="/company/seeker-profile/"
+        />
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ export async function GET(
         interview.date_time,
         interview.link,
         interview.location,
+        interview.status_notification,
         posts.post_id,
         posts.job_position,
         posts.job_description AS details,
@@ -32,6 +33,7 @@ export async function GET(
         posts.salary_max,
         posts.age_min,
         posts.age_max,
+        comp.company_id,
         comp.company_email,
         comp.company_name,
         comp.logo_image 

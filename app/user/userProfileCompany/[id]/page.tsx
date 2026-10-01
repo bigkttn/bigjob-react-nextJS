@@ -1,4 +1,5 @@
 "use client";
+import Swal from "sweetalert2";
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,8 +89,8 @@ export default function ProfileCompany() {
 
   async function deleteReview(trackingId: number) {
     if (!viewer?.id) return;
-    const ok = confirm("คุณต้องการลบรีวิวนี้ใช่หรือไม่?");
-    if (!ok) return;
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณต้องการลบรีวิวนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch("/api/interview_tracking/delete-review", {
@@ -102,10 +103,10 @@ export default function ProfileCompany() {
         setReviews(reviews.filter((r) => r.tracking_id !== trackingId));
       } else {
         const data = await res.json();
-        alert(data.error ?? "ไม่สามารถลบรีวิวได้");
+        Swal.fire(data.error ?? "ไม่สามารถลบรีวิวได้");
       }
     } catch (err: any) {
-      alert(`เกิดข้อผิดพลาด: ${err.message}`);
+      Swal.fire(`เกิดข้อผิดพลาด: ${err.message}`);
     }
   }
 
@@ -158,7 +159,7 @@ export default function ProfileCompany() {
     ? String(company.company_id)
     : String(id);
 
-  console.log(company);
+  /* console.log(company) */;
 
   return (
     <div>
