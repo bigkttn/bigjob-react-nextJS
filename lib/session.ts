@@ -12,7 +12,7 @@ export async function createSession(payload: Record<string, unknown>) {
     const cookieStore = await cookies();
     cookieStore.set('session', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https'),
         sameSite: 'lax',
         maxAge: 60 * 60 * 24, // 1 วัน
         path: '/',
@@ -44,7 +44,7 @@ export async function updateSession() {
         // เซ็ต Cookie ใหม่ ต่ออายุไปอีก 1 วัน
         cookieStore.set('session', newToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https'),
             sameSite: 'lax',
             maxAge: 60 * 60 * 24, // 1 วัน
             path: '/',
