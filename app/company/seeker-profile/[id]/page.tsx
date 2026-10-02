@@ -9,6 +9,7 @@ import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
 import ApplySeeker from "./apply-seeker";
 import { apiUrl } from "@/lib/hostURL";
+import { redirect } from "next/navigation";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -124,11 +125,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
   }
 
   if (!viewer) {
-    return (
-      <div className={styles.centerMsg}>
-        <p>Please log in to view this profile.</p>
-      </div>
-    );
+    redirect("/login");
   }
   const isAdmin = viewer?.role === "admin" || viewer?.role === "superadmin";
   const profile = await getSeekerProfile(userId);
@@ -381,22 +378,26 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                 <section className={styles.Educontainer}>
                   <div className={styles.timeline}>
                     <div className={styles.centralLine} />
-                    {profile.educations?.map((item: Education, index: number) => (
-                      <div
-                        key={index}
-                        className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
-                      >
-                        <div className={styles.content}>
-                          <p className={styles.level}>{fmt(item.level)}</p>
-                          <h4 className={styles.degree}>{fmt(item.major)}</h4>
-                          <p className={styles.school}>{fmt(item.institution)}</p>
-                          <p>
-                            {fmt(item.year_start)} – {fmt(item.year_end)}
-                          </p>
+                    {profile.educations?.map(
+                      (item: Education, index: number) => (
+                        <div
+                          key={index}
+                          className={`${styles.timelineItem} ${index % 2 === 0 ? styles.left : styles.right}`}
+                        >
+                          <div className={styles.content}>
+                            <p className={styles.level}>{fmt(item.level)}</p>
+                            <h4 className={styles.degree}>{fmt(item.major)}</h4>
+                            <p className={styles.school}>
+                              {fmt(item.institution)}
+                            </p>
+                            <p>
+                              {fmt(item.year_start)} – {fmt(item.year_end)}
+                            </p>
+                          </div>
+                          <div className={styles.connector} />
                         </div>
-                        <div className={styles.connector} />
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 </section>
               </section>
@@ -413,13 +414,27 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   {profile.skills?.map((s: Skills, i: number) => (
                     <li key={i}>
                       <strong>{fmt(s.skill_name)}</strong>
-                      {s.skill_category && s.skill_category !== "General" && s.skill_category !== "-" && (
-                        <span style={{ color: "#666", fontSize: "0.9em", marginLeft: "4px" }}>
-                          ({fmt(s.skill_category)})
-                        </span>
-                      )}
+                      {s.skill_category &&
+                        s.skill_category !== "General" &&
+                        s.skill_category !== "-" && (
+                          <span
+                            style={{
+                              color: "#666",
+                              fontSize: "0.9em",
+                              marginLeft: "4px",
+                            }}
+                          >
+                            ({fmt(s.skill_category)})
+                          </span>
+                        )}
                       {s.skill_detail && s.skill_detail !== "-" && (
-                        <div style={{ fontSize: "0.9em", color: "#555", marginTop: "2px" }}>
+                        <div
+                          style={{
+                            fontSize: "0.9em",
+                            color: "#555",
+                            marginTop: "2px",
+                          }}
+                        >
                           - {fmt(s.skill_detail)}
                         </div>
                       )}
@@ -431,7 +446,14 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               <section className={styles.section}>
                 <h4>ความเร็วในการพิมพ์</h4>
                 {profile.typing_speeds?.map((t: TypingSpeed, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
+                  <ul
+                    key={i}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
+                  >
                     <li>
                       <strong>{fmt(t.typing_language)}</strong>
                     </li>
@@ -443,11 +465,24 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               <section className={styles.section}>
                 <h4>โปรเจกต์ & ประวัติการทำงาน</h4>
                 {profile.experiences?.map((exp: Experiences, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
+                  <ul
+                    key={i}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
+                  >
                     <li>
                       – <strong>{fmt(exp.ex_title)}</strong>
                       {exp.type && exp.type !== "-" && (
-                        <span style={{ color: "#666", fontSize: "0.9em", marginLeft: "4px" }}>
+                        <span
+                          style={{
+                            color: "#666",
+                            fontSize: "0.9em",
+                            marginLeft: "4px",
+                          }}
+                        >
                           ({fmt(exp.type)})
                         </span>
                       )}
@@ -463,7 +498,14 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               <section className={styles.section}>
                 <h4>ความสามารถทางภาษา</h4>
                 {profile.languages?.map((exp: Language, i: number) => (
-                  <ul key={i} style={{ marginBottom: "1rem", listStyle: "none", paddingLeft: 0 }}>
+                  <ul
+                    key={i}
+                    style={{
+                      marginBottom: "1rem",
+                      listStyle: "none",
+                      paddingLeft: 0,
+                    }}
+                  >
                     <li>
                       <h4>{fmt(exp.language_type)}</h4>
                     </li>
@@ -487,50 +529,51 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                 { cat: "transcript", label: "ใบรายงานผลการเรียน" },
                 { cat: "resume", label: "เรซูเม่" },
                 { cat: "portfolio", label: "แฟ้มสะสมผลงาน" },
-                { cat: "certificate", label: "ใบรับรอง / เกียรติบัตร" }
-              ].map(
-                (item) => {
-                  const files: FileRecord[] = (profile.files ?? []).filter(
-                    (f: FileRecord) => f.file_category?.toLowerCase() === item.cat,
-                  );
-                  return (
-                    <div key={item.cat} className={styles.fileItem}>
-                      <label style={{ textTransform: "none", marginBottom: "10px" }}>
-                        {item.label} ({files.length})
-                      </label>
-                      <div className={styles.fileList}>
-                        {files.length === 0 && (
-                          <p className={styles.noFile}>ไม่มีไฟล์</p>
-                        )}
-                        {files.map((file: FileRecord) => {
-                          const shortName =
-                            (file.file_name?.length ?? 0) > 15
-                              ? (file.file_name ?? "").substring(0, 13) + "..."
-                              : file.file_name || "File";
-                          return (
+                { cat: "certificate", label: "ใบรับรอง / เกียรติบัตร" },
+              ].map((item) => {
+                const files: FileRecord[] = (profile.files ?? []).filter(
+                  (f: FileRecord) =>
+                    f.file_category?.toLowerCase() === item.cat,
+                );
+                return (
+                  <div key={item.cat} className={styles.fileItem}>
+                    <label
+                      style={{ textTransform: "none", marginBottom: "10px" }}
+                    >
+                      {item.label} ({files.length})
+                    </label>
+                    <div className={styles.fileList}>
+                      {files.length === 0 && (
+                        <p className={styles.noFile}>ไม่มีไฟล์</p>
+                      )}
+                      {files.map((file: FileRecord) => {
+                        const shortName =
+                          (file.file_name?.length ?? 0) > 15
+                            ? (file.file_name ?? "").substring(0, 13) + "..."
+                            : file.file_name || "File";
+                        return (
+                          <div
+                            key={file.file_id}
+                            className={styles.fileContainerBox}
+                          >
                             <div
-                              key={file.file_id}
-                              className={styles.fileContainerBox}
+                              className={styles.fileNameDisplay}
+                              title={file.file_name}
                             >
-                              <div
-                                className={styles.fileNameDisplay}
-                                title={file.file_name}
-                              >
-                                {shortName}
-                              </div>
-                              {/* ── Client Component สำหรับ popup ── */}
-                              <FilePreviewButton
-                                filePath={file.file_path ?? ""}
-                                fileName={file.file_name ?? ""}
-                              />
+                              {shortName}
                             </div>
-                          );
-                        })}
-                      </div>
+                            {/* ── Client Component สำหรับ popup ── */}
+                            <FilePreviewButton
+                              filePath={file.file_path ?? ""}
+                              fileName={file.file_name ?? ""}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                },
-              )}
+                  </div>
+                );
+              })}
             </div>
             <div className={styles.contactCard}>
               <h3>การติดต่อ</h3>

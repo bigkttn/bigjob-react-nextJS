@@ -8,6 +8,7 @@ import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
 import ApplyCompany from "./apply-company";
 import { apiUrl } from "@/lib/hostURL";
+import { redirect } from "next/navigation";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -60,11 +61,7 @@ export default async function DetailJob({ params }: PageProps) {
   }
 
   if (!viewer) {
-    return (
-      <div className={styles.centerMsg}>
-        <p>กรุณาเข้าสู่ระบบเพื่อดูข้อมูลนี้</p>
-      </div>
-    );
+    redirect("/login");
   }
 
   let seekerName = viewer?.fullname || "";
