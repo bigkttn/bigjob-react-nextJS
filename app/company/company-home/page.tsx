@@ -4,6 +4,7 @@ import styles from "./companyhome.module.css";
 import Link from "next/link";
 import { EDUCATION_LEVELS } from "@/lib/educationLevels";
 import ProvinceSelect from "./province";
+import FilterSelect from "@/components/FilterSelect";
 
 const WORK_TYPES = [
   "Full-time",
@@ -447,38 +448,28 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
         )} */}
 
         <div className={styles.filters}>
-          <select
+          <FilterSelect
             value={selectedWorkType}
-            onChange={(e) =>
-              handleFilterChange(setSelectedWorkType, e.target.value)
-            }
-          >
-            <option value="">รูปแบบการทำงานทั้งหมด</option>
-            {WORK_TYPES.map((type, i) => (
-              <option key={i} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleFilterChange(setSelectedWorkType, val)}
+            options={[
+              { value: "", label: "รูปแบบการทำงานทั้งหมด" },
+              ...WORK_TYPES.map((type) => ({ value: type, label: type })),
+            ]}
+          />
 
           <ProvinceSelect
             value={selectedProvince}
             onChange={(val) => handleFilterChange(setSelectedProvince, val)}
           />
 
-          <select
+          <FilterSelect
             value={selectedEducation}
-            onChange={(e) =>
-              handleFilterChange(setSelectedEducation, e.target.value)
-            }
-          >
-            <option value="">ระดับการศึกษาทั้งหมด</option>
-            {EDUCATION_LEVELS.map((edu, i) => (
-              <option key={i} value={edu}>
-                {edu}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleFilterChange(setSelectedEducation, val)}
+            options={[
+              { value: "", label: "ระดับการศึกษาทั้งหมด" },
+              ...EDUCATION_LEVELS.map((edu) => ({ value: edu, label: edu })),
+            ]}
+          />
 
           <div className={styles.ageFilterBox}>
             <span className={styles.ageLabel}>ช่วงอายุ</span>
@@ -513,13 +504,14 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
             </div>
           </div>
 
-          <select
+          <FilterSelect
             value={sortBy}
-            onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
-          >
-            <option value="newest">เรียงตาม: สมัครล่าสุด</option>
-            <option value="oldest">เรียงตาม: สมัครเก่าสุด</option>
-          </select>
+            onChange={(val) => handleFilterChange(setSortBy, val)}
+            options={[
+              { value: "newest", label: "เรียงตาม: สมัครล่าสุด" },
+              { value: "oldest", label: "เรียงตาม: สมัครเก่าสุด" },
+            ]}
+          />
 
           {isFilterActive && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>

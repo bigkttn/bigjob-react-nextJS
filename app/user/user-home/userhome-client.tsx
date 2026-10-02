@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./userhome-client.module.css";
 import Link from "next/link";
 import ProvinceSelect from "./province";
+import FilterSelect from "@/components/FilterSelect";
 
 interface User {
   id?: number;
@@ -412,43 +413,38 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
         )} */}
 
         <div className={styles.filters}>
-          <select
+          <FilterSelect
             value={selectedJobType}
-            onChange={(e) =>
-              handleFilterChange(setSelectedJobType, e.target.value)
-            }
-          >
-            <option value="">ประเภทงานทั้งหมด</option>
-            {availableJobTypes.map((type, i) => (
-              <option key={i} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => handleFilterChange(setSelectedJobType, val)}
+            options={[
+              { value: "", label: "ประเภทงานทั้งหมด" },
+              ...availableJobTypes.map((type) => ({ value: type, label: type })),
+            ]}
+          />
 
           <ProvinceSelect
             value={selectedProvince}
             onChange={(val) => handleFilterChange(setSelectedProvince, val)}
           />
 
-          <select
+          <FilterSelect
             value={selectedStatus}
-            onChange={(e) =>
-              handleFilterChange(setSelectedStatus, e.target.value)
-            }
-          >
-            <option value="">ทุกสถานะ</option>
-            <option value="Open">เปิดรับสมัคร</option>
-            <option value="Closed">ปิดรับสมัคร</option>
-          </select>
+            onChange={(val) => handleFilterChange(setSelectedStatus, val)}
+            options={[
+              { value: "", label: "ทุกสถานะ" },
+              { value: "Open", label: "เปิดรับสมัคร" },
+              { value: "Closed", label: "ปิดรับสมัคร" },
+            ]}
+          />
 
-          <select
+          <FilterSelect
             value={sortBy}
-            onChange={(e) => handleFilterChange(setSortBy, e.target.value)}
-          >
-            <option value="newest">เรียงตาม: โพสต์ล่าสุด</option>
-            <option value="oldest">เรียงตาม: โพสต์เก่าสุด</option>
-          </select>
+            onChange={(val) => handleFilterChange(setSortBy, val)}
+            options={[
+              { value: "newest", label: "เรียงตาม: โพสต์ล่าสุด" },
+              { value: "oldest", label: "เรียงตาม: โพสต์เก่าสุด" },
+            ]}
+          />
 
           {isFilterActive && (
             <button className={styles.resetBtn} onClick={handleResetFilters}>

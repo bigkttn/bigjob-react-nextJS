@@ -1,0 +1,86 @@
+.wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* ปุ่มสีดำมน สูง 50px เท่ากับ ProvinceSelect */
+.trigger {
+  height: 50px;
+  min-width: 150px;
+  padding: 0 32px 0 16px;
+  border-radius: 12px;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+  background-color: #000000;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.triggerOpen {
+  border: 1px solid #333;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 10px;
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+.arrowOpen {
+  color: #000000;
+}
+
+/* รายการเมนู Dropdown พื้นขาว เหมือน ProvinceSelect */
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-height: 220px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-size: 14px;
+}
+
+.option {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.option:hover {
+  background-color: #f9fafb;
+}
+
+.optionSelected {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.optionSelected:hover {
+  background-color: #e5e7eb;
+}
