@@ -53,8 +53,12 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [suggestedPosts, setSuggestedPosts] = useState<JobPost[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
-  const [searchInput, setSearchInput] = useState(() => getSavedState("searchTerm", ""));
-  const [searchTerm, setSearchTerm] = useState(() => getSavedState("searchTerm", ""));
+  const [searchInput, setSearchInput] = useState(() =>
+    getSavedState("searchTerm", ""),
+  );
+  const [searchTerm, setSearchTerm] = useState(() =>
+    getSavedState("searchTerm", ""),
+  );
 
   // Search History State
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -62,12 +66,20 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const searchInputRef = useRef<HTMLDivElement>(null);
 
   // Filter & Sort State
-  const [selectedJobType, setSelectedJobType] = useState(() => getSavedState("selectedJobType", ""));
-  const [selectedProvince, setSelectedProvince] = useState(() => getSavedState("selectedProvince", ""));
-  const [selectedStatus, setSelectedStatus] = useState(() => getSavedState("selectedStatus", ""));
+  const [selectedJobType, setSelectedJobType] = useState(() =>
+    getSavedState("selectedJobType", ""),
+  );
+  const [selectedProvince, setSelectedProvince] = useState(() =>
+    getSavedState("selectedProvince", ""),
+  );
+  const [selectedStatus, setSelectedStatus] = useState(() =>
+    getSavedState("selectedStatus", ""),
+  );
   const [sortBy, setSortBy] = useState(() => getSavedState("sortBy", "newest"));
 
-  const [currentPage, setCurrentPage] = useState<number>(() => getSavedState("currentPage", 1));
+  const [currentPage, setCurrentPage] = useState<number>(() =>
+    getSavedState("currentPage", 1),
+  );
   const postsPerPage = 12;
 
   // Save State to sessionStorage when changed
@@ -81,9 +93,16 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
         selectedStatus,
         sortBy,
         currentPage,
-      })
+      }),
     );
-  }, [searchTerm, selectedJobType, selectedProvince, selectedStatus, sortBy, currentPage]);
+  }, [
+    searchTerm,
+    selectedJobType,
+    selectedProvince,
+    selectedStatus,
+    sortBy,
+    currentPage,
+  ]);
 
   useEffect(() => {
     fetchSuggestedPosts();
@@ -418,7 +437,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
             onChange={(val) => handleFilterChange(setSelectedJobType, val)}
             options={[
               { value: "", label: "ประเภทงานทั้งหมด" },
-              ...availableJobTypes.map((type) => ({ value: type, label: type })),
+              ...availableJobTypes.map((type) => ({
+                value: type,
+                label: type,
+              })),
             ]}
           />
 
@@ -441,8 +463,8 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
             value={sortBy}
             onChange={(val) => handleFilterChange(setSortBy, val)}
             options={[
-              { value: "newest", label: "เรียงตาม: โพสต์ล่าสุด" },
-              { value: "oldest", label: "เรียงตาม: โพสต์เก่าสุด" },
+              { value: "newest", label: "โพสต์ล่าสุด" },
+              { value: "oldest", label: "โพสต์เก่าสุด" },
             ]}
           />
 

@@ -508,8 +508,8 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
             value={sortBy}
             onChange={(val) => handleFilterChange(setSortBy, val)}
             options={[
-              { value: "newest", label: "เรียงตาม: สมัครล่าสุด" },
-              { value: "oldest", label: "เรียงตาม: สมัครเก่าสุด" },
+              { value: "newest", label: "สมัครล่าสุด" },
+              { value: "oldest", label: "สมัครเก่าสุด" },
             ]}
           />
 
@@ -562,7 +562,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                         href={`/company/seeker-profile/${seeker.uid}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>ดูรายละเอียด</button>
+                        <button className={styles.detailsBtn}>
+                          ดูรายละเอียด
+                        </button>
                       </Link>
                     </div>
                   </div>
@@ -622,7 +624,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                         href={`/company/seeker-profile/${u.uid}`}
                         className={styles.btnWrapper}
                       >
-                        <button className={styles.detailsBtn}>ดูรายละเอียด</button>
+                        <button className={styles.detailsBtn}>
+                          ดูรายละเอียด
+                        </button>
                       </Link>
                     </div>
                   </div>
