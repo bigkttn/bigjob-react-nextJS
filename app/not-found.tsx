@@ -31,13 +31,13 @@ export default async function NotFound() {
       <div className={styles.card}>
         <div className={styles.hero}>
           <h1 className={styles.code} aria-label="404">
-            4
+            <span aria-hidden="true">4</span>
             <span className={styles.zero} aria-hidden="true">
               <span className={`material-symbols-outlined ${styles.zeroIcon}`}>
-                search_off
+                search
               </span>
             </span>
-            4
+            <span aria-hidden="true">4</span>
           </h1>
           <span className={styles.badge}>PAGE NOT FOUND</span>
         </div>
@@ -45,8 +45,12 @@ export default async function NotFound() {
         <div className={styles.body}>
           <h2 className={styles.title}>โอ๊ะโอ! ไม่พบหน้าที่คุณค้นหา</h2>
           <p className={styles.text}>
-            ดูเหมือนว่าหน้าที่คุณพยายามเข้าถึงจะไม่มีอยู่จริง
-            อาจจะถูกย้ายไปที่อื่น หรือลิงก์อาจจะเสียครับ
+            <span className={styles.line}>
+              ดูเหมือนว่าหน้าที่คุณพยายามเข้าถึงจะไม่มีอยู่จริง
+            </span>
+            <span className={styles.line}>
+              อาจจะถูกย้ายไปที่อื่น หรือลิงก์อาจจะเสียครับ
+            </span>
           </p>
           <Link href={homeHref} className={styles.homeBtn}>
             <span className={`material-symbols-outlined ${styles.btnIcon}`}>

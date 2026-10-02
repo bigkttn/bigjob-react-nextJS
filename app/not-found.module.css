@@ -28,30 +28,36 @@
 }
 
 .code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.04em;
   margin: 0;
   font-size: clamp(88px, 22vw, 140px);
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -4px;
+  letter-spacing: -2px;
   color: #ffffff;
 }
 
-/* ตัว 0 ตรงกลางเป็นวงกลมพร้อมไอคอนแว่นขยาย */
+/* ตัว 0 ตรงกลางเป็นวงกลม สูงเท่าตัวเลข 4 พร้อมไอคอนแว่นขยาย */
 .zero {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 0.78em;
-  height: 0.78em;
-  margin: 0 0.06em;
-  border: 0.12em solid #ffffff;
-  border-radius: 50%;
-  vertical-align: -0.04em;
+  flex-shrink: 0;
+  /* ตัวเลข Kanit สูง ~0.65em และจุดกึ่งกลางต่ำกว่ากล่องข้อความ ~0.03em */
+  width: 0.56em;
+  height: 0.65em;
+  border: 0.1em solid #ffffff;
+  border-radius: 999px;
   box-sizing: border-box;
+  transform: translateY(0.03em);
 }
 
 .zeroIcon {
-  font-size: 0.32em !important;
+  font-size: 0.26em !important;
+  font-variation-settings: "wght" 700;
   color: #ffffff;
 }
 
@@ -80,10 +86,15 @@
 
 .text {
   margin: 0 auto 28px;
-  max-width: 400px;
+  max-width: 440px;
   font-size: 15px;
   line-height: 1.7;
   color: #666666;
+}
+
+/* แต่ละประโยคขึ้นบรรทัดใหม่ ไม่ให้คำถูกตัดกลางคำ */
+.line {
+  display: block;
 }
 
 /* ปุ่มสีดำมน เหมือนปุ่มค้นหาในหน้า home */
