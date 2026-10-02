@@ -1,0 +1,134 @@
+/* หน้า 404 — โทนขาว/ดำ/เทา ให้เข้ากับหน้า home */
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 140px);
+  padding: 40px 16px;
+  background-color: #b3b3b3;
+  font-family: var(--font-kanit), sans-serif;
+  box-sizing: border-box;
+}
+
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  text-align: center;
+}
+
+/* ส่วนหัวการ์ดสีดำ แสดงเลข 404 */
+.hero {
+  position: relative;
+  background: #000000;
+  padding: 36px 24px 28px;
+}
+
+.code {
+  margin: 0;
+  font-size: clamp(88px, 22vw, 140px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -4px;
+  color: #ffffff;
+}
+
+/* ตัว 0 ตรงกลางเป็นวงกลมพร้อมไอคอนแว่นขยาย */
+.zero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.78em;
+  height: 0.78em;
+  margin: 0 0.06em;
+  border: 0.12em solid #ffffff;
+  border-radius: 50%;
+  vertical-align: -0.04em;
+  box-sizing: border-box;
+}
+
+.zeroIcon {
+  font-size: 0.32em !important;
+  color: #ffffff;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: #333333;
+  color: #d9d9d9;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.body {
+  padding: 32px 32px 36px;
+}
+
+.title {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 5vw, 28px);
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.text {
+  margin: 0 auto 28px;
+  max-width: 400px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #666666;
+}
+
+/* ปุ่มสีดำมน เหมือนปุ่มค้นหาในหน้า home */
+.homeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 36px;
+  border-radius: 12px;
+  background: #000000;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.homeBtn:hover {
+  background: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.homeBtn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.homeBtn:focus-visible {
+  outline: 3px solid #0056b3;
+  outline-offset: 3px;
+}
+
+.btnIcon {
+  font-size: 22px !important;
+}
+
+@media (max-width: 480px) {
+  .body {
+    padding: 24px 20px 28px;
+  }
+
+  .homeBtn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

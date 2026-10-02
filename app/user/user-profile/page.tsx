@@ -851,7 +851,7 @@ const SeekerProfile = () => {
       if (res.ok) {
         setProfile({ ...profile, profile_image: url });
         setForm({ ...form, profile_image: url });
-        Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว! 📷✨");
+        Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว!");
       } else {
         Swal.fire("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
       }
@@ -925,7 +925,15 @@ const SeekerProfile = () => {
   }
 
   async function deleteFile(fileId: number, filePath: string) {
-    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
     if (!result.isConfirmed) return;
 
     try {
@@ -1141,7 +1149,11 @@ const SeekerProfile = () => {
                 options={["ชาย", "หญิง", "อื่นๆ"]}
                 onChange={(v) => {
                   if (v === "หญิง") {
-                    setForm((prev) => ({ ...prev, gender: v, military_status: "" }));
+                    setForm((prev) => ({
+                      ...prev,
+                      gender: v,
+                      military_status: "",
+                    }));
                   } else {
                     changeText("gender", v);
                   }
@@ -1764,10 +1776,17 @@ const SeekerProfile = () => {
                           changeTypingLanguage(i, e.target.value)
                         }
                       >
-                        <option value="" disabled>เลือกภาษา</option>
-                        {t.typing_language && !NATIVE_LANGUAGE_OPTIONS.includes(t.typing_language) && (
-                          <option value={t.typing_language}>{t.typing_language}</option>
-                        )}
+                        <option value="" disabled>
+                          เลือกภาษา
+                        </option>
+                        {t.typing_language &&
+                          !NATIVE_LANGUAGE_OPTIONS.includes(
+                            t.typing_language,
+                          ) && (
+                            <option value={t.typing_language}>
+                              {t.typing_language}
+                            </option>
+                          )}
                         {NATIVE_LANGUAGE_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
                             {opt}
@@ -1973,10 +1992,17 @@ const SeekerProfile = () => {
                           changeLanguage(i, "language_type", e.target.value)
                         }
                       >
-                        <option value="" disabled>เลือกภาษา</option>
-                        {lang.language_type && !NATIVE_LANGUAGE_OPTIONS.includes(lang.language_type) && (
-                          <option value={lang.language_type}>{lang.language_type}</option>
-                        )}
+                        <option value="" disabled>
+                          เลือกภาษา
+                        </option>
+                        {lang.language_type &&
+                          !NATIVE_LANGUAGE_OPTIONS.includes(
+                            lang.language_type,
+                          ) && (
+                            <option value={lang.language_type}>
+                              {lang.language_type}
+                            </option>
+                          )}
                         {NATIVE_LANGUAGE_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
                             {opt}
@@ -1990,23 +2016,36 @@ const SeekerProfile = () => {
                           changeLanguage(i, "level", e.target.value)
                         }
                       >
-                        <option value="" disabled>เลือกระดับทั่วไป</option>
-                        {lang.level && !["พื้นฐาน", "ปานกลาง", "ดี", "ดีเยี่ยม", "เจ้าของภาษา"].includes(lang.level) && (
-                           <option value={lang.level}>{lang.level}</option>
-                        )}
+                        <option value="" disabled>
+                          เลือกระดับทั่วไป
+                        </option>
+                        {lang.level &&
+                          ![
+                            "พื้นฐาน",
+                            "ปานกลาง",
+                            "ดี",
+                            "ดีเยี่ยม",
+                            "เจ้าของภาษา",
+                          ].includes(lang.level) && (
+                            <option value={lang.level}>{lang.level}</option>
+                          )}
                         <option value="พื้นฐาน">พื้นฐาน (Beginner)</option>
                         <option value="ปานกลาง">ปานกลาง (Intermediate)</option>
                         <option value="ดี">ดี (Advanced)</option>
                         <option value="ดีเยี่ยม">ดีเยี่ยม (Fluent)</option>
-                        <option value="เจ้าของภาษา">เจ้าของภาษา (Native)</option>
+                        <option value="เจ้าของภาษา">
+                          เจ้าของภาษา (Native)
+                        </option>
                       </select>
                       <input
                         style={{ ...baseInputStyle, flex: "1 1 100px" }}
                         type="text"
                         placeholder={
-                          lang.language_type === "日本語" ? "การทดสอบ (เช่น JLPT)" :
-                          lang.language_type === "中文" ? "การทดสอบ (เช่น HSK)" :
-                          "การทดสอบ (เช่น TOEIC)"
+                          lang.language_type === "日本語"
+                            ? "การทดสอบ (เช่น JLPT)"
+                            : lang.language_type === "中文"
+                              ? "การทดสอบ (เช่น HSK)"
+                              : "การทดสอบ (เช่น TOEIC)"
                         }
                         value={lang.test_name}
                         onChange={(e) =>
@@ -2014,10 +2053,33 @@ const SeekerProfile = () => {
                         }
                       />
                       {lang.language_type === "日本語" ? (
-                        <div style={{ display: "flex", alignItems: "center", border: "1px solid #d1d5db", borderRadius: "6px", backgroundColor: "#fff", flex: "0 1 80px" }}>
-                          <span style={{ paddingLeft: "0.5rem", color: "#6b7280", fontWeight: "bold" }}>N</span>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "6px",
+                            backgroundColor: "#fff",
+                            flex: "0 1 80px",
+                          }}
+                        >
+                          <span
+                            style={{
+                              paddingLeft: "0.5rem",
+                              color: "#6b7280",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            N
+                          </span>
                           <input
-                            style={{ ...baseInputStyle, border: "none", paddingLeft: "0.25rem", width: "100%", backgroundColor: "transparent" }}
+                            style={{
+                              ...baseInputStyle,
+                              border: "none",
+                              paddingLeft: "0.25rem",
+                              width: "100%",
+                              backgroundColor: "transparent",
+                            }}
                             type="number"
                             min="1"
                             max="5"
@@ -2093,7 +2155,9 @@ const SeekerProfile = () => {
                             {shortName}
                             <span
                               className={styles.deleteFileIcon}
-                              onClick={() => deleteFile(file.file_id, file.file_path)}
+                              onClick={() =>
+                                deleteFile(file.file_id, file.file_path)
+                              }
                             >
                               ลบ
                             </span>
