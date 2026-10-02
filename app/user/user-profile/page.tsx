@@ -519,6 +519,24 @@ function InfoRow(props: InfoRowProps) {
     );
   }
 
+  // เบอร์โทร: รับเฉพาะตัวเลข (รวมตอนวาง) สูงสุด 10 หลัก และเปิดแป้นตัวเลขบนมือถือ
+  if (type === "tel") {
+    return (
+      <div className={styles.infoRow}>
+        {label}:{" "}
+        <input
+          style={rowInputStyle}
+          type="tel"
+          inputMode="numeric"
+          maxLength={10}
+          placeholder="0812345678"
+          value={value}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.infoRow}>
       {label}:{" "}
@@ -1224,6 +1242,7 @@ const SeekerProfile = () => {
               />
               <InfoRow
                 label="เบอร์โทรศัพท์"
+                type="tel"
                 editing={editMode}
                 value={editMode ? form.mobile_phone : profile.mobile_phone}
                 onChange={(v) => changeText("mobile_phone", v)}
