@@ -85,11 +85,15 @@ export default function CompanyEditForm({
             <input
               id="mobile_phone"
               type="tel"
-              inputMode="tel"
+              inputMode="numeric"
+              maxLength={10}
               className={styles.input}
               placeholder="เช่น 0812345678"
               value={text(form.mobile_phone)}
-              onChange={(e) => onChange("mobile_phone", e.target.value)}
+              // รับเฉพาะตัวเลข (รวมตอนวาง) สูงสุด 10 หลัก
+              onChange={(e) =>
+                onChange("mobile_phone", e.target.value.replace(/\D/g, ""))
+              }
             />
           </div>
         </div>
