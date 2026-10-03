@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import styles from "./seeker_tracking.module.css";
-import { apiUrl } from "@/lib/hostURL";
 
 export interface Recruiter {
   tracking_id: number;
@@ -322,7 +321,7 @@ export default function SeekerApplication({
 
     try {
       const response = await fetch(
-        `${apiUrl}/api/interview_tracking/update-status`,
+        `/api/interview_tracking/update-status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

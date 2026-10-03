@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import styles from './applySeeker.module.css';
 import ApplyModal from '@/components/ApplyModal';
-import { apiUrl } from '@/lib/hostURL';
 
 interface CompanyJob {
   post_id: number;
@@ -47,7 +46,7 @@ export default function ApplySeeker({
     if (!userId) return;
 
     try {
-      const response = await fetch(`${apiUrl}/api/company/check-repeat`, {
+      const response = await fetch(`/api/interview_tracking/check-repeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',

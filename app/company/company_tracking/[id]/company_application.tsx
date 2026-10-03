@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import styles from "./company_tracking.module.css";
-import { apiUrl } from "@/lib/hostURL";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import TestResultModal from "@/components/TestResultModal";
@@ -226,7 +225,7 @@ export default function CompanyApplication({
     if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
     try {
       const response = await fetch(
-        `${apiUrl}/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
+        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
         {
           method: "DELETE",
         },
@@ -297,7 +296,7 @@ export default function CompanyApplication({
 
     try {
       const response = await fetch(
-        `${apiUrl}/api/interview_tracking/update-status`,
+        `/api/interview_tracking/update-status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

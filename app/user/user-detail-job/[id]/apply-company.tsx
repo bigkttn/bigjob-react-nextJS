@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import { useEffect, useState } from 'react';
 import styles from './applyCompany.module.css'
 import ApplyModal from '@/components/ApplyModal';
-import { apiUrl } from '@/lib/hostURL';
 import TestModal from '@/components/TestModal';
 
 interface ApplyCompanyProps {
@@ -55,7 +54,7 @@ export default function ApplyCompany({
   const checkApplied = async () => {
     if(!userId || !postId) return;
     try {
-      const response = await fetch(`${apiUrl}/api/interview_tracking/check-repeat`, {
+      const response = await fetch(`/api/interview_tracking/check-repeat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,7 +87,7 @@ export default function ApplyCompany({
   const checkTest = async () => {
     if(!postId) return;
     try {
-      const response = await fetch(`${apiUrl}/api/question/check-test`, {
+      const response = await fetch(`/api/question/check-test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ post_id: Number(postId) }),
