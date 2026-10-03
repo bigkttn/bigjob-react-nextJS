@@ -240,6 +240,9 @@
 .fileBox {
   width: 100%;
   height: 35px;
+  /* เป็น <button> ในหน้านี้ ล้างขอบ/ฟอนต์ค่าเริ่มต้นให้เหมือนหน้าโปรไฟล์ผู้ใช้ */
+  border: none;
+  font-family: inherit;
   background-color: #b0b0b0;
   border-radius: 20px;
   display: flex;

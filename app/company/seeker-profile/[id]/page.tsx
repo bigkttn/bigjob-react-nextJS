@@ -101,7 +101,7 @@ const fmt = (val: unknown) =>
 
 const formatDate = (dateStr: string | null | undefined) => {
   if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("en-GB", {
+  return new Date(dateStr).toLocaleDateString("th-TH", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -275,12 +275,10 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   unoptimized
                 />
               </div>
-              <strong>
-                <h2 className={styles.name}>{fmt(profile.fullname)}</h2>
-              </strong>
-              <strong>
-                <p className={styles.email}>{fmt(profile.email)}</p>
-              </strong>
+              <h2 className={styles.name} style={{ marginTop: "1rem" }}>
+                {fmt(profile.fullname)}
+              </h2>
+              <p className={styles.email}>{fmt(profile.email)}</p>
 
               <div className={styles.detailsBox}>
                 <div className={styles.titleinfoRow}>
@@ -302,7 +300,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   { label: "เบอร์โทรศัพท์", value: profile.mobile_phone },
                 ].map((item) => (
                   <div className={styles.infoRow} key={item.label}>
-                    <strong>{item.label}:</strong> {fmt(item.value)}
+                    {item.label}: {fmt(item.value)}
                   </div>
                 ))}
 
@@ -320,7 +318,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                   { label: "ตำบล/แขวง", key: "sub_district" },
                 ].map((item) => (
                   <div className={styles.infoRow} key={item.key}>
-                    <strong>{item.label}:</strong> {fmt(profile[item.key])}
+                    {item.label}: {fmt(profile[item.key])}
                   </div>
                 ))}
               </div>
@@ -334,7 +332,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
               {profile.job_titles && profile.job_titles.length > 0 && (
                 <section className={styles.section}>
                   <h4>ตำแหน่งงานที่สนใจ</h4>
-                  <ol className={styles.plainList}>
+                  <ol className="list-decimal list-inside">
                     {profile.job_titles.map(
                       (job: { job_name: string }, i: number) => (
                         <li key={i}>{fmt(job.job_name)}</li>
@@ -410,35 +408,9 @@ export default async function SeekerProfilePage({ params }: PageProps) {
             <div className={styles.contentPadding}>
               <section className={styles.section}>
                 <h4>ทักษะเฉพาะทาง</h4>
-                <ol className={styles.plainList}>
+                <ol className="list-decimal list-inside">
                   {profile.skills?.map((s: Skills, i: number) => (
-                    <li key={i}>
-                      <strong>{fmt(s.skill_name)}</strong>
-                      {s.skill_category &&
-                        s.skill_category !== "General" &&
-                        s.skill_category !== "-" && (
-                          <span
-                            style={{
-                              color: "#666",
-                              fontSize: "0.9em",
-                              marginLeft: "4px",
-                            }}
-                          >
-                            ({fmt(s.skill_category)})
-                          </span>
-                        )}
-                      {s.skill_detail && s.skill_detail !== "-" && (
-                        <div
-                          style={{
-                            fontSize: "0.9em",
-                            color: "#555",
-                            marginTop: "2px",
-                          }}
-                        >
-                          - {fmt(s.skill_detail)}
-                        </div>
-                      )}
-                    </li>
+                    <li key={i}>{fmt(s.skill_name)}</li>
                   ))}
                 </ol>
               </section>
@@ -455,7 +427,7 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                     }}
                   >
                     <li>
-                      <strong>{fmt(t.typing_language)}</strong>
+                      <h4>{fmt(t.typing_language)}</h4>
                     </li>
                     <li>- {fmt(t.typing_wpm)} คำ/นาที (WPM)</li>
                   </ul>
@@ -474,21 +446,10 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                     }}
                   >
                     <li>
-                      – <strong>{fmt(exp.ex_title)}</strong>
-                      {exp.type && exp.type !== "-" && (
-                        <span
-                          style={{
-                            color: "#666",
-                            fontSize: "0.9em",
-                            marginLeft: "4px",
-                          }}
-                        >
-                          ({fmt(exp.type)})
-                        </span>
-                      )}
+                      - <strong>{fmt(exp.ex_title)}</strong>
                     </li>
                     <li className={styles.setLi}>{fmt(exp.ex_description)}</li>
-                    <li className={`${styles.setLi} ${styles.dateText}`}>
+                    <li className={styles.setLi}>
                       {formatDate(exp.start_date)} – {formatDate(exp.end_date)}
                     </li>
                   </ul>

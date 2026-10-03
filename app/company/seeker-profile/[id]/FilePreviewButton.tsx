@@ -15,7 +15,11 @@ export default function FilePreviewButton({
 
   return (
     <>
-      <button className={styles.fileBox} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={styles.fileBox}
+        onClick={() => setOpen(true)}
+      >
         ดูไฟล์
       </button>
 
