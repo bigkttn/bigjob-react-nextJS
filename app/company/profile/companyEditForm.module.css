@@ -1,0 +1,149 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+/* แต่ละหมวดเป็นการ์ดพื้นเทาอ่อน */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #ececec;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+.sectionTitle :global(.material-symbols-outlined) {
+  font-size: 20px;
+  color: #555555;
+}
+
+/* สองช่องเคียงกัน จอแคบเรียงลงมา */
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #111111;
+  font-family: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+}
+
+.nameInput {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.textarea {
+  min-height: 110px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.textareaSmall {
+  min-height: 72px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.readonlyWrap {
+  position: relative;
+}
+
+.readonly {
+  padding-right: 38px;
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.lockIcon {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 18px !important;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.mapHint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: -4px 0 0;
+  font-size: 0.78rem;
+  color: #1d6fb8;
+}
+
+.mapHint :global(.material-symbols-outlined) {
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+@media (max-width: 600px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 14px;
+  }
+}

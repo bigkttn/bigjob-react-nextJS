@@ -5,11 +5,14 @@ import { THAI_PROVINCES } from "@/lib/thaiProvinces";
 interface ProvinceSelectProps {
   value: string;
   onChange: (value: string) => void;
+  // ถ้าส่ง class มา จะใช้แทนสไตล์ค่าเริ่มต้นของช่อง input
+  inputClassName?: string;
 }
 
 export default function ProvinceSelect({
   value,
   onChange,
+  inputClassName,
 }: ProvinceSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -49,13 +52,18 @@ export default function ProvinceSelect({
           setSearch(e.target.value);
           setIsOpen(true);
         }}
-        style={{
-          width: "100%",
-          padding: "0.4rem",
-          borderRadius: "4px",
-          border: "1px solid #020202",
-          fontFamily: "inherit",
-        }}
+        className={inputClassName}
+        style={
+          inputClassName
+            ? undefined
+            : {
+                width: "100%",
+                padding: "0.4rem",
+                borderRadius: "4px",
+                border: "1px solid #020202",
+                fontFamily: "inherit",
+              }
+        }
       />
 
       {/* เมนู Dropdown รายการที่ค้นหาเจอ */}

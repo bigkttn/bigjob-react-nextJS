@@ -7,7 +7,7 @@ import styles from "./companyProfile.module.css";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
-import ProvinceSelect from "@/components/ProvinceSelect";
+import CompanyEditForm from "./CompanyEditForm";
 import ReviewSection from "@/components/ReviewSection";
 type LeafletMapProps = {
   lat: number | string | null;
@@ -418,84 +418,53 @@ const CompanyProfile = () => {
           </div>
 
           <div className={styles.infoArea}>
-            <h1 className={styles.companyName}>
-              {!editMode ? (
-                fmt(company.company_name)
-              ) : (
-                <input
-                  type="text"
-                  value={editForm.company_name ?? ""}
-                  onChange={(e) =>
-                    handleFieldChange("company_name", e.target.value)
-                  }
-                  style={{
-                    fontSize: "1.3rem",
-                    fontWeight: "bold",
-                    padding: "0.3rem 0.5rem",
-                    borderRadius: "6px",
-                    border: "1px solid #ccc",
-                    width: "100%",
-                  }}
-                />
-              )}
-              {isVerified ? (
-                <span
-                  className="material-symbols-outlined"
-                  title="บริษัทนี้ผ่านการยืนยันตัวตนแล้ว"
-                  style={{ color: "#1d9bf0" }}
-                >
-                  verified
-                </span>
-              ) : (
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 600,
-                    color: statusColor,
-                    border: `1px solid ${statusColor}`,
-                    borderRadius: "999px",
-                    padding: "2px 10px",
-                    alignSelf: "center",
-                  }}
-                >
-                  {statusLabel}
-                </span>
-              )}
-            </h1>
-
-            {!editMode ? (
-              <p>{fmt(company.brief_history)}</p>
-            ) : (
-              <textarea
-                value={editForm.brief_history ?? ""}
-                onChange={(e) =>
-                  handleFieldChange("brief_history", e.target.value)
-                }
-                style={{
-                  width: "100%",
-                  minHeight: "90px",
-                  padding: "0.5rem",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                  marginTop: "0.5rem",
-                }}
+            {editMode ? (
+              <CompanyEditForm
+                form={editForm}
+                email={company.company_email ?? ""}
+                onChange={handleFieldChange}
               />
-            )}
+            ) : (
+              <>
+                <h1 className={styles.companyName}>
+                  {fmt(company.company_name)}
+                  {isVerified ? (
+                    <span
+                      className="material-symbols-outlined"
+                      title="บริษัทนี้ผ่านการยืนยันตัวตนแล้ว"
+                      style={{ color: "#1d9bf0" }}
+                    >
+                      verified
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        color: statusColor,
+                        border: `1px solid ${statusColor}`,
+                        borderRadius: "999px",
+                        padding: "2px 10px",
+                        alignSelf: "center",
+                      }}
+                    >
+                      {statusLabel}
+                    </span>
+                  )}
+                </h1>
 
-            <hr />
-            <div className={styles.contactGroup}>
-              <h3>ช่องทางการติดต่อและสถานที่ตั้ง</h3>
+                <p>{fmt(company.brief_history)}</p>
 
-              {!editMode ? (
-                <>
+                <hr />
+                <div className={styles.contactGroup}>
+                  <h3>ช่องทางการติดต่อและสถานที่ตั้ง</h3>
                   <p>
                     <strong>ข้อมูลติดต่อ:</strong>{" "}
                     {fmt(company.contact_information)}
                   </p>
                   <p>
-                    <strong>ที่อยู่:</strong> {fmt(company.full_address)}
+                    <strong>รายละเอียดที่อยู่:</strong>{" "}
+                    {fmt(company.full_address)}
                   </p>
                   <p>
                     <strong>จังหวัด:</strong> {fmt(company.province)}
@@ -515,131 +484,9 @@ const CompanyProfile = () => {
                       ? `${company.company_latitude}, ${company.company_longitude}`
                       : "ยังไม่ได้กำหนด"}
                   </p>
-                </>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder="ชื่อผู้ติดต่อ"
-                    value={editForm.contact_information ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("contact_information", e.target.value)
-                    }
-                    style={{
-                      padding: "0.4rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                  <textarea
-                    placeholder="ที่อยู่บริษัท"
-                    value={editForm.full_address ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("full_address", e.target.value)
-                    }
-                    style={{
-                      padding: "0.4rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                      minHeight: "60px",
-                      fontFamily: "inherit",
-                      resize: "vertical",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "0.5rem",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#666",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ละติจูด (Latitude)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="เช่น 13.7563"
-                        value={editForm.company_latitude ?? ""}
-                        onChange={(e) =>
-                          handleFieldChange("company_latitude", e.target.value)
-                        }
-                        style={{
-                          width: "100%",
-                          padding: "0.4rem",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                        }}
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#666",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        ลองจิจูด (Longitude)
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="เช่น 100.5018"
-                        value={editForm.company_longitude ?? ""}
-                        onChange={(e) =>
-                          handleFieldChange("company_longitude", e.target.value)
-                        }
-                        style={{
-                          width: "100%",
-                          padding: "0.4rem",
-                          borderRadius: "4px",
-                          border: "1px solid #ccc",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <p
-                    style={{ fontSize: "0.75rem", color: "#1d9bf0", margin: 0 }}
-                  >
-                    *สามารถแก้ตัวเลขด้านบน หรือคลิก/ลากหมุดบนแผนที่ด้านล่างได้
-                  </p>
-
-                  <ProvinceSelect
-                    value={editForm.province ?? ""}
-                    onChange={(val) => handleFieldChange("province", val)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="เบอร์โทรศัพท์"
-                    value={editForm.mobile_phone ?? ""}
-                    onChange={(e) =>
-                      handleFieldChange("mobile_phone", e.target.value)
-                    }
-                    style={{
-                      padding: "0.4rem",
-                      borderRadius: "4px",
-                      border: "1px solid #ccc",
-                    }}
-                  />
-                  <p style={{ margin: 0, color: "#888" }}>
-                    Email: {fmt(company.company_email)} (ไม่สามารถแก้ไขได้)
-                  </p>
                 </div>
-              )}
-            </div>
+              </>
+            )}
 
             <div
               style={{
