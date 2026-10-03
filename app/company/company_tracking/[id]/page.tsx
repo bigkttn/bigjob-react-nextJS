@@ -34,7 +34,7 @@ export default async function CompanyTracking({params}:PageProps) {
   if(!viewer){
      return (
       <div className={styles.centerMsg}>
-        <p>Please log in to view this profile.</p>
+        <p>กรุณาเข้าสู่ระบบเพื่อดูข้อมูลผู้สมัคร</p>
       </div>
     );
   }

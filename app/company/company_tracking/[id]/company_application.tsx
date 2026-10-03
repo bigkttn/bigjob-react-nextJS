@@ -568,7 +568,7 @@ export default function CompanyApplication({
                           job.profile_image ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(job.fullname || "Seeker")}&background=random`
                         }
-                        alt="seeker profile"
+                        alt="รูปโปรไฟล์ผู้สมัคร"
                         className={styles.profileLeft}
                       />
                       <div className={styles.cardDetails}>
@@ -2099,7 +2099,7 @@ export default function CompanyApplication({
                             selectedJob.profile_image ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedJob.fullname || "Seeker")}`
                           }
-                          alt="profile"
+                          alt="รูปโปรไฟล์"
                           style={{
                             width: "100px",
                             height: "100px",
@@ -2167,39 +2167,39 @@ export default function CompanyApplication({
                         }}
                       >
                         <p style={{ margin: 0 }}>
-                          <strong>Mobile:</strong>{" "}
+                          <strong>เบอร์โทรศัพท์:</strong>{" "}
                           {selectedJob.mobile_phone || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Age:</strong> {selectedJob.age || "-"}
+                          <strong>อายุ:</strong> {selectedJob.age || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Gender:</strong> {selectedJob.gender || "-"}
+                          <strong>เพศ:</strong> {selectedJob.gender || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Nationality:</strong>{" "}
+                          <strong>สัญชาติ:</strong>{" "}
                           {selectedJob.nationality || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Military Status:</strong>{" "}
+                          <strong>สถานะทางทหาร:</strong>{" "}
                           {selectedJob.military_status || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Religion:</strong>{" "}
+                          <strong>ศาสนา:</strong>{" "}
                           {selectedJob.religion || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Weight / Height:</strong>{" "}
+                          <strong>น้ำหนัก / ส่วนสูง:</strong>{" "}
                           {selectedJob.weight
-                            ? `${selectedJob.weight} kg`
+                            ? `${selectedJob.weight} กก.`
                             : "-"}{" "}
                           /{" "}
                           {selectedJob.height
-                            ? `${selectedJob.height} cm`
+                            ? `${selectedJob.height} ซม.`
                             : "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>Current Address:</strong>{" "}
+                          <strong>ที่อยู่ปัจจุบัน:</strong>{" "}
                           {[
                             selectedJob.address,
                             selectedJob.sub_district,
@@ -2900,12 +2900,12 @@ export default function CompanyApplication({
                   <iframe
                     src={previewResume.file_path}
                     style={{ width: "100%", height: "100%", border: "none" }}
-                    title="Resume PDF Preview"
+                    title="ตัวอย่างเรซูเม่ (PDF)"
                   />
                 ) : (
                   <img
                     src={previewResume.file_path}
-                    alt="Resume Preview"
+                    alt="ตัวอย่างเรซูเม่"
                     style={{
                       maxWidth: "100%",
                       maxHeight: "100%",
