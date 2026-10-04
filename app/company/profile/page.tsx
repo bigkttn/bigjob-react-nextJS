@@ -195,7 +195,7 @@ const CompanyProfile = () => {
         setSelectedCertFile(null); // เคลียร์ไฟล์เก่าออกหลังอัปโหลดเสร็จเรียบร้อย
         if (certInputRef.current) certInputRef.current.value = "";
         Swal.fire(
-          "อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง 📄",
+          "อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง",
         );
       } else {
         const errData = await res.json();
@@ -711,7 +711,7 @@ const CompanyProfile = () => {
                 }}
               >
                 {selectedCertFile
-                  ? `📄 เลือกไฟล์: ${selectedCertFile.name}`
+                  ? `เลือกไฟล์: ${selectedCertFile.name}`
                   : "ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์ (PDF, JPG, PNG, DOCX)"}
               </div>
 
