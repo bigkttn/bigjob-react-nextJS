@@ -218,6 +218,13 @@ export default function Navbar() {
 
   const isActive = (path: string) => (pathname === path ? "active" : "");
 
+  // ปุ่มของหน้าที่เปิดอยู่เป็นสีขาว (ทั้งแถบบนและเมนู ☰ บนมือถือ)
+  const guestLinkClass = (href: string, isMobile: boolean) => {
+    const isCurrent = pathname === href;
+    if (isMobile) return isCurrent ? "side-item highlight" : "side-item";
+    return isCurrent ? "nav-btn-primary" : "nav-btn-outline";
+  };
+
   const renderLinks = (isMobile: boolean) => {
     const itemClass = isMobile ? "side-item" : "nav-item";
     const logoutClass = isMobile ? "side-btn-logout" : "nav-btn-logout";
@@ -229,14 +236,14 @@ export default function Navbar() {
           <>
             <Link
               href="/login"
-              className={isMobile ? "side-item" : (pathname === "/login" ? "nav-btn-primary" : "nav-btn-outline")}
+              className={guestLinkClass("/login", isMobile)}
               onClick={onLinkClick}
             >
               เข้าสู่ระบบ
             </Link>
             <Link
               href="/register"
-              className={isMobile ? "side-item highlight" : (pathname === "/register" ? "nav-btn-primary" : "nav-btn-outline")}
+              className={guestLinkClass("/register", isMobile)}
               onClick={onLinkClick}
             >
               สมัครสมาชิก
