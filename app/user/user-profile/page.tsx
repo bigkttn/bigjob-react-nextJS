@@ -12,6 +12,7 @@ import { storage } from "@/lib/firebase";
 import ProvinceSelect from "./province";
 import LevelSelect from "./levelSelect";
 import CountrySelect from "./CountrySelect";
+import Link from "next/link";
 
 /* ================= 1) Type ที่ใช้ในหน้าจอ ================= */
 
@@ -1306,50 +1307,101 @@ const SeekerProfile = () => {
               }}
             >
               {!editMode ? (
-                <button
-                  type="button"
-                  onClick={() => setEditMode(true)}
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    padding: "11px 18px",
-                    backgroundColor: "#111827",
-                    color: "#ffffff",
-                    borderRadius: "999px",
-                    border: "none",
-                    fontSize: "0.92rem",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#374151";
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#111827";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
-                >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(true)}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      padding: "11px 18px",
+                      backgroundColor: "#111827",
+                      color: "#ffffff",
+                      borderRadius: "999px",
+                      border: "none",
+                      fontSize: "0.92rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                      transition: "all 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#374151";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#111827";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }}
                   >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                  แก้ไขโปรไฟล์
-                </button>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    แก้ไขโปรไฟล์
+                  </button>
+                  <Link
+                    href="/user/forgot-password"
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      marginTop: "0.6rem",
+                      padding: "10px 18px",
+                      backgroundColor: "#ffffff",
+                      color: "#111827",
+                      borderRadius: "999px",
+                      border: "1px solid #d1d5db",
+                      fontSize: "0.92rem",
+                      fontWeight: 600,
+                      textDecoration: "none",
+                      boxSizing: "border-box",
+                      transition: "all 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f3f4f6";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#ffffff";
+                    }}
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect
+                        x="3"
+                        y="11"
+                        width="18"
+                        height="11"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    ลืมรหัสผ่าน
+                  </Link>
+                </>
               ) : (
                 <div style={{ display: "flex", gap: "0.6rem" }}>
                   <button
