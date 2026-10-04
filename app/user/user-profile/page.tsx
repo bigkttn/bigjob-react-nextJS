@@ -803,7 +803,8 @@ const SeekerProfile = () => {
         setProfile(payload);
         setForm(payload);
         setEditMode(false);
-        Swal.fire("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
+        // รอให้ผู้ใช้กดปิด alert ก่อน แล้วค่อยรีโหลดหน้า
+        await Swal.fire("บันทึกการเปลี่ยนแปลงโปรไฟล์เรียบร้อยแล้ว!");
         window.location.reload();
       } else {
         const data: { error?: string } = await res.json();
