@@ -759,8 +759,10 @@ export default function CompanyApplication({
                           border: "1.5px solid #2e7d32",
                           boxShadow:
                             "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
-                          width: "100%",
-                          maxWidth: "240px",
+                          // ล็อกความกว้างไว้ ให้ On-site กับ Online การ์ดเท่ากัน
+                          // (เดิมเป็น 100% ของกล่องแม่ที่กว้างตามเนื้อหา)
+                          width: "240px",
+                          maxWidth: "100%",
                           boxSizing: "border-box",
                           textAlign: "left",
                         }}
