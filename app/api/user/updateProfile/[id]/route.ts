@@ -1,10 +1,22 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { getSessionUser, isAdmin } from '@/lib/auth';
 
 export async function PUT(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // แก้ได้เฉพาะโปรไฟล์ของตัวเอง (หรือแอดมิน)
+    const { id: idParam } = await params;
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) {
+        return NextResponse.json({ error: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+    }
+    const isOwner = sessionUser.role !== 'company' && sessionUser.id === Number(idParam);
+    if (!isOwner && !isAdmin(sessionUser)) {
+        return NextResponse.json({ error: 'ไม่มีสิทธิ์แก้ไขโปรไฟล์นี้' }, { status: 403 });
+    }
+
     const connection = await db.getConnection();
     try {
         const resolvedParams = await params;

@@ -8,6 +8,7 @@ import ProfileActionsButton from "./ProfileActionsButton";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
 import ApplySeeker from "./apply-seeker";
+import { sessionCookieHeader } from "@/lib/auth";
 import { apiUrl } from "@/lib/hostURL";
 import { redirect } from "next/navigation";
 
@@ -68,6 +69,7 @@ interface CompanyProfile {
 
 async function getSeekerProfile(userId: string) {
   const res = await fetch(`${apiUrl}/api/user/getUserById/${userId}`, {
+    headers: await sessionCookieHeader(),
     cache: "no-store",
   });
   if (!res.ok) return null;

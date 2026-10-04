@@ -7,6 +7,7 @@ import BackButton from "./backBttn";
 import AdminButton from "./adminbutton";
 import BanPopup from "./BanPopup";
 import ApplyCompany from "./apply-company";
+import { sessionCookieHeader } from "@/lib/auth";
 import { apiUrl } from "@/lib/hostURL";
 import { redirect } from "next/navigation";
 
@@ -75,6 +76,7 @@ export default async function DetailJob({ params }: PageProps) {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            ...(await sessionCookieHeader()),
           },
           cache: "no-store",
         },
@@ -111,6 +113,7 @@ export default async function DetailJob({ params }: PageProps) {
     const jobResponse = await fetch(
       `${apiUrl}/api/posts/getPostById/${postId}`,
       {
+        headers: await sessionCookieHeader(),
         cache: "no-store",
       },
     );
@@ -140,6 +143,7 @@ export default async function DetailJob({ params }: PageProps) {
       const companyResponse = await fetch(
         `${apiUrl}/api/company/getCompanyById/${job.company_id}`,
         {
+          headers: await sessionCookieHeader(),
           cache: "no-store",
         },
       );

@@ -1,6 +1,7 @@
 import styles from "./seeker_tracking.module.css";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { sessionCookieHeader } from "@/lib/auth";
 import { apiUrl } from "@/lib/hostURL";
 import SeekerApplication, { Recruiter } from "./seeker_application";
 
@@ -42,6 +43,7 @@ export default async function SeekerTracking({ params }: PageProps) {
     const res = await fetch(
       `${apiUrl}/api/interview_tracking/GetByUser/${userId}`,
       {
+        headers: await sessionCookieHeader(),
         cache: "no-store",
       },
     );

@@ -1,6 +1,7 @@
 // 📂 วางไฟล์นี้ที่: app/api/company/updateProfile/[id]/route.ts (ทับไฟล์เดิม)
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { getSessionUser, isAdmin } from "@/lib/auth";
 
 // ฟิลด์ที่ "อนุญาต" ให้บริษัทแก้ไขเองได้จากหน้าโปรไฟล์
 // 🆕 เพิ่ม dbd_file เข้ามา เพราะบริษัทต้องอัปโหลดหนังสือรับรองได้เอง
@@ -37,6 +38,20 @@ export async function PUT(
       return NextResponse.json(
         { error: "Missing company id" },
         { status: 400 },
+      );
+    }
+
+    // แก้ได้เฉพาะโปรไฟล์บริษัทของตัวเอง (หรือแอดมิน)
+    const sessionUser = await getSessionUser();
+    if (!sessionUser) {
+      return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
+    }
+    const isOwner =
+      sessionUser.role === "company" && sessionUser.id === Number(companyId);
+    if (!isOwner && !isAdmin(sessionUser)) {
+      return NextResponse.json(
+        { error: "ไม่มีสิทธิ์แก้ไขโปรไฟล์นี้" },
+        { status: 403 },
       );
     }
 
