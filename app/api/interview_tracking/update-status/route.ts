@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import nodemailer from 'nodemailer';
+import { apiUrl } from '@/lib/hostURL';
+import { getSessionUser, isAdmin } from '@/lib/auth';
+import { getTrackingContact } from '@/lib/trackingContext';
 
 export async function PATCH(req: NextRequest) {
+  const sessionUser = await getSessionUser();
+  if (!sessionUser) {
+    return NextResponse.json({ message: 'กรุณาเข้าสู่ระบบ' }, { status: 401 });
+  }
+
   try {
     const { 
       trackingId, 
       status, 
-      companyEmail, 
-      seekerEmail, 
-      companyName, 
-      seekerName, 
-      jobTitle,
       interviewDate, 
       interviewTime, 
       locationName, 
@@ -23,6 +26,25 @@ export async function PATCH(req: NextRequest) {
     if (!trackingId || !status) {
       return NextResponse.json({ message: 'กรุณาระบุ trackingId และ status' }, { status: 400 });
     }
+
+    // ดึงผู้เกี่ยวข้องจากฐานข้อมูล (ไม่เชื่อชื่อ/อีเมลที่ client ส่งมา)
+    const contact = await getTrackingContact(Number(trackingId));
+    if (!contact) {
+      return NextResponse.json({ message: 'ไม่พบใบสมัครนี้' }, { status: 404 });
+    }
+
+    // เปลี่ยนสถานะได้เฉพาะผู้สมัครเจ้าของใบสมัคร หรือบริษัทเจ้าของตำแหน่งงาน
+    const isSeekerOwner = sessionUser.role !== 'company' && sessionUser.id === contact.user_id;
+    const isCompanyOwner = sessionUser.role === 'company' && sessionUser.id === contact.post.company_id;
+    if (!isSeekerOwner && !isCompanyOwner && !isAdmin(sessionUser)) {
+      return NextResponse.json({ message: 'ไม่มีสิทธิ์แก้ไขใบสมัครนี้' }, { status: 403 });
+    }
+
+    const companyEmail = contact.post.company_email;
+    const companyName = contact.post.company_name;
+    const jobTitle = contact.post.job_position;
+    const seekerEmail = contact.seeker.email;
+    const seekerName = contact.seeker.fullname;
 
     let updateSql = `UPDATE interview_tracking SET status = ?`;
     let queryParams = [status];
@@ -66,7 +88,7 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    const platformLink = "https://www.bigjobs.com/tracking";
+    const platformLink = apiUrl;
 
     let mailSubject = '';
     let mailBody = '';
@@ -111,13 +133,18 @@ export async function PATCH(req: NextRequest) {
       mailBody = `ระบบขอแจ้งให้ทราบว่า กระบวนการสมัครงานตำแหน่ง ${jobTitle} ระหว่างคุณ ${seekerName || 'ผู้สมัคร'} และบริษัท ${companyName} ได้ถูกปฏิเสธหรือยกเลิกแล้ว\n\nตรวจสอบรายละเอียด: ${platformLink}`;
     }
 
+    // ส่งอีเมลไม่ผ่านไม่ควรทำให้คำขอล้ม เพราะอัปเดตสถานะไปแล้ว
     if (targetEmail && mailSubject) {
-      await transporter.sendMail({
-        from: `"BigJobs System" <no-reply@yourdomain.com>`,
-        to: targetEmail,
-        subject: mailSubject,
-        text: mailBody,
-      });
+      try {
+        await transporter.sendMail({
+          from: `"BigJobs System" <${process.env.EMAIL_USER}>`,
+          to: targetEmail,
+          subject: mailSubject,
+          text: mailBody,
+        });
+      } catch (mailError) {
+        console.error('Send email failed:', mailError);
+      }
     }
 
     return NextResponse.json({ success: true, message: 'อัปเดตสถานะสำเร็จ' }, { status: 200 });
