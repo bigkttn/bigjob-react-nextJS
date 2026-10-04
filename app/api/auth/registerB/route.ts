@@ -3,12 +3,20 @@ import db from "@/lib/db";
 import bcrypt from 'bcryptjs';
 import { createSession } from "@/lib/session";
 import { otpStore } from "@/lib/otpStore";
+import { verifyRecaptcha } from "@/lib/recaptcha";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
 
-        const { email, password, userType, fullname, company_name, business_type, contact_name, mobile_phone, otpCode } = body;
+        const { email, password, userType, fullname, company_name, business_type, contact_name, mobile_phone, otpCode, captchaToken } = body;
+
+        //  0. ตรวจ reCAPTCHA กับ Google ก่อน (กัน bot ยิง API ตรงโดยไม่ผ่านหน้าเว็บ)
+        const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim();
+        const isHuman = await verifyRecaptcha(captchaToken, ip);
+        if (!isHuman) {
+            return NextResponse.json({ message: "การยืนยัน reCAPTCHA ไม่ผ่าน กรุณาติ๊กช่องยืนยันใหม่อีกครั้ง" }, { status: 400 });
+        }
 
         //  1. เริ่มส่วนตรวจสอบ OTP (เอาโค้ดที่เคยส่งมาปรับใช้)
         const storedOtpData = otpStore.get(email);
@@ -81,7 +89,7 @@ export async function POST(request: NextRequest) {
         // 5. สร้าง Session
         await createSession({ id: sessionId, email: email, role: role });
 
-        // 🧹 6. เคลียร์ OTP ทิ้งหลังจากสมัครสมาชิกสำเร็จแล้ว! (สำคัญมาก ป้องกันคนเอารหัสเดิมมาใช้ซ้ำ)
+        //  6. เคลียร์ OTP ทิ้งหลังจากสมัครสมาชิกสำเร็จแล้ว! (สำคัญมาก ป้องกันคนเอารหัสเดิมมาใช้ซ้ำ)
         otpStore.delete(email);
 
         return NextResponse.json({

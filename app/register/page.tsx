@@ -1,6 +1,6 @@
 "use client";
 import { showAlert } from "@/lib/customAlert";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -11,6 +11,7 @@ const Register = () => {
 
   const [userType, setUserType] = useState<"seeker" | "company">("seeker");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [otpCode, setOtpCode] = useState("");
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [isLoadingOtp, setIsLoadingOtp] = useState(false);
@@ -84,9 +85,7 @@ const Register = () => {
   }, [userType]);
 
   const handleGoogleCredentialResponse = async (response: any) => {
-    /* console.log("Google Token:", response.credential) */;
-
-    let payload: any = {
+    /* console.log("Google Token:", response.credential) */ let payload: any = {
       token: response.credential,
       userType: userType,
     };
@@ -247,6 +246,7 @@ const Register = () => {
       contact_name: registerData.contactName,
       mobile_phone: registerData.phone,
       otpCode: otpCode, // 👈 เพิ่มบรรทัดนี้ เพื่อส่ง OTP ไปให้หลังบ้านเช็ค!
+      captchaToken: captchaToken, // ส่งให้หลังบ้านตรวจกับ Google
     };
 
     try {
@@ -273,6 +273,9 @@ const Register = () => {
           window.location.replace("/company/company-home");
         }
       } else {
+        // token ของ reCAPTCHA ใช้ได้ครั้งเดียว ต้องให้ติ๊กใหม่ก่อนส่งอีกรอบ
+        recaptchaRef.current?.reset();
+        setCaptchaToken(null);
         showAlert.error(
           "แจ้งเตือน",
           "Registration Failed: " + (data.message || "Something went wrong"),
@@ -580,10 +583,12 @@ const Register = () => {
               {/* ReCaptcha */}
               <div style={{ padding: "10px 0" }}>
                 <ReCAPTCHA
+                  ref={recaptchaRef}
                   sitekey={
                     process.env.NEXT_PUBLIC_GOOGLE_RECAPTCHA_SITE_KEY || ""
                   }
                   onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
                 />
               </div>
 
