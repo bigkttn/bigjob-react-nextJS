@@ -20,3 +20,19 @@ export const otpStore =
 if (process.env.NODE_ENV !== "production") {
     globalForOtp.otpStore = otpStore;
 }
+
+// ลบ OTP ออกจาก memory เมื่อหมดอายุจริง
+// - ถ้าผู้ใช้ขอ OTP ใหม่ (hash เปลี่ยน) หรือถูกลบไปแล้ว ไม่ต้องทำอะไร
+// - ถ้า verify-otp ต่อเวลาไปแล้ว ให้รอจนถึงเวลาหมดอายุใหม่แล้วเช็กอีกรอบ
+export function scheduleOtpCleanup(email: string, otpHash: string) {
+    const data = otpStore.get(email);
+    if (!data || data.otp_code !== otpHash) return;
+
+    const remaining = data.expires_at - Date.now();
+    if (remaining <= 0) {
+        otpStore.delete(email);
+        return;
+    }
+
+    setTimeout(() => scheduleOtpCleanup(email, otpHash), remaining);
+}

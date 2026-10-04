@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { otpStore } from "@/lib/otpStore"; // นำเข้า temp table ของเรา
+import { otpStore, scheduleOtpCleanup } from "@/lib/otpStore"; // นำเข้า temp table ของเรา
 import nodemailer from "nodemailer";
 import { rateLimit } from "@/lib/rateLimit";
 import bcrypt from "bcryptjs";
@@ -74,14 +74,9 @@ export async function POST(req: NextRequest) {
                   </div>`
         });
 
-        // 3. ตั้งเวลาลบทิ้งเมื่อครบ 5 นาที (เพื่อเคลียร์ Memory)
-        setTimeout(() => {
-            // เช็คก่อนลบ เผื่อเขากดขอใหม่ รหัสจะเปลี่ยนไปแล้ว
-            const currentData = otpStore.get(email);
-            if (currentData && currentData.otp_code === otpHash) {
-                otpStore.delete(email);
-            }
-        }, 5 * 60 * 1000);
+        // 3. ตั้งเวลาลบทิ้งเมื่อหมดอายุ (เพื่อเคลียร์ Memory)
+        // เช็กเวลาหมดอายุจริงก่อนลบ เพราะ verify-otp อาจต่อเวลาเป็น 30 นาทีแล้ว
+        scheduleOtpCleanup(email, otpHash);
 
         return NextResponse.json({ message: 'ส่ง OTP สำเร็จ' }, { status: 200 });
 
