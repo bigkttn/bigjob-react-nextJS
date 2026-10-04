@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import { cookies } from "next/headers"; //
 import jwt from "jsonwebtoken";
+import { omitEmbeddings } from "@/lib/omitEmbedding";
 export async function GET(request: NextRequest) {
     try {
         const cookieStore = await cookies();
@@ -27,7 +28,7 @@ export async function GET(request: NextRequest) {
              ORDER BY created_at DESC`,
             [company_id]
         );
-        return NextResponse.json(rows, { status: 200 });
+        return NextResponse.json(omitEmbeddings(rows as { embedding?: unknown }[]), { status: 200 });
     } catch (error) {
         return NextResponse.json({ message: "Error fetching posts" }, { status: 500 });
     }

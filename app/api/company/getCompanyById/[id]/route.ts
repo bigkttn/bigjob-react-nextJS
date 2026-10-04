@@ -1,6 +1,7 @@
 // 📂 วางไฟล์นี้ที่: app/api/company/getCompanyById/[id]/route.ts
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { omitEmbeddings } from "@/lib/omitEmbedding";
 
 export async function GET(
     request: Request,
@@ -53,7 +54,7 @@ export async function GET(
             [companyId]
         );
 
-        return NextResponse.json({ company, posts, reviews }, { status: 200 });
+        return NextResponse.json({ company, posts: omitEmbeddings(posts), reviews }, { status: 200 });
     } catch (error: any) {
         console.error("Database Error:", error);
         return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { omitEmbeddings } from "@/lib/omitEmbedding";
 
 export async function GET(request: NextRequest) {
     try {
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
         `;
 
         const [posts]: any = await db.query(sql, params);
-        return NextResponse.json({ posts }, { status: 200 });
+        return NextResponse.json({ posts: omitEmbeddings(posts) }, { status: 200 });
 
     } catch (error) {
         console.error("Fetch posts API error:", error);

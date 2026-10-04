@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import db from '@/lib/db';
+import { omitEmbedding } from "@/lib/omitEmbedding";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -23,7 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ message: 'Post not found' }, { status: 404 });
         }
 
-        return NextResponse.json(posts[0], { status: 200 });
+        return NextResponse.json(omitEmbedding(posts[0]), { status: 200 });
 
     } catch (error) {
         // ถ้า Token หมดอายุหรือผิดพลาด ให้มองว่าไม่ได้ล็อกอิน

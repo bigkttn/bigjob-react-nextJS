@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getEmbedding, cosineSimilarity } from "@/lib/vectorSimilarity";
+import { omitEmbeddings } from "@/lib/omitEmbedding";
 
 export async function GET(request: Request) {
     try {
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
                 ORDER BY p.created_at DESC 
                 LIMIT 6
             `);
-            return NextResponse.json({ success: true, posts: latestPosts });
+            return NextResponse.json({ success: true, posts: omitEmbeddings(latestPosts) });
         }
 
         // ถ้ามีข้อมูล JobTitle ให้คำนวณความคล้ายคลึงด้วย AI Vector
@@ -80,7 +81,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             success: true,
-            posts: sortedPosts,
+            posts: omitEmbeddings(sortedPosts),
         });
     } catch (error: any) {
         console.error("AI Matching Error:", error);

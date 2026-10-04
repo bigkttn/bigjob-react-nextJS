@@ -6,6 +6,7 @@ import {
   cosineSimilarity,
   hashOf,
 } from "@/lib/vectorSimilarity";
+import { omitEmbedding, omitEmbeddings } from "@/lib/omitEmbedding";
 
 function normalizeText(text: string): string {
   return (text || "").toLowerCase().replace(/[-_]+/g, "").replace(/\s+/g, " ").trim();
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest) {
         ORDER BY p.created_at DESC LIMIT 30`;
 
       const [latest]: any = await db.query(sql, filterParams);
-      return NextResponse.json({ success: true, posts: latest });
+      return NextResponse.json({ success: true, posts: omitEmbeddings(latest) });
     }
 
     const normalizedQuery = normalizeText(rawQuery);
@@ -212,8 +213,7 @@ export async function GET(request: NextRequest) {
       const vectorBonus = vectorScore > 0.45 ? (vectorScore - 0.45) * 1.2 : 0;
 
       return {
-        ...post,
-        embedding: undefined,
+        ...omitEmbedding(post),
         matchScore: Number((keywordScore + vectorBonus).toFixed(4)),
       };
     });
