@@ -76,12 +76,13 @@ export default function ApplySeeker({
           (job) => !takenPostIds.includes(Number(job.post_id))
         );
 
-        if (postId) {
+        if (mode === 'invite' && companyJobs.length > 0) {
+          // โหมดเชิญเลือกตำแหน่งได้ในฟอร์ม: ปุ่มด้านนอกเป็นสีเทาเมื่อเชิญครบทุกตำแหน่งแล้วเท่านั้น
+          // (เดิมเช็ก postId ก่อน ซึ่งเป็นโพสต์แรกของบริษัทเสมอ ทำให้กดเชิญไม่ได้ทั้งที่ยังมีตำแหน่งอื่น)
+          setIsActioned(remainingJobs.length === 0);
+        } else if (postId) {
           // หากดูเจาะจงเฉพาะตำแหน่ง
           setIsActioned(takenPostIds.includes(Number(postId)));
-        } else if (mode === 'invite' && companyJobs.length > 0) {
-          // ปุ่มด้านนอกกลายเป็นสีเทา (isActioned = true) เมื่อเชิญครบทุกตำแหน่งที่มีแล้วเท่านั้น
-          setIsActioned(remainingJobs.length === 0);
         } else {
           setIsActioned(false);
         }
@@ -102,6 +103,14 @@ export default function ApplySeeker({
 
     return () => window.clearTimeout(timeoutId);
   }, [checkStatus]);
+
+  // ค่าเริ่มต้นในฟอร์มเชิญ: ตำแหน่งแรกที่ยังไม่เคยเชิญ/สมัคร
+  const firstOpenJob =
+    mode === 'invite'
+      ? companyJobs.find((job) => !existingPostIds.includes(Number(job.post_id)))
+      : undefined;
+  const defaultPostId = firstOpenJob ? firstOpenJob.post_id : postId;
+  const defaultJobTitle = firstOpenJob ? firstOpenJob.job_position : jobTitle;
 
   const handleCloseModal = () => {
     void checkStatus();
@@ -129,12 +138,12 @@ export default function ApplySeeker({
         mode={mode}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        postId={postId || 0}
+        postId={defaultPostId || 0}
         userId={userId}
         companyId={companyId}
         companyName={companyName}
         seekerName={seekerName}
-        jobTitle={jobTitle}
+        jobTitle={defaultJobTitle}
         seekerEmail={seekerEmail}
         companyEmail={companyEmail}
         companyJobs={companyJobs}
