@@ -2,13 +2,10 @@
 import Swal from "sweetalert2";
 import React, { useEffect, useState } from "react";
 import styles from "./seekerProfile.module.css";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import { deleteStorageFile } from "@/lib/storageFile";
+import { showAlert } from "@/lib/customAlert";
 import ProvinceSelect from "./province";
 import LevelSelect from "./levelSelect";
 import CountrySelect from "./CountrySelect";
@@ -855,9 +852,13 @@ const SeekerProfile = () => {
   async function uploadAvatar(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files ? event.target.files[0] : null;
     if (!file || userId === "") return;
+    event.target.value = "";
+
+    const oldUrl = profile.profile_image;
 
     try {
       setSaving(true);
+      showAlert.loading("กำลังอัปโหลดรูปโปรไฟล์...");
       const path = `user_avatars/${userId}_${Date.now()}_${file.name}`;
       const result = await uploadBytes(ref(storage, path), file);
       const url = await getDownloadURL(result.ref);
@@ -868,13 +869,17 @@ const SeekerProfile = () => {
         body: JSON.stringify({ ...profile, profile_image: url }),
       });
 
-      if (res.ok) {
-        setProfile({ ...profile, profile_image: url });
-        setForm({ ...form, profile_image: url });
-        Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว!");
-      } else {
+      if (!res.ok) {
+        // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
+        await deleteStorageFile(url);
         Swal.fire("เกิดข้อผิดพลาดในการบันทึกรูปภาพลงระบบ");
+        return;
       }
+
+      setProfile({ ...profile, profile_image: url });
+      setForm({ ...form, profile_image: url });
+      await deleteStorageFile(oldUrl);
+      Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว!");
     } catch (err: unknown) {
       Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
@@ -900,6 +905,7 @@ const SeekerProfile = () => {
 
     try {
       setUploadingCategory(category);
+      showAlert.loading("กำลังอัปโหลดไฟล์...");
       const path = `user_documents/${userId}/${category}_${Date.now()}_${file.name}`;
       const result = await uploadBytes(ref(storage, path), file);
       const url = await getDownloadURL(result.ref);
@@ -916,27 +922,31 @@ const SeekerProfile = () => {
         }),
       });
 
-      if (res.ok) {
-        const data: { file?: FileRecord } = await res.json();
-        const newFile: FileRecord = data.file ?? {
-          file_id: Date.now(),
-          file_path: url,
-          file_name: file.name,
-          file_type: file.type,
-          file_category: category,
-        };
-        setProfile((prev) => ({
-          ...prev,
-          files: [newFile, ...prev.files],
-        }));
-        setForm((prev) => ({
-          ...prev,
-          files: [newFile, ...prev.files],
-        }));
-      } else {
+      if (!res.ok) {
+        // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
+        await deleteStorageFile(url);
         const data: { error?: string } = await res.json();
         Swal.fire(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
+        return;
       }
+
+      const data: { file?: FileRecord } = await res.json();
+      const newFile: FileRecord = data.file ?? {
+        file_id: Date.now(),
+        file_path: url,
+        file_name: file.name,
+        file_type: file.type,
+        file_category: category,
+      };
+      setProfile((prev) => ({
+        ...prev,
+        files: [newFile, ...prev.files],
+      }));
+      setForm((prev) => ({
+        ...prev,
+        files: [newFile, ...prev.files],
+      }));
+      showAlert.close();
     } catch (err: unknown) {
       Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
     } finally {
@@ -957,27 +967,26 @@ const SeekerProfile = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await deleteObject(ref(storage, filePath));
-    } catch (err: unknown) {
-      console.warn("ลบไฟล์คลาวด์ไม่ได้", err);
-    }
-
-    try {
+      showAlert.loading("กำลังลบไฟล์...");
+      // ลบแถวใน DB ก่อน ถ้าพลาดไฟล์ใน Firebase จะยังใช้งานได้
       const res = await fetch(`/api/user/deleteFileRecord?file_id=${fileId}`, {
         method: "DELETE",
       });
-      if (res.ok) {
-        setProfile((prev) => ({
-          ...prev,
-          files: prev.files.filter((f) => f.file_id !== fileId),
-        }));
-        setForm((prev) => ({
-          ...prev,
-          files: prev.files.filter((f) => f.file_id !== fileId),
-        }));
-      } else {
+      if (!res.ok) {
         Swal.fire("ไม่สามารถลบแถวข้อมูลได้");
+        return;
       }
+
+      await deleteStorageFile(filePath);
+      setProfile((prev) => ({
+        ...prev,
+        files: prev.files.filter((f) => f.file_id !== fileId),
+      }));
+      setForm((prev) => ({
+        ...prev,
+        files: prev.files.filter((f) => f.file_id !== fileId),
+      }));
+      showAlert.close();
     } catch (err: unknown) {
       Swal.fire(`การลบล้มเหลว: ${getErrorText(err)}`);
     }

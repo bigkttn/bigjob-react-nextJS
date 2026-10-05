@@ -46,4 +46,16 @@ export const showAlert = {
       buttonsStyling: true,
     });
   },
+  // ตัวโหลดระหว่างทำงาน ปิดเองไม่ได้ ต้องเรียก showAlert.close() หรือเปิด alert อื่นทับ
+  loading: (title: string) => {
+    Swal.fire({
+      title,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      customClass: { popup: "premium-swal-popup" },
+      didOpen: () => Swal.showLoading(),
+    });
+  },
+  close: () => Swal.close(),
 };

@@ -1,13 +1,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 
+// ค่า config อยู่ใน .env.local (ต้องขึ้นต้นด้วย NEXT_PUBLIC_ เพราะใช้ฝั่งเบราว์เซอร์)
 const firebaseConfig = {
-    apiKey: "AIzaSyAk2I99JX5T7AR_E5Ex5sTEu5wxjmMTPrk",
-    authDomain: "bigjobs-72ba5.firebaseapp.com",
-    projectId: "bigjobs-72ba5",
-    storageBucket: "bigjobs-72ba5.firebasestorage.app",
-    messagingSenderId: "399284261906",
-    appId: "1:399284261906:web:b5ef97eac4e36ab841f4cb"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // ป้องกันการ Initialize ซ้ำซ้อนในโหมด Dev ของ Next.js (Fast Refresh)

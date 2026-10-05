@@ -7,6 +7,8 @@ import styles from "./companyProfile.module.css";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase";
+import { deleteStorageFile } from "@/lib/storageFile";
+import { showAlert } from "@/lib/customAlert";
 import CompanyEditForm from "./CompanyEditForm";
 import ReviewSection from "@/components/ReviewSection";
 type LeafletMapProps = {
@@ -107,9 +109,13 @@ const CompanyProfile = () => {
   ) => {
     const file = event.target.files?.[0];
     if (!file || !sessionUser?.id) return;
+    event.target.value = "";
+
+    const oldUrl: string | null = company?.[targetField] ?? null;
 
     try {
       setSaving(true);
+      showAlert.loading("กำลังอัปโหลดรูปภาพ...");
       const filePath = `company_images/${sessionUser.id}_${targetField}_${Date.now()}_${file.name}`;
       const storageRef = ref(storage, filePath);
       const uploadResult = await uploadBytes(storageRef, file);
@@ -121,12 +127,17 @@ const CompanyProfile = () => {
         body: JSON.stringify({ [targetField]: downloadURL }),
       });
 
-      if (res.ok) {
-        setCompany((prev: any) => ({ ...prev, [targetField]: downloadURL }));
-        setEditForm((prev: any) => ({ ...prev, [targetField]: downloadURL }));
-      } else {
+      if (!res.ok) {
+        // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
+        await deleteStorageFile(downloadURL);
         Swal.fire("เกิดข้อผิดพลาดในการบันทึกรูปภาพ");
+        return;
       }
+
+      setCompany((prev: any) => ({ ...prev, [targetField]: downloadURL }));
+      setEditForm((prev: any) => ({ ...prev, [targetField]: downloadURL }));
+      await deleteStorageFile(oldUrl);
+      showAlert.close();
     } catch (err: any) {
       Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
     } finally {
@@ -175,8 +186,11 @@ const CompanyProfile = () => {
   const handleCertUpload = async () => {
     if (!selectedCertFile || !sessionUser?.id) return;
 
+    const oldUrl: string | null = company?.dbd_file ?? null;
+
     try {
       setUploadingCert(true);
+      showAlert.loading("กำลังส่งไฟล์...");
       const filePath = `company_documents/${sessionUser.id}_dbd_${Date.now()}_${selectedCertFile.name}`;
       const storageRef = ref(storage, filePath);
       const uploadResult = await uploadBytes(storageRef, selectedCertFile);
@@ -188,19 +202,21 @@ const CompanyProfile = () => {
         body: JSON.stringify({ dbd_file: downloadURL }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setCompany(data.company);
-        setEditForm(JSON.parse(JSON.stringify(data.company)));
-        setSelectedCertFile(null); // เคลียร์ไฟล์เก่าออกหลังอัปโหลดเสร็จเรียบร้อย
-        if (certInputRef.current) certInputRef.current.value = "";
-        Swal.fire(
-          "อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง",
-        );
-      } else {
+      if (!res.ok) {
+        // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
+        await deleteStorageFile(downloadURL);
         const errData = await res.json();
         Swal.fire(errData.error || "เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
+        return;
       }
+
+      const data = await res.json();
+      setCompany(data.company);
+      setEditForm(JSON.parse(JSON.stringify(data.company)));
+      setSelectedCertFile(null); // เคลียร์ไฟล์เก่าออกหลังอัปโหลดเสร็จเรียบร้อย
+      if (certInputRef.current) certInputRef.current.value = "";
+      await deleteStorageFile(oldUrl);
+      Swal.fire("อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง");
     } catch (err: any) {
       Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
     } finally {
