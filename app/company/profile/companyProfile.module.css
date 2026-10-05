@@ -299,3 +299,102 @@
   justify-content: center;
   margin: 0 auto 15px auto;
 }
+/* ปุ่มแก้ไขโปรไฟล์ / บันทึก / ยกเลิก
+ * จอใหญ่: อยู่ในการ์ดโปรไฟล์ (desktopActions)
+ * มือถือ: ย้ายไปใต้แผนที่ (mobileActions) จะได้ปักหมุดก่อนแล้วค่อยกดบันทึก
+ */
+.desktopActions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mobileActions {
+  display: none;
+}
+
+/* ================= มือถือ / แท็บเล็ต ================= */
+@media (max-width: 768px) {
+  /* ซ้าย (โปรไฟล์ + แผนที่) / ขวา (เอกสาร + งาน + รีวิว) → เรียงลงมา */
+  .container {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px;
+  }
+
+  .leftSection,
+  .rightSection {
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .banner {
+    height: 160px;
+  }
+
+  .logoWrapper {
+    margin-top: -48px;
+    padding-left: 16px;
+  }
+
+  .logo {
+    width: 96px;
+    height: 96px;
+  }
+
+  .infoArea {
+    padding: 10px 16px 16px;
+    overflow-wrap: anywhere;
+  }
+
+  .companyName {
+    font-size: 20px;
+  }
+
+  .mapWrapper {
+    height: 280px;
+  }
+
+  .desktopActions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: block;
+  }
+
+  .VerifiedConfirm {
+    padding: 16px;
+  }
+
+  .jobScrollArea {
+    height: auto;
+    max-height: 60vh;
+    padding-right: 0;
+  }
+
+  /* ปุ่ม "แก้ไข" ลอยมุมขวาล่างของการ์ด เว้นที่ด้านล่างไว้ไม่ให้ทับข้อความ */
+  .jobCard {
+    padding: 12px 12px 48px;
+    gap: 12px;
+  }
+
+  .jobCard img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .reviewSection {
+    padding: 16px;
+  }
+
+  .modalContent {
+    width: calc(100% - 16px);
+    height: 90%;
+  }
+
+  .modalHeader {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+}

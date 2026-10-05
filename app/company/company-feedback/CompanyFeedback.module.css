@@ -186,3 +186,17 @@
     max-height: 70vh;
   }
 }
+
+/* มือถือ: ลดระยะขอบให้ฟอร์มกับประวัติกว้างขึ้น */
+@media (max-width: 768px) {
+  .container {
+    gap: 16px;
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+
+  .leftPanel,
+  .rightPanel {
+    padding: 20px 16px;
+  }
+}

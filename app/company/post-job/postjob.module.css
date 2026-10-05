@@ -526,3 +526,80 @@
 .addOptBtn:hover {
   background: #f3f4f6;
 }
+
+/* ================= มือถือ / แท็บเล็ต =================
+ * ฟอร์มเรียงคอลัมน์เดียวอยู่แล้ว (ด้านบน) ส่วนนี้แก้ช่องกรอกที่กว้างตายตัว 300–350px
+ * ให้กว้างเต็มพื้นที่แทน จะได้ไม่ล้นจอแคบ
+ */
+@media (max-width: 768px) {
+  .postContainer,
+  .container {
+    margin: 12px;
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .postHeader,
+  .headerRow {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .postForm {
+    gap: 20px;
+  }
+
+  /* label อยู่บน ช่องกรอกอยู่ล่าง */
+  .inputGroupInline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .inputGroupInline label {
+    width: auto;
+  }
+
+  .inputGroupInline input {
+    min-width: 0;
+  }
+
+  .inputGroupFull,
+  .inputGroupFull2 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .inputGroupFull textarea,
+  .inputGroupFull2 textarea,
+  .selectInput,
+  .dateInput {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* การ์ดโพสต์ของฉัน (เลื่อนแนวนอน) */
+  .postMiniCard {
+    min-width: 220px;
+  }
+
+  /* ตัวสร้างข้อสอบ */
+  .instruction {
+    max-width: none;
+  }
+
+  .mainInput {
+    min-width: 0;
+  }
+
+  .optionsBox,
+  .testCardFooter {
+    margin-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .optionsBox {
+    padding: 12px;
+  }
+}

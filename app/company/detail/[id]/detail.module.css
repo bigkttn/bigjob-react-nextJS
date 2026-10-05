@@ -443,3 +443,133 @@
 .backBtn .spanMother2 span:nth-child(6) {
   transition: 0.7s;
 }
+
+/* ===== แถวควบคุมบนสุด: ย้อนกลับ | แท็บโหมด | บันทึก ===== */
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 30px;
+}
+
+.modeTabs {
+  display: flex;
+  background: #f3f4f6;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ================= มือถือ / แท็บเล็ต =================
+ * ตามแบบหน้ารายละเอียดงานฝั่งผู้ใช้ (app/user/user-detail-job/[id]/detailjob.module.css)
+ */
+@media (max-width: 768px) {
+  /* .container ถูกประกาศ 2 ครั้งในไฟล์นี้ ชุดล่างชนะ จึงทับให้ครบทั้ง padding และ margin */
+  .container {
+    padding: 16px 12px;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+  }
+
+  .card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  /* แถวบน: ย้อนกลับซ้าย บันทึกขวา แท็บโหมดลงไปเต็มบรรทัดถัดไป */
+  .topBar {
+    flex-wrap: wrap;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+  }
+
+  .modeTabs {
+    order: 3;
+    width: 100%;
+  }
+
+  /* ปุ่มแท็บกำหนด padding แบบ inline ไว้ ต้องใช้ !important ทับ */
+  .modeTabs > button {
+    flex: 1;
+    padding: 8px 6px !important;
+    font-size: 0.85rem;
+  }
+
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+
+  .companyName {
+    font-size: 1.35rem;
+    overflow-wrap: anywhere;
+  }
+
+  .contentGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  /* ตารางข้อมูล/ฟอร์มแก้ไข: หัวข้ออยู่บน ช่องกรอกอยู่ล่าง เต็มความกว้าง */
+  .infoTable,
+  .infoTable tbody,
+  .infoTable tr,
+  .infoTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .infoTable td.label {
+    padding-bottom: 2px;
+  }
+
+  .infoTable td:not(.label) {
+    padding-top: 0;
+    padding-bottom: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .inputField {
+    min-width: 0;
+  }
+
+  /* ===== ตัวแก้ไขข้อสอบ ===== */
+  .instruction {
+    max-width: none;
+  }
+
+  .inputWrapper {
+    gap: 8px;
+  }
+
+  .mainInput {
+    min-width: 0;
+    padding: 10px;
+  }
+
+  .optionsBox,
+  .cardFooter {
+    margin-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .optionsBox {
+    padding: 12px;
+  }
+
+  .optionInput {
+    min-width: 0;
+  }
+}

@@ -1121,3 +1121,317 @@
 .detailsCard strong {
   color: #333;
 }
+/* หัวข้อ "ผู้สมัคร (N)" แสดงเฉพาะมือถือ */
+.listTitle {
+  display: none;
+}
+
+/* ข้อมูลผู้สมัคร 3 คอลัมน์ (ส่วนตัว / ความต้องการ / ทักษะ) */
+.applicantColumns {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* ================= มือถือ / แท็บเล็ต =================
+ * ตามแบบหน้าติดตามสถานะฝั่งผู้ใช้ (app/user/seeker_tracking/[id]/seeker_tracking.module.css)
+ * ลำดับ: รายการผู้สมัคร (ปัดซ้ายขวา) → สถานะ (แนวตั้ง) → ข้อมูลผู้สมัคร
+ */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .mainContent {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  /* ---------- รายการผู้สมัคร ---------- */
+  .cardScollBar {
+    max-height: none;
+    overflow: visible;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .filterTopBar {
+    position: static;
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+    min-height: 34px;
+  }
+
+  .listTitle {
+    display: block;
+    font-size: 15px;
+    font-weight: bold;
+    color: #111;
+    white-space: nowrap;
+    margin-right: auto;
+  }
+
+  .activeFilterChip {
+    max-width: 130px;
+    margin-right: 0;
+  }
+
+  .dropdownMenu {
+    width: min(250px, calc(100vw - 48px));
+  }
+
+  .sidebar {
+    position: relative; /* ให้ offsetLeft ของการ์ดนับจากรายการ */
+    margin: 0;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+    padding: 2px 2px 8px;
+  }
+
+  .jobCard {
+    flex: 0 0 220px;
+    scroll-snap-align: center;
+    padding: 12px;
+  }
+
+  .profileLeft {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .cardDetails {
+    min-width: 0;
+  }
+
+  .cardDetails h4,
+  .cardDetails p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- สถานะ: แถบขั้นตอนแนวตั้ง ---------- */
+  .trackerBox,
+  .detailsCard {
+    margin: 0;
+    padding: 16px;
+  }
+
+  .stepperContainer {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: center;
+    flex: none;
+    text-align: left;
+  }
+
+  .stepIcon {
+    width: 40px;
+    height: 40px;
+    grid-column: 1;
+  }
+
+  /* ความกว้าง/การจัดกลางของชื่อขั้นตอนและกล่อง ถูกกำหนดแบบ inline ไว้
+   * จึงต้องใช้ !important ทับเฉพาะบนมือถือ
+   */
+  .step > span {
+    grid-column: 2;
+    width: auto !important;
+    text-align: left !important;
+  }
+
+  .step > div:not(.stepIcon) {
+    grid-column: 2;
+    width: auto !important;
+    max-width: none !important;
+    margin-top: 0 !important;
+  }
+
+  /* เส้นเชื่อมแนวตั้ง อยู่กึ่งกลางใต้ไอคอน (40px / 2 - 2px) */
+  .stepLine {
+    flex: none;
+    width: 4px;
+    height: 20px;
+    margin: 4px 0 4px 18px;
+  }
+
+  .datePickerRow,
+  .actionBtnGroup {
+    flex-wrap: wrap;
+  }
+
+  /* ---------- ข้อมูลผู้สมัคร ---------- */
+  .applicantCard {
+    padding: 14px !important;
+  }
+
+  .applicantColumns {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .applicantColumns > div {
+    padding: 16px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .detailGrid {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0;
+  }
+
+  .detailRow {
+    flex-wrap: wrap;
+  }
+
+  /* ไทม์ไลน์การศึกษา: ซ้าย-ขวาสลับกัน → เส้นเดียวชิดซ้าย */
+  .centralLine {
+    left: 8px;
+    transform: none;
+  }
+
+  .timelineItem {
+    width: 100%;
+    left: 0;
+    padding: 0 0 0 28px;
+    text-align: left;
+  }
+
+  .left .connector,
+  .right .connector {
+    left: 8px;
+    right: auto;
+    width: 14px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modalOverlay {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .modalOverlay > div {
+    max-width: 100%;
+  }
+
+  .mapModalContent {
+    width: 100% !important;
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* กล่องรายละเอียดนัดสัมภาษณ์ในแถบขั้นตอน: เต็มความกว้าง ข้อความตัดบรรทัดได้ */
+  .interviewDetailsCard {
+    width: auto;
+    padding: 14px;
+  }
+
+  .detailLabel {
+    width: 110px;
+  }
+
+  .detailValue {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ===== Modal พรีวิวเรซูเม่ / ไฟล์เอกสาร ===== */
+.previewBox {
+  background-color: #fff;
+  border-radius: 12px;
+  width: 85%;
+  max-width: 920px;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.previewHeader {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+/* ชื่อไฟล์ยาวให้ตัดเป็น "…" ไม่ดันปุ่มด้านขวาจนตกบรรทัด */
+.previewTitle {
+  font-weight: bold;
+  font-size: 15px;
+  color: #111827;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.previewActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.previewOpenBtn {
+  background-color: #2563eb;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.previewCloseBtn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px 8px;
+}
+
+@media (max-width: 768px) {
+  .previewBox {
+    width: 100%;
+    height: 90vh;
+  }
+
+  .previewHeader {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .previewTitle {
+    font-size: 14px;
+  }
+
+  .previewOpenBtn {
+    padding: 6px 10px;
+  }
+
+  .previewCloseBtn {
+    padding: 4px;
+  }
+}

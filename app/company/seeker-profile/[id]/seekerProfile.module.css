@@ -444,3 +444,103 @@
   transform: scale(0.95);
   cursor: pointer; /* แก้ไขตรงนี้ */
 }
+
+/* ================= มือถือ / แท็บเล็ต =================
+ * ชุดเดียวกับหน้าโปรไฟล์ผู้ใช้ (app/user/user-profile/seekerProfile.module.css)
+ */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .backRow {
+    gap: 8px;
+  }
+
+  /* 4 คอลัมน์ → เรียงลงมาทีละการ์ด */
+  .profileGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .column {
+    border-radius: 20px;
+  }
+
+  .contentPadding {
+    padding: 0 16px 20px 16px;
+  }
+
+  .personalInfoContent {
+    padding: 0 16px 16px 16px;
+  }
+
+  .avatarWrapper {
+    width: 120px;
+    height: 120px;
+  }
+
+  .detailsBox {
+    overflow-wrap: anywhere;
+  }
+
+  /* ไทม์ไลน์การศึกษา: จากซ้าย-ขวาสลับกัน → เส้นเดียวชิดซ้าย */
+  .Educontainer {
+    margin-left: 0;
+    padding: 20px 12px;
+    border-radius: 16px;
+  }
+
+  .centralLine {
+    left: 8px;
+    margin-top: 0;
+    top: 0;
+    transform: none;
+  }
+
+  .timelineItem {
+    width: 100%;
+    left: 0;
+    padding: 0 0 16px 28px;
+    text-align: left;
+  }
+
+  .left .connector,
+  .right .connector {
+    left: 8px;
+    right: auto;
+    width: 14px;
+  }
+
+  /* การ์ดไฟล์แนบ + การติดต่อ: กว้างเต็มจอแทน fit-content */
+  .columnTransparent {
+    width: auto;
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .fileContainerBox,
+  .addFileInlineBtn {
+    max-width: none;
+  }
+
+  .contactCard,
+  .contactCard1 {
+    padding: 20px;
+    margin-top: 24px;
+    border-radius: 20px;
+  }
+
+  .modalOverlay {
+    padding: 8px;
+  }
+
+  .modalContainer {
+    height: 90vh;
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding: 12px 16px;
+  }
+}

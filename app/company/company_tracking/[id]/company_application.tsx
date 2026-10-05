@@ -101,6 +101,23 @@ export default function CompanyApplication({
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  // มือถือ: รายการผู้สมัครเลื่อนแนวนอน เลื่อนการ์ดที่เลือกมาไว้กลางรายการ
+  // จอใหญ่รายการเป็นแนวตั้ง scrollLeft ไม่มีผล จึงไม่กระทบ
+  const jobListRef = useRef<HTMLElement>(null);
+  const activeTrackingId = selectedJob?.tracking_id;
+  useEffect(() => {
+    const list = jobListRef.current;
+    if (!list || activeTrackingId == null) return;
+    const card = list.querySelector<HTMLElement>(
+      `[data-tracking-id="${activeTrackingId}"]`,
+    );
+    if (!card) return;
+    list.scrollTo({
+      left: card.offsetLeft - (list.clientWidth - card.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [activeTrackingId]);
   const [previewResume, setPreviewResume] = useState<FileRecord | null>(null);
 
   // ปิด dropdown เมื่อคลิกพื้นที่ด้านนอก
@@ -295,23 +312,20 @@ export default function CompanyApplication({
     });
 
     try {
-      const response = await fetch(
-        `/api/interview_tracking/update-status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trackingId: trackingId,
-            status: newStatus,
-            companyEmail: selectedJob.company_email || "hr@company.com",
-            seekerEmail: selectedJob.email,
-            companyName: selectedJob.company_name || "บริษัท",
-            seekerName: selectedJob.fullname || "ผู้สมัคร",
-            jobTitle: selectedJob.job_position,
-            ...interviewDetails,
-          }),
-        },
-      );
+      const response = await fetch(`/api/interview_tracking/update-status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trackingId: trackingId,
+          status: newStatus,
+          companyEmail: selectedJob.company_email || "hr@company.com",
+          seekerEmail: selectedJob.email,
+          companyName: selectedJob.company_name || "บริษัท",
+          seekerName: selectedJob.fullname || "ผู้สมัคร",
+          jobTitle: selectedJob.job_position,
+          ...interviewDetails,
+        }),
+      });
 
       if (response.ok) {
         setJobs((prev) =>
@@ -434,6 +448,9 @@ export default function CompanyApplication({
         <div className={styles.cardScollBar}>
           {/* แถบตัวกรองตำแหน่งงาน (มีเพียงไอคอน filter เมื่อคลิกจึงแสดง dropdown รายการตำแหน่งงาน) */}
           <div className={styles.filterTopBar}>
+            <span className={styles.listTitle}>
+              ผู้สมัคร ({filteredJobs.length})
+            </span>
             {selectedPosition !== "all" && (
               <div className={styles.activeFilterChip}>
                 <span className={styles.activeFilterText}>
@@ -528,7 +545,7 @@ export default function CompanyApplication({
             </div>
           </div>
 
-          <aside className={styles.sidebar}>
+          <aside className={styles.sidebar} ref={jobListRef}>
             {filteredJobs.length === 0 ? (
               <p
                 style={{
@@ -550,6 +567,7 @@ export default function CompanyApplication({
                 return (
                   <div
                     key={job.tracking_id}
+                    data-tracking-id={job.tracking_id}
                     className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
                     style={{
                       cursor: "pointer",
@@ -1993,6 +2011,7 @@ export default function CompanyApplication({
               {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
               <div style={{ marginTop: "20px" }}>
                 <div
+                  className={styles.applicantCard}
                   style={{
                     backgroundColor: "#ffffff",
                     padding: "20px",
@@ -2071,14 +2090,7 @@ export default function CompanyApplication({
                   </div>
 
                   {/* Column 1: Personal Info */}
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      gap: "20px",
-                    }}
-                  >
+                  <div className={styles.applicantColumns}>
                     <div
                       style={{
                         flex: "1",
@@ -2186,8 +2198,7 @@ export default function CompanyApplication({
                           {selectedJob.military_status || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
-                          <strong>ศาสนา:</strong>{" "}
-                          {selectedJob.religion || "-"}
+                          <strong>ศาสนา:</strong> {selectedJob.religion || "-"}
                         </p>
                         <p style={{ margin: 0 }}>
                           <strong>น้ำหนัก / ส่วนสูง:</strong>{" "}
@@ -2813,75 +2824,30 @@ export default function CompanyApplication({
             style={{ zIndex: 9999 }}
           >
             <div
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "12px",
-                width: "85%",
-                maxWidth: "920px",
-                height: "85vh",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
-              }}
+              className={styles.previewBox}
               onClick={(e) => e.stopPropagation()}
             >
-              <div
-                style={{
-                  padding: "14px 20px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #e5e7eb",
-                  backgroundColor: "#f9fafb",
-                }}
-              >
+              <div className={styles.previewHeader}>
                 <span
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "15px",
-                    color: "#111827",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                  }}
+                  className={styles.previewTitle}
+                  title={previewResume.file_name}
                 >
-                  📄 ตัวอย่างไฟล์: {previewResume.file_name}
+                  ตัวอย่างไฟล์: {previewResume.file_name}
                 </span>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    alignItems: "center",
-                  }}
-                >
+                <div className={styles.previewActions}>
                   <a
                     href={previewResume.file_path}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      backgroundColor: "#2563eb",
-                      color: "#fff",
-                      padding: "6px 14px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                    }}
+                    className={styles.previewOpenBtn}
                   >
                     เปิดแท็บใหม่ ↗
                   </a>
                   <button
                     type="button"
                     onClick={() => setPreviewResume(null)}
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      fontSize: "18px",
-                      cursor: "pointer",
-                      color: "#6b7280",
-                      padding: "4px 8px",
-                    }}
+                    className={styles.previewCloseBtn}
+                    aria-label="ปิดหน้าต่าง"
                   >
                     ✖
                   </button>

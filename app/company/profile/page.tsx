@@ -287,6 +287,112 @@ const CompanyProfile = () => {
     company.dbd_file.toLowerCase().includes(".pdf");
 
   const isPending = !isVerified && !isRejected && company.dbd_file;
+  /* ปุ่มแก้ไขโปรไฟล์ / บันทึก / ยกเลิก ใช้ 2 ที่:
+   * ในการ์ดโปรไฟล์ (จอใหญ่) และใต้แผนที่ (มือถือ) */
+  const profileActions = !editMode ? (
+    <>
+      {" "}
+      <button
+        type="button"
+        onClick={() => setEditMode(true)}
+        style={{
+          width: "100%",
+          padding: "10px 16px",
+          backgroundColor: "#111111",
+          color: "#fff",
+          border: "none",
+          borderRadius: "999px",
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        แก้ไขโปรไฟล์
+      </button>
+      <Link
+        href="/company/forgot-password"
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          marginTop: "0.6rem",
+          padding: "10px 18px",
+          backgroundColor: "#ffffff",
+          color: "#111827",
+          borderRadius: "999px",
+          border: "1px solid #d1d5db",
+          fontSize: "0.92rem",
+          fontWeight: 600,
+          textDecoration: "none",
+          boxSizing: "border-box",
+          transition: "all 0.15s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#f3f4f6";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#ffffff";
+        }}
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        ลืมรหัสผ่าน
+      </Link>
+    </>
+  ) : (
+    <div style={{ display: "flex", gap: "0.6rem" }}>
+      <button
+        type="button"
+        onClick={handleSaveChanges}
+        disabled={saving}
+        style={{
+          flex: 1,
+          padding: "10px 14px",
+          backgroundColor: saving ? "#5fb37b" : "#28a745",
+          color: "#fff",
+          border: "none",
+          borderRadius: "999px",
+          fontWeight: 700,
+          cursor: saving ? "wait" : "pointer",
+        }}
+      >
+        {saving ? "กำลังบันทึก..." : "บันทึก"}
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setEditMode(false);
+          setEditForm(JSON.parse(JSON.stringify(company)));
+        }}
+        disabled={saving}
+        style={{
+          flex: 1,
+          padding: "10px 14px",
+          backgroundColor: "#fff",
+          color: "#dc3545",
+          border: "1.5px solid #dc3545",
+          borderRadius: "999px",
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        ยกเลิก
+      </button>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
       <link
@@ -504,72 +610,7 @@ const CompanyProfile = () => {
               </>
             )}
 
-            <div
-              style={{
-                marginTop: "1.25rem",
-                paddingTop: "1rem",
-                borderTop: "1px solid rgba(0,0,0,0.08)",
-              }}
-            >
-              {!editMode ? (
-                <button
-                  type="button"
-                  onClick={() => setEditMode(true)}
-                  style={{
-                    width: "100%",
-                    padding: "10px 16px",
-                    backgroundColor: "#111111",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "999px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  แก้ไขโปรไฟล์
-                </button>
-              ) : (
-                <div style={{ display: "flex", gap: "0.6rem" }}>
-                  <button
-                    type="button"
-                    onClick={handleSaveChanges}
-                    disabled={saving}
-                    style={{
-                      flex: 1,
-                      padding: "10px 14px",
-                      backgroundColor: saving ? "#5fb37b" : "#28a745",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "999px",
-                      fontWeight: 700,
-                      cursor: saving ? "wait" : "pointer",
-                    }}
-                  >
-                    {saving ? "กำลังบันทึก..." : "บันทึก"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditMode(false);
-                      setEditForm(JSON.parse(JSON.stringify(company)));
-                    }}
-                    disabled={saving}
-                    style={{
-                      flex: 1,
-                      padding: "10px 14px",
-                      backgroundColor: "#fff",
-                      color: "#dc3545",
-                      border: "1.5px solid #dc3545",
-                      borderRadius: "999px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    ยกเลิก
-                  </button>
-                </div>
-              )}
-            </div>
+            <div className={styles.desktopActions}>{profileActions}</div>
           </div>
         </div>
 
@@ -590,6 +631,9 @@ const CompanyProfile = () => {
             }}
           />
         </div>
+
+        {/* มือถือ: ปุ่มแก้ไข / บันทึก อยู่ใต้แผนที่ */}
+        <div className={styles.mobileActions}>{profileActions}</div>
       </div>
 
       {/* ฝั่งขวา: ตำแหน่งงานและรีวิว */}

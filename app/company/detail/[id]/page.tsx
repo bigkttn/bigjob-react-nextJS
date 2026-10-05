@@ -393,16 +393,7 @@ const DetailJob = () => {
       )}
       <div className={styles.card}>
         {/* ===== Unified Header Row (แถวควบคุมบนสุดระดับสากล) ===== */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "20px",
-            borderBottom: "1px solid #e5e7eb",
-            marginBottom: "30px",
-          }}
-        >
+        <div className={styles.topBar}>
           <button className={styles.backBtn} onClick={() => router.back()}>
             <span className={styles.spanMother}>
               <span>{"<"}</span>
@@ -428,15 +419,7 @@ const DetailJob = () => {
           </button>
 
           {/* ตรงกลาง: แท็บสลับโหมดบอกสถานะชัดเจน */}
-          <div
-            style={{
-              display: "flex",
-              background: "#f3f4f6",
-              padding: "6px",
-              borderRadius: "12px",
-              border: "1px solid #e5e7eb",
-            }}
-          >
+          <div className={styles.modeTabs}>
             <button
               onClick={() => setIsMode(true)}
               style={{
