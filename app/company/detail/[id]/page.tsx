@@ -5,6 +5,18 @@ import styles from "./detail.module.css";
 import { useParams, useRouter } from "next/navigation";
 import ProvinceSelect from "@/components/ProvinceSelect";
 
+type NumberValue = string | number | null | undefined;
+
+// true เมื่อกรอกครบทั้งคู่ และ min มากกว่า max (ค่าจาก DB อาจเป็น number หรือ null)
+const isMinOverMax = (min: NumberValue, max: NumberValue) =>
+  min !== "" && min != null && max !== "" && max != null && Number(min) > Number(max);
+
+const rangeErrorStyle = {
+  color: "#dc2626",
+  fontSize: "0.85rem",
+  margin: "4px 0 0",
+};
+
 const DetailJob = () => {
   const params = useParams();
   const postId = params.id;
@@ -163,7 +175,20 @@ const DetailJob = () => {
   };
 
   // ===== Job handlers =====
+  // ช่องตัวเลข: เก็บเฉพาะตัวเลข 0-9 (กันติดลบ/ทศนิยม ทั้งจากการพิมพ์ วาง และปุ่มลูกศร)
+  const changeNumber = (field: string, value: string) => {
+    setEditData({ ...editData, [field]: value.replace(/[^0-9]/g, "") });
+  };
+
   const handleSave = async () => {
+    if (isMinOverMax(editData.salary_min, editData.salary_max)) {
+      Swal.fire("เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด");
+      return;
+    }
+    if (isMinOverMax(editData.age_min, editData.age_max)) {
+      Swal.fire("อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด");
+      return;
+    }
     try {
       setIsSaving(true);
       const res = await fetch(`/api/posts/updatePost/${postId}`, {
@@ -561,12 +586,10 @@ const DetailJob = () => {
                           <input
                             type="number"
                             className={styles.inputField}
+                            min={0}
                             value={editData.salary_min ?? ""}
                             onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                salary_min: e.target.value,
-                              })
+                              changeNumber("salary_min", e.target.value)
                             }
                             onKeyDown={blockInvalidKeys}
                           />{" "}
@@ -574,16 +597,19 @@ const DetailJob = () => {
                           <input
                             type="number"
                             className={styles.inputField}
+                            min={0}
                             value={editData.salary_max ?? ""}
                             onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                salary_max: e.target.value,
-                              })
+                              changeNumber("salary_max", e.target.value)
                             }
                             onKeyDown={blockInvalidKeys}
                           />
                         </div>
+                        {isMinOverMax(editData.salary_min, editData.salary_max) && (
+                          <p style={rangeErrorStyle}>
+                            เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด
+                          </p>
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -593,12 +619,10 @@ const DetailJob = () => {
                           <input
                             type="number"
                             className={styles.inputField}
+                            min={0}
                             value={editData.age_min ?? ""}
                             onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                age_min: e.target.value,
-                              })
+                              changeNumber("age_min", e.target.value)
                             }
                             onKeyDown={blockInvalidKeys}
                           />{" "}
@@ -606,16 +630,19 @@ const DetailJob = () => {
                           <input
                             type="number"
                             className={styles.inputField}
+                            min={0}
                             value={editData.age_max ?? ""}
                             onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                age_max: e.target.value,
-                              })
+                              changeNumber("age_max", e.target.value)
                             }
                             onKeyDown={blockInvalidKeys}
                           />
                         </div>
+                        {isMinOverMax(editData.age_min, editData.age_max) && (
+                          <p style={rangeErrorStyle}>
+                            อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด
+                          </p>
+                        )}
                       </td>
                     </tr>
                     <tr>
@@ -647,13 +674,12 @@ const DetailJob = () => {
                       <td>
                         <div className={styles.editInputWrapper}>
                           <input
+                            type="number"
+                            min={0}
                             className={styles.inputField}
                             value={editData.vacancy ?? ""}
                             onChange={(e) =>
-                              setEditData({
-                                ...editData,
-                                vacancy: e.target.value,
-                              })
+                              changeNumber("vacancy", e.target.value)
                             }
                             onKeyDown={blockInvalidKeys}
                           />

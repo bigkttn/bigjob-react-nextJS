@@ -14,6 +14,19 @@ interface Question {
   correctIndex: number | null;
 }
 
+// ช่องที่รับได้เฉพาะจำนวนเต็มไม่ติดลบ
+const NUMBER_FIELDS = ["salary_min", "salary_max", "age_min", "age_max", "vacancy"];
+
+// true เมื่อกรอกครบทั้งคู่ และ min มากกว่า max
+const isMinOverMax = (min: string, max: string) =>
+  min !== "" && max !== "" && Number(min) > Number(max);
+
+const rangeErrorStyle = {
+  color: "#dc2626",
+  fontSize: "0.85rem",
+  margin: "-4px 0 8px",
+};
+
 const PostJob = () => {
   const router = useRouter();
   const [isNext, setIsNext] = useState(false);
@@ -138,17 +151,43 @@ const PostJob = () => {
     >,
   ) => {
     if (!isApproved) return; // ล็อกถ้าไม่ Approved
-    const { name, value } = e.target;
+    const { name } = e.target;
+    let { value } = e.target;
+    // ช่องตัวเลข: เก็บเฉพาะตัวเลข 0-9 (กันติดลบ/ทศนิยม ทั้งจากการพิมพ์ วาง และปุ่มลูกศร)
+    if (NUMBER_FIELDS.includes(name)) {
+      value = value.replace(/[^0-9]/g, "");
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // คืนข้อความ error ถ้าช่วงเงินเดือน/อายุ ใส่ min มากกว่า max
+  const getRangeError = () => {
+    if (isMinOverMax(formData.salary_min, formData.salary_max)) {
+      return "เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด";
+    }
+    if (isMinOverMax(formData.age_min, formData.age_max)) {
+      return "อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด";
+    }
+    return "";
   };
 
   const handleNext = () => {
     if (!isApproved) return;
+    const rangeError = getRangeError();
+    if (rangeError) {
+      Swal.fire(rangeError);
+      return;
+    }
     setIsNext(true);
   };
 
   const handleSubmit = async () => {
     if (!isApproved) return;
+    const rangeError = getRangeError();
+    if (rangeError) {
+      Swal.fire(rangeError);
+      return;
+    }
     if (
       !formData.jobPosition ||
       !formData.province ||
@@ -619,6 +658,7 @@ const PostJob = () => {
                 <input
                   type="number"
                   name="salary_min"
+                  min={0}
                   disabled={!isApproved}
                   value={formData.salary_min}
                   onChange={handleChange}
@@ -629,17 +669,25 @@ const PostJob = () => {
                 <input
                   type="number"
                   name="salary_max"
+                  min={0}
                   disabled={!isApproved}
                   value={formData.salary_max}
                   onChange={handleChange}
+                  onKeyDown={blockInvalidKeys}
                   style={{ ...inputStyle, width: "100%" }}
                 />
               </div>
+              {isMinOverMax(formData.salary_min, formData.salary_max) && (
+                <p style={rangeErrorStyle}>
+                  เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด
+                </p>
+              )}
               <div className={styles.inputGroupInline}>
                 <label>ช่วงอายุ</label>
                 <input
                   type="number"
                   name="age_min"
+                  min={0}
                   disabled={!isApproved}
                   value={formData.age_min}
                   onKeyDown={blockInvalidKeys}
@@ -650,6 +698,7 @@ const PostJob = () => {
                 <input
                   type="number"
                   name="age_max"
+                  min={0}
                   disabled={!isApproved}
                   value={formData.age_max}
                   onKeyDown={blockInvalidKeys}
@@ -657,11 +706,15 @@ const PostJob = () => {
                   style={{ ...inputStyle, width: "100%" }}
                 />
               </div>
+              {isMinOverMax(formData.age_min, formData.age_max) && (
+                <p style={rangeErrorStyle}>อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด</p>
+              )}
               <div className={styles.inputGroupInline}>
                 <label>จำนวนที่รับ</label>
                 <input
                   type="number"
                   name="vacancy"
+                  min={0}
                   style={inputStyle}
                   disabled={!isApproved}
                   value={formData.vacancy}
