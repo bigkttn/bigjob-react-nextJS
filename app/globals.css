@@ -28,3 +28,11 @@ body * {
   box-shadow: 0 10px 15px -3px rgba(17, 24, 39, 0.3) !important;
   background-color: #000000 !important;
 }
+
+/* ป๊อปอัป SweetAlert ต้องอยู่บนสุดเสมอ
+ * ค่าเดิมของ SweetAlert คือ 1060 ซึ่งต่ำกว่า navbar (9999) และเมนูข้าง
+ * ทำให้ป๊อปอัปยืนยัน เช่น "ออกจากระบบ" ถูกเมนูบังบนมือถือ
+ */
+.swal2-container {
+  z-index: 100000 !important;
+}
