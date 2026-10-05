@@ -135,3 +135,82 @@
 .linkCard1:hover .companyName {
   color: #3653f8;
 }
+
+.companyLink {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ================= มือถือ / แท็บเล็ต ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  .card {
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  /* โลโก้ ชื่อบริษัท และปุ่มบันทึก/รายงาน ห่อลงบรรทัดใหม่ได้ ไม่ล้นจอ */
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .linkCard1 {
+    padding: 0;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+  }
+
+  .companyName {
+    font-size: 1.35rem;
+    overflow-wrap: anywhere;
+  }
+
+  /* ซ้าย/ขวา ซ้อนกันเป็นคอลัมน์เดียว */
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .label {
+    width: 100px;
+    padding-right: 8px !important;
+  }
+
+  .infoTable td {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* แถวบนสุด: ปุ่มย้อนกลับชิดซ้าย ปุ่มสมัครชิดขวา สูงเท่ากัน */
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.topBar button {
+  height: 40px;
+}

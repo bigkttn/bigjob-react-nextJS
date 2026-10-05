@@ -581,3 +581,203 @@
 .btnCancel:hover {
   background-color: #bdbdbd;
 }
+
+/* รายการการ์ดงาน: จอใหญ่เรียงแนวตั้ง ระยะเท่าเดิม (12px ตาม .sidebar) */
+.jobList {
+  position: relative; /* ให้ offsetLeft ของการ์ดนับจากรายการ ใช้ตอนเลื่อนการ์ดที่เลือกมากลาง */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* หัวข้อ "งานที่สมัคร (N)" แสดงเฉพาะมือถือ */
+.listTitle {
+  display: none;
+}
+
+/* ================= มือถือ / แท็บเล็ต =================
+ * ลำดับ: รายการงาน (ปัดซ้ายขวา) → สถานะ (แนวตั้ง) → ข้อมูลงาน
+ */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+
+  .mainContent {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  /* ---------- รายการงาน ---------- */
+  .sidebar {
+    max-height: none;
+    overflow: visible;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .filterTopBar {
+    position: static;
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+    min-height: 34px;
+  }
+
+  .listTitle {
+    display: block;
+    font-size: 15px;
+    font-weight: bold;
+    color: #111;
+    white-space: nowrap;
+    margin-right: auto;
+  }
+
+  .activeFilterChip {
+    max-width: 130px;
+    margin-right: 0;
+  }
+
+  .dropdownMenu {
+    width: min(250px, calc(100vw - 48px));
+  }
+
+  .jobList {
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+    padding: 2px 2px 8px;
+  }
+
+  .jobCard {
+    flex: 0 0 220px;
+    scroll-snap-align: center;
+    padding: 12px;
+  }
+
+  .sidebarLogo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+
+  .cardDetails {
+    min-width: 0;
+  }
+
+  .cardDetails h4,
+  .cardDetails p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- สถานะ: แถบขั้นตอนแนวตั้ง ----------
+   * ไอคอนอยู่คอลัมน์ซ้าย ชื่อขั้นตอนและกล่องของขั้นนั้นอยู่คอลัมน์ขวา
+   * กล่องจึงกว้างเกือบเต็มจอ แทนที่จะถูกบีบอยู่ใต้ไอคอน
+   */
+  .trackerCard,
+  .detailsCard {
+    padding: 16px;
+  }
+
+  .stepperWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: center;
+    flex: none;
+  }
+
+  .stepIcon {
+    width: 40px;
+    height: 40px;
+    grid-column: 1;
+  }
+
+  /* ความกว้าง/การจัดกลางของชื่อขั้นตอนและกล่อง ถูกกำหนดแบบ inline ไว้
+   * จึงต้องใช้ !important ทับเฉพาะบนมือถือ
+   */
+  .step > span {
+    grid-column: 2;
+    width: auto !important;
+    text-align: left !important;
+  }
+
+  .step > div:not(.stepIcon) {
+    grid-column: 2;
+    width: auto !important;
+    max-width: none !important;
+    margin-top: 0 !important;
+  }
+
+  /* เส้นเชื่อมแนวตั้ง อยู่กึ่งกลางใต้ไอคอน (40px / 2 - 2px) */
+  .stepLine {
+    flex: none;
+    width: 4px;
+    height: 20px;
+    margin: 4px 0 4px 18px;
+  }
+
+  .actionButtons {
+    padding-right: 0;
+    justify-content: center;
+  }
+
+  /* ---------- ข้อมูลงาน ---------- */
+  .detailsHeader {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .detailsLogo {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .detailsHeader h2 {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+
+  .detailsGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .rightCol {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .infoLabel,
+  .sectionTitle {
+    width: 110px;
+    flex-shrink: 0;
+  }
+
+  .infoValue,
+  .sectionBlock p {
+    overflow-wrap: anywhere;
+  }
+
+  /* modal รีวิวกำหนดกว้าง 360px แบบ inline ไว้ ให้หดตามจอได้ */
+  .modalOverlay {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .modalOverlay > div {
+    max-width: 100%;
+  }
+}

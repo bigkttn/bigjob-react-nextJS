@@ -133,8 +133,8 @@ export default function ApplyCompany({
   };
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div>
+      <div>
         {/* <h1 className="text-3xl font-bold">{jobData.company}</h1> */}
         
         {/* ปุ่มกด Apply Now */}
@@ -180,6 +180,6 @@ export default function ApplyCompany({
     companyEmail={companyEmail}
   />
 
-    </main>
+    </div>
   );
 }

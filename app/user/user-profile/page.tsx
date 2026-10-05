@@ -1015,6 +1015,107 @@ const SeekerProfile = () => {
     certificate: "ใบรับรอง / เกียรติบัตร",
   };
 
+  /* ปุ่มบันทึก / ยกเลิก ใช้ 2 ที่: ใต้ข้อมูลส่วนตัว (จอใหญ่) และท้ายหน้า (มือถือ) */
+  const saveCancelButtons = (
+    <div style={{ display: "flex", gap: "0.6rem" }}>
+      <button
+        type="button"
+        onClick={saveProfile}
+        disabled={saving}
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "6px",
+          padding: "11px 14px",
+          fontSize: "0.88rem",
+          fontWeight: 600,
+          backgroundColor: saving ? "#6b7280" : "#111827",
+          color: "#ffffff",
+          borderRadius: "999px",
+          border: "none",
+          cursor: saving ? "wait" : "pointer",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+          transition: "all 0.15s ease",
+        }}
+        onMouseEnter={(e) => {
+          if (!saving)
+            e.currentTarget.style.backgroundColor = "#374151";
+        }}
+        onMouseLeave={(e) => {
+          if (!saving)
+            e.currentTarget.style.backgroundColor = "#111827";
+        }}
+      >
+        {saving ? (
+          "กำลังบันทึก..."
+        ) : (
+          <>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            บันทึก
+          </>
+        )}
+      </button>
+
+      <button
+        type="button"
+        onClick={cancelEdit}
+        disabled={saving}
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "6px",
+          padding: "11px 14px",
+          fontSize: "0.88rem",
+          fontWeight: 600,
+          backgroundColor: "#ffffff",
+          color: "#374151",
+          borderRadius: "999px",
+          border: "1px solid #d1d5db",
+          cursor: "pointer",
+          transition: "all 0.15s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#f3f4f6";
+          e.currentTarget.style.color = "#111827";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#ffffff";
+          e.currentTarget.style.color = "#374151";
+        }}
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        ยกเลิก
+      </button>
+    </div>
+  );
+
   return (
     <div className={styles.container}>
       <link
@@ -1310,6 +1411,7 @@ const SeekerProfile = () => {
 
             {/* ปุ่ม Edit / Save + Cancel */}
             <div
+              className={editMode ? styles.desktopActions : undefined}
               style={{
                 marginTop: "1.5rem",
                 paddingTop: "1.25rem",
@@ -1413,103 +1515,7 @@ const SeekerProfile = () => {
                   </Link>
                 </>
               ) : (
-                <div style={{ display: "flex", gap: "0.6rem" }}>
-                  <button
-                    type="button"
-                    onClick={saveProfile}
-                    disabled={saving}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      padding: "11px 14px",
-                      fontSize: "0.88rem",
-                      fontWeight: 600,
-                      backgroundColor: saving ? "#6b7280" : "#111827",
-                      color: "#ffffff",
-                      borderRadius: "999px",
-                      border: "none",
-                      cursor: saving ? "wait" : "pointer",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                      transition: "all 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!saving)
-                        e.currentTarget.style.backgroundColor = "#374151";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!saving)
-                        e.currentTarget.style.backgroundColor = "#111827";
-                    }}
-                  >
-                    {saving ? (
-                      "กำลังบันทึก..."
-                    ) : (
-                      <>
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        บันทึก
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    disabled={saving}
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      padding: "11px 14px",
-                      fontSize: "0.88rem",
-                      fontWeight: 600,
-                      backgroundColor: "#ffffff",
-                      color: "#374151",
-                      borderRadius: "999px",
-                      border: "1px solid #d1d5db",
-                      cursor: "pointer",
-                      transition: "all 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#f3f4f6";
-                      e.currentTarget.style.color = "#111827";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#ffffff";
-                      e.currentTarget.style.color = "#374151";
-                    }}
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                    ยกเลิก
-                  </button>
-                </div>
+                saveCancelButtons
               )}
             </div>
           </div>
@@ -1635,16 +1641,7 @@ const SeekerProfile = () => {
                     </>
                   ) : (
                     /* EDIT MODE - EDUCATION */
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "1rem",
-                        width: "150%",
-                        marginLeft: "-28%",
-                        marginTop: "-25%",
-                      }}
-                    >
+                    <div className={styles.eduEditList}>
                       {form.educations.map((item, i) => (
                         <div
                           key={item.education_id ?? `edit-edu-${i}`}
@@ -2276,6 +2273,11 @@ const SeekerProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* มือถือ: ปุ่มบันทึก / ยกเลิก อยู่ท้ายข้อมูลทั้งหมด */}
+      {editMode && (
+        <div className={styles.mobileActions}>{saveCancelButtons}</div>
+      )}
 
       {/* ─── Popup พรีวิวไฟล์ ─── */}
       {previewFile && (

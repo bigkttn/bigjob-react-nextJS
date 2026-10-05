@@ -139,6 +139,23 @@ export default function SeekerApplication({
     return filteredJobs.length > 0 ? filteredJobs[0] : null;
   }, [selectedJob, filteredJobs]);
 
+  // มือถือ: รายการการ์ดเลื่อนแนวนอน เลื่อนการ์ดที่เลือกมาไว้กลางรายการ
+  // จอใหญ่รายการเป็นแนวตั้ง scrollLeft ไม่มีผล จึงไม่กระทบ
+  const jobListRef = useRef<HTMLDivElement>(null);
+  const activeTrackingId = activeSelectedJob?.tracking_id;
+  useEffect(() => {
+    const list = jobListRef.current;
+    if (!list || activeTrackingId == null) return;
+    const card = list.querySelector<HTMLElement>(
+      `[data-tracking-id="${activeTrackingId}"]`,
+    );
+    if (!card) return;
+    list.scrollTo({
+      left: card.offsetLeft - (list.clientWidth - card.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [activeTrackingId]);
+
   // จัดการเมื่อผู้ใช้เลือกตำแหน่งงานใน dropdown
   const handleSelectPosition = (newPosition: string) => {
     setSelectedPosition(newPosition);
@@ -320,24 +337,21 @@ export default function SeekerApplication({
     if (!activeSelectedJob) return;
 
     try {
-      const response = await fetch(
-        `/api/interview_tracking/update-status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trackingId: trackingId,
-            status: newStatus,
-            companyEmail: activeSelectedJob.company_email,
-            seekerEmail: userId, // หรืออีเมลของ user จริงๆ
-            companyName: activeSelectedJob.company_name,
-            seekerName: "ผู้สมัคร",
-            jobTitle: activeSelectedJob.job_position,
-            reviewRating: reviewData?.rating, // <--- ส่งค่ารีวิวพ่วงไป
-            reviewComment: reviewData?.comment, // <--- ส่งค่าคอมเมนต์พ่วงไป
-          }),
-        },
-      );
+      const response = await fetch(`/api/interview_tracking/update-status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trackingId: trackingId,
+          status: newStatus,
+          companyEmail: activeSelectedJob.company_email,
+          seekerEmail: userId, // หรืออีเมลของ user จริงๆ
+          companyName: activeSelectedJob.company_name,
+          seekerName: "ผู้สมัคร",
+          jobTitle: activeSelectedJob.job_position,
+          reviewRating: reviewData?.rating, // <--- ส่งค่ารีวิวพ่วงไป
+          reviewComment: reviewData?.comment, // <--- ส่งค่าคอมเมนต์พ่วงไป
+        }),
+      });
 
       if (response.ok) {
         const s = newStatus.toLowerCase();
@@ -427,6 +441,9 @@ export default function SeekerApplication({
         <aside className={styles.sidebar}>
           {/* แถบตัวกรองตำแหน่งงาน (มีเพียงไอคอน filter เมื่อคลิกจึงแสดง dropdown รายการตำแหน่งงาน) */}
           <div className={styles.filterTopBar}>
+            <span className={styles.listTitle}>
+              งานที่สมัคร ({filteredJobs.length})
+            </span>
             {selectedPosition !== "all" && (
               <div className={styles.activeFilterChip}>
                 <span className={styles.activeFilterText}>
@@ -523,70 +540,74 @@ export default function SeekerApplication({
             </div>
           </div>
 
-          {filteredJobs.length === 0 ? (
-            <p
-              style={{
-                textAlign: "center",
-                padding: "20px",
-                color: "#666",
-                fontSize: "14px",
-              }}
-            >
-              {visibleJobs.length === 0
-                ? "ไม่พบข้อมูลการสมัครงาน"
-                : `ไม่พบตำแหน่งงาน "${selectedPosition}"`}
-            </p>
-          ) : (
-            filteredJobs.map((job) => {
-              const isUnread =
-                job.status_notification === "unread_user" ||
-                job.status_notification === "unread_both";
-              return (
-                <div
-                  key={job.tracking_id}
-                  className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
-                  style={{
-                    cursor: isUnread ? "pointer" : "default",
-                    backgroundColor: isUnread ? "#fff7ed" : undefined,
-                    borderColor: isUnread ? "#ffedd5" : undefined,
-                    borderWidth: isUnread ? "1px" : undefined,
-                    borderStyle: isUnread ? "solid" : undefined,
-                    transition: "all 0.2s ease",
-                  }}
-                  onClick={() => handleCardClick(job)}
-                >
-                  <div className={styles.cardLeft}>
-                    <img
-                      src={
-                        job.logo_image ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
-                      }
-                      alt="company logo"
-                      className={styles.sidebarLogo}
-                      onError={(e) => {
-                        e.currentTarget.src = "https://via.placeholder.com/50";
+          <div className={styles.jobList} ref={jobListRef}>
+            {filteredJobs.length === 0 ? (
+              <p
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  color: "#666",
+                  fontSize: "14px",
+                }}
+              >
+                {visibleJobs.length === 0
+                  ? "ไม่พบข้อมูลการสมัครงาน"
+                  : `ไม่พบตำแหน่งงาน "${selectedPosition}"`}
+              </p>
+            ) : (
+              filteredJobs.map((job) => {
+                const isUnread =
+                  job.status_notification === "unread_user" ||
+                  job.status_notification === "unread_both";
+                return (
+                  <div
+                    key={job.tracking_id}
+                    data-tracking-id={job.tracking_id}
+                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                    style={{
+                      cursor: isUnread ? "pointer" : "default",
+                      backgroundColor: isUnread ? "#fff7ed" : undefined,
+                      borderColor: isUnread ? "#ffedd5" : undefined,
+                      borderWidth: isUnread ? "1px" : undefined,
+                      borderStyle: isUnread ? "solid" : undefined,
+                      transition: "all 0.2s ease",
+                    }}
+                    onClick={() => handleCardClick(job)}
+                  >
+                    <div className={styles.cardLeft}>
+                      <img
+                        src={
+                          job.logo_image ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company_name || "Company")}&background=random`
+                        }
+                        alt="company logo"
+                        className={styles.sidebarLogo}
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            "https://via.placeholder.com/50";
+                        }}
+                      />
+                      <div className={styles.cardDetails}>
+                        <h4>{job.job_position || "ไม่ระบุตำแหน่ง"}</h4>
+                        <p>{job.company_name || "ไม่ระบุบริษัท"}</p>
+                      </div>
+                    </div>
+                    <div
+                      className={styles.badgeContainer}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                        alignItems: "flex-end",
                       }}
-                    />
-                    <div className={styles.cardDetails}>
-                      <h4>{job.job_position || "ไม่ระบุตำแหน่ง"}</h4>
-                      <p>{job.company_name || "ไม่ระบุบริษัท"}</p>
+                    >
+                      {getStatusBadge(job.status)}
                     </div>
                   </div>
-                  <div
-                    className={styles.badgeContainer}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "5px",
-                      alignItems: "flex-end",
-                    }}
-                  >
-                    {getStatusBadge(job.status)}
-                  </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })
+            )}
+          </div>
         </aside>
 
         {/* Right Panel */}

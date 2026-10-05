@@ -212,32 +212,31 @@ export default async function DetailJob({ params }: PageProps) {
       )}
       <div className={styles.container}>
         <div className={styles.card}>
-          <BackButton />
+          {/* ปุ่มย้อนกลับ (ซ้าย) กับปุ่มสมัคร (ขวา) อยู่แถวเดียวกัน */}
+          <div className={styles.topBar}>
+            <BackButton />
 
-          {/* ปุ่ม Apply พร้อมส่ง Props */}
-          <ApplyCompany
-            mode="invite"
-            postId={Number(postId)}
-            userId={viewer.id}
-            companyId={Number(job.company_id)}
-            companyName={job.company_name || "ไม่ระบุชื่อบริษัท"}
-            seekerName={seekerName || "ไม่ระบุชื่อผู้สมัคร"}
-            jobTitle={job.job_position || "ไม่ระบุตำแหน่งงาน"}
-            seekerEmail={seekerEmail || "ไม่ระบุอีเมลผู้สมัคร"}
-            companyEmail={companyEmail || viewer.email || "ไม่ระบุอีเมลบริษัท"}
-          />
+            {/* ปุ่ม Apply พร้อมส่ง Props */}
+            <ApplyCompany
+              mode="invite"
+              postId={Number(postId)}
+              userId={viewer.id}
+              companyId={Number(job.company_id)}
+              companyName={job.company_name || "ไม่ระบุชื่อบริษัท"}
+              seekerName={seekerName || "ไม่ระบุชื่อผู้สมัคร"}
+              jobTitle={job.job_position || "ไม่ระบุตำแหน่งงาน"}
+              seekerEmail={seekerEmail || "ไม่ระบุอีเมลผู้สมัคร"}
+              companyEmail={
+                companyEmail || viewer.email || "ไม่ระบุอีเมลบริษัท"
+              }
+            />
+          </div>
 
           <div className={styles.header}>
             <div className={styles.linkCard1}>
               <Link
                 href={`/user/userProfileCompany/${job.company_id}`}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "15px",
-                  textDecoration: "none",
-                  color: "inherit",
-                }}
+                className={styles.companyLink}
               >
                 <img
                   src={
@@ -248,9 +247,7 @@ export default async function DetailJob({ params }: PageProps) {
                   className={styles.logo}
                 />
 
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
+                <div className={styles.nameRow}>
                   <h1 className={styles.companyName}>
                     {job.company_name || "ไม่ระบุชื่อบริษัท"}
                   </h1>

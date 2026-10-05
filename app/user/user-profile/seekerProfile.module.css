@@ -402,3 +402,132 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* รายการแก้ไขการศึกษา (โหมดแก้ไข)
+ * ขยายเกินกรอบเพื่อหักล้าง padding 50px ของ .Educontainer บนจอใหญ่
+ */
+.eduEditList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 150%;
+  margin-left: -28%;
+  margin-top: -25%;
+}
+
+/* ================= มือถือ / แท็บเล็ต ================= */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  /* 4 คอลัมน์ → เรียงลงมาทีละการ์ด */
+  .profileGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .column {
+    border-radius: 20px;
+  }
+
+  .contentPadding {
+    padding: 0 16px 20px 16px;
+  }
+
+  .personalInfoContent {
+    padding: 0 16px 16px 16px;
+  }
+
+  .avatarWrapper {
+    width: 120px;
+    height: 120px;
+  }
+
+  .detailsBox {
+    overflow-wrap: anywhere;
+  }
+
+  /* ไทม์ไลน์การศึกษา: จากซ้าย-ขวาสลับกัน → เส้นเดียวชิดซ้าย อ่านง่ายบนจอแคบ */
+  .Educontainer {
+    margin-left: 0;
+    padding: 20px 12px;
+    border-radius: 16px;
+  }
+
+  .centralLine {
+    left: 8px;
+    margin-top: 0;
+    top: 0;
+    transform: none;
+  }
+
+  .timelineItem {
+    width: 100%;
+    left: 0;
+    padding: 0 0 16px 28px;
+    text-align: left;
+  }
+
+  .left .connector,
+  .right .connector {
+    left: 8px;
+    right: auto;
+    width: 14px;
+  }
+
+  .eduEditList {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* การ์ดไฟล์แนบ: กว้างเต็มจอแทน fit-content */
+  .columnTransparent {
+    width: auto;
+    padding: 20px 16px;
+    border-radius: 20px;
+  }
+
+  .fileContainerBox,
+  .addFileInlineBtn {
+    max-width: none;
+  }
+
+  .contactCard,
+  .contactCard1 {
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .modalOverlay {
+    padding: 8px;
+  }
+
+  .modalContainer {
+    height: 90vh;
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding: 12px 16px;
+  }
+}
+
+/* ปุ่มบันทึก / ยกเลิก
+ * จอใหญ่: อยู่ใต้ข้อมูลส่วนตัว (desktopActions)
+ * มือถือ: ย้ายไปท้ายข้อมูลทั้งหมด (mobileActions) จะได้กดหลังแก้ครบทุกการ์ด
+ */
+.mobileActions {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktopActions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: block;
+    margin-top: 16px;
+  }
+}
