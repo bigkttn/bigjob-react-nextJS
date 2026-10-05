@@ -178,6 +178,19 @@ export default function HomeSwitcher({ initialUser }: HomeSwitcherProps) {
           color: #111111;
         }
 
+        /* จอแคบ ช่องค้นหากินความกว้างเกือบเต็ม ถ้าปุ่มลอยทับอยู่จะบังช่องค้นหา
+         * จึงเอาปุ่มกลับมาอยู่ในลำดับปกติ ให้ดันช่องค้นหาลงไปแทน
+         * พื้นสีเดียวกับแถบค้นหา (#b3b3b3) จะได้ดูเป็นแถบเดียวกัน
+         */
+        @media (max-width: 768px) {
+          .mode-switcher {
+            position: static;
+            justify-content: center;
+            padding: 16px 16px 0;
+            background: #b3b3b3;
+          }
+        }
+
         @media (max-width: 640px) {
           .mode-label {
             display: none;

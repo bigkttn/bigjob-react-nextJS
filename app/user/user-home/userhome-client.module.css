@@ -256,6 +256,11 @@
     width: 100%;
     flex: none;
   }
+  /* มือถือ: ให้ผลการค้นหาขึ้นก่อน รายการแนะนำย้ายไปอยู่ล่างสุด */
+  .leftSidebar {
+    order: 2;
+    min-width: 0;
+  }
   .searchBarWrapper {
     flex-direction: column;
   }
@@ -407,4 +412,12 @@
 }
 .historyClearAll:hover {
   text-decoration: underline;
+}
+
+
+/* ต้องอยู่หลังกฎ .searchBarContainer ด้านบน ไม่งั้นจะถูกทับเป็น 50% */
+@media (max-width: 768px) {
+  .searchBarContainer {
+    width: 100%;
+  }
 }
