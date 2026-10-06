@@ -126,7 +126,9 @@ export default function Navbar() {
   // Tracking Notification Badge
   async function fetchTrackingNotificationBadge(uid: string, role: string) {
     try {
-      const res = await fetch(`/api/interview_tracking/notifications?userId=${uid}&role=${role}`);
+      const res = await fetch(
+        `/api/interview_tracking/notifications?userId=${uid}&role=${role}`,
+      );
       if (res.ok) {
         const data = await res.json();
         setTrackingUnreadCount(data.unreadCount || 0);
@@ -185,7 +187,14 @@ export default function Navbar() {
   const closeMenu = () => setIsMenuOpen(false);
 
   const onLogout = async () => {
-    const result = await Swal.fire({ title: "ออกจากระบบ", text: "คุณต้องการออกจากระบบใช่หรือไม่?", icon: "question", showCancelButton: true, confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    const result = await Swal.fire({
+      title: "ออกจากระบบ",
+      text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
+    });
     if (result.isConfirmed) {
       await forceLogout();
     }
@@ -201,7 +210,6 @@ export default function Navbar() {
       console.error("Logout failed", error);
     }
   };
-
 
   const getDashboardRoute = () => {
     switch (userRole) {
@@ -421,9 +429,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Menu */}
-          <div className="nav-links desktop-menu">
-            {renderLinks(false)}
-          </div>
+          <div className="nav-links desktop-menu">{renderLinks(false)}</div>
         </div>
 
         {/* Mobile Drawer / Sidebar */}
