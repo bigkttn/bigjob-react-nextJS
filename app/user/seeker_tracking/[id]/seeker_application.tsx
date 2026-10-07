@@ -48,6 +48,43 @@ interface ComponentProps {
 
 const EXCLUDED_STATUSES: string[] = [];
 
+const RESCHEDULE_REASONS = [
+  "ติดเรียน / สอบ",
+  "ติดงานหรือภารกิจอื่น",
+  "เหตุผลด้านสุขภาพ",
+  "เดินทางไม่สะดวก",
+  "อื่น ๆ",
+];
+
+// "2026-10-15" → "วันพฤหัสบดีที่ 15 ตุลาคม 2569"
+const formatThaiDate = (value: string): string => {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("th-TH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// "2026-10-25T14:00:00" → "25 ตุลาคม 2569 เวลา 14:00 น."
+const formatInterviewDateTime = (value?: string): string => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  const day = date.toLocaleDateString("th-TH", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const time = date.toLocaleTimeString("th-TH", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${day} เวลา ${time} น.`;
+};
+
 const isExcludedStatus = (status?: string): boolean => {
   if (!status) return false;
   return EXCLUDED_STATUSES.includes(status.trim().toLowerCase());
@@ -78,6 +115,16 @@ export default function SeekerApplication({
   const [pendingFinalStatus, setPendingFinalStatus] = useState<
     "hired" | "reject" | null
   >(null);
+
+  // ขอเลื่อนนัด
+  const [rescheduleTrackingId, setRescheduleTrackingId] = useState<
+    number | null
+  >(null);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
+  const [rescheduleDetail, setRescheduleDetail] = useState("");
+  const [isSubmittingReschedule, setIsSubmittingReschedule] = useState(false);
 
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -202,6 +249,20 @@ export default function SeekerApplication({
           }}
         >
           นัดสัมภาษณ์
+        </span>
+      );
+    if (s === "reschedule")
+      return (
+        <span
+          className={styles.badge}
+          style={{
+            backgroundColor: "#8e24aa",
+            padding: "4px 12px",
+            borderRadius: "12px",
+            color: "#fff",
+          }}
+        >
+          ขอเลื่อนนัด
         </span>
       );
     if (s === "interview")
@@ -409,6 +470,9 @@ export default function SeekerApplication({
             );
           }
         }
+      } else {
+        const data = await response.json().catch(() => ({}));
+        Swal.fire(data.message || "อัปเดตสถานะไม่สำเร็จ");
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -431,6 +495,94 @@ export default function SeekerApplication({
       );
       setModalAction(null);
       setTargetTrackingId(null);
+    }
+  };
+
+  const openRescheduleModal = (trackingId: number) => {
+    setRescheduleTrackingId(trackingId);
+    setRescheduleDate("");
+    setRescheduleTime("");
+    setRescheduleReason("");
+    setRescheduleDetail("");
+  };
+
+  const closeRescheduleModal = () => {
+    if (isSubmittingReschedule) return;
+    setRescheduleTrackingId(null);
+  };
+
+  const todayStr = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD ตามเวลาเครื่อง
+
+  const handleSubmitReschedule = async () => {
+    if (rescheduleTrackingId === null) return;
+
+    if (!rescheduleDate || !rescheduleTime) {
+      Swal.fire("กรุณาเลือกวันและเวลาที่สะดวก");
+      return;
+    }
+    const proposedAt = new Date(`${rescheduleDate}T${rescheduleTime}:00`);
+    if (proposedAt.getTime() <= Date.now()) {
+      Swal.fire("วันและเวลาที่เสนอต้องเป็นเวลาในอนาคต");
+      return;
+    }
+    if (!rescheduleReason) {
+      Swal.fire("กรุณาเลือกเหตุผลที่ขอเลื่อนนัด");
+      return;
+    }
+    const detail = rescheduleDetail.trim();
+    if (rescheduleReason === "อื่น ๆ" && !detail) {
+      Swal.fire("กรุณาระบุรายละเอียดเหตุผล");
+      return;
+    }
+    const reason = detail ? `${rescheduleReason}: ${detail}` : rescheduleReason;
+
+    setIsSubmittingReschedule(true);
+    try {
+      const response = await fetch(`/api/interview_tracking/update-status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trackingId: rescheduleTrackingId,
+          status: "reschedule",
+          interviewDate: rescheduleDate,
+          interviewTime: rescheduleTime,
+          rescheduleReason: reason,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        Swal.fire(data.message || "ส่งคำขอเลื่อนนัดไม่สำเร็จ");
+        return;
+      }
+
+      const updated = {
+        status: "reschedule",
+        interview_date: `${rescheduleDate}T${rescheduleTime}:00`,
+        interview_message: reason,
+      };
+      setJobs((prev) =>
+        prev.map((job) =>
+          job.tracking_id === rescheduleTrackingId
+            ? { ...job, ...updated }
+            : job,
+        ),
+      );
+      setSelectedJob((prev) =>
+        prev && prev.tracking_id === rescheduleTrackingId
+          ? { ...prev, ...updated }
+          : prev,
+      );
+      setRescheduleTrackingId(null);
+      Swal.fire(
+        "ส่งคำขอเลื่อนนัดแล้ว",
+        "กรุณารอบริษัทพิจารณาเวลาใหม่",
+        "success",
+      );
+    } catch (error) {
+      console.error("Error requesting reschedule:", error);
+      Swal.fire("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setIsSubmittingReschedule(false);
     }
   };
 
@@ -746,12 +898,12 @@ export default function SeekerApplication({
                   )}
                 </div>
                 <div
-                  className={`${styles.stepLine} ${["", "screening", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.activeLine : ""}`}
+                  className={`${styles.stepLine} ${["", "screening", "reschedule", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.activeLine : ""}`}
                 />
 
                 {/* Step 2: Screening */}
                 <div
-                  className={`${styles.step} ${["screening", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.active : ""} ${currentStatus === "screening" ? styles.currentStep : ""}`}
+                  className={`${styles.step} ${["screening", "reschedule", "interview", "offer", "appointment", "hired"].includes(currentStatus) ? styles.active : ""} ${["screening", "reschedule"].includes(currentStatus) ? styles.currentStep : ""}`}
                 >
                   <div className={styles.stepIcon}>
                     <span
@@ -1013,6 +1165,60 @@ export default function SeekerApplication({
                           <span className={styles.iconCross}>✕</span> ปฏิเสธ
                         </button>
                       </div>
+                      <button
+                        type="button"
+                        className={styles.btnReschedule}
+                        onClick={() =>
+                          openRescheduleModal(activeSelectedJob.tracking_id)
+                        }
+                      >
+                        <span className="material-symbols-outlined">
+                          event_repeat
+                        </span>
+                        ไม่สะดวก? ขอเลื่อนนัด
+                      </button>
+                    </div>
+                  )}
+                  {currentStatus === "reschedule" && (
+                    <div className={styles.rescheduleCard}>
+                      <p className={styles.rescheduleTitle}>
+                        <span className="material-symbols-outlined">
+                          schedule
+                        </span>
+                        รอบริษัทพิจารณาเวลาใหม่
+                      </p>
+                      <div className={styles.rescheduleInfo}>
+                        <div>
+                          <p className={styles.rescheduleLabel}>
+                            เวลาที่คุณขอเลื่อนเป็น
+                          </p>
+                          <p className={styles.rescheduleValue}>
+                            {formatInterviewDateTime(
+                              activeSelectedJob.interview_date,
+                            )}
+                          </p>
+                        </div>
+                        {activeSelectedJob.interview_message && (
+                          <div>
+                            <p className={styles.rescheduleLabel}>เหตุผล</p>
+                            <p className={styles.rescheduleValue}>
+                              {activeSelectedJob.interview_message}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.btnCancelApplication}
+                        onClick={() =>
+                          handleOpenRejectModel(
+                            activeSelectedJob.tracking_id,
+                            "cancel",
+                          )
+                        }
+                      >
+                        ✕ ยกเลิกใบสมัคร
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1292,6 +1498,18 @@ export default function SeekerApplication({
                           <span className={styles.iconCross}>✕</span> ยกเลิกนัด
                         </button>
                       </div>
+                      <button
+                        type="button"
+                        className={styles.btnReschedule}
+                        onClick={() =>
+                          openRescheduleModal(activeSelectedJob.tracking_id)
+                        }
+                      >
+                        <span className="material-symbols-outlined">
+                          event_repeat
+                        </span>
+                        ไม่สะดวก? ขอเลื่อนนัด
+                      </button>
                     </div>
                   )}
                 </div>
@@ -1664,6 +1882,83 @@ export default function SeekerApplication({
                     <button
                       className={styles.btnCancel}
                       onClick={() => setModalAction(null)}
+                    >
+                      ปิดหน้าต่าง
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reschedule Modal (ขอเลื่อนนัด) */}
+            {rescheduleTrackingId !== null && (
+              <div className={styles.modalOverlay}>
+                <div className={styles.modalContent}>
+                  <h3>ขอเลื่อนนัดสัมภาษณ์</h3>
+                  <p>
+                    เลือกวันและเวลาที่คุณสะดวก
+                    บริษัทจะพิจารณาและแจ้งผลกลับทางระบบและอีเมล
+                  </p>
+                  <div className={styles.rescheduleForm}>
+                    <label htmlFor="reschedule-date">วันที่สะดวก</label>
+                    <input
+                      id="reschedule-date"
+                      type="date"
+                      min={todayStr}
+                      value={rescheduleDate}
+                      onChange={(e) => setRescheduleDate(e.target.value)}
+                    />
+                    {rescheduleDate && (
+                      <span className={styles.datePreview}>
+                        {formatThaiDate(rescheduleDate)}
+                      </span>
+                    )}
+                    <label htmlFor="reschedule-time">เวลาที่สะดวก</label>
+                    <input
+                      id="reschedule-time"
+                      type="time"
+                      value={rescheduleTime}
+                      onChange={(e) => setRescheduleTime(e.target.value)}
+                    />
+                    <label htmlFor="reschedule-reason">เหตุผล</label>
+                    <select
+                      id="reschedule-reason"
+                      value={rescheduleReason}
+                      onChange={(e) => setRescheduleReason(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        เลือกเหตุผล
+                      </option>
+                      {RESCHEDULE_REASONS.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                    <label htmlFor="reschedule-detail">
+                      รายละเอียดเพิ่มเติม
+                      {rescheduleReason === "อื่น ๆ" ? "" : " (ไม่บังคับ)"}
+                    </label>
+                    <textarea
+                      id="reschedule-detail"
+                      rows={3}
+                      maxLength={300}
+                      value={rescheduleDetail}
+                      onChange={(e) => setRescheduleDetail(e.target.value)}
+                    />
+                  </div>
+                  <div className={styles.modalActions}>
+                    <button
+                      className={styles.btnConfirmReschedule}
+                      onClick={handleSubmitReschedule}
+                      disabled={isSubmittingReschedule}
+                    >
+                      {isSubmittingReschedule ? "กำลังส่ง..." : "ส่งคำขอ"}
+                    </button>
+                    <button
+                      className={styles.btnCancel}
+                      onClick={closeRescheduleModal}
+                      disabled={isSubmittingReschedule}
                     >
                       ปิดหน้าต่าง
                     </button>

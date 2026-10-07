@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import Swal from "sweetalert2";
 import styles from "./company_tracking.module.css";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -202,7 +203,23 @@ export default function CompanyApplication({
     setIsRejectModelOpen(true);
   };
 
+  // เลื่อนนัด / กำหนดเวลาอื่น: เปิดฟอร์มนัดเดิมในขั้น "นัดสัมภาษณ์" อีกครั้ง
+  const [reschedulingId, setReschedulingId] = useState<number | null>(null);
+
   const status = selectedJob?.status?.toLowerCase() || "pending";
+  const isRescheduling =
+    reschedulingId !== null && reschedulingId === selectedJob?.tracking_id;
+
+  const openCompanyReschedule = () => {
+    if (!selectedJob) return;
+    // ใช้รูปแบบ/สถานที่เดิมตั้งต้น ให้บริษัทเปลี่ยนแค่วันเวลาได้เลย
+    setInterviewType(selectedJob.link ? "online" : "onsite");
+    setMeetingLink(selectedJob.link || "");
+    setLocationName(selectedJob.location || "");
+    setInterviewDate("");
+    setInterviewTime("");
+    setReschedulingId(selectedJob.tracking_id);
+  };
 
   // หาวันที่ปัจจุบันในรูปแบบ YYYY-MM-DD เพื่อเอาไปบล็อกการเลือกวันย้อนหลัง
   const today = new Date();
@@ -210,6 +227,13 @@ export default function CompanyApplication({
   const mm = String(today.getMonth() + 1).padStart(2, "0");
   const dd = String(today.getDate()).padStart(2, "0");
   const minDate = `${yyyy}-${mm}-${dd}`;
+
+  // เวลาที่ผู้สมัครขอเลื่อนผ่านไปแล้วหรือยัง (ผ่านแล้วต้องกำหนดเวลาอื่น)
+  const proposedDate = selectedJob?.interview_date;
+  const isProposedTimePast =
+    status === "reschedule" &&
+    proposedDate !== undefined &&
+    new Date(proposedDate) <= today;
 
   // เช็กว่าวันที่เลือกเป็นอดีตหรือไม่
   const isPastDate = interviewDate && interviewDate < minDate;
@@ -219,6 +243,7 @@ export default function CompanyApplication({
     if (s === "applied") return styles.statusApplied;
     // ปรับให้ screening ใช้สี (Class) เดียวกับ interview
     if (s === "screening" || s === "interview") return styles.statusInterview;
+    if (s === "reschedule") return styles.statusReschedule;
     if (s === "appointment" || s === "offer" || s === "hired")
       return styles.statusOffer;
     if (s === "rejected" || s === "reject") return styles.statusRejected;
@@ -231,6 +256,7 @@ export default function CompanyApplication({
     if (s === "pending") return "ยื่นใบสมัคร";
     if (s === "applied") return "นัดสัมภาษณ์";
     if (s === "screening") return "นัดสัมภาษณ์";
+    if (s === "reschedule") return "ขอเลื่อนนัด";
     if (s === "interview") return "สัมภาษณ์งาน";
     if (s === "offer" || s === "appointment" || s === "hired")
       return "ผลการพิจารณา";
@@ -298,8 +324,8 @@ export default function CompanyApplication({
     trackingId: number,
     newStatus: string,
     interviewDetails?: any,
-  ) => {
-    if (!selectedJob) return;
+  ): Promise<boolean> => {
+    if (!selectedJob) return false;
     console.log("ข้อมูลที่จะส่งไป API:", {
       trackingId: trackingId,
       status: newStatus,
@@ -372,10 +398,14 @@ export default function CompanyApplication({
               }
             : null,
         );
+        return true;
       }
+      const data = await response.json().catch(() => ({}));
+      Swal.fire(data.message || "อัปเดตสถานะไม่สำเร็จ");
     } catch (error) {
       console.error("Error updating status:", error);
     }
+    return false;
   };
 
   const handleOpenMap = () => {
@@ -738,12 +768,12 @@ export default function CompanyApplication({
                     )}
                   </div>
                   <div
-                    className={`${styles.stepLine} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                    className={`${styles.stepLine} ${["applied", "screening", "reschedule", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
                   />
 
                   {/* Step 2: Applied */}
                   <div
-                    className={`${styles.step} ${["applied", "screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" ? styles.currentStep : ""}`}
+                    className={`${styles.step} ${["applied", "screening", "reschedule", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${status === "applied" || isRescheduling ? styles.currentStep : ""}`}
                   >
                     <div className={styles.stepIcon}>
                       <span
@@ -765,7 +795,7 @@ export default function CompanyApplication({
                       นัดสัมภาษณ์
                     </span>
 
-                    {status === "applied" && (
+                    {(status === "applied" || isRescheduling) && (
                       <div
                         style={{
                           marginTop: "15px",
@@ -797,7 +827,7 @@ export default function CompanyApplication({
                             whiteSpace: "nowrap",
                           }}
                         >
-                          สร้างนัดหมาย
+                          {isRescheduling ? "เลื่อนนัดหมาย" : "สร้างนัดหมาย"}
                         </p>
                         <label
                           style={{
@@ -1023,12 +1053,12 @@ export default function CompanyApplication({
                                     !isInterviewFormComplete ||
                                     Boolean(isPastDate)
                                   }
-                                  onClick={() => {
+                                  onClick={async () => {
                                     const finalLocation =
                                       interviewType === "online"
                                         ? meetingLink
                                         : locationName;
-                                    handleUpdateStatus(
+                                    const ok = await handleUpdateStatus(
                                       selectedJob.tracking_id,
                                       "screening",
                                       {
@@ -1046,6 +1076,7 @@ export default function CompanyApplication({
                                             : null,
                                       },
                                     );
+                                    if (ok) setReschedulingId(null);
                                   }}
                                 >
                                   <div
@@ -1086,11 +1117,16 @@ export default function CompanyApplication({
                                     cursor: "pointer",
                                     color: "#333",
                                   }}
-                                  onClick={() =>
+                                  onClick={() => {
+                                    // ตอนเลื่อนนัด ปุ่มนี้แค่ปิดฟอร์ม ไม่ได้ปฏิเสธผู้สมัคร
+                                    if (isRescheduling) {
+                                      setReschedulingId(null);
+                                      return;
+                                    }
                                     handleOpenRejectModal(
                                       selectedJob.tracking_id,
-                                    )
-                                  }
+                                    );
+                                  }}
                                 >
                                   <div
                                     style={{
@@ -1122,12 +1158,12 @@ export default function CompanyApplication({
                     )}
                   </div>
                   <div
-                    className={`${styles.stepLine} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
+                    className={`${styles.stepLine} ${["screening", "reschedule", "interview", "appointment", "offer", "hired"].includes(status) ? styles.activeLine : ""}`}
                   />
 
                   {/* Step 3: Screening / Interview */}
                   <div
-                    className={`${styles.step} ${["screening", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "interview"].includes(status) ? styles.currentStep : ""}`}
+                    className={`${styles.step} ${["screening", "reschedule", "interview", "appointment", "offer", "hired"].includes(status) ? styles.active : ""} ${["screening", "reschedule", "interview"].includes(status) && !isRescheduling ? styles.currentStep : ""}`}
                   >
                     <div className={styles.stepIcon}>
                       <span
@@ -1192,6 +1228,18 @@ export default function CompanyApplication({
                         >
                           รอผู้สมัครยืนยันนัดหมาย
                         </p>
+                        {!isRescheduling && (
+                          <button
+                            type="button"
+                            className={styles.btnCompanyReschedule}
+                            onClick={openCompanyReschedule}
+                          >
+                            <span className="material-symbols-outlined">
+                              event_repeat
+                            </span>
+                            เลื่อนนัด
+                          </button>
+                        )}
                         <button
                           type="button"
                           style={{
@@ -1230,6 +1278,71 @@ export default function CompanyApplication({
                             </span>
                           </div>
                           ยกเลิกนัด
+                        </button>
+                      </div>
+                    )}
+
+                    {status === "reschedule" && !isRescheduling && (
+                      <div className={styles.rescheduleRequestCard}>
+                        <p className={styles.rescheduleRequestTitle}>
+                          ผู้สมัครขอเลื่อนนัด
+                        </p>
+                        <p className={styles.rescheduleRequestLabel}>
+                          เวลาที่ผู้สมัครเสนอ
+                        </p>
+                        <p className={styles.rescheduleRequestValue}>
+                          {selectedJob.interview_date
+                            ? `${new Date(selectedJob.interview_date).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })} เวลา ${new Date(selectedJob.interview_date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.`
+                            : "-"}
+                        </p>
+                        {selectedJob.interview_message && (
+                          <>
+                            <p className={styles.rescheduleRequestLabel}>
+                              เหตุผล
+                            </p>
+                            <p className={styles.rescheduleRequestValue}>
+                              {selectedJob.interview_message}
+                            </p>
+                          </>
+                        )}
+                        {isProposedTimePast && (
+                          <p className={styles.rescheduleRequestWarning}>
+                            เวลาที่เสนอผ่านไปแล้ว กรุณากำหนดเวลาอื่น
+                          </p>
+                        )}
+                        <div className={styles.rescheduleRequestActions}>
+                          <button
+                            type="button"
+                            className={styles.btnAcceptProposed}
+                            disabled={isProposedTimePast}
+                            onClick={() =>
+                              handleUpdateStatus(
+                                selectedJob.tracking_id,
+                                "interview",
+                              )
+                            }
+                          >
+                            ตกลงเวลานี้
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.btnCompanyReschedule}
+                            onClick={openCompanyReschedule}
+                          >
+                            <span className="material-symbols-outlined">
+                              event_repeat
+                            </span>
+                            กำหนดเวลาอื่น
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.btnRejectApplicant}
+                          onClick={() =>
+                            handleOpenRejectModal(selectedJob.tracking_id)
+                          }
+                        >
+                          ไม่ผ่านพิจารณา
                         </button>
                       </div>
                     )}
@@ -1423,6 +1536,18 @@ export default function CompanyApplication({
                           </div>
                         </div>
 
+                        {!isRescheduling && (
+                          <button
+                            type="button"
+                            className={styles.btnCompanyReschedule}
+                            onClick={openCompanyReschedule}
+                          >
+                            <span className="material-symbols-outlined">
+                              event_repeat
+                            </span>
+                            เลื่อนนัด
+                          </button>
+                        )}
                         <div
                           style={{
                             display: "flex",

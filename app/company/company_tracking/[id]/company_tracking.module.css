@@ -1435,3 +1435,133 @@
     padding: 4px;
   }
 }
+
+/* ===== เลื่อนนัด ===== */
+.statusReschedule {
+  background: #8e24aa;
+  color: #fff;
+}
+
+.btnCompanyReschedule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  background: #fff8e1;
+  border: 1px solid #f57c00;
+  border-radius: 8px;
+  color: #e65100;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnCompanyReschedule:hover {
+  background-color: #ffe0b2;
+}
+
+.btnCompanyReschedule :global(.material-symbols-outlined) {
+  font-size: 16px;
+}
+
+/* กว้างกว่าคอลัมน์ขั้นตอน ให้แต่ละบรรทัดไม่ต้องตัดคำ (ขั้นตอนจัดกึ่งกลาง การ์ดจึงล้นออกสองข้างเท่ากัน) */
+.rescheduleRequestCard {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  max-width: 80vw;
+  padding: 14px 18px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border: 1.5px solid #8e24aa;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(142, 36, 170, 0.12);
+  text-align: left;
+}
+
+.rescheduleRequestTitle {
+  margin: 0 0 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #8e24aa;
+}
+
+.rescheduleRequestLabel {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: normal;
+  color: #888;
+}
+
+.rescheduleRequestValue {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.rescheduleRequestActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.rescheduleRequestActions > button {
+  flex: 1;
+  margin: 0;
+}
+
+.rescheduleRequestWarning {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #d32f2f;
+}
+
+.btnAcceptProposed {
+  width: 100%;
+  margin: 4px 0 8px;
+  padding: 8px 10px;
+  background: #2e7d32;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btnAcceptProposed:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
+.btnRejectApplicant {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid #d32f2f;
+  border-radius: 8px;
+  color: #d32f2f;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnRejectApplicant:hover {
+  background-color: #ffebee;
+}
+
+/* ขั้นตอนที่มีการ์ดขอเลื่อนนัด: ไม่ให้การ์ดดันคอลัมน์จนเส้นเชื่อมหด การ์ดล้นออกสองข้างแทน */
+.step:has(> .rescheduleRequestCard) {
+  min-width: 0;
+}

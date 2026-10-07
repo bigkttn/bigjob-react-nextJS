@@ -781,3 +781,159 @@
     max-width: 100%;
   }
 }
+
+/* ===== ขอเลื่อนนัด ===== */
+.btnReschedule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 10px;
+  background: #fff8e1;
+  border: 1px solid #f57c00;
+  border-radius: 8px;
+  color: #e65100;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnReschedule:hover {
+  background-color: #ffe0b2;
+}
+
+.btnReschedule :global(.material-symbols-outlined) {
+  font-size: 16px;
+}
+
+/* การ์ดแนวนอน กว้างกว่าคอลัมน์ขั้นตอน (ขั้นตอนจัดกึ่งกลาง การ์ดจึงล้นออกสองข้างเท่ากัน) */
+.rescheduleCard {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: max-content; /* กว้างเท่าข้อความที่ยาวที่สุด */
+  max-width: min(460px, 85vw);
+  padding: 14px 18px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border: 1.5px solid #8e24aa;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(142, 36, 170, 0.12);
+  text-align: left;
+}
+
+.rescheduleTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #8e24aa;
+}
+
+.rescheduleTitle :global(.material-symbols-outlined) {
+  font-size: 18px;
+}
+
+.rescheduleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rescheduleLabel {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: normal;
+  color: #888;
+}
+
+.rescheduleValue {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+  overflow-wrap: anywhere;
+}
+
+.btnCancelApplication {
+  align-self: flex-end;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #d32f2f;
+  border-radius: 8px;
+  color: #d32f2f;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnCancelApplication:hover {
+  background-color: #ffebee;
+}
+
+.rescheduleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.rescheduleForm label {
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+}
+
+.rescheduleForm input,
+.rescheduleForm select,
+.rescheduleForm textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.btnConfirmReschedule {
+  background-color: #fff8e1;
+  color: #e65100;
+  border: 1px solid #f57c00;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnConfirmReschedule:hover:not(:disabled) {
+  background-color: #ffe0b2;
+}
+
+.btnConfirmReschedule:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.datePreview {
+  margin-top: -2px;
+  font-size: 12px;
+  color: #e65100;
+}
+
+/* ขั้นตอนที่มีการ์ดเลื่อนนัด: ไม่ให้การ์ดดันคอลัมน์จนเส้นเชื่อมหด การ์ดล้นออกสองข้างแทน */
+.step:has(> .rescheduleCard) {
+  min-width: 0;
+}

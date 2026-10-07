@@ -8,6 +8,7 @@ export interface PostContact {
   company_id: number;
   company_name: string;
   company_email: string;
+  company_phone: string | null;
 }
 
 export interface SeekerContact {
@@ -19,13 +20,28 @@ export interface SeekerContact {
 export interface TrackingContact {
   tracking_id: number;
   user_id: number;
+  status: string;
+  interview_date: Date | null;
+  link: string | null;
+  location: string | null;
   post: PostContact;
   seeker: SeekerContact;
 }
 
+interface TrackingRow {
+  tracking_id: number;
+  user_id: number;
+  post_id: number;
+  status: string;
+  interview_date: Date | null;
+  link: string | null;
+  location: string | null;
+}
+
 export async function getPostContact(postId: number): Promise<PostContact | null> {
   const [rows] = (await db.query(
-    `SELECT p.post_id, p.job_position, p.company_id, c.company_name, c.company_email
+    `SELECT p.post_id, p.job_position, p.company_id, c.company_name, c.company_email,
+            c.mobile_phone AS company_phone
      FROM posts p
      JOIN company c ON c.company_id = p.company_id
      WHERE p.post_id = ?
@@ -47,9 +63,10 @@ export async function getTrackingContact(
   trackingId: number,
 ): Promise<TrackingContact | null> {
   const [rows] = (await db.query(
-    "SELECT tracking_id, user_id, post_id FROM interview_tracking WHERE tracking_id = ? LIMIT 1",
+    `SELECT tracking_id, user_id, post_id, status, interview_date, link, location
+     FROM interview_tracking WHERE tracking_id = ? LIMIT 1`,
     [trackingId],
-  )) as [{ tracking_id: number; user_id: number; post_id: number }[], unknown];
+  )) as [TrackingRow[], unknown];
   const tracking = rows[0];
   if (!tracking) return null;
 
@@ -57,7 +74,16 @@ export async function getTrackingContact(
   const seeker = await getSeekerContact(tracking.user_id);
   if (!post || !seeker) return null;
 
-  return { tracking_id: tracking.tracking_id, user_id: tracking.user_id, post, seeker };
+  return {
+    tracking_id: tracking.tracking_id,
+    user_id: tracking.user_id,
+    status: tracking.status,
+    interview_date: tracking.interview_date,
+    link: tracking.link,
+    location: tracking.location,
+    post,
+    seeker,
+  };
 }
 
 // กันข้อความจากผู้ใช้ไปแทรก HTML/ลิงก์ในอีเมล
