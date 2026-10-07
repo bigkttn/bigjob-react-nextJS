@@ -3,8 +3,8 @@ import db from '@/lib/db';
 import nodemailer from 'nodemailer';
 import { apiUrl } from '@/lib/hostURL';
 import { getSessionUser, isAdmin } from '@/lib/auth';
-import { getTrackingContact } from '@/lib/trackingContext';
-import { TrackingActor, canChangeStatus } from '@/lib/trackingStatus';
+import { getTrackingContact } from '../trackingContext';
+import { TrackingActor, canChangeStatus } from '../trackingStatus';
 import {
   SeekerMailContext,
   interviewInviteMail,
@@ -13,7 +13,7 @@ import {
   rescheduleConfirmedMail,
   rescheduleRequestMail,
   toDateParts,
-} from '@/lib/trackingEmails';
+} from '../trackingEmails';
 
 // สถานะที่ต้องมีวันนัดในอนาคต (นัดสัมภาษณ์ / ขอเลื่อนนัด)
 const NEEDS_FUTURE_DATE = ['screening', 'reschedule'];

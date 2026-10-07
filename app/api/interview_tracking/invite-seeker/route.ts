@@ -8,7 +8,7 @@ import {
   escapeHtml,
   getPostContact,
   getSeekerContact,
-} from "@/lib/trackingContext";
+} from "../trackingContext";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
