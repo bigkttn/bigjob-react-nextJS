@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const postId = Number(post_id);
 
     if (!userId) {
-      return NextResponse.json({ exists: false, message: "Missing user_id" }, { status: 400 });
+      return NextResponse.json({ exists: false, message: "ไม่ได้ระบุรหัสผู้ใช้" }, { status: 400 });
     }
 
     let sql = "";

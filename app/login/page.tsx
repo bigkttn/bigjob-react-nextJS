@@ -18,33 +18,6 @@ export default function Login() {
   // แนะนำให้ย้าย Client ID ไปไว้ใน .env.local (เช่น NEXT_PUBLIC_GOOGLE_CLIENT_ID)
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  // ฟังก์ชันตั้งค่าปุ่ม Google
-  const initGoogleButton = () => {
-    if (typeof window !== "undefined" && window.google) {
-      window.google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: handleGoogleLogin,
-      });
-
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-btn-login-container"),
-        {
-          theme: "filled_black",
-          size: "large",
-          width: "350",
-          shape: "pill",
-          text: "signin_with",
-        },
-      );
-    }
-  };
-  useEffect(() => {
-    // ถ้า script โหลดเสร็จไปแล้ว (จากหน้าอื่นหรือโหลดค้างไว้) ให้รันเลย
-    if (window.google) {
-      initGoogleButton();
-    }
-  }, []);
-
   // จัดการเมื่อ Login ด้วย Google สำเร็จ
   const handleGoogleLogin = async (response: any) => {
     const payload = {
@@ -70,7 +43,12 @@ export default function Login() {
           router.push("/register");
           return;
         }
-        throw new Error("Login failed");
+        const data = await res.json().catch(() => ({}));
+        showAlert.error(
+          "แจ้งเตือน",
+          data.message || "เข้าสู่ระบบด้วย Google ไม่สำเร็จ",
+        );
+        return;
       }
 
       const data = await res.json();
@@ -82,7 +60,10 @@ export default function Login() {
       redirectUser(data.user.role);
     } catch (err: any) {
       console.error(err);
-      showAlert.error("แจ้งเตือน", "เข้าสู่ระบบไม่สำเร็จ: " + err.message);
+      showAlert.error(
+        "แจ้งเตือน",
+        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
+      );
     }
   };
 
@@ -91,7 +72,7 @@ export default function Login() {
     e.preventDefault(); // ป้องกันไม่ให้หน้าเว็บ Refresh เมื่อกด Submit
 
     if (!email || !password) {
-      showAlert.info("แจ้งเตือน", "Please enter both email and password.");
+      showAlert.info("แจ้งเตือน", "กรุณากรอกอีเมลและรหัสผ่าน");
       return;
     }
 
@@ -103,8 +84,14 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok)
-        throw new Error("Login failed. Please check your email/password.");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        showAlert.info(
+          "แจ้งเตือน",
+          errData.message || "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        );
+        return;
+      }
 
       const data = await res.json();
       /* console.log("Login Success:", data) */;
@@ -114,7 +101,10 @@ export default function Login() {
       redirectUser(data.user.role);
     } catch (err: any) {
       console.error(err);
-      showAlert.info("แจ้งเตือน", err.message);
+      showAlert.error(
+        "แจ้งเตือน",
+        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
+      );
     }
   };
 
@@ -131,9 +121,36 @@ export default function Login() {
         router.replace("/admin/home");
         break;
       default:
-        showAlert.info("แจ้งเตือน", "Unknown Role: " + role);
+        showAlert.info("แจ้งเตือน", `ไม่รู้จักประเภทบัญชี: ${role}`);
     }
   };
+
+  // ฟังก์ชันตั้งค่าปุ่ม Google (ประกาศหลัง handleGoogleLogin ที่ใช้เป็น callback)
+  const initGoogleButton = () => {
+    if (typeof window !== "undefined" && window.google) {
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: handleGoogleLogin,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-btn-login-container"),
+        {
+          theme: "filled_black",
+          size: "large",
+          width: "350",
+          shape: "pill",
+          text: "signin_with",
+        },
+      );
+    }
+  };
+  useEffect(() => {
+    // ถ้า script โหลดเสร็จไปแล้ว (จากหน้าอื่นหรือโหลดค้างไว้) ให้รันเลย
+    if (window.google) {
+      initGoogleButton();
+    }
+  }, []);
 
   return (
     <div className={styles.loginContainer}>

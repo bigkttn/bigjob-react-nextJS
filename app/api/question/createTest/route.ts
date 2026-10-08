@@ -26,11 +26,11 @@ export async function POST(request: Request) {
         }
 
         await connection.commit();
-        return NextResponse.json({ message: "Test created successfully" }, { status: 201 });
+        return NextResponse.json({ message: "สร้างแบบทดสอบสำเร็จ" }, { status: 201 });
     } catch (error) {
         await connection.rollback();
         console.error("Error creating test:", error);
-        return NextResponse.json({ message: "Failed to create test" }, { status: 500 });
+        return NextResponse.json({ message: "สร้างแบบทดสอบไม่สำเร็จ" }, { status: 500 });
     } finally {
         connection.release();
     }

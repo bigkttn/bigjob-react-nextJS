@@ -10,7 +10,7 @@ export async function GET(
         const id = Number(resolvedParams.id);
 
         if (isNaN(id)) {
-            return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+            return NextResponse.json({ error: 'รหัสไม่ถูกต้อง' }, { status: 400 });
         }
 
         // 1. ดึงข้อมูล user หลัก
@@ -26,7 +26,7 @@ export async function GET(
         );
 
         if (!users || users.length === 0) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            return NextResponse.json({ error: 'ไม่พบผู้ใช้' }, { status: 404 });
         }
 
         // 2. ดึงข้อมูลตารางที่เกี่ยวข้องพร้อมกัน (ชื่อตรงตาม schema จริง)

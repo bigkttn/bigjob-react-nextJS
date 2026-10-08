@@ -61,14 +61,14 @@ export default function ProfileActionsButton({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("API Error Details:", errorData);
-        Swal.fire(`Failed to Save (Status: ${response.status}) เคยบันทึกแล้ว`);
+        Swal.fire(errorData.message || errorData.error || "บันทึกไม่สำเร็จ หรือคุณเคยบันทึกไว้แล้ว");
         return;
       }
       setIsSaved(true);
-      Swal.fire("Saved Successfully!");
+      Swal.fire("บันทึกเรียบร้อยแล้ว");
     } catch (error) {
       console.error("Network Error:", error);
-      Swal.fire("Unable to connect to the server.");
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -169,7 +169,7 @@ export default function ProfileActionsButton({
       if (response.ok) {
         /* console.log("reported!!") */;
         setIsReported(true); //  แก้ไขชื่อตัวแปรให้ตรงกับ State
-        Swal.fire("Reported Successfully!");
+        Swal.fire("รายงานเรียบร้อยแล้ว");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
       } else {
         /* console.log("fail report!!") */;
@@ -264,7 +264,7 @@ export default function ProfileActionsButton({
             >
               bookmark
             </span>
-            {isSaved ? "Saved" : "Save"}
+            {isSaved ? "บันทึกแล้ว" : "บันทึก"}
           </button>
 
           <button
@@ -291,7 +291,7 @@ export default function ProfileActionsButton({
             >
               flag_2
             </span>
-            Report
+            รายงาน
           </button>
         </div>
       )}

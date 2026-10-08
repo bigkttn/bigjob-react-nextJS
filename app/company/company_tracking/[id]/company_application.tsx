@@ -265,7 +265,16 @@ export default function CompanyApplication({
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
   const handleDeleteTracking = async (trackingId: number) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) return;
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
     try {
       const response = await fetch(
         `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
@@ -279,7 +288,7 @@ export default function CompanyApplication({
           setSelectedJob(null);
         }
       } else {
-        alert("เกิดข้อผิดพลาดในการลบรายการ");
+        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
       }
     } catch (error) {
       console.error("Error deleting tracking:", error);

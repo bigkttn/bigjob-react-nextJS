@@ -7,7 +7,7 @@ export async function PUT(request: Request) {
         const { postId, questions } = await request.json();
 
         if (!postId) {
-            return NextResponse.json({ message: "Missing Post ID" }, { status: 400 });
+            return NextResponse.json({ message: "ไม่ได้ระบุรหัสประกาศงาน" }, { status: 400 });
         }
 
         await connection.beginTransaction();
@@ -51,11 +51,11 @@ export async function PUT(request: Request) {
         }
 
         await connection.commit();
-        return NextResponse.json({ message: "Test updated successfully" }, { status: 200 });
+        return NextResponse.json({ message: "บันทึกแบบทดสอบสำเร็จ" }, { status: 200 });
     } catch (error) {
         await connection.rollback();
         console.error("Error updating test:", error);
-        return NextResponse.json({ message: "Failed to update test" }, { status: 500 });
+        return NextResponse.json({ message: "บันทึกแบบทดสอบไม่สำเร็จ" }, { status: 500 });
     } finally {
         connection.release();
     }

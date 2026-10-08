@@ -808,7 +808,8 @@ const SeekerProfile = () => {
         Swal.fire(data.error ?? "เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (err: unknown) {
-      Swal.fire(getErrorText(err));
+      console.error(err);
+      Swal.fire("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSaving(false);
     }
@@ -841,7 +842,8 @@ const SeekerProfile = () => {
         Swal.fire(data.error ?? "ไม่สามารถเปลี่ยนสถานะการมองเห็นได้");
       }
     } catch (err: unknown) {
-      Swal.fire(`เกิดข้อผิดพลาด: ${getErrorText(err)}`);
+      console.error(err);
+      Swal.fire("เปลี่ยนสถานะการมองเห็นไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setTogglingVisibility(false);
     }
@@ -881,7 +883,8 @@ const SeekerProfile = () => {
       await deleteStorageFile(oldUrl);
       Swal.fire("เปลี่ยนรูปโปรไฟล์เรียบร้อยแล้ว!");
     } catch (err: unknown) {
-      Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
+      console.error(err);
+      Swal.fire("อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSaving(false);
     }
@@ -926,7 +929,7 @@ const SeekerProfile = () => {
         // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
         await deleteStorageFile(url);
         const data: { error?: string } = await res.json();
-        Swal.fire(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "unknown"}`);
+        Swal.fire(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "ไม่ทราบสาเหตุ"}`);
         return;
       }
 
@@ -948,7 +951,8 @@ const SeekerProfile = () => {
       }));
       showAlert.close();
     } catch (err: unknown) {
-      Swal.fire(`อัปโหลดล้มเหลว: ${getErrorText(err)}`);
+      console.error(err);
+      Swal.fire("อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setUploadingCategory("");
     }
@@ -988,7 +992,8 @@ const SeekerProfile = () => {
       }));
       showAlert.close();
     } catch (err: unknown) {
-      Swal.fire(`การลบล้มเหลว: ${getErrorText(err)}`);
+      console.error(err);
+      Swal.fire("ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   }
 

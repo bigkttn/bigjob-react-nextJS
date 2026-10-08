@@ -7,14 +7,14 @@ export async function POST(request: Request) {
         const { trackingId, userType } = body;
 
         if (!trackingId || !userType) {
-            return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+            return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
         }
 
         const updateField = userType === "user" ? "unread_user" : "unread_company";
         const targetValue = userType === "user" ? "unread_company" : "unread_user"; // We use 'read' below if it's not unread_both
         
         const [rows]: any = await db.query(`SELECT status_notification FROM interview_tracking WHERE tracking_id = ?`, [trackingId]);
-        if (rows.length === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
+        if (rows.length === 0) return NextResponse.json({ error: "ไม่พบข้อมูล" }, { status: 404 });
         
         const currentStatus = rows[0].status_notification;
         let newStatus = "read";
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("[MARK_SINGLE_TRACKING_READ_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }
 
@@ -37,7 +37,7 @@ export async function PATCH(request: Request) {
         const { userId, role } = body;
 
         if (!userId || isNaN(Number(userId)) || !role) {
-            return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+            return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
         }
 
         let updateSql = "";
@@ -53,12 +53,12 @@ export async function PATCH(request: Request) {
             await db.query(updateSql, [Number(userId)]);
             await db.query(updateBothSql, [Number(userId)]);
         } else {
-            return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+            return NextResponse.json({ error: "ประเภทผู้ใช้ไม่ถูกต้อง" }, { status: 400 });
         }
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("[MARK_TRACKING_NOTIFICATION_READ_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

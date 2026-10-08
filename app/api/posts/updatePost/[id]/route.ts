@@ -12,12 +12,12 @@ export async function PATCH(
         const token = cookieStore.get("session")?.value;
 
         if (!token) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
         }
 
         const decoded: any = jwt.decode(token);
         if (decoded.role !== "company") {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+            return NextResponse.json({ message: "ไม่มีสิทธิ์ดำเนินการนี้" }, { status: 403 });
         }
 
         const { id: postId } = await params;
@@ -92,15 +92,15 @@ export async function PATCH(
 
         if (result.affectedRows === 0) {
             return NextResponse.json(
-                { message: "Post not found or unauthorized" },
+                { message: "ไม่พบประกาศงาน หรือไม่มีสิทธิ์แก้ไข" },
                 { status: 404 }
             );
         }
 
-        return NextResponse.json({ message: "Post updated successfully" }, { status: 200 });
+        return NextResponse.json({ message: "แก้ไขประกาศงานสำเร็จ" }, { status: 200 });
 
     } catch (error) {
         console.error("Error updating post:", error);
-        return NextResponse.json({ message: "Error updating post" }, { status: 500 });
+        return NextResponse.json({ message: "แก้ไขประกาศงานไม่สำเร็จ" }, { status: 500 });
     }
 }

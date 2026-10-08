@@ -49,7 +49,7 @@ export async function GET(
   } catch (error: any) {
     console.error("SQL Error:", error.message);
     return NextResponse.json(
-      { message: "Error fetching tracking", error: error.message },
+      { message: "ดึงข้อมูลการสมัครงานไม่สำเร็จ", error: error.message },
       { status: 500 }
     );
   }

@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "ส่งคำเชิญเรียบร้อยแล้ว!" }, { status: 200 });
   } catch (error: unknown) {
     console.error("Error sending Invitation:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     return NextResponse.json({ message: "เกิดข้อผิดพลาดในการส่งคำเชิญ", error: errorMessage }, { status: 500 });
   }
 }

@@ -139,7 +139,8 @@ const CompanyProfile = () => {
       await deleteStorageFile(oldUrl);
       showAlert.close();
     } catch (err: any) {
-      Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
+      console.error(err);
+      Swal.fire("อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSaving(false);
     }
@@ -218,7 +219,8 @@ const CompanyProfile = () => {
       await deleteStorageFile(oldUrl);
       Swal.fire("อัปโหลดไฟล์เรียบร้อย! ระบบจะส่งให้ Admin ตรวจสอบใหม่อีกครั้ง");
     } catch (err: any) {
-      Swal.fire(`อัปโหลดล้มเหลว: ${err.message}`);
+      console.error(err);
+      Swal.fire("อัปโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setUploadingCert(false);
     }
@@ -255,7 +257,8 @@ const CompanyProfile = () => {
         Swal.fire(data.error || "เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (err: any) {
-      Swal.fire(err.message);
+      console.error(err);
+      Swal.fire("บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setSaving(false);
     }

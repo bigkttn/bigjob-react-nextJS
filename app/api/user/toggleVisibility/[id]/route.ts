@@ -10,7 +10,7 @@ export async function PATCH(
         const id = Number(resolvedParams.id);
 
         if (isNaN(id)) {
-            return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+            return NextResponse.json({ error: 'รหัสไม่ถูกต้อง' }, { status: 400 });
         }
 
         const body = await request.json();
@@ -19,7 +19,7 @@ export async function PATCH(
         // รับเฉพาะ 0 หรือ 1 เท่านั้น ป้องกันค่าแปลกปลอม
         if (is_visible !== 0 && is_visible !== 1) {
             return NextResponse.json(
-                { error: 'is_visible must be 0 or 1' },
+                { error: 'ค่าการแสดงโปรไฟล์ไม่ถูกต้อง' },
                 { status: 400 }
             );
         }
@@ -30,7 +30,7 @@ export async function PATCH(
         );
 
         if (result.affectedRows === 0) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            return NextResponse.json({ error: 'ไม่พบผู้ใช้' }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, is_visible }, { status: 200 });

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
         const role = searchParams.get("role");
 
         if (!userId || isNaN(Number(userId)) || !role) {
-            return NextResponse.json({ error: "Invalid parameters" }, { status: 400 });
+            return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ถูกต้อง" }, { status: 400 });
         }
 
         let query = "";
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
             `;
             params = [Number(userId)];
         } else {
-            return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+            return NextResponse.json({ error: "ประเภทผู้ใช้ไม่ถูกต้อง" }, { status: 400 });
         }
 
         const [rows]: any = await db.query(query, params);
@@ -55,6 +55,6 @@ export async function GET(request: Request) {
         return NextResponse.json({ notifications: rows, unreadCount: rows.length }, { status: 200 });
     } catch (error: any) {
         console.error("[TRACKING_NOTIFICATIONS_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

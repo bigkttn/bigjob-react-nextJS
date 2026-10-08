@@ -14,6 +14,6 @@ export async function GET() {
         return NextResponse.json({ success: true, data: rows[0] });
     } catch (error) {
         console.error("Database error in footer stats:", error);
-        return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

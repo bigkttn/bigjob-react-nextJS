@@ -106,7 +106,8 @@ export default function ProfileCompany() {
         Swal.fire(data.error ?? "ไม่สามารถลบรีวิวได้");
       }
     } catch (err: any) {
-      Swal.fire(`เกิดข้อผิดพลาด: ${err.message}`);
+      console.error(err);
+      Swal.fire("ลบรีวิวไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
     }
   }
 

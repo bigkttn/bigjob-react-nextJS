@@ -43,7 +43,7 @@ export async function GET(
 
         return NextResponse.json(
             {
-                message: "Failed to fetch test data",
+                message: "ดึงข้อมูลแบบทดสอบไม่สำเร็จ",
                 error: error.message,
             },
             { status: 500 }

@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         message: "เกิดข้อผิดพลาดในการส่งใบสมัคร",
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ",
       },
       { status: 500 },
     );

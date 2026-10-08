@@ -8,7 +8,7 @@ export async function GET(request: Request) {
         const userId = searchParams.get("userId");
 
         if (!userId || isNaN(Number(userId))) {
-            return NextResponse.json({ error: "Invalid User ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสผู้ใช้ไม่ถูกต้อง" }, { status: 400 });
         }
 
         // ดึงเฉพาะประวัติขึ้นมาเรียงลำดับจากใหม่ไปเก่าอย่างเดียว ไม่แอบอัปเดตอัตโนมัติ
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ feedbacks: rows }, { status: 200 });
     } catch (error: any) {
         console.error("[GET_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }
 
@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
         const { feedbackId } = body;
 
         if (!feedbackId || isNaN(Number(feedbackId))) {
-            return NextResponse.json({ error: "Invalid Feedback ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสความคิดเห็นไม่ถูกต้อง" }, { status: 400 });
         }
 
         // ปรับสถานะเป็น 'read' เฉพาะแถวข้อมูลที่ระบุไอดีเข้ามา และยังไม่ได้กดอ่านมาก่อนหน้า
@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("[PATCH_USER_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         const { userId, message } = body;
 
         if (!userId || !message || message.trim() === "") {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+            return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
         }
 
         await db.query(
@@ -71,6 +71,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true }, { status: 201 });
     } catch (error: any) {
         console.error("[POST_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

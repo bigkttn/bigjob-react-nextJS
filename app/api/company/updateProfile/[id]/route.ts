@@ -36,7 +36,7 @@ export async function PUT(
 
     if (!companyId) {
       return NextResponse.json(
-        { error: "Missing company id" },
+        { error: "ไม่ได้ระบุรหัสบริษัท" },
         { status: 400 },
       );
     }

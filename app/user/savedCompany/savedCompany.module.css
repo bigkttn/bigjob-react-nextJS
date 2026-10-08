@@ -169,6 +169,7 @@
   text-align: left;
   cursor: pointer;
   font-size: 0.9rem;
+  white-space: nowrap; /* "ยกเลิกการบันทึก" อยู่บรรทัดเดียว */
   color: #ef4444; /* red color for unsave */
   transition: background-color 0.2s ease;
 }

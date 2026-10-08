@@ -58,4 +58,20 @@ export const showAlert = {
     });
   },
   close: () => Swal.close(),
+  // ถามข้อความจากผู้ใช้ (แทน prompt() ของเบราว์เซอร์) คืน null ถ้ากดยกเลิก
+  prompt: async (title: string, placeholder = ""): Promise<string | null> => {
+    const result = await Swal.fire({
+      title,
+      input: "textarea",
+      inputPlaceholder: placeholder,
+      showCancelButton: true,
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#111827",
+      customClass: { popup: "premium-swal-popup" },
+      inputValidator: (value) =>
+        value.trim() ? undefined : "กรุณากรอกข้อความ",
+    });
+    return result.isConfirmed ? String(result.value).trim() : null;
+  },
 };

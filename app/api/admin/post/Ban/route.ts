@@ -7,7 +7,7 @@ export async function POST(request: Request) {
 
         if (!post_id || durationDays === undefined) {
             return NextResponse.json(
-                { error: "Please provide both postId and durationDays" },
+                { error: "กรุณาระบุประกาศงานและระยะเวลาการแบน" },
                 { status: 400 }
             );
         }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         await db.query(queryUpdateReport, [post_id])
 
         return NextResponse.json({
-            message: "banned successfully",
+            message: "แบนสำเร็จ",
             banUntil: banUntilDate
         },
             { status: 200 }
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     } catch (error: any) {
         console.error("Database Error:", error);
         return NextResponse.json(
-            { error: "Server Error", details: error.message },
+            { error: "เกิดข้อผิดพลาดในระบบ", details: error.message },
             { status: 500 }
         );
     }
@@ -70,7 +70,7 @@ export async function DELETE(request: Request) {
 
     if (!post_id) {
       return NextResponse.json(
-        { error: "Please provide post_id" },
+        { error: "กรุณาระบุรหัสประกาศงาน" },
         { status: 400 }
       );
     }
@@ -85,7 +85,7 @@ export async function DELETE(request: Request) {
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
-        { error: "Post not found" },
+        { error: "ไม่พบประกาศงาน" },
         { status: 404 }
       );
     }
@@ -99,13 +99,13 @@ export async function DELETE(request: Request) {
     await db.query(queryUpdateReport, [post_id]);
 
     return NextResponse.json(
-      { message: "Unbanned successfully" },
+      { message: "ปลดแบนสำเร็จ" },
       { status: 200 }
     );
   } catch (error: any) {
     console.error("Database Error:", error);
     return NextResponse.json(
-      { error: "Server Error", details: error.message },
+      { error: "เกิดข้อผิดพลาดในระบบ", details: error.message },
       { status: 500 }
     );
   }

@@ -10,13 +10,13 @@ export async function POST(request: Request) {
         const token = cookieStore.get("session")?.value;
 
         if (!token) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 }); // เปลี่ยนสถานะเป็น 401 ให้ถูกต้องตามหลักการ
+            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 }); // เปลี่ยนสถานะเป็น 401 ให้ถูกต้องตามหลักการ
         }
         const decoded: any = jwt.decode(token);
         const company_id = decoded.id;
 
         if (decoded.role !== 'company') {
-            return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+            return NextResponse.json({ message: "ไม่มีสิทธิ์ดำเนินการนี้" }, { status: 403 });
         }
 
         // 🔍 [เพิ่มส่วนนี้] ตรวจสอบสถานะการยืนยันตัวตนของบริษัทจาก Database
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         );
 
         if (!companyRows || companyRows.length === 0) {
-            return NextResponse.json({ message: "Company not found" }, { status: 404 });
+            return NextResponse.json({ message: "ไม่พบบริษัท" }, { status: 404 });
         }
 
         const verificationStatus = companyRows[0].verification_status;
@@ -76,10 +76,10 @@ export async function POST(request: Request) {
             howToApply, contact, salary_min, salary_max, age_min, age_max
         ]);
 
-        return NextResponse.json({ message: "Post created successfully", postId: result.insertId }, { status: 201 });
+        return NextResponse.json({ message: "สร้างประกาศงานสำเร็จ", postId: result.insertId }, { status: 201 });
 
     } catch (error) {
         console.error("Error processing request:", error);
-        return NextResponse.json({ message: "Error creating post" }, { status: 500 });
+        return NextResponse.json({ message: "สร้างประกาศงานไม่สำเร็จ" }, { status: 500 });
     }
 }

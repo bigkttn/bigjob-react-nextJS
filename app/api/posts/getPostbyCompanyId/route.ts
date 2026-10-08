@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
         const token = cookieStore.get("session")?.value;
 
         if (!token) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
         }
 
         // const decoded: any = jwt.decode(token);
@@ -30,6 +30,6 @@ export async function GET(request: NextRequest) {
         );
         return NextResponse.json(omitEmbeddings(rows as { embedding?: unknown }[]), { status: 200 });
     } catch (error) {
-        return NextResponse.json({ message: "Error fetching posts" }, { status: 500 });
+        return NextResponse.json({ message: "ดึงข้อมูลประกาศงานไม่สำเร็จ" }, { status: 500 });
     }
 }

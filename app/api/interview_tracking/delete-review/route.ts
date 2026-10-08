@@ -6,7 +6,7 @@ export async function PATCH(req: NextRequest) {
     const { tracking_id, user_id } = await req.json();
 
     if (!tracking_id || !user_id) {
-      return NextResponse.json({ error: "Missing tracking_id or user_id" }, { status: 400 });
+      return NextResponse.json({ error: "ไม่ได้ระบุรหัสใบสมัครหรือรหัสผู้ใช้" }, { status: 400 });
     }
 
     const sql = `
@@ -18,10 +18,10 @@ export async function PATCH(req: NextRequest) {
     const [result]: any = await db.query(sql, [tracking_id, user_id]);
 
     if (result.affectedRows === 0) {
-      return NextResponse.json({ error: "Review not found or unauthorized" }, { status: 404 });
+      return NextResponse.json({ error: "ไม่พบรีวิว หรือไม่มีสิทธิ์ลบรีวิวนี้" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: "Review deleted successfully" }, { status: 200 });
+    return NextResponse.json({ message: "ลบรีวิวสำเร็จ" }, { status: 200 });
   } catch (error: any) {
     console.error("Delete review error:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
         const companyId = searchParams.get("companyId");
 
         if (!companyId || isNaN(Number(companyId))) {
-            return NextResponse.json({ error: "Invalid Company ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสบริษัทไม่ถูกต้อง" }, { status: 400 });
         }
 
         // ดึงประวัติทั้งหมดมาแสดงเรียงจากใหม่ไปเก่าตามปกติ โดยไม่แอบเปลี่ยนสถานะอัตโนมัติแล้ว
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ feedbacks: rows }, { status: 200 });
     } catch (error: any) {
         console.error("[GET_COMPANY_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }
 
@@ -34,7 +34,7 @@ export async function PATCH(request: Request) {
         const { feedbackId } = body;
 
         if (!feedbackId || isNaN(Number(feedbackId))) {
-            return NextResponse.json({ error: "Invalid Feedback ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสความคิดเห็นไม่ถูกต้อง" }, { status: 400 });
         }
 
         // ปรับสถานะเป็น 'read' เฉพาะของ ID นี้ และต้องเป็นรายการที่ Admin เคยตอบกลับมาแล้ว ('replied')
@@ -48,7 +48,7 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error: any) {
         console.error("[PATCH_COMPANY_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
         const { companyId, message } = body;
 
         if (!companyId || !message || message.trim() === "") {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+            return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
         }
 
         await db.query(
@@ -71,6 +71,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true }, { status: 201 });
     } catch (error: any) {
         console.error("[POST_COMPANY_FEEDBACK_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

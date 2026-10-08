@@ -8,7 +8,7 @@ export async function POST(request: Request) {
         // 1. แก้ข้อความแจ้งเตือนให้ตรงกับ company_id
         if (!company_id || durationDays === undefined) {
             return NextResponse.json(
-                { error: "Please provide both company_id and durationDays" },
+                { error: "กรุณาระบุบริษัทและระยะเวลาการแบน" },
                 { status: 400 }
             );
         }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         if (result.affectedRows === 0) {
             // 2. แก้ erro เป็น error และปรับข้อความให้เป็น Company
             return NextResponse.json(
-                { error: "The company to be banned was not found in the system." },
+                { error: "ไม่พบบริษัทที่ต้องการแบนในระบบ" },
                 { status: 404 }
             );
         }
@@ -49,14 +49,14 @@ export async function POST(request: Request) {
         await db.query(queryUpdateReport, [company_id]);
 
         return NextResponse.json({
-            message: "banned successfully",
+            message: "แบนสำเร็จ",
             banUntil: banUntilDate
         }, { status: 200 });
 
     } catch (error: any) {
         console.error("Database Error:", error);
         return NextResponse.json(
-            { error: "Server Error", details: error.message },
+            { error: "เกิดข้อผิดพลาดในระบบ", details: error.message },
             { status: 500 }
         );
     }
@@ -70,7 +70,7 @@ export async function DELETE(request: Request) {
 
     if (!company_id) {
       return NextResponse.json(
-        { error: "Please provide company_id" },
+        { error: "กรุณาระบุรหัสบริษัท" },
         { status: 400 }
       );
     }
@@ -85,7 +85,7 @@ export async function DELETE(request: Request) {
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
-        { error: "Company not found" },
+        { error: "ไม่พบบริษัท" },
         { status: 404 }
       );
     }
@@ -99,13 +99,13 @@ export async function DELETE(request: Request) {
     await db.query(queryUpdateReport, [company_id]);
 
     return NextResponse.json(
-      { message: "Unbanned company successfully" },
+      { message: "ปลดแบนบริษัทสำเร็จ" },
       { status: 200 }
     );
   } catch (error: any) {
     console.error("Database Error:", error);
     return NextResponse.json(
-      { error: "Server Error", details: error.message },
+      { error: "เกิดข้อผิดพลาดในระบบ", details: error.message },
       { status: 500 }
     );
   }

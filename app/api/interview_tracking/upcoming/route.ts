@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const role = searchParams.get("role");
 
     if (!userId || !role) {
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+      return NextResponse.json({ error: "ข้อมูลที่ส่งมาไม่ครบถ้วน" }, { status: 400 });
     }
 
     if (role === "seeker") {
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error fetching upcoming interviews:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "เกิดข้อผิดพลาดในระบบ" },
       { status: 500 }
     );
   }

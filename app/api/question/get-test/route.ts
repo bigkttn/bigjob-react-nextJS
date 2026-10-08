@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const postId = searchParams.get("post_id");
 
-    if (!postId) return NextResponse.json({ message: "Missing post_id" }, { status: 400 });
+    if (!postId) return NextResponse.json({ message: "ไม่ได้ระบุรหัสประกาศงาน" }, { status: 400 });
 
     // 1. ดึงคำถามทั้งหมดของ post_id นี้
     const [questions] = await db.query(`SELECT * FROM question WHERE post_id = ?`, [postId]) as [any[], unknown];
@@ -31,6 +31,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(formattedQuestions, { status: 200 });
   } catch (error) {
     console.error("Error fetching test:", error);
-    return NextResponse.json({ message: "Error fetching test" }, { status: 500 });
+    return NextResponse.json({ message: "ดึงข้อมูลแบบทดสอบไม่สำเร็จ" }, { status: 500 });
   }
 }

@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("User search error:", error);
     return NextResponse.json(
-      { success: false, error: "Internal Server Error" },
+      { success: false, error: "เกิดข้อผิดพลาดในระบบ" },
       { status: 500 }
     );
   }

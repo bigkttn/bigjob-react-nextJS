@@ -111,7 +111,7 @@ export async function GET(
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("SQL Error:", errorMessage);
     return NextResponse.json(
-      { message: "Error fetching tracking", error: errorMessage },
+      { message: "ดึงข้อมูลการสมัครงานไม่สำเร็จ", error: errorMessage },
       { status: 500 }
     );
   }

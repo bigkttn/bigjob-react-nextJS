@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         const [posts]: any = await db.query(sql, [post_id]); // แทนที่ ? ด้วยค่า post_id ที่ต้องการ
 
         if (posts.length === 0) {
-            return NextResponse.json({ message: 'Post not found' }, { status: 404 });
+            return NextResponse.json({ message: 'ไม่พบประกาศงาน' }, { status: 404 });
         }
 
         return NextResponse.json(posts[0], { status: 200 });

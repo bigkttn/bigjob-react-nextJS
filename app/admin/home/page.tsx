@@ -1,5 +1,6 @@
 "use client";
 import Swal from "sweetalert2";
+import { showAlert } from "@/lib/customAlert";
 
 import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
@@ -100,9 +101,8 @@ const Home = () => {
         Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      Swal.fire(errorMessage);
+      console.error(err);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setActingId(null);
     }
@@ -110,7 +110,10 @@ const Home = () => {
 
   // ─── ปฏิเสธบริษัท ───
   const handleReject = async (id: number) => {
-    const comment = prompt("กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้:");
+    const comment = await showAlert.prompt(
+      "กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้",
+      "เช่น เอกสารไม่ชัดเจน, ข้อมูลไม่ตรงกับหนังสือรับรอง",
+    );
     if (!comment) return;
 
     try {
@@ -130,9 +133,8 @@ const Home = () => {
         Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      Swal.fire(errorMessage);
+      console.error(err);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setActingId(null);
     }

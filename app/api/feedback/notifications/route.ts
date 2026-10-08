@@ -7,7 +7,7 @@ export async function GET(request: Request) {
         const userId = searchParams.get("userId");
 
         if (!userId || isNaN(Number(userId))) {
-            return NextResponse.json({ error: "Invalid User ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสผู้ใช้ไม่ถูกต้อง" }, { status: 400 });
         }
 
         const connection = await db.getConnection();
@@ -40,6 +40,6 @@ export async function GET(request: Request) {
         }
     } catch (error: any) {
         console.error("[NOTIFICATIONS_TEMP_TABLE_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

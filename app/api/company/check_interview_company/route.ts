@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     return NextResponse.json(
-      { message: "Error checking status", error: error.message },
+      { message: "ตรวจสอบสถานะไม่สำเร็จ", error: error.message },
       { status: 500 }
     );
   }

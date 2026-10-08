@@ -107,7 +107,7 @@ const Register = () => {
       ) {
         showAlert.info(
           "แจ้งเตือน",
-          "Please complete all the required company information !!",
+          "กรุณากรอกข้อมูลบริษัทให้ครบถ้วน",
         );
         return;
       }
@@ -123,7 +123,7 @@ const Register = () => {
       const data = await res.json();
 
       if (res.ok) {
-        showAlert.success("แจ้งเตือน", "Registration Successful! Welcome");
+        showAlert.success("แจ้งเตือน", "สมัครสมาชิกสำเร็จ ยินดีต้อนรับ");
         localStorage.setItem("currentUser", JSON.stringify(data.user));
         if (data.user.role === "seeker") {
           window.location.replace("/user/user-home");
@@ -133,12 +133,12 @@ const Register = () => {
       } else {
         showAlert.error(
           "แจ้งเตือน",
-          "Google Sign-up Failed: " + (data.message || "Server Error"),
+          "สมัครสมาชิกด้วย Google ไม่สำเร็จ: " + (data.message || "เกิดข้อผิดพลาดในระบบ"),
         );
       }
     } catch (err) {
       console.error("Google Sign-up Error:", err);
-      showAlert.error("แจ้งเตือน", "Network Error: ติดต่อ Server ไม่ได้");
+      showAlert.error("แจ้งเตือน", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -171,7 +171,7 @@ const Register = () => {
       console.error("Request OTP Error:", error);
       showAlert.error(
         "แจ้งเตือน",
-        "Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
       );
     } finally {
       setIsLoadingOtp(false); // ปิดสถานะโหลดไม่ว่าจะสำเร็จหรือล้มเหลว
@@ -214,24 +214,24 @@ const Register = () => {
 
     // 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
     if (!captchaToken)
-      return showAlert.info("แจ้งเตือน", "Please complete the CAPTCHA");
+      return showAlert.info("แจ้งเตือน", "กรุณายืนยันว่าคุณไม่ใช่โปรแกรมอัตโนมัติ (CAPTCHA)");
     if (registerData.password.length < 8)
       return showAlert.error("แจ้งเตือน", "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
     if (registerData.password !== registerData.confirmPassword)
-      return showAlert.error("แจ้งเตือน", "Password mismatch!");
+      return showAlert.error("แจ้งเตือน", "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
     if (!isOtpVerified)
-      return showAlert.info("แจ้งเตือน", "Please click Verify OTP first!"); // เช็ค OTP
+      return showAlert.info("แจ้งเตือน", "กรุณากดยืนยันรหัส OTP ก่อน"); // เช็ค OTP
 
     if (userType === "company") {
       if (!registerData.companyName || !registerData.phone) {
         return showAlert.info(
           "แจ้งเตือน",
-          "Please fill in all required company information!",
+          "กรุณากรอกข้อมูลบริษัทให้ครบถ้วน",
         );
       }
     } else {
       if (!registerData.fullname) {
-        return showAlert.info("แจ้งเตือน", "Please enter your full name!");
+        return showAlert.info("แจ้งเตือน", "กรุณากรอกชื่อ-นามสกุล");
       }
     }
 
@@ -263,7 +263,7 @@ const Register = () => {
       if (res.ok) {
         showAlert.success(
           "แจ้งเตือน",
-          "Registration Successful! Welcome to BIGJOBs",
+          "สมัครสมาชิกสำเร็จ ยินดีต้อนรับสู่ BIGJOBs",
         );
         localStorage.setItem("currentUser", JSON.stringify(data.user));
 
@@ -278,14 +278,14 @@ const Register = () => {
         setCaptchaToken(null);
         showAlert.error(
           "แจ้งเตือน",
-          "Registration Failed: " + (data.message || "Something went wrong"),
+          "สมัครสมาชิกไม่สำเร็จ: " + (data.message || "เกิดข้อผิดพลาดในระบบ"),
         );
       }
     } catch (error) {
       console.error("Registration Error:", error);
       showAlert.error(
         "แจ้งเตือน",
-        "Network Error: ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
       );
     }
   };

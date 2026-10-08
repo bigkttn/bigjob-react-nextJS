@@ -11,7 +11,7 @@ export async function POST() {
         if (hasVisited) {
             return NextResponse.json({
                 success: true,
-                message: "Visitor already counted",
+                message: "นับผู้เข้าชมแล้ว",
             });
         }
 
@@ -28,9 +28,9 @@ export async function POST() {
             path: "/",
         }); // ตั้งคุกกี้ให้หมดอายุใน 30 วัน
 
-        return NextResponse.json({ success: true, message: "Visitor counted successfully" });
+        return NextResponse.json({ success: true, message: "นับผู้เข้าชมสำเร็จ" });
     } catch (error) {
         console.error("Database error in visitor tracking:", error);
-        return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ success: false, error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

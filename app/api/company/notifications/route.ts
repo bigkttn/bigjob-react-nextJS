@@ -7,7 +7,7 @@ export async function GET(request: Request) {
         const companyId = searchParams.get("companyId");
 
         if (!companyId || isNaN(Number(companyId))) {
-            return NextResponse.json({ error: "Invalid Company ID" }, { status: 400 });
+            return NextResponse.json({ error: "รหัสบริษัทไม่ถูกต้อง" }, { status: 400 });
         }
 
         // 🌟 ดึง connection เดี่ยวออกจาก pool เพื่อให้อยู่ใน Session เครือข่ายเดียวกัน
@@ -46,6 +46,6 @@ export async function GET(request: Request) {
         }
     } catch (error: any) {
         console.error("[COMPANY_NOTIFICATIONS_TEMP_TABLE_ERROR]:", error.message);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "เกิดข้อผิดพลาดในระบบ" }, { status: 500 });
     }
 }

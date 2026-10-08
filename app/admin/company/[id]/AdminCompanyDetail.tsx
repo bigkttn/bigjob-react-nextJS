@@ -1,5 +1,6 @@
 "use client";
 import Swal from "sweetalert2";
+import { showAlert } from "@/lib/customAlert";
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -117,9 +118,8 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถอนุมัติได้");
       }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      Swal.fire(errorMessage);
+      console.error(err);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setActing(false);
     }
@@ -127,7 +127,10 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   // จัดการการปฏิเสธ
   const handleReject = async () => {
-    const comment = prompt("กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้:");
+    const comment = await showAlert.prompt(
+      "กรุณาระบุเหตุผลในการปฏิเสธบริษัทนี้",
+      "เช่น เอกสารไม่ชัดเจน, ข้อมูลไม่ตรงกับหนังสือรับรอง",
+    );
     if (!comment) return;
     try {
       setActing(true);
@@ -147,9 +150,8 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
         Swal.fire(data.error || "เกิดข้อผิดพลาด ไม่สามารถปฏิเสธได้");
       }
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-      Swal.fire(errorMessage);
+      console.error(err);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setActing(false);
     }

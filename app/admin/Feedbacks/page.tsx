@@ -151,7 +151,7 @@ export default function AdminFeedbackPage() {
     feedback_id: number,
     source_type: string,
   ): Promise<void> => {
-    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณต้องการลบข้อเสนอแนะ (Feedback) นี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณต้องการลบข้อเสนอแนะนี้ใช่หรือไม่?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
     if (!result.isConfirmed) return;
 
     try {
@@ -199,7 +199,7 @@ export default function AdminFeedbackPage() {
     <div className={styles.container}>
       {/* ส่วนหัว Dashboard */}
       <div className={styles.header}>
-        <h2>Admin Feedback Dashboard</h2>
+        <h2>จัดการข้อเสนอแนะ</h2>
         <p>ศูนย์จัดการข้อเสนอแนะและตอบกลับความคิดเห็นจากผู้ใช้งาน</p>
       </div>
 
@@ -248,10 +248,10 @@ export default function AdminFeedbackPage() {
       {/* รายการ Feedbacks */}
       <div className={styles.listContainer}>
         {isLoading ? (
-          <div className={styles.loading}>กำลังโหลดข้อมูล Feedback...</div>
+          <div className={styles.loading}>กำลังโหลดข้อเสนอแนะ...</div>
         ) : processedFeedbacks.length === 0 ? (
           <div className={styles.empty}>
-            ไม่พบข้อมูล Feedback ที่ตรงกับเงื่อนไขการค้นหา
+            ไม่พบข้อเสนอแนะที่ตรงกับเงื่อนไขการค้นหา
           </div>
         ) : (
           processedFeedbacks.map((item, index) => {
@@ -362,7 +362,7 @@ export default function AdminFeedbackPage() {
                       handleDeleteFeedback(item.feedback_id, item.source_type)
                     }
                   >
-                    ลบ Feedback
+                    ลบข้อเสนอแนะ
                   </button>
                 </div>
               </div>
