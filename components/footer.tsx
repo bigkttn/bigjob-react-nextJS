@@ -11,6 +11,20 @@ interface FooterStats {
   visitors: number;
 }
 
+// นับผู้เข้าชมครั้งเดียวต่อการเปิดเว็บ (กัน effect รันซ้ำตอน dev / remount)
+// เก็บ promise ไว้ ให้ทุกครั้งที่เรียกรอคำขอเดียวกันจนเสร็จก่อนค่อยดึงสถิติ
+let visitorRequest: Promise<void> | null = null;
+
+function countVisitor(): Promise<void> {
+  if (!visitorRequest) {
+    // ฝั่ง server กันนับซ้ำด้วยคุกกี้ hasVisited (30 วัน)
+    visitorRequest = fetch("/api/visitor", { method: "POST" })
+      .then(() => undefined)
+      .catch((err) => console.error("Count visitor error:", err));
+  }
+  return visitorRequest;
+}
+
 const Footer = () => {
   const [stats, setStats] = useState<FooterStats | null>(null);
 
@@ -18,6 +32,8 @@ const Footer = () => {
     let isMounted = true;
     const fetchFooterStats = async () => {
       try {
+        // นับก่อน แล้วค่อยดึงสถิติ ให้คนที่เข้ามาครั้งแรกเห็นยอดที่รวมตัวเองแล้ว
+        await countVisitor();
         const res = await fetch("/api/footer-stats");
         const data = await res.json();
         if (isMounted && data.success) {

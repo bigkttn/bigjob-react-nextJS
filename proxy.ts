@@ -31,6 +31,7 @@ const PUBLIC_APIS = [
   "/api/posts/company-search-user",
   "/api/user/getUserAndJobtitle",
   "/api/footer-stats",
+  "/api/visitor",
 ];
 
 // หน้าที่ login แล้วเข้าได้ทุก role (เช่น บริษัทเปิดดูรายละเอียดงาน)

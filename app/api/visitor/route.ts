@@ -1,8 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import { cookies } from "next/headers";
+import { rateLimit } from "@/lib/rateLimit";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+    // API นี้เรียกได้โดยไม่ต้อง login จึงจำกัดจำนวนครั้งต่อ IP กันการปั่นยอด
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+    if (!rateLimit(`visitor:${ip}`, 5, 60_000)) {
+        return NextResponse.json(
+            { success: false, error: "คุณส่งคำขอมากเกินไป กรุณาลองใหม่อีกครั้งในภายหลัง" },
+            { status: 429 },
+        );
+    }
+
     try {
         const cookieStore = await cookies();
         const hasVisited = cookieStore.get("hasVisited");

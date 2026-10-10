@@ -1,4 +1,10 @@
 /* ปุ่มปกติ (เชิญ) - สีดำ */
+.applyWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
 .applyBtn {
   background-color: #000000;
   color: #ffffff;

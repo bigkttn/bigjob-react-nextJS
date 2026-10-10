@@ -118,8 +118,9 @@ export default function ApplySeeker({
   };
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div>
+      {/* ปุ่มอยู่กึ่งกลางกล่อง "การติดต่อ" ให้ตรงกับหัวข้อ */}
+      <div className={styles.applyWrapper}>
         <button
           onClick={() => setIsModalOpen(true)}
           className={`${styles.applyBtn} ${isActioned ? styles.invitedBtn : ''}`}
@@ -149,6 +150,6 @@ export default function ApplySeeker({
         companyJobs={companyJobs}
         existingPostIds={existingPostIds}
       />
-    </main>
+    </div>
   );
 }
