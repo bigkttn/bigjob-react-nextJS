@@ -101,7 +101,15 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
 
   // จัดการการอนุมัติ
   const handleApprove = async () => {
-    const result = await Swal.fire({ title: "ยืนยันการอนุมัติ", text: "คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?", icon: "question", showCancelButton: true, confirmButtonColor: "#3085d6", confirmButtonText: "ตกลง", cancelButtonText: "ยกเลิก" });
+    const result = await Swal.fire({
+      title: "ยืนยันการอนุมัติ",
+      text: "คุณต้องการยืนยันการอนุมัติบริษัทนี้ใช่หรือไม่?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
+    });
     if (!result.isConfirmed) return;
     try {
       setActing(true);
@@ -227,7 +235,12 @@ const AdminCompanyDetail = ({ companyId }: Props) => {
       <div className={styles.card}>
         <div className={styles.headerRow}>
           <img
-            src={company.logo_image || "/assets/images/suggestedCompanys.jpg"}
+            src={
+              company.logo_image ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                company.company_name || "Company",
+              )}&background=random`
+            }
             alt="logo"
             className={styles.logo}
           />

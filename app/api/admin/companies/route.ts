@@ -10,7 +10,7 @@ export async function GET(request: Request) {
 
         let query = `
                     SELECT company_id, company_name, logo_image, dbd_file,
-                            verification_status, verification_comment, created_at
+                            verification_status, verification_comment, created_at, updated_at
                     FROM company`;
         const values: any[] = [];
 

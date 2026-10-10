@@ -125,3 +125,79 @@
     font-size: 15px;
   }
 }
+/* ===== ประวัติการตรวจสอบ ===== */
+.historyCard {
+  margin-top: 30px;
+}
+
+.historyTabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.historyTab {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  background: #ffffff;
+  color: #333;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.historyTabActive {
+  background: #000000;
+  color: #ffffff;
+}
+
+.historyInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.statusBadge {
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.badgeApproved { background-color: #1a8a2a; }
+.badgeRejected { background-color: #b50000; }
+
+.historyReason {
+  font-size: 13px;
+  color: #b50000;
+  overflow-wrap: anywhere;
+}
+
+.historyDate {
+  font-size: 12px;
+  color: #777;
+}
+
+.undo { background-color: #e65100; }
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .historyCard {
+    margin-top: 20px;
+  }
+
+  .historyInfo {
+    align-items: center;
+    text-align: center;
+  }
+}
