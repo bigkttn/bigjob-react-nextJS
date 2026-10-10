@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Script from "next/script";
 import Link from "next/link";
 import styles from "./login.module.css"; // เปลี่ยนเป็น .module.css
+import { getGoogleButtonWidth } from "@/lib/googleButton";
 declare global {
   interface Window {
     google: any;
@@ -133,12 +134,13 @@ export default function Login() {
         callback: handleGoogleLogin,
       });
 
+      const container = document.getElementById("google-btn-login-container");
       window.google.accounts.id.renderButton(
-        document.getElementById("google-btn-login-container"),
+        container,
         {
           theme: "filled_black",
           size: "large",
-          width: "350",
+          width: getGoogleButtonWidth(container),
           shape: "pill",
           text: "signin_with",
         },

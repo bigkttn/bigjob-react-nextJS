@@ -603,3 +603,22 @@
     padding: 12px;
   }
 }
+
+/* คำอธิบายเหนือฟอร์ม (ช่องบังคับ / ข้อสอบไม่บังคับ) */
+.formHint {
+  margin: 0 0 12px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* ช่องบังคับที่ยังไม่ได้กรอก หลังกด "ถัดไป" (ProvinceSelect ใส่ border แบบ inline จึงต้อง !important) */
+.fieldMissing label {
+  color: #dc2626;
+}
+
+.fieldMissing input,
+.fieldMissing textarea,
+.fieldMissing select {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2;
+}

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ReCAPTCHA from "react-google-recaptcha";
 import styles from "./register.module.css";
+import { PASSWORD_HINT, validatePassword } from "@/lib/passwordRules";
+import { getGoogleButtonWidth } from "@/lib/googleButton";
 
 const Register = () => {
   const router = useRouter();
@@ -58,12 +60,15 @@ const Register = () => {
           client_id: googleClientId,
           callback: handleGoogleCredentialResponse,
         });
+        const container = document.getElementById(
+          "google-btn-register-container",
+        );
         google.accounts.id.renderButton(
-          document.getElementById("google-btn-register-container"),
+          container,
           {
             theme: "filled_back",
             size: "large",
-            width: "350",
+            width: getGoogleButtonWidth(container),
             shape: "pill",
             text: "signup_with",
           },
@@ -215,8 +220,11 @@ const Register = () => {
     // 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
     if (!captchaToken)
       return showAlert.info("แจ้งเตือน", "กรุณายืนยันว่าคุณไม่ใช่โปรแกรมอัตโนมัติ (CAPTCHA)");
-    if (registerData.password.length < 8)
-      return showAlert.error("แจ้งเตือน", "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
+    const passwordError = validatePassword(
+      registerData.password,
+      registerData.email,
+    );
+    if (passwordError) return showAlert.error("แจ้งเตือน", passwordError);
     if (registerData.password !== registerData.confirmPassword)
       return showAlert.error("แจ้งเตือน", "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
     if (!isOtpVerified)
@@ -514,6 +522,7 @@ const Register = () => {
                   />
                 </div>
               </div>
+              <small className={styles.passwordHint}>{PASSWORD_HINT}</small>
 
               {/* Company Fields */}
               {userType === "company" && (
@@ -581,7 +590,7 @@ const Register = () => {
               )}
 
               {/* ReCaptcha */}
-              <div style={{ padding: "10px 0" }}>
+              <div className={styles.captchaWrapper}>
                 <ReCAPTCHA
                   ref={recaptchaRef}
                   sitekey={

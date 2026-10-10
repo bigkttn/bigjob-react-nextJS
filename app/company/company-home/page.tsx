@@ -566,8 +566,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                 </p>
               ) : suggestedSeekers.length > 0 ? (
                 suggestedSeekers.map((seeker, index) => (
-                  <div
+                  <Link
                     key={`suggested-${seeker.uid}-${index}`}
+                    href={`/company/seeker-profile/${seeker.uid}`}
                     className={styles.suggestMiniCard}
                   >
                     <img
@@ -592,16 +593,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                           {seeker.province || "ไม่ระบุจังหวัด"}
                         </p>
                       </div>
-                      <Link
-                        href={`/company/seeker-profile/${seeker.uid}`}
-                        className={styles.btnWrapper}
-                      >
-                        <button className={styles.detailsBtn}>
-                          ดูรายละเอียด
-                        </button>
-                      </Link>
+                      <div className={styles.btnWrapper}>
+                        <span className={styles.detailsBtn}>ดูรายละเอียด</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className={styles.subText}>ไม่มีผู้สมัครที่แนะนำ</p>
@@ -627,8 +623,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                 <p className={styles.subText}>กำลังค้นหาด้วย AI...</p>
               ) : currentUsers.length > 0 ? (
                 currentUsers.map((u, index) => (
-                  <div
+                  <Link
                     key={`user-${u.uid}-${index}`}
+                    href={`/company/seeker-profile/${u.uid}`}
                     className={styles.suggestMiniCard}
                   >
                     <img
@@ -656,16 +653,11 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
                       <p className={styles.subText}>
                         {getTimeAgo(u.created_at)}
                       </p>
-                      <Link
-                        href={`/company/seeker-profile/${u.uid}`}
-                        className={styles.btnWrapper}
-                      >
-                        <button className={styles.detailsBtn}>
-                          ดูรายละเอียด
-                        </button>
-                      </Link>
+                      <div className={styles.btnWrapper}>
+                        <span className={styles.detailsBtn}>ดูรายละเอียด</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className={styles.noData}>ไม่พบผู้สมัครที่ตรงกับการค้นหา</p>

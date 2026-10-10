@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { createSession } from "@/lib/session";
 import { otpStore } from "@/lib/otpStore";
 import { verifyRecaptcha } from "@/lib/recaptcha";
+import { validatePassword } from "@/lib/passwordRules";
 
 export async function POST(request: NextRequest) {
     try {
@@ -16,6 +17,12 @@ export async function POST(request: NextRequest) {
         const isHuman = await verifyRecaptcha(captchaToken, ip);
         if (!isHuman) {
             return NextResponse.json({ message: "การยืนยัน reCAPTCHA ไม่ผ่าน กรุณาติ๊กช่องยืนยันใหม่อีกครั้ง" }, { status: 400 });
+        }
+
+        //  0.1 ตรวจกฎรหัสผ่านฝั่งเซิร์ฟเวอร์ด้วย (กันการยิง API ตรงด้วยรหัสอ่อน/รหัสเดียวกับอีเมล)
+        const passwordError = validatePassword(String(password ?? ""), String(email ?? ""));
+        if (passwordError) {
+            return NextResponse.json({ message: passwordError }, { status: 400 });
         }
 
         //  1. เริ่มส่วนตรวจสอบ OTP (เอาโค้ดที่เคยส่งมาปรับใช้)

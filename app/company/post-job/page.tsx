@@ -21,6 +21,42 @@ const NUMBER_FIELDS = ["salary_min", "salary_max", "age_min", "age_max", "vacanc
 const isMinOverMax = (min: string, max: string) =>
   min !== "" && max !== "" && Number(min) > Number(max);
 
+// ช่องที่ต้องกรอกก่อนไปขั้นถัดไป (label ใช้แสดงในข้อความแจ้งเตือน)
+const REQUIRED_FIELDS = [
+  { name: "jobPosition", label: "ตำแหน่งงาน" },
+  { name: "province", label: "จังหวัด" },
+  { name: "workLocation", label: "สถานที่ทำงาน" },
+  { name: "jobType", label: "รูปแบบงาน" },
+  { name: "deadline", label: "วันปิดรับสมัคร" },
+  { name: "jobDescription", label: "รายละเอียดงาน" },
+  { name: "qualifications", label: "คุณสมบัติ" },
+  { name: "benefits", label: "สวัสดิการ" },
+  { name: "howToApply", label: "วิธีการสมัคร" },
+  { name: "contact", label: "ข้อมูลติดต่อ" },
+] as const;
+
+type RequiredField = (typeof REQUIRED_FIELDS)[number]["name"];
+
+// ข้อที่ไม่ได้กรอกอะไรเลย (ทั้งคำถามและตัวเลือก) ถือว่าไม่ใช้ จะไม่ถูกบันทึก
+const isBlankQuestion = (q: Question) =>
+  !q.text.trim() && q.options.every((opt) => !opt.trim());
+
+// คืนข้อความ error ของข้อสอบที่กรอกไม่ครบ, คืน "" ถ้าครบ
+const getQuestionError = (q: Question, questionNumber: number) => {
+  if (!q.text.trim()) {
+    return `ข้อสอบข้อ ${questionNumber}: กรุณากรอกคำถาม`;
+  }
+  if (q.options.some((opt) => !opt.trim())) {
+    return `ข้อสอบข้อ ${questionNumber}: กรุณากรอกตัวเลือกให้ครบ หรือลบตัวเลือกที่ไม่ใช้`;
+  }
+  if (q.correctIndex === null) {
+    return `ข้อสอบข้อ ${questionNumber}: กรุณาคลิกวงกลมเพื่อเลือกคำตอบที่ถูก`;
+  }
+  return "";
+};
+
+const requiredMark = <span style={{ color: "#dc2626" }}> *</span>;
+
 const rangeErrorStyle = {
   color: "#dc2626",
   fontSize: "0.85rem",
@@ -30,6 +66,8 @@ const rangeErrorStyle = {
 const PostJob = () => {
   const router = useRouter();
   const [isNext, setIsNext] = useState(false);
+  // เปิดหลังกด "ถัดไป" แล้วกรอกไม่ครบ เพื่อไฮไลต์ช่องที่ยังว่าง
+  const [showMissing, setShowMissing] = useState(false);
   const [postId, setPostId] = useState<number | null>(null);
 
   // เพิ่ม State สำหรับเก็บสถานะการยืนยันตัวตน (ค่าเริ่มต้นเป็นเท็จก่อนโหลดข้อมูลเสร็จ)
@@ -171,38 +209,64 @@ const PostJob = () => {
     return "";
   };
 
-  const handleNext = () => {
-    if (!isApproved) return;
+  const isFieldMissing = (name: RequiredField) => !formData[name].trim();
+
+  // ชื่อช่องบังคับที่ยังไม่ได้กรอก
+  const getMissingLabels = () =>
+    REQUIRED_FIELDS.filter((field) => isFieldMissing(field.name)).map(
+      (field) => field.label,
+    );
+
+  // ใส่กรอบแดงให้กลุ่มช่องที่ยังว่าง หลังจากผู้ใช้กด "ถัดไป" ไปแล้ว
+  const groupClass = (baseClass: string, name: RequiredField) => {
+    if (showMissing && isFieldMissing(name)) {
+      return `${baseClass} ${styles.fieldMissing}`;
+    }
+    return baseClass;
+  };
+
+  // ตรวจข้อมูลขั้นที่ 1 ทั้งหมด คืน true ถ้าผ่าน
+  const validateJobForm = () => {
+    const missing = getMissingLabels();
+    if (missing.length > 0) {
+      setShowMissing(true);
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+        text: `ยังไม่ได้กรอก: ${missing.join(", ")}`,
+      });
+      return false;
+    }
     const rangeError = getRangeError();
     if (rangeError) {
       Swal.fire(rangeError);
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (!isApproved) return;
+    if (!validateJobForm()) return;
     setIsNext(true);
   };
 
   const handleSubmit = async () => {
     if (!isApproved) return;
-    const rangeError = getRangeError();
-    if (rangeError) {
-      Swal.fire(rangeError);
+    if (!validateJobForm()) {
+      setIsNext(false);
       return;
     }
-    if (
-      !formData.jobPosition ||
-      !formData.province ||
-      !formData.workLocation ||
-      !formData.jobType ||
-      !formData.deadline ||
-      !formData.jobDescription ||
-      !formData.qualifications ||
-      !formData.benefits ||
-      !formData.howToApply ||
-      !formData.contact
-    ) {
-      Swal.fire("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
-      return;
+
+    for (const [index, q] of questions.entries()) {
+      if (isBlankQuestion(q)) continue;
+      const questionError = getQuestionError(q, index + 1);
+      if (questionError) {
+        Swal.fire(questionError);
+        return;
+      }
     }
+    const usedQuestions = questions.filter((q) => !isBlankQuestion(q));
 
     setIsLoading(true);
     try {
@@ -215,14 +279,20 @@ const PostJob = () => {
         const data = await response.json();
         // console.log("Post created successfully:", data);
         setPostId(data.postId);
-        const testResponse = await fetch("/api/question/createTest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ postId: data.postId, questions }),
-        });
-        if (!testResponse.ok) {
-          const errorData = await testResponse.json();
-          console.error("Error creating test:", errorData);
+        // ไม่มีข้อสอบก็ไม่ต้องสร้าง (ถ้าสร้างชุดว่าง ระบบจะคิดว่างานนี้มีข้อสอบ)
+        if (usedQuestions.length > 0) {
+          const testResponse = await fetch("/api/question/createTest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              postId: data.postId,
+              questions: usedQuestions,
+            }),
+          });
+          if (!testResponse.ok) {
+            const errorData = await testResponse.json();
+            console.error("Error creating test:", errorData);
+          }
         }
         // รีเฟรชรายการโพสต์หลังจากสร้างเสร็จ
         // setIsNext(false);
@@ -230,6 +300,9 @@ const PostJob = () => {
       } else {
         const errorData = await response.json();
         console.error("Error creating post:", errorData);
+        Swal.fire(
+          errorData.message || "สร้างประกาศงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+        );
       }
     } catch (error) {
       console.error("Error creating post:", error);
@@ -307,11 +380,18 @@ const PostJob = () => {
   const deleteOption = (qId: string, optIndex: number) => {
     if (!isApproved) return;
     setQuestions(
-      questions.map((q) =>
-        q.id === qId
-          ? { ...q, options: q.options.filter((_, i) => i !== optIndex) }
-          : q,
-      ),
+      questions.map((q) => {
+        if (q.id !== qId) return q;
+        // เลื่อนคำตอบที่ถูกให้ยังชี้ตัวเลือกเดิม (ถ้าลบตัวที่เป็นคำตอบ ต้องเลือกใหม่)
+        let correctIndex = q.correctIndex;
+        if (correctIndex === optIndex) correctIndex = null;
+        if (correctIndex !== null && correctIndex > optIndex) correctIndex -= 1;
+        return {
+          ...q,
+          options: q.options.filter((_, i) => i !== optIndex),
+          correctIndex,
+        };
+      }),
     );
   };
 
@@ -510,6 +590,11 @@ const PostJob = () => {
             <div className={styles.headerRow}>
               <p className={styles.instruction}>สร้างชุดข้อสอบคัดกรอง</p>
             </div>
+            <p className={styles.formHint}>
+              ไม่บังคับ — ถ้าไม่ต้องการข้อสอบ ปล่อยข้อที่ว่างไว้แล้วกด
+              &quot;ยืนยัน&quot; ได้เลย ถ้าเริ่มกรอกข้อไหนแล้ว
+              ต้องกรอกคำถาม ตัวเลือก และเลือกคำตอบที่ถูกให้ครบ
+            </p>
 
             <div className={styles.questionList}>
               {questions.map((q, qIndex) => (
@@ -617,203 +702,238 @@ const PostJob = () => {
           </div>
         ) : (
           /* Step 1: Job Form */
-          <div className={styles.postForm}>
-            <div className={styles.formColumn}>
-              <div className={styles.inputGroupInline}>
-                <label>ตำแหน่งงาน</label>
-                <input
-                  type="text"
-                  name="jobPosition"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.jobPosition}
-                  onChange={handleChange}
-                />
+          <>
+            <p className={styles.formHint}>
+              ช่องที่มี {requiredMark} จำเป็นต้องกรอกให้ครบก่อนกด &quot;ถัดไป&quot;
+            </p>
+            <div className={styles.postForm}>
+              <div className={styles.formColumn}>
+                <div className={groupClass(styles.inputGroupInline, "jobPosition")}>
+                  <label>
+                    ตำแหน่งงาน
+                    {requiredMark}
+                  </label>
+                  <input
+                    type="text"
+                    name="jobPosition"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.jobPosition}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupInline, "province")}>
+                  <label>
+                    จังหวัด
+                    {requiredMark}
+                  </label>
+                  <ProvinceSelect
+                    value={formData.province ?? ""}
+                    onChange={(value: string) => {
+                      if (!isApproved) return;
+                      setFormData((prev) => ({ ...prev, province: value }));
+                    }}
+                  />
+                </div>
+  
+                <div className={groupClass(styles.inputGroupFull2, "workLocation")}>
+                  <label>
+                    สถานที่ทำงาน
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="workLocation"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.workLocation}
+                    onKeyDown={blockInvalidKeys}
+                    onChange={handleChange}
+                    rows={3}
+                  />
+                </div>
+                <div className={styles.inputGroupInline}>
+                  <label>ช่วงเงินเดือน</label>
+                  <input
+                    type="number"
+                    name="salary_min"
+                    min={0}
+                    disabled={!isApproved}
+                    value={formData.salary_min}
+                    onChange={handleChange}
+                    onKeyDown={blockInvalidKeys}
+                    style={{ ...inputStyle, width: "100%" }}
+                  />
+                  -
+                  <input
+                    type="number"
+                    name="salary_max"
+                    min={0}
+                    disabled={!isApproved}
+                    value={formData.salary_max}
+                    onChange={handleChange}
+                    onKeyDown={blockInvalidKeys}
+                    style={{ ...inputStyle, width: "100%" }}
+                  />
+                </div>
+                {isMinOverMax(formData.salary_min, formData.salary_max) && (
+                  <p style={rangeErrorStyle}>
+                    เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด
+                  </p>
+                )}
+                <div className={styles.inputGroupInline}>
+                  <label>ช่วงอายุ</label>
+                  <input
+                    type="number"
+                    name="age_min"
+                    min={0}
+                    disabled={!isApproved}
+                    value={formData.age_min}
+                    onKeyDown={blockInvalidKeys}
+                    onChange={handleChange}
+                    style={{ ...inputStyle, width: "100%" }}
+                  />
+                  -
+                  <input
+                    type="number"
+                    name="age_max"
+                    min={0}
+                    disabled={!isApproved}
+                    value={formData.age_max}
+                    onKeyDown={blockInvalidKeys}
+                    onChange={handleChange}
+                    style={{ ...inputStyle, width: "100%" }}
+                  />
+                </div>
+                {isMinOverMax(formData.age_min, formData.age_max) && (
+                  <p style={rangeErrorStyle}>อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด</p>
+                )}
+                <div className={styles.inputGroupInline}>
+                  <label>จำนวนที่รับ</label>
+                  <input
+                    type="number"
+                    name="vacancy"
+                    min={0}
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.vacancy}
+                    onChange={handleChange}
+                    onKeyDown={blockInvalidKeys}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupInline, "jobType")}>
+                  <label>
+                    รูปแบบงาน
+                    {requiredMark}
+                  </label>
+                  <select
+                    name="jobType"
+                    value={formData.jobType}
+                    className={styles.selectInput}
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    onChange={handleChange}
+                  >
+                    <option value="" disabled>
+                      เลือกรุปแบบงาน
+                    </option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                  </select>
+                </div>
+                <div className={groupClass(styles.inputGroupFull, "deadline")}>
+                  <label>
+                    วันปิดรับสมัคร
+                    {requiredMark}
+                  </label>
+                  <input
+                    type="datetime-local"
+                    className={styles.dateInput}
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    name="deadline"
+                    value={formData.deadline}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupFull, "jobDescription")}>
+                  <label>
+                    รายละเอียดงาน
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="jobDescription"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.jobDescription}
+                    onChange={handleChange}
+                    rows={6}
+                  />
+                </div>
               </div>
-              <div className={styles.inputGroupInline}>
-                <label>จังหวัด</label>
-                <ProvinceSelect
-                  value={formData.province ?? ""}
-                  onChange={(value: string) => {
-                    if (!isApproved) return;
-                    setFormData((prev) => ({ ...prev, province: value }));
-                  }}
-                />
-              </div>
-
-              <div className={styles.inputGroupFull2}>
-                <label>สถานที่ทำงาน</label>
-                <textarea
-                  name="workLocation"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.workLocation}
-                  onKeyDown={blockInvalidKeys}
-                  onChange={handleChange}
-                  rows={3}
-                />
-              </div>
-              <div className={styles.inputGroupInline}>
-                <label>ช่วงเงินเดือน</label>
-                <input
-                  type="number"
-                  name="salary_min"
-                  min={0}
-                  disabled={!isApproved}
-                  value={formData.salary_min}
-                  onChange={handleChange}
-                  onKeyDown={blockInvalidKeys}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-                -
-                <input
-                  type="number"
-                  name="salary_max"
-                  min={0}
-                  disabled={!isApproved}
-                  value={formData.salary_max}
-                  onChange={handleChange}
-                  onKeyDown={blockInvalidKeys}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-              </div>
-              {isMinOverMax(formData.salary_min, formData.salary_max) && (
-                <p style={rangeErrorStyle}>
-                  เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด
-                </p>
-              )}
-              <div className={styles.inputGroupInline}>
-                <label>ช่วงอายุ</label>
-                <input
-                  type="number"
-                  name="age_min"
-                  min={0}
-                  disabled={!isApproved}
-                  value={formData.age_min}
-                  onKeyDown={blockInvalidKeys}
-                  onChange={handleChange}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-                -
-                <input
-                  type="number"
-                  name="age_max"
-                  min={0}
-                  disabled={!isApproved}
-                  value={formData.age_max}
-                  onKeyDown={blockInvalidKeys}
-                  onChange={handleChange}
-                  style={{ ...inputStyle, width: "100%" }}
-                />
-              </div>
-              {isMinOverMax(formData.age_min, formData.age_max) && (
-                <p style={rangeErrorStyle}>อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด</p>
-              )}
-              <div className={styles.inputGroupInline}>
-                <label>จำนวนที่รับ</label>
-                <input
-                  type="number"
-                  name="vacancy"
-                  min={0}
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.vacancy}
-                  onChange={handleChange}
-                  onKeyDown={blockInvalidKeys}
-                />
-              </div>
-              <div className={styles.inputGroupInline}>
-                <label>รูปแบบงาน</label>
-                <select
-                  name="jobType"
-                  value={formData.jobType}
-                  className={styles.selectInput}
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled>
-                    เลือกรุปแบบงาน
-                  </option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Internship">Internship</option>
-                  <option value="Contract">Contract</option>
-                </select>
-              </div>
-              <div className={styles.inputGroupFull}>
-                <label>วันปิดรับสมัคร</label>
-                <input
-                  type="datetime-local"
-                  className={styles.dateInput}
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  name="deadline"
-                  value={formData.deadline}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className={styles.inputGroupFull}>
-                <label>รายละเอียดงาน</label>
-                <textarea
-                  name="jobDescription"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.jobDescription}
-                  onChange={handleChange}
-                  rows={6}
-                />
+  
+              <div className={styles.formColumn}>
+                <div className={groupClass(styles.inputGroupFull, "qualifications")}>
+                  <label>
+                    คุณสมบัติ
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="qualifications"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.qualifications}
+                    onChange={handleChange}
+                    rows={6}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupFull, "benefits")}>
+                  <label>
+                    สวัสดิการ
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="benefits"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.benefits}
+                    onChange={handleChange}
+                    rows={6}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupFull, "howToApply")}>
+                  <label>
+                    วิธีการสมัคร
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="howToApply"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.howToApply}
+                    onChange={handleChange}
+                    rows={6}
+                  />
+                </div>
+                <div className={groupClass(styles.inputGroupFull, "contact")}>
+                  <label>
+                    ข้อมูลติดต่อ
+                    {requiredMark}
+                  </label>
+                  <textarea
+                    name="contact"
+                    style={inputStyle}
+                    disabled={!isApproved}
+                    value={formData.contact}
+                    onChange={handleChange}
+                    rows={6}
+                  />
+                </div>
               </div>
             </div>
-
-            <div className={styles.formColumn}>
-              <div className={styles.inputGroupFull}>
-                <label>คุณสมบัติ</label>
-                <textarea
-                  name="qualifications"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.qualifications}
-                  onChange={handleChange}
-                  rows={6}
-                />
-              </div>
-              <div className={styles.inputGroupFull}>
-                <label>สวัสดิการ</label>
-                <textarea
-                  name="benefits"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.benefits}
-                  onChange={handleChange}
-                  rows={6}
-                />
-              </div>
-              <div className={styles.inputGroupFull}>
-                <label>วิธีการสมัคร</label>
-                <textarea
-                  name="howToApply"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.howToApply}
-                  onChange={handleChange}
-                  rows={6}
-                />
-              </div>
-              <div className={styles.inputGroupFull}>
-                <label>ข้อมูลติดต่อ</label>
-                <textarea
-                  name="contact"
-                  style={inputStyle}
-                  disabled={!isApproved}
-                  value={formData.contact}
-                  onChange={handleChange}
-                  rows={6}
-                />
-              </div>
-            </div>
-          </div>
+          </>
         )}
       </div>
     </div>

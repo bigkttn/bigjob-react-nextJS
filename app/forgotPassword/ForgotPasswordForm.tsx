@@ -2,6 +2,7 @@
 import { showAlert } from "@/lib/customAlert";
 import React, { useState, useEffect } from "react";
 import styles from "./forgotPassword.module.css";
+import { PASSWORD_HINT, validatePassword } from "@/lib/passwordRules";
 import { useRouter } from "next/navigation";
 
 interface ForgotPasswordFormProps {
@@ -126,8 +127,9 @@ export default function ForgotPasswordForm({
       return;
     }
 
-    if (newPassword.length < 8) {
-      setErrorMsg("รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร");
+    const passwordError = validatePassword(newPassword, email);
+    if (passwordError) {
+      setErrorMsg(passwordError);
       return;
     }
 
@@ -240,6 +242,7 @@ export default function ForgotPasswordForm({
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
+            <small>{PASSWORD_HINT}</small>
 
             {errorMsg && <div className={styles.fpError}>{errorMsg}</div>}
 

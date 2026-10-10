@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { otpStore } from "@/lib/otpStore";
 import db from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { validatePassword } from "@/lib/passwordRules";
 
 export async function POST(req: NextRequest) {
     try {
         const { email, otp, newPassword } = await req.json();
+
+        const passwordError = validatePassword(String(newPassword ?? ""), String(email ?? ""));
+        if (passwordError) {
+            return NextResponse.json({ message: passwordError }, { status: 400 });
+        }
 
         const data = otpStore.get(email);
 

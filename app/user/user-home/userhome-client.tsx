@@ -521,7 +521,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                 </p>
               ) : suggestedPosts.length > 0 ? (
                 suggestedPosts.map((post) => (
-                  <div key={post.post_id} className={styles.suggestMiniCard}>
+                  <Link
+                    key={post.post_id}
+                    href={`/user/user-detail-job/${post.post_id}`}
+                    className={styles.suggestMiniCard}
+                  >
                     <img
                       src={
                         post.logo_image ||
@@ -559,16 +563,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                       <p className={styles.subText}>
                         {getTimeAgo(post.created_at || "")}
                       </p>
-                      <Link
-                        href={`/user/user-detail-job/${post.post_id}`}
-                        className={styles.btnWrapper}
-                      >
-                        <button className={styles.detailsBtn}>
-                          รายละเอียด
-                        </button>
-                      </Link>
+                      <div className={styles.btnWrapper}>
+                        <span className={styles.detailsBtn}>รายละเอียด</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className={styles.subText}>ไม่มีตำแหน่งงานแนะนำ</p>
@@ -594,7 +593,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                 <p className={styles.subText}>กำลังค้นหาด้วย AI...</p>
               ) : currentPosts.length > 0 ? (
                 currentPosts.map((post) => (
-                  <div key={post.post_id} className={styles.suggestMiniCard}>
+                  <Link
+                    key={post.post_id}
+                    href={`/user/user-detail-job/${post.post_id}`}
+                    className={styles.suggestMiniCard}
+                  >
                     <img
                       src={
                         post.logo_image ||
@@ -632,16 +635,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                       <p className={styles.subText}>
                         {getTimeAgo(post.created_at || "")}
                       </p>
-                      <Link
-                        href={`/user/user-detail-job/${post.post_id}`}
-                        className={styles.btnWrapper}
-                      >
-                        <button className={styles.detailsBtn}>
-                          รายละเอียด
-                        </button>
-                      </Link>
+                      <div className={styles.btnWrapper}>
+                        <span className={styles.detailsBtn}>รายละเอียด</span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className={styles.noData}>ไม่พบประกาศงานที่ตรงกับการค้นหา</p>

@@ -171,6 +171,26 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.passwordHint {
+  display: block;
+  margin: -8px 0 15px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.captchaWrapper {
+  padding: 10px 0;
+}
+
+/* กล่อง reCAPTCHA กว้างตายตัว 304px ย่อลงบนจอแคบมากไม่ให้ล้นการ์ด */
+@media (max-width: 360px) {
+  .captchaWrapper {
+    transform: scale(0.82);
+    transform-origin: left top;
+    height: 70px;
+  }
+}
+
 /* --- Buttons & Utilities --- */
 .btnRegister {
   width: 100%;
