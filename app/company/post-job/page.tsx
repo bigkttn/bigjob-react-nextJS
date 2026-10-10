@@ -15,7 +15,13 @@ interface Question {
 }
 
 // ช่องที่รับได้เฉพาะจำนวนเต็มไม่ติดลบ
-const NUMBER_FIELDS = ["salary_min", "salary_max", "age_min", "age_max", "vacancy"];
+const NUMBER_FIELDS = [
+  "salary_min",
+  "salary_max",
+  "age_min",
+  "age_max",
+  "vacancy",
+];
 
 // true เมื่อกรอกครบทั้งคู่ และ min มากกว่า max
 const isMinOverMax = (min: string, max: string) =>
@@ -26,6 +32,11 @@ const REQUIRED_FIELDS = [
   { name: "jobPosition", label: "ตำแหน่งงาน" },
   { name: "province", label: "จังหวัด" },
   { name: "workLocation", label: "สถานที่ทำงาน" },
+  { name: "salary_min", label: "เงินเดือนขั้นต่ำ" },
+  { name: "salary_max", label: "เงินเดือนสูงสุด" },
+  { name: "age_min", label: "อายุขั้นต่ำ" },
+  { name: "age_max", label: "อายุสูงสุด" },
+  { name: "vacancy", label: "จำนวนที่รับ" },
   { name: "jobType", label: "รูปแบบงาน" },
   { name: "deadline", label: "วันปิดรับสมัคร" },
   { name: "jobDescription", label: "รายละเอียดงาน" },
@@ -206,6 +217,9 @@ const PostJob = () => {
     if (isMinOverMax(formData.age_min, formData.age_max)) {
       return "อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด";
     }
+    if (formData.vacancy !== "" && Number(formData.vacancy) < 1) {
+      return "จำนวนที่รับต้องอย่างน้อย 1 อัตรา";
+    }
     return "";
   };
 
@@ -218,8 +232,9 @@ const PostJob = () => {
     );
 
   // ใส่กรอบแดงให้กลุ่มช่องที่ยังว่าง หลังจากผู้ใช้กด "ถัดไป" ไปแล้ว
-  const groupClass = (baseClass: string, name: RequiredField) => {
-    if (showMissing && isFieldMissing(name)) {
+  // ส่งได้หลายช่อง สำหรับกลุ่มแบบช่วง (ขั้นต่ำ - สูงสุด) ว่างช่องใดช่องหนึ่งก็ไฮไลต์
+  const groupClass = (baseClass: string, ...names: RequiredField[]) => {
+    if (showMissing && names.some(isFieldMissing)) {
       return `${baseClass} ${styles.fieldMissing}`;
     }
     return baseClass;
@@ -319,7 +334,15 @@ const PostJob = () => {
       Swal.fire("ไม่สามารถลบได้เนื่องจากบัญชียังไม่ได้รับการอนุมัติ");
       return;
     }
-    const result = await Swal.fire({ title: "ยืนยันการลบ", text: "คุณแน่ใจหรือไม่ว่าต้องการลบประกาศงานนี้?", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "ลบ", cancelButtonText: "ยกเลิก" });
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบประกาศงานนี้?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
     if (!result.isConfirmed) return;
 
     setIsLoading(true);
@@ -592,8 +615,8 @@ const PostJob = () => {
             </div>
             <p className={styles.formHint}>
               ไม่บังคับ — ถ้าไม่ต้องการข้อสอบ ปล่อยข้อที่ว่างไว้แล้วกด
-              &quot;ยืนยัน&quot; ได้เลย ถ้าเริ่มกรอกข้อไหนแล้ว
-              ต้องกรอกคำถาม ตัวเลือก และเลือกคำตอบที่ถูกให้ครบ
+              &quot;ยืนยัน&quot; ได้เลย ถ้าเริ่มกรอกข้อไหนแล้ว ต้องกรอกคำถาม
+              ตัวเลือก และเลือกคำตอบที่ถูกให้ครบ
             </p>
 
             <div className={styles.questionList}>
@@ -704,11 +727,14 @@ const PostJob = () => {
           /* Step 1: Job Form */
           <>
             <p className={styles.formHint}>
-              ช่องที่มี {requiredMark} จำเป็นต้องกรอกให้ครบก่อนกด &quot;ถัดไป&quot;
+              ช่องที่มี {requiredMark} จำเป็นต้องกรอกให้ครบก่อนกด
+              &quot;ถัดไป&quot;
             </p>
             <div className={styles.postForm}>
               <div className={styles.formColumn}>
-                <div className={groupClass(styles.inputGroupInline, "jobPosition")}>
+                <div
+                  className={groupClass(styles.inputGroupInline, "jobPosition")}
+                >
                   <label>
                     ตำแหน่งงาน
                     {requiredMark}
@@ -722,7 +748,9 @@ const PostJob = () => {
                     onChange={handleChange}
                   />
                 </div>
-                <div className={groupClass(styles.inputGroupInline, "province")}>
+                <div
+                  className={groupClass(styles.inputGroupInline, "province")}
+                >
                   <label>
                     จังหวัด
                     {requiredMark}
@@ -735,8 +763,10 @@ const PostJob = () => {
                     }}
                   />
                 </div>
-  
-                <div className={groupClass(styles.inputGroupFull2, "workLocation")}>
+
+                <div
+                  className={groupClass(styles.inputGroupFull2, "workLocation")}
+                >
                   <label>
                     สถานที่ทำงาน
                     {requiredMark}
@@ -751,8 +781,17 @@ const PostJob = () => {
                     rows={3}
                   />
                 </div>
-                <div className={styles.inputGroupInline}>
-                  <label>ช่วงเงินเดือน</label>
+                <div
+                  className={groupClass(
+                    styles.inputGroupInline,
+                    "salary_min",
+                    "salary_max",
+                  )}
+                >
+                  <label>
+                    ช่วงเงินเดือน
+                    {requiredMark}
+                  </label>
                   <input
                     type="number"
                     name="salary_min"
@@ -780,8 +819,17 @@ const PostJob = () => {
                     เงินเดือนขั้นต่ำต้องไม่มากกว่าเงินเดือนสูงสุด
                   </p>
                 )}
-                <div className={styles.inputGroupInline}>
-                  <label>ช่วงอายุ</label>
+                <div
+                  className={groupClass(
+                    styles.inputGroupInline,
+                    "age_min",
+                    "age_max",
+                  )}
+                >
+                  <label>
+                    ช่วงอายุ
+                    {requiredMark}
+                  </label>
                   <input
                     type="number"
                     name="age_min"
@@ -805,10 +853,15 @@ const PostJob = () => {
                   />
                 </div>
                 {isMinOverMax(formData.age_min, formData.age_max) && (
-                  <p style={rangeErrorStyle}>อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด</p>
+                  <p style={rangeErrorStyle}>
+                    อายุขั้นต่ำต้องไม่มากกว่าอายุสูงสุด
+                  </p>
                 )}
-                <div className={styles.inputGroupInline}>
-                  <label>จำนวนที่รับ</label>
+                <div className={groupClass(styles.inputGroupInline, "vacancy")}>
+                  <label>
+                    จำนวนที่รับ
+                    {requiredMark}
+                  </label>
                   <input
                     type="number"
                     name="vacancy"
@@ -858,7 +911,12 @@ const PostJob = () => {
                     onChange={handleChange}
                   />
                 </div>
-                <div className={groupClass(styles.inputGroupFull, "jobDescription")}>
+                <div
+                  className={groupClass(
+                    styles.inputGroupFull,
+                    "jobDescription",
+                  )}
+                >
                   <label>
                     รายละเอียดงาน
                     {requiredMark}
@@ -873,9 +931,14 @@ const PostJob = () => {
                   />
                 </div>
               </div>
-  
+
               <div className={styles.formColumn}>
-                <div className={groupClass(styles.inputGroupFull, "qualifications")}>
+                <div
+                  className={groupClass(
+                    styles.inputGroupFull,
+                    "qualifications",
+                  )}
+                >
                   <label>
                     คุณสมบัติ
                     {requiredMark}
@@ -903,7 +966,9 @@ const PostJob = () => {
                     rows={6}
                   />
                 </div>
-                <div className={groupClass(styles.inputGroupFull, "howToApply")}>
+                <div
+                  className={groupClass(styles.inputGroupFull, "howToApply")}
+                >
                   <label>
                     วิธีการสมัคร
                     {requiredMark}
