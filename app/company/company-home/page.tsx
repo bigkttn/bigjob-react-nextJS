@@ -41,6 +41,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const [suggestedSeekers, setSuggestedSeekers] = useState<any[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
+  // มือถือ: แสดงทีละส่วนด้วยแท็บ (จอใหญ่แสดงทั้งสองส่วนเหมือนเดิม)
+  const [mobileTab, setMobileTab] = useState<"results" | "suggest">("results");
+
   const [searchInput, setSearchInput] = useState(() =>
     getSavedState("searchTerm", ""),
   );
@@ -259,6 +262,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
 
   const handleSearchSubmit = () => {
     setCurrentPage(1);
+    setMobileTab("results");
     const term = searchInput.trim();
     setSearchTerm(term);
     setShowHistory(false);
@@ -268,6 +272,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   const handleHistoryClick = (item: string) => {
     setSearchInput(item);
     setCurrentPage(1);
+    setMobileTab("results");
     setSearchTerm(item);
     setShowHistory(false);
     saveSearchHistory(item);
@@ -329,6 +334,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   ) => {
     setter(value);
     setCurrentPage(1);
+    setMobileTab("results");
   };
 
   const handleMinAgeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,6 +348,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
   };
 
   const handleResetFilters = () => {
+    setMobileTab("results");
     setSearchInput("");
     setSearchTerm("");
     setSelectedProvince("");
@@ -521,8 +528,35 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
         </div>
       </header>
 
+      {/* แท็บสลับส่วน (แสดงเฉพาะมือถือ) */}
+      <div className={styles.mobileTabs} role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileTab === "results"}
+          className={`${styles.mobileTab} ${mobileTab === "results" ? styles.mobileTabActive : ""}`}
+          onClick={() => setMobileTab("results")}
+        >
+          {isFilterActive ? `ผลการค้นหา (${users.length})` : "ผู้สมัครงานทั้งหมด"}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileTab === "suggest"}
+          className={`${styles.mobileTab} ${mobileTab === "suggest" ? styles.mobileTabActive : ""}`}
+          onClick={() => setMobileTab("suggest")}
+        >
+          ผู้สมัครที่แนะนำ
+          {!isSuggestLoading && suggestedSeekers.length > 0
+            ? ` (${suggestedSeekers.length})`
+            : ""}
+        </button>
+      </div>
+
       <div className={styles.mainLayout}>
-        <aside className={styles.leftSidebar}>
+        <aside
+          className={`${styles.leftSidebar} ${mobileTab !== "suggest" ? styles.mobileHidden : ""}`}
+        >
           <div className={styles.suggestContent}>
             <h3>ผู้สมัครงานที่แนะนำ</h3>
             <div className={styles.verticalList}>
@@ -576,7 +610,9 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
           </div>
         </aside>
 
-        <main className={styles.rightContent}>
+        <main
+          className={`${styles.rightContent} ${mobileTab !== "results" ? styles.mobileHidden : ""}`}
+        >
           <div className={styles.suggestContent}>
             <div className={styles.headerTitleRow}>
               <h3>

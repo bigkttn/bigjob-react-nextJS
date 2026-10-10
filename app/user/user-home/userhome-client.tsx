@@ -53,6 +53,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const [suggestedPosts, setSuggestedPosts] = useState<JobPost[]>([]);
   const [isSuggestLoading, setIsSuggestLoading] = useState(true);
 
+  // มือถือ: แสดงทีละส่วนด้วยแท็บ (จอใหญ่แสดงทั้งสองส่วนเหมือนเดิม)
+  const [mobileTab, setMobileTab] = useState<"results" | "suggest">("results");
+
   const [searchInput, setSearchInput] = useState(() =>
     getSavedState("searchTerm", ""),
   );
@@ -232,6 +235,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
 
   const handleSearchSubmit = () => {
     setCurrentPage(1);
+    setMobileTab("results");
     const term = searchInput.trim();
     setSearchTerm(term);
     setShowHistory(false);
@@ -241,6 +245,7 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const handleHistoryClick = (item: string) => {
     setSearchInput(item);
     setCurrentPage(1);
+    setMobileTab("results");
     setSearchTerm(item);
     setShowHistory(false);
     saveSearchHistory(item);
@@ -299,9 +304,11 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
   const handleFilterChange = (setter: (val: string) => void, val: string) => {
     setter(val);
     setCurrentPage(1);
+    setMobileTab("results");
   };
 
   const handleResetFilters = () => {
+    setMobileTab("results");
     setSearchInput("");
     setSearchTerm("");
     setSelectedJobType("");
@@ -476,8 +483,35 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
         </div>
       </header>
 
+      {/* แท็บสลับส่วน (แสดงเฉพาะมือถือ) */}
+      <div className={styles.mobileTabs} role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileTab === "results"}
+          className={`${styles.mobileTab} ${mobileTab === "results" ? styles.mobileTabActive : ""}`}
+          onClick={() => setMobileTab("results")}
+        >
+          {isFilterActive ? `ผลการค้นหา (${posts.length})` : "ประกาศงานล่าสุด"}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobileTab === "suggest"}
+          className={`${styles.mobileTab} ${mobileTab === "suggest" ? styles.mobileTabActive : ""}`}
+          onClick={() => setMobileTab("suggest")}
+        >
+          แนะนำสำหรับคุณ
+          {!isSuggestLoading && suggestedPosts.length > 0
+            ? ` (${suggestedPosts.length})`
+            : ""}
+        </button>
+      </div>
+
       <div className={styles.mainLayout}>
-        <aside className={styles.leftSidebar}>
+        <aside
+          className={`${styles.leftSidebar} ${mobileTab !== "suggest" ? styles.mobileHidden : ""}`}
+        >
           <div className={styles.suggestContent}>
             <h3>ตำแหน่งงานแนะนำ</h3>
             <div className={styles.verticalList}>
@@ -512,10 +546,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                         <p className={styles.jobPositionText}>
                           {post.job_position}
                         </p>
-                        <p className={styles.subText}>
+                        <p className={`${styles.subText} ${styles.metaInline}`}>
                           {post.province || "ไม่ระบุสถานที่"}
                         </p>
-                        <p className={styles.subText}>
+                        <p className={`${styles.subText} ${styles.metaInline}`}>
                           {post.job_type || "ไม่ระบุประเภท"}
                         </p>
                         <p className={styles.subText}>
@@ -543,7 +577,9 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
           </div>
         </aside>
 
-        <main className={styles.rightContent}>
+        <main
+          className={`${styles.rightContent} ${mobileTab !== "results" ? styles.mobileHidden : ""}`}
+        >
           <div className={styles.suggestContent}>
             <div className={styles.headerTitleRow}>
               <h3>
@@ -583,10 +619,10 @@ const UserHomeClient = ({ initialUser }: { initialUser: User | null }) => {
                         <p className={styles.jobPositionText}>
                           {post.job_position}
                         </p>
-                        <p className={styles.subText}>
+                        <p className={`${styles.subText} ${styles.metaInline}`}>
                           {post.province || "ไม่ระบุสถานที่"}
                         </p>
-                        <p className={styles.subText}>
+                        <p className={`${styles.subText} ${styles.metaInline}`}>
                           {post.job_type || "ไม่ระบุประเภท"}
                         </p>
                         <p className={styles.subText}>
