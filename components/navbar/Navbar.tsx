@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import BanPopup from "./BanPopup";
 import InterviewSchedule from "./InterviewSchedule";
 import "./navbar.css";
@@ -21,7 +21,6 @@ export default function Navbar() {
   const [banDetails, setBanDetails] = useState({ date: "", remaining: "" });
 
   const pathname = usePathname();
-  const router = useRouter();
 
   function resetUserState() {
     setUserRole("guest");
@@ -205,7 +204,9 @@ export default function Navbar() {
       await fetch("/api/auth/logout", { method: "POST" });
       resetUserState();
       closeMenu();
-      router.push("/login");
+      // โหลดหน้าใหม่ทั้งหน้า (ไม่ใช้ router.push) เพื่อล้าง cache ของ router ที่ยังจำผลตอนล็อกอินอยู่
+      // เช่น /login → redirect ไป /company/company-home ทำให้กด "เข้าสู่ระบบ" แล้วไม่ไปไหนจนกว่าจะรีเฟรช
+      window.location.replace("/login");
     } catch (error) {
       console.error("Logout failed", error);
     }
