@@ -28,7 +28,7 @@ export default function ReviewSection({ reviews, viewerId, onDeleteReview, maxHe
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>
-        การให้คะแนนและบทวิจารณ์
+        การให้คะแนนและแสดงความคิดเห็น
       </h3>
 
       {/* Top Score Section (Google Play Style) */}
