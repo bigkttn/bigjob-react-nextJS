@@ -2143,7 +2143,7 @@ export default function CompanyApplication({
               )}
 
               {/* Profile Details (โชว์ข้อมูลผู้สมัคร) */}
-              <div style={{ marginTop: "20px" }}>
+              <div>
                 <div
                   className={styles.applicantCard}
                   style={{
@@ -2887,9 +2887,7 @@ export default function CompanyApplication({
               </div>
             </>
           ) : (
-            <div
-              style={{ textAlign: "center", padding: "50px", color: "#666" }}
-            >
+            <div className={styles.emptyPanelText}>
               กรุณาเลือกผู้สมัครจากรายการด้านซ้าย
             </div>
           )}

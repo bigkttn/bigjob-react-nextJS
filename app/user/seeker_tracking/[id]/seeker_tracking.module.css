@@ -287,11 +287,19 @@
 .badgeOffer { background-color: #2e7d32; }
 .badgePending { background-color: #9e9e9e; }
 
-/* ฝั่งขวา (Tracker + Details) */
+/* ฝั่งขวา (Tracker + Details): พื้นเทาเข้ม สูงเท่าแถบรายการงานด้านซ้าย และเลื่อนดูภายในกรอบได้ */
 .rightPanel {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #4b4b4b;
+  border: 1px solid #3a3a3a;
+  border-radius: 16px;
+  padding: 16px;
+  scrollbar-color: #9e9e9e #4b4b4b;
 }
 
 /* Card มาตรฐานพื้นหลังขาว */
@@ -614,6 +622,13 @@
     overflow: visible;
     padding: 12px;
     gap: 8px;
+  }
+
+  .rightPanel {
+    max-height: none;
+    overflow: visible;
+    padding: 12px;
+    gap: 12px;
   }
 
   .filterTopBar {
