@@ -2046,7 +2046,7 @@ export default function SeekerApplication({
                 color: "#0f172a",
               }}
             >
-              Rate Review
+              ให้คะแนนรีวิว
             </h3>
             <p
               style={{
@@ -2117,7 +2117,7 @@ export default function SeekerApplication({
                   marginBottom: "6px",
                 }}
               >
-                Comment
+                ความคิดเห็น
               </label>
               <textarea
                 rows={3}
@@ -2180,7 +2180,7 @@ export default function SeekerApplication({
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.92")}
               onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
             >
-              Submit
+              ส่งรีวิว
             </button>
           </div>
         </div>
