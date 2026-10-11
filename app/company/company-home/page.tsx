@@ -409,7 +409,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               onFocus={() => setShowHistory(true)}
-              placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด (รองรับ AI Semantic Search)..."
+              placeholder="ค้นหาชื่อผู้สมัคร, ตำแหน่งงานที่สนใจ หรือจังหวัด"
               className={styles.searchInputFull}
             />
             {showHistory && searchHistory.length > 0 && (
@@ -620,7 +620,7 @@ const CompanyHomeClient = ({ initialUser }: { initialUser: any }) => {
 
             <div className={styles.suggestGrid}>
               {isSearching ? (
-                <p className={styles.subText}>กำลังค้นหาด้วย AI...</p>
+                <p className={styles.subText}>กำลังค้นหา...</p>
               ) : currentUsers.length > 0 ? (
                 currentUsers.map((u, index) => (
                   <Link
