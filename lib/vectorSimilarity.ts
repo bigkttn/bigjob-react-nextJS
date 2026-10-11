@@ -5,6 +5,7 @@ export const MODEL_ID = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
 // เก็บเป็น Promise กัน race condition
 let extractorPromise: Promise<any> | null = null;
 
+// สร้าง extractor (เรียกใช้ครั้งแรกจะโหลดโมเดล)
 function getExtractor() {
   if (!extractorPromise) {
     extractorPromise = (async () => {
@@ -20,6 +21,7 @@ function getExtractor() {
 }
 
 // In-memory cache (LRU จริง)
+//  เก็บ embedding ของข้อความที่เคยคำนวณแล้ว (key = hash ของข้อความ, value = vector)
 const memCache = new Map<string, number[]>();
 const MAX_CACHE = 5000;
 
@@ -39,6 +41,7 @@ function getFromCache(key: string): number[] | undefined {
   return val;
 }
 
+// ถ้า cache เต็ม ให้ลบรายการแรก (เก่าที่สุด) ออก
 function setCache(key: string, vec: number[]) {
   if (memCache.has(key)) {
     memCache.delete(key);
@@ -51,17 +54,21 @@ function setCache(key: string, vec: number[]) {
 
 /** embed ข้อความเดียว */
 export async function getEmbedding(text: string): Promise<number[]> {
+  // ถ้าเป็นข้อความว่าง ให้คืนค่าเป็น array ว่าง
   const clean = (text || "").trim();
   if (!clean) return [];
 
+  // ตรวจสอบ cache ก่อน ดูว่าเคยคำนวณข้อความนี้ไปแล้วหรือยัง ถ้าเคย หยิบผลเดิมมาใช้เลย
   const key = hashOf(clean);
   const cached = getFromCache(key);
   if (cached) return cached;
 
-  const extractor = await getExtractor();
-  const output = await extractor(clean, { pooling: "mean", normalize: true });
-  const vec = Array.from(output.data) as number[];
+  // ถ้าไม่เจอใน cache ให้คำนวณ embedding ใหม่
+  const extractor = await getExtractor();                                                   //โมเดลนี้เข้าใจหลายภาษารวมถึงภาษาไทย โหลดครั้งแรกครั้งเดียว ครั้งต่อไปใช้ตัวเดิม
+  const output = await extractor(clean, { pooling: "mean", normalize: true });              //คือเอาตัวเลขของทุกคำมาหาค่าเฉลี่ย ได้ตัวเลขชุดเดียวแทนทั้งประโยค
+  const vec = Array.from(output.data) as number[];                                          //คือปรับขนาดให้เท่ากันทุกประโยค ประโยคยาวหรือสั้นจะได้เทียบกันได้อย่างยุติธรรม
 
+  // บันทึกลง cache
   setCache(key, vec);
   return vec;
 }
