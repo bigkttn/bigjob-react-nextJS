@@ -246,13 +246,16 @@ export async function GET(request: NextRequest) {
 
     // ---------- 6. คิดคะแนน = คะแนนคำสำคัญ + คะแนนความหมาย ----------
     const queryVector = await getEmbedding(rawQuery);
+    // ถ้า embedding ของคำค้นเป็น array ว่าง แสดงว่าเป็นข้อความว่างหรือไม่สามารถคำนวณ embedding ได้ ให้ส่งผลลัพธ์จากคะแนนคำสำคัญอย่างเดียว
     const userVectors = await getUserVectors(candidates);
 
+
+    // คำนวณคะแนนรวมของผู้หางานแต่ละคน
     const results = [];
     for (let i = 0; i < candidates.length; i++) {
       const user = candidates[i];
       const score =
-        keywordScore(user, query, words) + vectorScore(queryVector, userVectors[i]);
+        keywordScore(user, query, words) + vectorScore(queryVector, userVectors[i]);  
 
       if (score < MIN_SCORE) continue;
 
