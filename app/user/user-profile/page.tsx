@@ -929,7 +929,7 @@ const SeekerProfile = () => {
         // บันทึกไม่ผ่าน → ลบไฟล์ใหม่ทิ้ง ไม่ให้ค้างใน Firebase
         await deleteStorageFile(url);
         const data: { error?: string } = await res.json();
-        Swal.fire(`เกิดข้อผิดพลาดคลังข้อมูล: ${data.error ?? "ไม่ทราบสาเหตุ"}`);
+        Swal.fire(`บันทึกข้อมูลไฟล์ไม่สำเร็จ: ${data.error ?? "ไม่ทราบสาเหตุ"}`);
         return;
       }
 
@@ -961,7 +961,7 @@ const SeekerProfile = () => {
   async function deleteFile(fileId: number, filePath: string) {
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
-      text: "คุณมั่นใจใช่ไหมที่จะลบไฟล์นี้ออกจากระบบอย่างถาวร?",
+      text: "คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้อย่างถาวร?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -977,7 +977,7 @@ const SeekerProfile = () => {
         method: "DELETE",
       });
       if (!res.ok) {
-        Swal.fire("ไม่สามารถลบแถวข้อมูลได้");
+        Swal.fire("ไม่สามารถลบไฟล์ได้");
         return;
       }
 

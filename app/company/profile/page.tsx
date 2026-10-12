@@ -176,7 +176,7 @@ const CompanyProfile = () => {
     if (file) {
       const allowedExtensions = /(\.pdf|\.jpg|\.jpeg|\.png|\.docx)$/i;
       if (!allowedExtensions.exec(file.name)) {
-        Swal.fire("รองรับเฉพาะไฟล์ PDF, JPG, PNG, DOCX เท่านั้นครับ");
+        Swal.fire("รองรับเฉพาะไฟล์ PDF, JPG, PNG, DOCX เท่านั้น");
         return;
       }
       setSelectedCertFile(file);

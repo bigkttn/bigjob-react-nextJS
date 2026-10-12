@@ -77,7 +77,7 @@ export default function ProfileActionsButton({
 
   const openReportModal = () => {
     if (isReported) {
-      Swal.fire("คุณได้ทำการรายงานบริษัทนี้เรียบร้อยแล้ว");
+      Swal.fire("คุณได้รายงานบริษัทนี้ไปแล้ว");
       setIsModalOpen(false);
     } else {
       setSelectedType("");

@@ -1,5 +1,6 @@
 "use client";
 import Swal from "sweetalert2";
+import { showAlert } from "@/lib/customAlert";
 import Link from "next/link";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
@@ -397,6 +398,9 @@ export default function SeekerApplication({
   ) => {
     if (!activeSelectedJob) return;
 
+    // ตัวโหลดระหว่างบันทึก (ปิดเองไม่ได้ จะถูกปิดหรือแทนที่ด้วย alert ด้านล่าง)
+    showAlert.loading("กำลังบันทึก...");
+
     try {
       const response = await fetch(`/api/interview_tracking/update-status`, {
         method: "PATCH",
@@ -415,6 +419,7 @@ export default function SeekerApplication({
       });
 
       if (response.ok) {
+        showAlert.close();
         const s = newStatus.toLowerCase();
 
         // ถ้าเป็น reject หรือ cancel ให้ลบออกจากหน้าจอ (State)
@@ -476,6 +481,7 @@ export default function SeekerApplication({
       }
     } catch (error) {
       console.error("Error updating status:", error);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -538,6 +544,7 @@ export default function SeekerApplication({
 
     setIsSubmittingReschedule(true);
     try {
+      showAlert.loading("กำลังส่งคำขอเลื่อนนัด...");
       const response = await fetch(`/api/interview_tracking/update-status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

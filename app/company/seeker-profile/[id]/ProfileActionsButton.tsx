@@ -126,7 +126,7 @@ export default function ProfileActionsButton({
   
   const openReportModal = () => {
     if (isReported) {
-      Swal.fire("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
+      Swal.fire("คุณได้รายงานผู้สมัครงานรายนี้ไปแล้ว")
       setIsModalOpen(false);
     }else{setSelectedType("");
     setDescription("");

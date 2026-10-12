@@ -107,7 +107,7 @@ export default function MapComponent({
         // ส่งพิกัดและชื่อสถานที่กลับไปยังคอมโพเนนต์หลัก
         onLocationSelect(lat, lng, address);
       } else {
-        Swal.fire("ไม่พบสถานที่นี้ ลองระบุชื่อหรือเขต/จังหวัดให้ละเอียดขึ้นครับ");
+        Swal.fire("ไม่พบสถานที่นี้ ลองระบุชื่อหรือเขต/จังหวัดให้ละเอียดขึ้น");
       }
     } catch (error) {
       console.error("Search location error:", error);

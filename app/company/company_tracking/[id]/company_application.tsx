@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Swal from "sweetalert2";
+import { showAlert } from "@/lib/customAlert";
 import styles from "./company_tracking.module.css";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -346,6 +347,9 @@ export default function CompanyApplication({
       ...interviewDetails,
     });
 
+    // ตัวโหลดระหว่างบันทึก (ปิดเองไม่ได้ จะถูกปิดหรือแทนที่ด้วย alert ด้านล่าง)
+    showAlert.loading("กำลังบันทึก...");
+
     try {
       const response = await fetch(`/api/interview_tracking/update-status`, {
         method: "PATCH",
@@ -407,12 +411,14 @@ export default function CompanyApplication({
               }
             : null,
         );
+        showAlert.close();
         return true;
       }
       const data = await response.json().catch(() => ({}));
       Swal.fire(data.message || "อัปเดตสถานะไม่สำเร็จ");
     } catch (error) {
       console.error("Error updating status:", error);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
     return false;
   };

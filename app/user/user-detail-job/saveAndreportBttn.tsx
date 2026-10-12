@@ -131,7 +131,7 @@ export default function ProfileActionsButton({
   
   const openReportModal = () => {
     if (isReported) {
-      Swal.fire("คูณได้ทำการรายงานผู้สมัครงานเรียบร้อยแล้ว")
+      Swal.fire("คุณได้รายงานประกาศงานนี้ไปแล้ว")
       setIsModalOpen(false);
     }else{
     setSelectedType("");
@@ -160,7 +160,7 @@ export default function ProfileActionsButton({
       });
 
       if (response.status === 409) {
-        Swal.fire("คุณเคยส่งรายงานพฤติกรรมสำหรับผู้สมัครงานคนนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ");
+        Swal.fire("คุณเคยรายงานประกาศงานนี้ไปแล้ว ระบบกำลังอยู่ระหว่างตรวจสอบ");
         setIsModalOpen(false); // ปิดโมดอลป็อปอัพ
         setIsOpen(false);      // ปิดเมนูสามจุด
         return;
