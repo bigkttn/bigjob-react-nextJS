@@ -3,6 +3,8 @@ import db from '@/lib/db';
 import nodemailer from 'nodemailer';
 import { apiUrl } from '@/lib/hostURL';
 import { getSessionUser, isAdmin } from '@/lib/auth';
+import { RESCHEDULE_RULE_TEXT, canReschedule } from '@/lib/rescheduleRule';
+import { INTERVIEW_DURATION_MINUTES, isInterviewOver } from '@/lib/interviewTiming';
 import { getTrackingContact } from '../trackingContext';
 import { TrackingActor, canChangeStatus } from '../trackingStatus';
 import {
@@ -78,6 +80,35 @@ export async function PATCH(req: NextRequest) {
       if (newInterviewAt.getTime() <= Date.now()) {
         return NextResponse.json({ message: 'วันและเวลานัดหมายต้องเป็นเวลาในอนาคต' }, { status: 400 });
       }
+    }
+
+    // ส่งข้อเสนองานได้หลังสัมภาษณ์เสร็จ (เวลานัด + 30 นาที)
+    if (actor && status === 'appointment' && previousStatus === 'interview' && !isInterviewOver(contact.interview_date)) {
+      return NextResponse.json(
+        { message: `ส่งข้อเสนองานได้หลังเวลานัดสัมภาษณ์ ${INTERVIEW_DURATION_MINUTES} นาที` },
+        { status: 400 },
+      );
+    }
+
+    // บริษัทนัดสัมภาษณ์ต้องระบุรูปแบบ และสถานที่/ลิงก์ ให้ผู้สมัครรู้ว่าต้องไปที่ไหน
+    if (status === 'screening') {
+      const hasLocation = typeof locationName === 'string' && locationName.trim() !== '';
+      if (!['online', 'onsite'].includes(interviewType) || !hasLocation) {
+        return NextResponse.json({ message: 'กรุณาระบุสถานที่หรือลิงก์สัมภาษณ์' }, { status: 400 });
+      }
+    }
+
+    // เลื่อนนัด (ผู้สมัครขอเลื่อน / บริษัทเปลี่ยนวันนัดที่มีอยู่) ต้องทำก่อนวันนัดเดิมอย่างน้อย 7 วัน
+    // ยกเว้นเวลาที่ผู้สมัครเสนอผ่านไปแล้ว บริษัทต้องกำหนดเวลาใหม่ได้
+    const isReschedule =
+      status === 'reschedule' ||
+      (status === 'screening' && HAS_APPOINTMENT.includes(previousStatus) && contact.interview_date !== null);
+    const isProposedTimePast =
+      previousStatus === 'reschedule' &&
+      contact.interview_date !== null &&
+      contact.interview_date.getTime() <= Date.now();
+    if (actor && isReschedule && !isProposedTimePast && !canReschedule(contact.interview_date)) {
+      return NextResponse.json({ message: RESCHEDULE_RULE_TEXT }, { status: 400 });
     }
 
     const reason = typeof rescheduleReason === 'string' ? rescheduleReason.trim() : '';

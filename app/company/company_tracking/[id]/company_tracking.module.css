@@ -298,6 +298,11 @@
   text-overflow: ellipsis;
 }
 
+/* การ์ดที่มีเมนูสามจุดมุมขวาบน: เว้นที่ไม่ให้ชื่อผู้สมัครทับปุ่มเมนู */
+.cardWithMenu .cardLeft {
+  padding-right: 24px;
+}
+
 .statusBadge {
   padding: 4px 10px;
   border-radius: 12px;
