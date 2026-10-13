@@ -1,15 +1,6 @@
 "use client";
 import Swal from "sweetalert2";
 import { showAlert } from "@/lib/customAlert";
-import { RESCHEDULE_RULE_TEXT, canReschedule } from "@/lib/rescheduleRule";
-import { isInterviewOver } from "@/lib/interviewTiming";
-import { useNow } from "@/lib/useNow";
-import {
-  STATUS_COMPANY_REMOVED,
-  canRemoveTracking,
-  isRemovedBy,
-} from "@/lib/trackingRemoval";
-import TrackingCardMenu from "@/components/TrackingCardMenu";
 import Link from "next/link";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
@@ -158,10 +149,7 @@ export default function SeekerApplication({
     };
   }, [isFilterOpen]);
 
-  // ไม่แสดงรายการที่ผู้สมัครลบไปแล้ว (status = user removed / all removed)
-  const visibleJobs = jobs.filter(
-    (job) => !isExcludedStatus(job.status) && !isRemovedBy("seeker", job.status),
-  );
+  const visibleJobs = jobs.filter((job) => !isExcludedStatus(job.status));
 
   // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนงานที่สมัครในแต่ละตำแหน่ง
   const availablePositions = useMemo(() => {
@@ -320,21 +308,6 @@ export default function SeekerApplication({
           ไม่ผ่านพิจารณา
         </span>
       );
-    // บริษัทลบรายการนี้ไปแล้ว (สถานะเดิมไม่ผ่าน/ยกเลิก ถูกแทนที่ใน DB)
-    if (s === STATUS_COMPANY_REMOVED)
-      return (
-        <span
-          className={`${styles.badge} ${styles.badgePending}`}
-          style={{
-            backgroundColor: "#9e9e9e",
-            padding: "4px 12px",
-            borderRadius: "12px",
-            color: "#fff",
-          }}
-        >
-          บริษัทลบรายการ
-        </span>
-      );
     return (
       <span
         className={`${styles.badge} ${styles.badgePending}`}
@@ -352,14 +325,7 @@ export default function SeekerApplication({
 
   const currentStatus = activeSelectedJob?.status?.toLowerCase() || "applied";
 
-  // เลยเวลานัด + 30 นาที: ซ่อนการ์ดนัดสัมภาษณ์ แสดงการ์ดรอผลการพิจารณาแทน (อัปเดตทุก 30 วินาที)
-  const now = useNow();
-  const isInterviewFinished =
-    currentStatus === "interview" &&
-    isInterviewOver(activeSelectedJob?.interview_date, now);
-
-  // ลบออกจากหน้าของผู้สมัคร: ไม่ลบแถวในฐานข้อมูล แต่เปลี่ยน status เป็น user removed / all removed
-  const handleRemoveTracking = async (trackingId: number) => {
+  const handleDeleteTracking = async (trackingId: number) => {
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
@@ -371,27 +337,22 @@ export default function SeekerApplication({
     });
     if (!result.isConfirmed) return;
     try {
-      const response = await fetch(`/api/interview_tracking/remove-tracking`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingId }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        Swal.fire(data.message || "เกิดข้อผิดพลาดในการลบรายการ");
-        return;
-      }
-      setJobs((prev) =>
-        prev.map((job) =>
-          job.tracking_id === trackingId ? { ...job, status: data.status } : job,
-        ),
+      const response = await fetch(
+        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
+        {
+          method: "DELETE",
+        },
       );
-      if (selectedJob?.tracking_id === trackingId) {
-        setSelectedJob(null);
+      if (response.ok) {
+        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
+        if (selectedJob?.tracking_id === trackingId) {
+          setSelectedJob(null);
+        }
+      } else {
+        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
       }
     } catch (error) {
-      console.error("Error removing tracking:", error);
-      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+      console.error("Error deleting tracking:", error);
     }
   };
 
@@ -543,12 +504,8 @@ export default function SeekerApplication({
     }
   };
 
-  const openRescheduleModal = (job: Recruiter) => {
-    if (!canReschedule(job.interview_date)) {
-      showAlert.info("ไม่สามารถเลื่อนนัดได้", RESCHEDULE_RULE_TEXT);
-      return;
-    }
-    setRescheduleTrackingId(job.tracking_id);
+  const openRescheduleModal = (trackingId: number) => {
+    setRescheduleTrackingId(trackingId);
     setRescheduleDate("");
     setRescheduleTime("");
     setRescheduleReason("");
@@ -761,12 +718,11 @@ export default function SeekerApplication({
                 const isUnread =
                   job.status_notification === "unread_user" ||
                   job.status_notification === "unread_both";
-                const canDelete = canRemoveTracking("seeker", job.status);
                 return (
                   <div
                     key={job.tracking_id}
                     data-tracking-id={job.tracking_id}
-                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""} ${canDelete ? styles.cardWithMenu : ""}`}
+                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
                     style={{
                       cursor: isUnread ? "pointer" : "default",
                       backgroundColor: isUnread ? "#fff7ed" : undefined,
@@ -777,11 +733,6 @@ export default function SeekerApplication({
                     }}
                     onClick={() => handleCardClick(job)}
                   >
-                    {canDelete && (
-                      <TrackingCardMenu
-                        onDelete={() => handleRemoveTracking(job.tracking_id)}
-                      />
-                    )}
                     <div className={styles.cardLeft}>
                       <img
                         src={
@@ -1225,7 +1176,7 @@ export default function SeekerApplication({
                         type="button"
                         className={styles.btnReschedule}
                         onClick={() =>
-                          openRescheduleModal(activeSelectedJob)
+                          openRescheduleModal(activeSelectedJob.tracking_id)
                         }
                       >
                         <span className="material-symbols-outlined">
@@ -1304,7 +1255,7 @@ export default function SeekerApplication({
                   >
                     สัมภาษณ์งาน
                   </span>
-                  {currentStatus === "interview" && !isInterviewFinished && (
+                  {currentStatus === "interview" && (
                     <div
                       style={{
                         marginTop: "15px",
@@ -1558,7 +1509,7 @@ export default function SeekerApplication({
                         type="button"
                         className={styles.btnReschedule}
                         onClick={() =>
-                          openRescheduleModal(activeSelectedJob)
+                          openRescheduleModal(activeSelectedJob.tracking_id)
                         }
                       >
                         <span className="material-symbols-outlined">
@@ -1595,54 +1546,6 @@ export default function SeekerApplication({
                   >
                     ผลการพิจารณา
                   </span>
-
-                  {isInterviewFinished && (
-                    <div
-                      style={{
-                        marginTop: "15px",
-                        display: "flex",
-                        flexDirection: "column",
-                        backgroundColor: "#ffffff",
-                        padding: "15px",
-                        borderRadius: "12px",
-                        border: "1.5px solid #2e7d32",
-                        boxShadow:
-                          "0 6px 18px rgba(46, 125, 50, 0.15), 0 2px 4px rgba(0,0,0,0.04)",
-                        width: "100%",
-                        maxWidth: "240px",
-                        boxSizing: "border-box",
-                        textAlign: "center",
-                      }}
-                    >
-                      <p
-                        style={{
-                          fontSize: "14px",
-                          color: "#333",
-                          margin: "0 0 12px 0",
-                          fontWeight: "bold",
-                          borderBottom: "1px solid #f0f0f0",
-                          paddingBottom: "8px",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        ข้อเสนอรับเข้าทำงาน
-                      </p>
-                      <p
-                        style={{
-                          color: "#ff9800",
-                          fontWeight: "bold",
-                          fontSize: "13px",
-                          margin: "0 0 5px 0",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        รอผลการพิจารณาจากบริษัท
-                      </p>
-                      <p style={{ fontSize: "12px", color: "#555", margin: 0 }}>
-                        สัมภาษณ์เสร็จสิ้นแล้ว บริษัทจะแจ้งผลผ่านระบบและอีเมล
-                      </p>
-                    </div>
-                  )}
 
                   {(currentStatus === "offer" ||
                     currentStatus === "appointment") && (
@@ -1881,6 +1784,29 @@ export default function SeekerApplication({
                 >
                   <h2>{activeSelectedJob.company_name || "ไม่ระบุบริษัท"}</h2>
                 </Link>
+                {(currentStatus === "reject" ||
+                  currentStatus === "rejected" ||
+                  currentStatus === "cancel" ||
+                  currentStatus === "canceled") && (
+                  <button
+                    onClick={() =>
+                      handleDeleteTracking(activeSelectedJob.tracking_id)
+                    }
+                    style={{
+                      marginLeft: "auto",
+                      padding: "6px 12px",
+                      backgroundColor: "#ffebee",
+                      color: "#d32f2f",
+                      border: "1px solid #d32f2f",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ลบรายการ
+                  </button>
+                )}
               </div>
               <div className={styles.detailsGrid}>
                 <div className={styles.leftCol}>
@@ -1982,9 +1908,6 @@ export default function SeekerApplication({
                   </p>
                   <div className={styles.rescheduleForm}>
                     <label htmlFor="reschedule-date">วันที่สะดวก</label>
-                    <span className={styles.rescheduleRuleNote}>
-                      * {RESCHEDULE_RULE_TEXT}
-                    </span>
                     <input
                       id="reschedule-date"
                       type="date"
