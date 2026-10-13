@@ -1233,6 +1233,7 @@ export default function CompanyApplication({
                             color: "#555",
                             marginBottom: "15px",
                             textAlign: "center",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           รอผู้สมัครยืนยันนัดหมาย
