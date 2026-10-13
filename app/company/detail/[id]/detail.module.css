@@ -158,20 +158,25 @@
 }
 
 /* ปุ่มบันทึก (สไตล์สีฟ้า Cyan เส้นขอบและเงาดำหนา) */
+/* ปุ่มบันทึก: สีน้ำเงินแบบเดียวกับปุ่มย้อนกลับเดิม */
 .postBtn {
-  background-color: #00ffff;
-  border: 2px solid #000;
-  border-radius: 8px;
-  padding: 5px 25px;
+  background-color: #3653f8;
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  padding: 0 25px;
+  height: 42.66px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 2px 2px 0px #000;
   white-space: nowrap; /* ป้องกันปุ่มตัวหนังสือแตกแถว */
+  transition: background-color 0.2s ease;
+}
+.postBtn:hover:not(:disabled) {
+  background-color: #2a43d4;
 }
 .postBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
 /* บล็อกของข้อสอบแต่ละข้อ */
@@ -354,15 +359,17 @@
   transform: scale(0.97);
 }
 
+/* ปุ่มย้อนกลับ: พื้นขาว ขอบดำ ตัวอักษรดำ */
 .backBtn {
   font-weight: bold;
-  color: white;
+  color: #000;
   border-radius: 2rem;
   cursor: pointer;
   width: 95.02px;
   height: 42.66px;
-  border: none;
-  background-color: #3653f8;
+  box-sizing: border-box;
+  border: 2px solid #000;
+  background-color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;

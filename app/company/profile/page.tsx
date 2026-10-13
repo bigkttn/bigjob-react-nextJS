@@ -314,13 +314,13 @@ const CompanyProfile = () => {
       <Link
         href="/company/forgot-password"
         style={{
-          width: "100%",
+          width: "fit-content",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          marginTop: "0.6rem",
-          padding: "10px 18px",
+          margin: "0.6rem auto 0",
+          padding: "8px 22px",
           backgroundColor: "#ffffff",
           color: "#111827",
           borderRadius: "999px",

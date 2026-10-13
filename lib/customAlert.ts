@@ -37,7 +37,7 @@ export const showAlert = {
       text,
       icon: "info",
       iconColor: "#3b82f6",
-      confirmButtonText: "รับทราบครับ",
+      confirmButtonText: "รับทราบ",
       confirmButtonColor: "#111827",
       customClass: {
         popup: "premium-swal-popup",
