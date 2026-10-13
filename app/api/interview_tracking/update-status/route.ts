@@ -8,12 +8,19 @@ import { INTERVIEW_DURATION_MINUTES, isInterviewOver } from '@/lib/interviewTimi
 import { getTrackingContact } from '../trackingContext';
 import { TrackingActor, canChangeStatus } from '../trackingStatus';
 import {
+  CompanyMailContext,
+  DeclineStage,
+  MailContent,
   SeekerMailContext,
+  interviewConfirmedMail,
   interviewInviteMail,
+  invitationAcceptedMail,
+  offerAcceptedMail,
   offerMail,
   rejectionMail,
   rescheduleConfirmedMail,
   rescheduleRequestMail,
+  seekerDeclinedMail,
   toDateParts,
 } from '../trackingEmails';
 
@@ -22,6 +29,13 @@ const NEEDS_FUTURE_DATE = ['screening', 'reschedule'];
 // สถานะที่ถือว่า "มีวันนัดอยู่แล้ว" ถ้าบริษัทนัดใหม่จากสถานะเหล่านี้ = เลื่อนนัด
 const HAS_APPOINTMENT = ['screening', 'interview', 'reschedule'];
 const MAX_REASON_LENGTH = 500;
+
+// ผู้สมัครกดปฏิเสธจากสถานะไหน → ใช้ข้อความอีเมลให้ตรงขั้นตอน
+function declineStage(previousStatus: string): DeclineStage {
+  if (previousStatus === 'pending') return 'invitation';
+  if (previousStatus === 'screening') return 'interview';
+  return 'offer';
+}
 
 export async function PATCH(req: NextRequest) {
   const sessionUser = await getSessionUser();
@@ -182,10 +196,10 @@ export async function PATCH(req: NextRequest) {
 
     const platformLink = apiUrl;
 
-    let mailSubject = '';
-    let mailBody = '';
+    let mail: MailContent | null = null;
     let targetEmail = '';
     // อีเมลถึงผู้สมัครส่งในนามบริษัท: ตอบกลับแล้วถึงบริษัทโดยตรง
+    // อีเมลถึงบริษัทส่งในนามระบบ: ตอบกลับแล้วถึงผู้สมัครโดยตรง
     let sendAsCompany = false;
 
     const seekerMailContext: SeekerMailContext = {
@@ -197,85 +211,96 @@ export async function PATCH(req: NextRequest) {
       platformLink,
     };
 
+    const companyMailContext: CompanyMailContext = {
+      companyName,
+      jobTitle,
+      seekerName: seekerName || 'ผู้สมัคร',
+      seekerEmail,
+      seekerPhone: contact.seeker.phone,
+      seekerProfileLink: `${platformLink}/company/seeker-profile/${contact.user_id}`,
+      platformLink,
+    };
+
     if (status === 'applied') {
+      // ผู้สมัครตอบรับคำเชิญของบริษัท
       targetEmail = companyEmail;
-      mailSubject = `[อัปเดตสถานะ] คุณ ${seekerName || 'ผู้สมัคร'} ตอบรับความสนใจตำแหน่ง ${jobTitle}`;
-      mailBody = `เรียน ฝ่าย HR บริษัท ${companyName},\n\nผู้สมัครได้ตอบรับความสนใจในตำแหน่ง ${jobTitle} แล้ว\nกรุณาเข้าสู่ระบบเพื่อนัดหมายวันเวลาสัมภาษณ์\n\nเข้าสู่ระบบ: ${platformLink}`;
+      mail = invitationAcceptedMail(companyMailContext);
     }
     else if (status === 'screening') {
       // เคยมีวันนัดแล้ว = บริษัทเลื่อนนัด / กำหนดเวลาใหม่แทนเวลาที่ผู้สมัครขอ
       const isChange = HAS_APPOINTMENT.includes(previousStatus) && contact.interview_date !== null;
       targetEmail = seekerEmail;
       sendAsCompany = true;
-      ({ subject: mailSubject, body: mailBody } = interviewInviteMail(seekerMailContext, {
+      mail = interviewInviteMail(seekerMailContext, {
         interviewDate,
         interviewTime,
         interviewType,
         locationName,
-      }, isChange));
+      }, isChange);
     }
     else if (status === 'interview' && previousStatus === 'reschedule') {
       // บริษัทตกลงตามเวลาที่ผู้สมัครเสนอ → ยืนยันกับผู้สมัคร (ข้อมูลนัดอ่านจาก DB)
       const proposed = contact.interview_date ? toDateParts(contact.interview_date) : null;
       targetEmail = seekerEmail;
       sendAsCompany = true;
-      ({ subject: mailSubject, body: mailBody } = rescheduleConfirmedMail(seekerMailContext, {
+      mail = rescheduleConfirmedMail(seekerMailContext, {
         interviewDate: proposed?.date,
         interviewTime: proposed?.time,
         interviewType: contact.link ? 'online' : 'onsite',
         locationName: contact.link || contact.location || undefined,
-      }));
+      });
     }
     else if (status === 'interview') {
+      // ผู้สมัครยืนยันเข้าร่วมสัมภาษณ์ตามวันที่บริษัทนัด
       targetEmail = companyEmail;
-      mailSubject = `[ยืนยันนัดหมาย] คุณ ${seekerName || 'ผู้สมัคร'} ยืนยันเข้าร่วมสัมภาษณ์ตำแหน่ง ${jobTitle}`;
-      mailBody = `เรียน ฝ่าย HR บริษัท ${companyName},\n\nผู้สมัครยืนยันเข้าร่วมการสัมภาษณ์งานตามวันและเวลาที่ท่านกำหนดแล้ว\n\nดูรายละเอียด: ${platformLink}`;
+      mail = interviewConfirmedMail(
+        companyMailContext,
+        contact.interview_date ? toDateParts(contact.interview_date) : null,
+      );
     }
     else if (status === 'reschedule') {
       // ผู้สมัครขอเลื่อนนัด → แจ้งบริษัท พร้อมวันเดิม วันที่ขอ และเหตุผล
       targetEmail = companyEmail;
-      ({ subject: mailSubject, body: mailBody } = rescheduleRequestMail(seekerMailContext, {
+      mail = rescheduleRequestMail(companyMailContext, {
         oldDate: contact.interview_date ? toDateParts(contact.interview_date) : null,
         newDate: interviewDate,
         newTime: interviewTime,
         reason,
-      }));
+      });
     }
     else if (status === 'appointment' || status === 'offer') {
       targetEmail = seekerEmail;
       sendAsCompany = true;
-      ({ subject: mailSubject, body: mailBody } = offerMail(seekerMailContext));
+      mail = offerMail(seekerMailContext);
     }
     else if (status === 'hired') {
       targetEmail = companyEmail;
-      mailSubject = `[ตอบรับข้อเสนองาน] คุณ ${seekerName || 'ผู้สมัคร'} ยืนยันตอบรับข้อเสนอตำแหน่ง ${jobTitle}`;
-      mailBody = `เรียน ฝ่าย HR บริษัท ${companyName},\n\nคุณ ${seekerName || 'ผู้สมัคร'} ได้ตอบรับข้อเสนอเริ่มงานในตำแหน่ง ${jobTitle} เรียบร้อยแล้ว\n\nดูรายละเอียด: ${platformLink}`;
+      mail = offerAcceptedMail(companyMailContext);
     }
     else if ((status === 'reject' || status === 'rejected') && isSeekerOwner) {
-      // ผู้สมัครปฏิเสธข้อเสนองานเอง → แจ้งบริษัท
+      // ผู้สมัครปฏิเสธเอง (คำเชิญ / นัดสัมภาษณ์ / ข้อเสนองาน) → แจ้งบริษัท
       targetEmail = companyEmail;
-      mailSubject = `[ปฏิเสธข้อเสนองาน] คุณ ${seekerName || 'ผู้สมัคร'} ปฏิเสธข้อเสนอตำแหน่ง ${jobTitle}`;
-      mailBody = `เรียน ฝ่าย HR บริษัท ${companyName},\n\nคุณ ${seekerName || 'ผู้สมัคร'} ได้ปฏิเสธข้อเสนอเริ่มงานในตำแหน่ง ${jobTitle}\n\nดูรายละเอียด: ${platformLink}`;
+      mail = seekerDeclinedMail(companyMailContext, declineStage(previousStatus));
     }
     else if (status === 'reject' || status === 'rejected') {
       // บริษัท (หรือ admin) ไม่ผ่านพิจารณา → แจ้งผู้สมัครแบบทางการ
       targetEmail = seekerEmail;
       sendAsCompany = true;
-      ({ subject: mailSubject, body: mailBody } = rejectionMail(seekerMailContext));
+      mail = rejectionMail(seekerMailContext);
     }
 
     // ส่งอีเมลไม่ผ่านไม่ควรทำให้คำขอล้ม เพราะอัปเดตสถานะไปแล้ว
-    if (targetEmail && mailSubject) {
+    if (targetEmail && mail) {
       try {
         await transporter.sendMail({
           from: {
-            name: sendAsCompany ? `${companyName} (ผ่าน BIGJOBs)` : 'BigJobs System',
+            name: sendAsCompany ? `${companyName} (ผ่าน BIGJOBs)` : 'BIGJOBs',
             address: process.env.EMAIL_USER ?? '',
           },
-          replyTo: sendAsCompany ? companyEmail : undefined,
+          replyTo: sendAsCompany ? companyEmail : seekerEmail,
           to: targetEmail,
-          subject: mailSubject,
-          text: mailBody,
+          subject: mail.subject,
+          text: mail.body,
         });
       } catch (mailError) {
         console.error('Send email failed:', mailError);

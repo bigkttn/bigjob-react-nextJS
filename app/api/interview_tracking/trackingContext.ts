@@ -15,6 +15,7 @@ export interface SeekerContact {
   uid: number;
   fullname: string;
   email: string;
+  phone: string | null;
 }
 
 export interface TrackingContact {
@@ -53,7 +54,7 @@ export async function getPostContact(postId: number): Promise<PostContact | null
 
 export async function getSeekerContact(userId: number): Promise<SeekerContact | null> {
   const [rows] = (await db.query(
-    "SELECT uid, fullname, email FROM `User` WHERE uid = ? LIMIT 1",
+    "SELECT uid, fullname, email, mobile_phone AS phone FROM `User` WHERE uid = ? LIMIT 1",
     [userId],
   )) as [SeekerContact[], unknown];
   return rows[0] ?? null;
@@ -84,14 +85,4 @@ export async function getTrackingContact(
     post,
     seeker,
   };
-}
-
-// กันข้อความจากผู้ใช้ไปแทรก HTML/ลิงก์ในอีเมล
-export function escapeHtml(value: unknown): string {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }

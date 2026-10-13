@@ -3,6 +3,7 @@
 import Swal from "sweetalert2";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import BulletText from "@/components/BulletText";
 import styles from "./companyProfile.module.css";
 import Link from "next/link";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -299,8 +300,11 @@ const CompanyProfile = () => {
         type="button"
         onClick={() => setEditMode(true)}
         style={{
-          width: "100%",
-          padding: "10px 16px",
+          display: "block",
+          width: "180px",
+          maxWidth: "100%",
+          margin: "0 auto",
+          padding: "8px 22px",
           backgroundColor: "#111111",
           color: "#fff",
           border: "none",
@@ -314,7 +318,8 @@ const CompanyProfile = () => {
       <Link
         href="/company/forgot-password"
         style={{
-          width: "fit-content",
+          width: "180px",
+          maxWidth: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -853,9 +858,10 @@ const CompanyProfile = () => {
                 />
                 <div>
                   <h2>{fmt(job.job_position)}</h2>
-                  <p>
-                    <strong>รายละเอียดงาน:</strong> {fmt(job.job_description)}
-                  </p>
+                  <div className={styles.jobDesc}>
+                    <strong>รายละเอียดงาน:</strong>
+                    <BulletText text={job.job_description} />
+                  </div>
                   <p>
                     <strong>เงินเดือน:</strong> {fmt(job.salary_min)} -{" "}
                     {fmt(job.salary_max)} บาท / เดือน

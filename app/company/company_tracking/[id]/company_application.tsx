@@ -268,7 +268,9 @@ export default function CompanyApplication({
     if (s === "reschedule") return styles.statusReschedule;
     if (s === "appointment" || s === "offer" || s === "hired")
       return styles.statusOffer;
-    if (s === "rejected" || s === "reject") return styles.statusRejected;
+    // ผู้สมัครลบรายการแล้ว: บริษัทยังเห็นเป็นไม่ผ่านพิจารณาเหมือนเดิม
+    if (s === "rejected" || s === "reject" || s === STATUS_USER_REMOVED)
+      return styles.statusRejected;
     return styles.statusPending;
   };
 
@@ -284,8 +286,7 @@ export default function CompanyApplication({
       return "ผลการพิจารณา";
     if (s === "reject" || s === "rejected") return "ไม่ผ่านพิจารณา";
     if (s === "cancel" || s === "cancelled") return "ผู้สมัครยกเลิก";
-    // ผู้สมัครลบรายการนี้ไปแล้ว (สถานะเดิมไม่ผ่าน/ยกเลิก ถูกแทนที่ใน DB)
-    if (s === STATUS_USER_REMOVED) return "ผู้สมัครลบรายการ";
+    if (s === STATUS_USER_REMOVED) return "ไม่ผ่านพิจารณา";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
   // ลบออกจากหน้าของบริษัท: ไม่ลบแถวในฐานข้อมูล แต่เปลี่ยน status เป็น company removed / all removed
