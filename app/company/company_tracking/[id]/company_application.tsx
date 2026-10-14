@@ -3,15 +3,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Swal from "sweetalert2";
 import { showAlert } from "@/lib/customAlert";
-import { RESCHEDULE_RULE_TEXT, canReschedule } from "@/lib/rescheduleRule";
-import { isInterviewOver } from "@/lib/interviewTiming";
-import { useNow } from "@/lib/useNow";
-import {
-  STATUS_USER_REMOVED,
-  canRemoveTracking,
-  isRemovedBy,
-} from "@/lib/trackingRemoval";
-import TrackingCardMenu from "@/components/TrackingCardMenu";
 import styles from "./company_tracking.module.css";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -104,15 +95,8 @@ export default function CompanyApplication({
   companyId,
 }: ComponentProps) {
   const [jobs, setJobs] = useState<Applicant[]>(initialJobs || []);
-  // ไม่แสดงรายการที่บริษัทลบไปแล้ว (status = company removed / all removed)
-  const visibleJobs = useMemo(
-    () => jobs.filter((job) => !isRemovedBy("company", job.status)),
-    [jobs],
-  );
   const [selectedJob, setSelectedJob] = useState<Applicant | null>(
-    () =>
-      (initialJobs || []).find((job) => !isRemovedBy("company", job.status)) ??
-      null,
+    initialJobs && initialJobs.length > 0 ? initialJobs[0] : null,
   );
   console.log("data รายการผู้สมัครงาน tracking:", initialJobs);
 
@@ -159,7 +143,7 @@ export default function CompanyApplication({
   // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนผู้สมัครในแต่ละตำแหน่ง
   const availablePositions = useMemo(() => {
     const positionMap = new Map<string, number>();
-    visibleJobs.forEach((job) => {
+    jobs.forEach((job) => {
       const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
       positionMap.set(pos, (positionMap.get(pos) || 0) + 1);
     });
@@ -167,18 +151,18 @@ export default function CompanyApplication({
       name,
       count,
     }));
-  }, [visibleJobs]);
+  }, [jobs]);
 
   // คัดกรองรายชื่อผู้สมัครตามตำแหน่งงานที่เลือกใน dropdown
   const filteredJobs = useMemo(() => {
     if (selectedPosition === "all") {
-      return visibleJobs;
+      return jobs;
     }
-    return visibleJobs.filter((job) => {
+    return jobs.filter((job) => {
       const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
       return pos === selectedPosition;
     });
-  }, [visibleJobs, selectedPosition]);
+  }, [jobs, selectedPosition]);
 
   // จัดการเมื่อผู้ใช้เลือกตำแหน่งงานใน dropdown
   const handleSelectPosition = (newPosition: string) => {
@@ -187,8 +171,8 @@ export default function CompanyApplication({
 
     const nextFiltered =
       newPosition === "all"
-        ? visibleJobs
-        : visibleJobs.filter((job) => {
+        ? jobs
+        : jobs.filter((job) => {
             const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
             return pos === newPosition;
           });
@@ -229,11 +213,6 @@ export default function CompanyApplication({
 
   const openCompanyReschedule = () => {
     if (!selectedJob) return;
-    // เวลาที่ผู้สมัครเสนอผ่านไปแล้ว บริษัทต้องกำหนดเวลาใหม่ได้เสมอ
-    if (!isProposedTimePast && !canReschedule(selectedJob.interview_date)) {
-      showAlert.info("ไม่สามารถเลื่อนนัดได้", RESCHEDULE_RULE_TEXT);
-      return;
-    }
     // ใช้รูปแบบ/สถานที่เดิมตั้งต้น ให้บริษัทเปลี่ยนแค่วันเวลาได้เลย
     setInterviewType(selectedJob.link ? "online" : "onsite");
     setMeetingLink(selectedJob.link || "");
@@ -289,8 +268,7 @@ export default function CompanyApplication({
     if (s === STATUS_USER_REMOVED) return "ไม่ผ่านพิจารณา";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
-  // ลบออกจากหน้าของบริษัท: ไม่ลบแถวในฐานข้อมูล แต่เปลี่ยน status เป็น company removed / all removed
-  const handleRemoveTracking = async (trackingId: number) => {
+  const handleDeleteTracking = async (trackingId: number) => {
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
@@ -302,28 +280,22 @@ export default function CompanyApplication({
     });
     if (!result.isConfirmed) return;
     try {
-      const response = await fetch(`/api/interview_tracking/remove-tracking`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingId }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        Swal.fire(data.message || "เกิดข้อผิดพลาดในการลบรายการ");
-        return;
-      }
-      setJobs((prev) =>
-        prev.map((job) =>
-          job.tracking_id === trackingId ? { ...job, status: data.status } : job,
-        ),
+      const response = await fetch(
+        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
+        {
+          method: "DELETE",
+        },
       );
-      if (selectedJob?.tracking_id === trackingId) {
-        const next = filteredJobs.find((job) => job.tracking_id !== trackingId);
-        setSelectedJob(next ?? null);
+      if (response.ok) {
+        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
+        if (selectedJob?.tracking_id === trackingId) {
+          setSelectedJob(null);
+        }
+      } else {
+        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
       }
     } catch (error) {
-      console.error("Error removing tracking:", error);
-      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
+      console.error("Error deleting tracking:", error);
     }
   };
 
@@ -483,33 +455,34 @@ export default function CompanyApplication({
             Boolean(f?.file_name?.toLowerCase().endsWith(".pdf")),
         );
 
-  // อัปเดตทุก 30 วินาที การ์ดจึงสลับเองเมื่อถึงเวลาสัมภาษณ์ + 30 นาที
-  const now = useNow();
-  let canMakeOffer = false; // สัมภาษณ์เสร็จแล้ว (อยู่ในช่วง 7 วัน)
+  const now = new Date();
+  let isWaitingForInterviewEnd = false; // ยังไม่ถึงเวลาสัมภาษณ์
+  let canMakeOffer = false; // สัมภาษณ์แล้ว (อยู่ในช่วง 7 วัน)
   let isOfferExpired = false; // เกิน 7 วันหลังสัมภาษณ์
 
+  let offerStartDateStr = ""; // วันที่เริ่มส่ง offer ได้
   let offerEndDateStr = ""; // วันสุดท้ายที่ส่ง offer ได้
 
-  // ยังไม่ถึงเวลานัด + 30 นาที: แสดงการ์ดนัดสัมภาษณ์ ยังไม่แสดงการ์ดเสนองาน
-  const isInterviewFinished =
-    status === "interview" && isInterviewOver(selectedJob?.interview_date, now);
-
-  if (isInterviewFinished && selectedJob?.interview_date) {
+  if (status === "interview" && selectedJob?.interview_date) {
     const interviewDateObj = new Date(selectedJob.interview_date);
 
     // คำนวณหาความต่างของเวลา (มิลลิวินาที)
     const diffTime = now.getTime() - interviewDateObj.getTime();
     const diffDays = diffTime / (1000 * 3600 * 24);
 
-    if (diffDays <= 7) {
-      // สัมภาษณ์เสร็จแล้ว และยังไม่เกิน 7 วัน
+    if (diffTime < 0) {
+      // diffTime ติดลบ แปลว่า "ยังไม่ถึงเวลาสัมภาษณ์" (ยังเป็นอนาคตอยู่)
+      isWaitingForInterviewEnd = true;
+      offerStartDateStr = interviewDateObj.toLocaleDateString("th-TH");
+    } else if (diffTime >= 0 && diffDays <= 7) {
+      // diffTime เป็นบวก แปลว่า "ถึงเวลา/เลยเวลาสัมภาษณ์มาแล้ว" และยังไม่เกิน 7 วัน
       canMakeOffer = true;
       // คำนวณวันสุดท้ายที่หมดเขต (วันสัมภาษณ์ + 7 วัน)
       const endDateObj = new Date(
         interviewDateObj.getTime() + 7 * 24 * 60 * 60 * 1000,
       );
       offerEndDateStr = endDateObj.toLocaleDateString("th-TH");
-    } else {
+    } else if (diffDays > 7) {
       // ผ่านไปเกิน 7 วันแล้ว
       isOfferExpired = true;
     }
@@ -576,7 +549,7 @@ export default function CompanyApplication({
                       onClick={() => handleSelectPosition("all")}
                     >
                       <span className={styles.itemText}>ทุกตำแหน่งงาน</span>
-                      <span className={styles.itemCount}>({visibleJobs.length})</span>
+                      <span className={styles.itemCount}>({jobs.length})</span>
                       {selectedPosition === "all" && (
                         <span
                           className="material-symbols-outlined"
@@ -630,7 +603,7 @@ export default function CompanyApplication({
                   fontSize: "14px",
                 }}
               >
-                {visibleJobs.length === 0
+                {jobs.length === 0
                   ? "ไม่พบข้อมูลผู้สมัคร"
                   : `ไม่พบผู้สมัครในตำแหน่ง "${selectedPosition}"`}
               </p>
@@ -639,12 +612,11 @@ export default function CompanyApplication({
                 const isUnread =
                   job.status_notification === "unread_company" ||
                   job.status_notification === "unread_both";
-                const canDelete = canRemoveTracking("company", job.status);
                 return (
                   <div
                     key={job.tracking_id}
                     data-tracking-id={job.tracking_id}
-                    className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""} ${canDelete ? styles.cardWithMenu : ""}`}
+                    className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
                     style={{
                       cursor: "pointer",
                       backgroundColor: isUnread ? "#fff7ed" : undefined,
@@ -655,11 +627,6 @@ export default function CompanyApplication({
                     }}
                     onClick={() => handleCardClick(job)}
                   >
-                    {canDelete && (
-                      <TrackingCardMenu
-                        onDelete={() => handleRemoveTracking(job.tracking_id)}
-                      />
-                    )}
                     <div className={styles.cardLeft}>
                       <img
                         src={
@@ -757,14 +724,13 @@ export default function CompanyApplication({
                             width: "100%",
                           }}
                         >
-                          รอพิจารณา
+                          ยื่นใบสมัคร
                         </p>
                         <p
                           style={{
                             fontSize: "13px",
                             color: "#555",
                             marginBottom: "15px",
-                            whiteSpace: "nowrap",
                           }}
                         >
                           รอผู้สมัครงานตอบกลับ
@@ -890,18 +856,6 @@ export default function CompanyApplication({
                         >
                           วันสัมภาษณ์:
                         </label>
-                        {isRescheduling && (
-                          <span
-                            style={{
-                              color: "#d32f2f",
-                              fontSize: "11px",
-                              display: "block",
-                              marginBottom: "6px",
-                            }}
-                          >
-                            * {RESCHEDULE_RULE_TEXT}
-                          </span>
-                        )}
                         <input
                           type="date"
                           min={minDate}
@@ -1087,17 +1041,12 @@ export default function CompanyApplication({
                           }}
                         >
                           {(() => {
-                            // ข้อมูลนัดสัมภาษณ์ที่ยังไม่ได้กรอก ใช้แจ้งเตือนก่อนส่งนัดหมาย
-                            const missingFields: string[] = [];
-                            if (!interviewDate) missingFields.push("วันสัมภาษณ์");
-                            if (!interviewTime) missingFields.push("เวลาสัมภาษณ์");
-                            if (interviewType === "online" && !meetingLink.trim()) {
-                              missingFields.push("ลิงก์สัมภาษณ์");
-                            }
-                            if (interviewType === "onsite" && !locationName.trim()) {
-                              missingFields.push("สถานที่สัมภาษณ์");
-                            }
-                            const isInterviewFormComplete = missingFields.length === 0;
+                            const isInterviewFormComplete =
+                              interviewDate &&
+                              interviewTime &&
+                              (interviewType === "online"
+                                ? meetingLink
+                                : locationName);
                             return (
                               <>
                                 <button
@@ -1109,27 +1058,20 @@ export default function CompanyApplication({
                                     border: "none",
                                     fontSize: "12px",
                                     fontWeight: "bold",
-                                    cursor: "pointer",
+                                    cursor:
+                                      !isInterviewFormComplete || isPastDate
+                                        ? "not-allowed"
+                                        : "pointer",
                                     color:
                                       !isInterviewFormComplete || isPastDate
                                         ? "#9e9e9e"
                                         : "#333",
                                   }}
+                                  disabled={
+                                    !isInterviewFormComplete ||
+                                    Boolean(isPastDate)
+                                  }
                                   onClick={async () => {
-                                    if (!isInterviewFormComplete) {
-                                      showAlert.info(
-                                        "กรุณากรอกรายละเอียดการสัมภาษณ์ให้ครบถ้วน",
-                                        `ยังไม่ได้ระบุ ${missingFields.join(", ")} รบกวนกรอกข้อมูลให้ครบก่อนส่งนัดหมาย เพื่อให้ผู้สมัครทราบรายละเอียดการสัมภาษณ์`,
-                                      );
-                                      return;
-                                    }
-                                    if (isPastDate) {
-                                      showAlert.info(
-                                        "วันสัมภาษณ์ไม่ถูกต้อง",
-                                        "วันที่เลือกผ่านมาแล้ว รบกวนเลือกวันสัมภาษณ์ใหม่อีกครั้ง",
-                                      );
-                                      return;
-                                    }
                                     const finalLocation =
                                       interviewType === "online"
                                         ? meetingLink
@@ -1424,7 +1366,7 @@ export default function CompanyApplication({
                       </div>
                     )}
 
-                    {status === "interview" && !isInterviewFinished && (
+                    {status === "interview" && (
                       <div
                         style={{
                           marginTop: "15px",
@@ -1558,7 +1500,16 @@ export default function CompanyApplication({
                               flexShrink: 0,
                             }}
                           >
-                            {selectedJob.link ? "video_chat" : "distance"}
+                            {selectedJob.location &&
+                            (selectedJob.location.startsWith("http") ||
+                              selectedJob.location
+                                .toLowerCase()
+                                .includes("meet") ||
+                              selectedJob.location
+                                .toLowerCase()
+                                .includes("zoom"))
+                              ? "video_chat"
+                              : "distance"}
                           </span>
                           <div
                             style={{
@@ -1568,31 +1519,13 @@ export default function CompanyApplication({
                               color: "#555",
                             }}
                           >
-                            {/* สัมภาษณ์ออนไลน์แสดงลิงก์ประชุม / On-site แสดงสถานที่ที่ปักหมุด (เปิดใน Google Maps) */}
-                            {selectedJob.link ? (
+                            {selectedJob.location ? (
                               <a
                                 href={
-                                  selectedJob.link.startsWith("http")
-                                    ? selectedJob.link
-                                    : `https://${selectedJob.link}`
+                                  selectedJob.location.startsWith("http")
+                                    ? selectedJob.location
+                                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedJob.location)}`
                                 }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={selectedJob.link}
-                                style={{
-                                  color: "#0288d1",
-                                  textDecoration: "underline",
-                                  display: "block",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {selectedJob.link}
-                              </a>
-                            ) : selectedJob.location ? (
-                              <a
-                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedJob.location)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title={selectedJob.location}
@@ -1714,10 +1647,11 @@ export default function CompanyApplication({
                       ผลการพิจารณา
                     </span>
 
-                    {/* การ์ดเสนองาน: สถานะ interview จะแสดงหลังเวลานัด + 30 นาทีเท่านั้น (ก่อนหน้านั้นแสดงการ์ดนัดสัมภาษณ์แทน) */}
+                    {/* --- Offer block logic is now purely based on status === "appointment" OR "offer" to avoid rendering 2 boxes at once --- */}
                     {(status === "appointment" ||
                       status === "offer" ||
-                      isInterviewFinished) && (
+                      (status === "interview" &&
+                        selectedJob.interview_date)) && (
                       <div
                         style={{
                           marginTop: "15px",
@@ -1749,6 +1683,37 @@ export default function CompanyApplication({
                         >
                           ข้อเสนอรับเข้าทำงาน
                         </p>
+
+                        {status === "interview" && isWaitingForInterviewEnd && (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            <p
+                              style={{
+                                color: "#ff9800",
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                                margin: "0 0 5px 0",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              รอการสัมภาษณ์เสร็จสิ้น
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "12px",
+                                color: "#555",
+                                margin: 0,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              ประเมินผลได้ตั้งแต่วันที่ {offerStartDateStr}
+                            </p>
+                          </div>
+                        )}
 
                         {status === "interview" && canMakeOffer && (
                           <div
@@ -1979,7 +1944,8 @@ export default function CompanyApplication({
                             </>
                           )}
 
-                          {status === "interview" && isOfferExpired && (
+                          {status === "interview" &&
+                            (isWaitingForInterviewEnd || isOfferExpired) && (
                               <button
                                 type="button"
                                 style={{
@@ -2017,7 +1983,7 @@ export default function CompanyApplication({
                                     close
                                   </span>
                                 </div>
-                                ปรับเป็นไม่ผ่าน
+                                {isOfferExpired ? "ปรับเป็นไม่ผ่าน" : "ยกเลิก"}
                               </button>
                             )}
 
@@ -2325,6 +2291,28 @@ export default function CompanyApplication({
                       >
                         {selectedJob.email || "ไม่ระบุ"}
                       </a>
+
+                      {(status === "reject" || status === "rejected") && (
+                        <button
+                          onClick={() =>
+                            handleDeleteTracking(selectedJob.tracking_id)
+                          }
+                          style={{
+                            marginTop: "-10px",
+                            marginBottom: "20px",
+                            padding: "6px 12px",
+                            backgroundColor: "#ffebee",
+                            color: "#d32f2f",
+                            border: "1px solid #d32f2f",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "13px",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          ลบรายการ
+                        </button>
+                      )}
 
                       <div
                         style={{

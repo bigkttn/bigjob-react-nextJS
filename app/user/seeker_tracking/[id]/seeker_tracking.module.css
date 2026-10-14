@@ -275,11 +275,6 @@
   margin-top: 8px;
 }
 
-/* การ์ดที่มีเมนูสามจุดมุมขวาบน: เว้นที่ไม่ให้ชื่องานทับปุ่มเมนู */
-.cardWithMenu .cardLeft {
-  padding-right: 24px;
-}
-
 .badge {
   padding: 4px 16px;
   border-radius: 20px;
@@ -947,12 +942,6 @@
 .btnConfirmReschedule:disabled {
   opacity: 0.6;
   cursor: wait;
-}
-
-.rescheduleRuleNote {
-  margin-top: -4px;
-  font-size: 11px;
-  color: #d32f2f;
 }
 
 .datePreview {
