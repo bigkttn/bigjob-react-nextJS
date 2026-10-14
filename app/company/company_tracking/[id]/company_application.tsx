@@ -3,6 +3,13 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import Swal from "sweetalert2";
 import { showAlert } from "@/lib/customAlert";
+import {
+  STATUS_USER_REMOVED,
+  canRemoveTracking,
+  isRemovedBy,
+} from "@/lib/trackingRemoval";
+import TrackingCardMenu from "@/components/TrackingCardMenu";
+import { isInterviewOver } from "@/lib/interviewTiming";
 import styles from "./company_tracking.module.css";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -95,8 +102,15 @@ export default function CompanyApplication({
   companyId,
 }: ComponentProps) {
   const [jobs, setJobs] = useState<Applicant[]>(initialJobs || []);
+  // ไม่แสดงรายการที่บริษัทลบไปแล้ว (status = company removed / all removed)
+  const visibleJobs = useMemo(
+    () => jobs.filter((job) => !isRemovedBy("company", job.status)),
+    [jobs],
+  );
   const [selectedJob, setSelectedJob] = useState<Applicant | null>(
-    initialJobs && initialJobs.length > 0 ? initialJobs[0] : null,
+    () =>
+      (initialJobs || []).find((job) => !isRemovedBy("company", job.status)) ??
+      null,
   );
   console.log("data รายการผู้สมัครงาน tracking:", initialJobs);
 
@@ -143,7 +157,7 @@ export default function CompanyApplication({
   // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนผู้สมัครในแต่ละตำแหน่ง
   const availablePositions = useMemo(() => {
     const positionMap = new Map<string, number>();
-    jobs.forEach((job) => {
+    visibleJobs.forEach((job) => {
       const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
       positionMap.set(pos, (positionMap.get(pos) || 0) + 1);
     });
@@ -151,18 +165,18 @@ export default function CompanyApplication({
       name,
       count,
     }));
-  }, [jobs]);
+  }, [visibleJobs]);
 
   // คัดกรองรายชื่อผู้สมัครตามตำแหน่งงานที่เลือกใน dropdown
   const filteredJobs = useMemo(() => {
     if (selectedPosition === "all") {
-      return jobs;
+      return visibleJobs;
     }
-    return jobs.filter((job) => {
+    return visibleJobs.filter((job) => {
       const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
       return pos === selectedPosition;
     });
-  }, [jobs, selectedPosition]);
+  }, [visibleJobs, selectedPosition]);
 
   // จัดการเมื่อผู้ใช้เลือกตำแหน่งงานใน dropdown
   const handleSelectPosition = (newPosition: string) => {
@@ -171,8 +185,8 @@ export default function CompanyApplication({
 
     const nextFiltered =
       newPosition === "all"
-        ? jobs
-        : jobs.filter((job) => {
+        ? visibleJobs
+        : visibleJobs.filter((job) => {
             const pos = job.job_position?.trim() || "ไม่ระบุตำแหน่ง";
             return pos === newPosition;
           });
@@ -248,7 +262,12 @@ export default function CompanyApplication({
     if (s === "appointment" || s === "offer" || s === "hired")
       return styles.statusOffer;
     // ผู้สมัครลบรายการแล้ว: บริษัทยังเห็นเป็นไม่ผ่านพิจารณาเหมือนเดิม
-    if (s === "rejected" || s === "reject" || s === STATUS_USER_REMOVED)
+    if (
+      s === "rejected" ||
+      s === "reject" ||
+      s === "no_show" ||
+      s === STATUS_USER_REMOVED
+    )
       return styles.statusRejected;
     return styles.statusPending;
   };
@@ -265,10 +284,12 @@ export default function CompanyApplication({
       return "ผลการพิจารณา";
     if (s === "reject" || s === "rejected") return "ไม่ผ่านพิจารณา";
     if (s === "cancel" || s === "cancelled") return "ผู้สมัครยกเลิก";
+    if (s === "no_show") return "ไม่มาตามนัดสัมภาษณ์";
     if (s === STATUS_USER_REMOVED) return "ไม่ผ่านพิจารณา";
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
-  const handleDeleteTracking = async (trackingId: number) => {
+  // ลบออกจากหน้าของบริษัท: ไม่ลบแถวในฐานข้อมูล แต่เปลี่ยน status เป็น company removed / all removed
+  const handleRemoveTracking = async (trackingId: number) => {
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
@@ -279,23 +300,32 @@ export default function CompanyApplication({
       cancelButtonText: "ยกเลิก",
     });
     if (!result.isConfirmed) return;
+
+    showAlert.loading("กำลังลบรายการ...");
     try {
-      const response = await fetch(
-        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
-        {
-          method: "DELETE",
-        },
+      const response = await fetch(`/api/interview_tracking/remove-tracking`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingId }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        Swal.fire(data.message || "เกิดข้อผิดพลาดในการลบรายการ");
+        return;
+      }
+      showAlert.close();
+      setJobs((prev) =>
+        prev.map((job) =>
+          job.tracking_id === trackingId ? { ...job, status: data.status } : job,
+        ),
       );
-      if (response.ok) {
-        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
-        if (selectedJob?.tracking_id === trackingId) {
-          setSelectedJob(null);
-        }
-      } else {
-        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
+      if (selectedJob?.tracking_id === trackingId) {
+        const next = filteredJobs.find((job) => job.tracking_id !== trackingId);
+        setSelectedJob(next ?? null);
       }
     } catch (error) {
-      console.error("Error deleting tracking:", error);
+      console.error("Error removing tracking:", error);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -331,6 +361,21 @@ export default function CompanyApplication({
         console.error("Failed to mark as read", error);
       }
     }
+  };
+
+  // ผู้สมัครไม่มาสัมภาษณ์ตามนัด: เปลี่ยนสถานะเป็น no_show (นับเป็นประวัติผิดนัดในโปรไฟล์ผู้สมัคร)
+  const handleReportNoShow = async (trackingId: number) => {
+    const result = await Swal.fire({
+      title: "ผู้สมัครไม่มาตามนัดสัมภาษณ์?",
+      text: "ระบบจะปิดใบสมัครนี้ แจ้งผู้สมัครทางอีเมล และบันทึกเป็นประวัติผิดนัดในโปรไฟล์ผู้สมัคร",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
+    await handleUpdateStatus(trackingId, "no_show");
   };
 
   const handleUpdateStatus = async (
@@ -603,7 +648,7 @@ export default function CompanyApplication({
                   fontSize: "14px",
                 }}
               >
-                {jobs.length === 0
+                {visibleJobs.length === 0
                   ? "ไม่พบข้อมูลผู้สมัคร"
                   : `ไม่พบผู้สมัครในตำแหน่ง "${selectedPosition}"`}
               </p>
@@ -612,11 +657,13 @@ export default function CompanyApplication({
                 const isUnread =
                   job.status_notification === "unread_company" ||
                   job.status_notification === "unread_both";
+                // ลบได้เฉพาะรายการที่ไม่ผ่านพิจารณา / ยกเลิก / ผู้สมัครลบไปแล้ว
+                const canDelete = canRemoveTracking("company", job.status);
                 return (
                   <div
                     key={job.tracking_id}
                     data-tracking-id={job.tracking_id}
-                    className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                    className={`${styles.jobCard} ${selectedJob?.tracking_id === job.tracking_id ? styles.selected : ""} ${canDelete ? styles.cardWithMenu : ""}`}
                     style={{
                       cursor: "pointer",
                       backgroundColor: isUnread ? "#fff7ed" : undefined,
@@ -627,6 +674,11 @@ export default function CompanyApplication({
                     }}
                     onClick={() => handleCardClick(job)}
                   >
+                    {canDelete && (
+                      <TrackingCardMenu
+                        onDelete={() => handleRemoveTracking(job.tracking_id)}
+                      />
+                    )}
                     <div className={styles.cardLeft}>
                       <img
                         src={
@@ -1571,6 +1623,7 @@ export default function CompanyApplication({
                           style={{
                             display: "flex",
                             justifyContent: "center",
+                            gap: "24px",
                             marginTop: "auto",
                             borderTop: "1px solid #f0f0f0",
                             paddingTop: "15px",
@@ -1615,6 +1668,48 @@ export default function CompanyApplication({
                             </div>
                             ยกเลิกนัด
                           </button>
+                          {/* เลยเวลานัด 30 นาทีแล้ว: แจ้งว่าผู้สมัครไม่มาตามนัดได้ */}
+                          {isInterviewOver(selectedJob.interview_date) && (
+                            <button
+                              type="button"
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                background: "none",
+                                border: "none",
+                                fontSize: "12px",
+                                fontWeight: "bold",
+                                cursor: "pointer",
+                                color: "#333",
+                              }}
+                              onClick={() =>
+                                handleReportNoShow(selectedJob.tracking_id)
+                              }
+                            >
+                              <div
+                                style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#757575",
+                                  color: "#fff",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                <span
+                                  className="material-symbols-outlined"
+                                  style={{ fontSize: "16px" }}
+                                >
+                                  person_off
+                                </span>
+                              </div>
+                              ไม่มาตามนัดสัมภาษณ์
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -2291,28 +2386,6 @@ export default function CompanyApplication({
                       >
                         {selectedJob.email || "ไม่ระบุ"}
                       </a>
-
-                      {(status === "reject" || status === "rejected") && (
-                        <button
-                          onClick={() =>
-                            handleDeleteTracking(selectedJob.tracking_id)
-                          }
-                          style={{
-                            marginTop: "-10px",
-                            marginBottom: "20px",
-                            padding: "6px 12px",
-                            backgroundColor: "#ffebee",
-                            color: "#d32f2f",
-                            border: "1px solid #d32f2f",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontSize: "13px",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          ลบรายการ
-                        </button>
-                      )}
 
                       <div
                         style={{

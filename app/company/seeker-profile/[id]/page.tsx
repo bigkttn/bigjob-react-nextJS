@@ -281,6 +281,11 @@ export default async function SeekerProfilePage({ params }: PageProps) {
                 {fmt(profile.fullname)}
               </h2>
               <p className={styles.email}>{fmt(profile.email)}</p>
+              {Number(profile.no_show_count) > 0 && (
+                <p className={styles.noShowBadge}>
+                  ผิดนัดสัมภาษณ์ {Number(profile.no_show_count)} ครั้ง
+                </p>
+              )}
 
               <div className={styles.detailsBox}>
                 <div className={styles.titleinfoRow}>

@@ -92,19 +92,25 @@ const getStatusClass = (statusCode: number): string => {
  }
 };
 
-const getReportTypeText = (type: string): string => {
- switch (type) {
-  case "identity_fraud":
-   return "ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง";
-  case "job_no_show":
-   return "งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์";
-  case "harassment_to_staff":
-   return "ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง";
-  case "other":
-   return "อื่นๆ (ระบุในรายละเอียด)";
-  default:
-   return type || "-";
- }
+// หัวข้อรายงานผู้สมัคร (บริษัทเป็นคนรายงาน) ใช้ข้อความต่างจากรายงานบริษัท/โพสต์งาน
+const SEEKER_REPORT_TYPES: Record<string, string> = {
+ identity_fraud: "ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน",
+ job_no_show: "ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)",
+ harassment_to_staff: "ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่",
+ other: "อื่นๆ (ระบุในรายละเอียด)",
+};
+
+// หัวข้อรายงานบริษัทและโพสต์งาน (ผู้สมัครเป็นคนรายงาน)
+const JOB_REPORT_TYPES: Record<string, string> = {
+ identity_fraud: "ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง",
+ job_no_show: "งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์",
+ harassment_to_staff: "ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง",
+ other: "อื่นๆ (ระบุในรายละเอียด)",
+};
+
+const getReportTypeText = (type: string, source: string): string => {
+ const types = source === "user" ? SEEKER_REPORT_TYPES : JOB_REPORT_TYPES;
+ return types[type] || type || "-";
 };
 
 const getTargetLink = (source: string, targetId: number): string => {
@@ -212,7 +218,7 @@ const AdminReportPage = () => {
       reporter: item.reporter_name || "ไม่ทราบชื่อ",
       reporterId: item.reporter_id,
       reporterRole: item.reporter_role,
-      reportType: getReportTypeText(item.report_type),
+      reportType: getReportTypeText(item.report_type, item.source),
       details: item.description,
       target: item.target_name || "ไม่ทราบข้อมูล",
       targetId: item.target_id,

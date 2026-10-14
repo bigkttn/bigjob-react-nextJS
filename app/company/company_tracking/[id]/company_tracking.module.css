@@ -1590,3 +1590,8 @@
 .step:has(> .rescheduleRequestCard) {
   min-width: 0;
 }
+
+/* การ์ดที่มีเมนูสามจุดมุมขวาบน: เว้นที่ไม่ให้ชื่อผู้สมัครทับปุ่มเมนู */
+.cardWithMenu .cardLeft {
+  padding-right: 24px;
+}

@@ -11,7 +11,7 @@ interface ProfileActionsProps {
   postId: number;
 }
 
-type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
+type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff' | 'other';
 
 export default function ProfileActionsButton({
   userId,
@@ -359,7 +359,7 @@ export default function ProfileActionsButton({
                 <option value="identity_fraud">ข้อมูลงานไม่ตรงกับความจริง / หลอกลวง</option>
                 <option value="job_no_show">งานผิดกฎหมาย / สิ่งลามกอนาจาร / พนันออนไลน์</option>
                 <option value="harassment_to_staff">ลิงก์เสีย / ข้อมูลติดต่อไม่ถูกต้อง</option>
-                <option value="harassment_to_staff">อื่นๆ (ระบุในรายละเอียด)</option>
+                <option value="other">อื่นๆ (ระบุในรายละเอียด)</option>
 
               </select>
             </div>

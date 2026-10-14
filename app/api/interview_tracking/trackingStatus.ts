@@ -17,7 +17,7 @@ const COMPANY_TRANSITIONS: Record<string, string[]> = {
   pending: ["reject"],
   applied: ["screening", "reject"], // นัดสัมภาษณ์
   screening: ["screening", "reject"], // เลื่อนนัด
-  interview: ["screening", "appointment", "reject"], // เลื่อนนัด / ส่งข้อเสนองาน
+  interview: ["screening", "appointment", "reject", "no_show"], // เลื่อนนัด / ส่งข้อเสนองาน / ผู้สมัครไม่มาตามนัด
   reschedule: ["interview", "screening", "reject"], // ตกลงเวลาที่ผู้สมัครเสนอ / กำหนดเวลาอื่น
   appointment: ["reject"],
   offer: ["reject"],

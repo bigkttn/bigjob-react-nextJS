@@ -954,3 +954,7 @@
 .step:has(> .rescheduleCard) {
   min-width: 0;
 }
+
+.cardWithMenu .cardLeft {
+  padding-right: 24px;
+}

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
               const query =
             `INSERT INTO report_user (user_id, company_id, report_type, description, report_date)
                 VALUES (?, ?, ?, ?, NOW())`;
-        await db.execute(query, [user_id, company_id,, report_type, description]);
+        await db.execute(query, [user_id, company_id, report_type, description]);
 
         return NextResponse.json(
             { message: 'บันทึกข้อมูลการรายงาน (Report) เรียบร้อยแล้ว' },

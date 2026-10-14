@@ -11,7 +11,7 @@ interface ProfileActionsProps {
   companyId: number;
 }
 
-type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff';
+type ReportType = 'identity_fraud' | 'job_no_show' | 'harassment_to_staff' | 'other';
 
 export default function ProfileActionsButton({
   userId,
@@ -366,7 +366,7 @@ export default function ProfileActionsButton({
                 <option value="identity_fraud">ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน</option>
                 <option value="job_no_show">ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)</option>
                 <option value="harassment_to_staff">ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่</option>
-                <option value="harassment_to_staff">อื่นๆ (ระบุในรายละเอียด)</option>
+                <option value="other">อื่นๆ (ระบุในรายละเอียด)</option>
               </select>
             </div>
 

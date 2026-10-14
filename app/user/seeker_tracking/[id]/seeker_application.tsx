@@ -106,7 +106,7 @@ export default function SeekerApplication({
   userId,
 }: ComponentProps) {
   const validInitialJobs = (initialJobs || []).filter(
-    (job) => !isExcludedStatus(job.status),
+    (job) => !isExcludedStatus(job.status) && !isRemovedBy("seeker", job.status),
   );
 
   const [jobs, setJobs] = useState<Recruiter[]>(validInitialJobs);
@@ -159,7 +159,9 @@ export default function SeekerApplication({
     };
   }, [isFilterOpen]);
 
-  const visibleJobs = jobs.filter((job) => !isExcludedStatus(job.status));
+  const visibleJobs = jobs.filter(
+    (job) => !isExcludedStatus(job.status) && !isRemovedBy("seeker", job.status),
+  );
 
   // ดึงรายการตำแหน่งงานที่ไม่ซ้ำกัน พร้อมจำนวนงานที่สมัครในแต่ละตำแหน่ง
   const availablePositions = useMemo(() => {
@@ -304,6 +306,20 @@ export default function SeekerApplication({
           ผลการพิจารณา
         </span>
       );
+    if (s === "no_show")
+      return (
+        <span
+          className={`${styles.badge} ${styles.badgeRejected}`}
+          style={{
+            backgroundColor: "#616161",
+            padding: "4px 12px",
+            borderRadius: "12px",
+            color: "#fff",
+          }}
+        >
+          ไม่มาตามนัดสัมภาษณ์
+        </span>
+      );
     // บริษัทลบรายการแล้ว: ผู้สมัครยังเห็นเป็นไม่ผ่านพิจารณาเหมือนเดิม
     if (s === "rejected" || s === "reject" || s === STATUS_COMPANY_REMOVED)
       return (
@@ -336,7 +352,8 @@ export default function SeekerApplication({
 
   const currentStatus = activeSelectedJob?.status?.toLowerCase() || "applied";
 
-  const handleDeleteTracking = async (trackingId: number) => {
+  // ลบออกจากหน้าของผู้สมัคร: ไม่ลบแถวในฐานข้อมูล แต่เปลี่ยน status เป็น user removed / all removed
+  const handleRemoveTracking = async (trackingId: number) => {
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?",
@@ -347,23 +364,31 @@ export default function SeekerApplication({
       cancelButtonText: "ยกเลิก",
     });
     if (!result.isConfirmed) return;
+
+    showAlert.loading("กำลังลบรายการ...");
     try {
-      const response = await fetch(
-        `/api/interview_tracking/delete-tracking?tracking_id=${trackingId}`,
-        {
-          method: "DELETE",
-        },
+      const response = await fetch(`/api/interview_tracking/remove-tracking`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingId }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        Swal.fire(data.message || "เกิดข้อผิดพลาดในการลบรายการ");
+        return;
+      }
+      showAlert.close();
+      setJobs((prev) =>
+        prev.map((job) =>
+          job.tracking_id === trackingId ? { ...job, status: data.status } : job,
+        ),
       );
-      if (response.ok) {
-        setJobs((prev) => prev.filter((job) => job.tracking_id !== trackingId));
-        if (selectedJob?.tracking_id === trackingId) {
-          setSelectedJob(null);
-        }
-      } else {
-        Swal.fire("เกิดข้อผิดพลาดในการลบรายการ");
+      if (selectedJob?.tracking_id === trackingId) {
+        setSelectedJob(null);
       }
     } catch (error) {
-      console.error("Error deleting tracking:", error);
+      console.error("Error removing tracking:", error);
+      Swal.fire("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
@@ -729,11 +754,12 @@ export default function SeekerApplication({
                 const isUnread =
                   job.status_notification === "unread_user" ||
                   job.status_notification === "unread_both";
+                const canDelete = canRemoveTracking("seeker", job.status);
                 return (
                   <div
                     key={job.tracking_id}
                     data-tracking-id={job.tracking_id}
-                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""}`}
+                    className={`${styles.jobCard} ${activeSelectedJob?.tracking_id === job.tracking_id ? styles.selected : ""} ${canDelete ? styles.cardWithMenu : ""}`}
                     style={{
                       cursor: isUnread ? "pointer" : "default",
                       backgroundColor: isUnread ? "#fff7ed" : undefined,
@@ -744,6 +770,11 @@ export default function SeekerApplication({
                     }}
                     onClick={() => handleCardClick(job)}
                   >
+                    {canDelete && (
+                      <TrackingCardMenu
+                        onDelete={() => handleRemoveTracking(job.tracking_id)}
+                      />
+                    )}
                     <div className={styles.cardLeft}>
                       <img
                         src={
@@ -1795,29 +1826,6 @@ export default function SeekerApplication({
                 >
                   <h2>{activeSelectedJob.company_name || "ไม่ระบุบริษัท"}</h2>
                 </Link>
-                {(currentStatus === "reject" ||
-                  currentStatus === "rejected" ||
-                  currentStatus === "cancel" ||
-                  currentStatus === "canceled") && (
-                  <button
-                    onClick={() =>
-                      handleDeleteTracking(activeSelectedJob.tracking_id)
-                    }
-                    style={{
-                      marginLeft: "auto",
-                      padding: "6px 12px",
-                      backgroundColor: "#ffebee",
-                      color: "#d32f2f",
-                      border: "1px solid #d32f2f",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontSize: "13px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    ลบรายการ
-                  </button>
-                )}
               </div>
               <div className={styles.detailsGrid}>
                 <div className={styles.leftCol}>

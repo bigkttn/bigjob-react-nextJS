@@ -20,7 +20,9 @@ export async function GET(
               disability_status, marital_status, mobile_phone, line_id,
               country, address, province, district, sub_district, postal_code,
               type_of_work, desired_salary, desired_work_location,
-              available_start_date, role, is_visible,banned_until
+              available_start_date, role, is_visible,banned_until,
+              (SELECT COUNT(*) FROM interview_tracking
+                 WHERE interview_tracking.user_id = User.uid AND status = 'no_show') AS no_show_count
        FROM User WHERE uid = ?`,
             [id]
         );

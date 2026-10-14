@@ -544,3 +544,15 @@
     padding: 12px 16px;
   }
 }
+
+/* ประวัติผิดนัดสัมภาษณ์ (สถานะ no_show) */
+.noShowBadge {
+  display: inline-block;
+  margin: 6px 0 0;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background-color: #ffebee;
+  color: #c62828;
+  font-size: 13px;
+  font-weight: 600;
+}

@@ -3,6 +3,8 @@ import db from '@/lib/db';
 import nodemailer from 'nodemailer';
 import { apiUrl } from '@/lib/hostURL';
 import { getSessionUser, isAdmin } from '@/lib/auth';
+import { RESCHEDULE_RULE_TEXT, canReschedule } from '@/lib/rescheduleRule';
+import { INTERVIEW_DURATION_MINUTES, isInterviewOver } from '@/lib/interviewTiming';
 import { getTrackingContact } from '../trackingContext';
 import { TrackingActor, canChangeStatus } from '../trackingStatus';
 import {
@@ -13,6 +15,7 @@ import {
   interviewConfirmedMail,
   interviewInviteMail,
   invitationAcceptedMail,
+  noShowMail,
   offerAcceptedMail,
   offerMail,
   rejectionMail,
@@ -94,6 +97,43 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    // ส่งข้อเสนองานได้หลังสัมภาษณ์เสร็จ (เวลานัด + 30 นาที)
+    if (actor && status === 'appointment' && previousStatus === 'interview' && !isInterviewOver(contact.interview_date)) {
+      return NextResponse.json(
+        { message: `ส่งข้อเสนองานได้หลังเวลานัดสัมภาษณ์ ${INTERVIEW_DURATION_MINUTES} นาที` },
+        { status: 400 },
+      );
+    }
+
+    // แจ้งว่าผู้สมัครไม่มาตามนัดได้หลังเลยเวลานัดแล้ว (เวลานัด + 30 นาที)
+    if (actor && status === 'no_show' && !isInterviewOver(contact.interview_date)) {
+      return NextResponse.json(
+        { message: `แจ้งผู้สมัครไม่มาตามนัดได้หลังเวลานัดสัมภาษณ์ ${INTERVIEW_DURATION_MINUTES} นาที` },
+        { status: 400 },
+      );
+    }
+
+    // บริษัทนัดสัมภาษณ์ต้องระบุรูปแบบ และสถานที่/ลิงก์ ให้ผู้สมัครรู้ว่าต้องไปที่ไหน
+    if (status === 'screening') {
+      const hasLocation = typeof locationName === 'string' && locationName.trim() !== '';
+      if (!['online', 'onsite'].includes(interviewType) || !hasLocation) {
+        return NextResponse.json({ message: 'กรุณาระบุสถานที่หรือลิงก์สัมภาษณ์' }, { status: 400 });
+      }
+    }
+
+    // เลื่อนนัด (ผู้สมัครขอเลื่อน / บริษัทเปลี่ยนวันนัดที่มีอยู่) ต้องทำก่อนวันนัดเดิมอย่างน้อย 7 วัน
+    // ยกเว้นเวลาที่ผู้สมัครเสนอผ่านไปแล้ว บริษัทต้องกำหนดเวลาใหม่ได้
+    const isReschedule =
+      status === 'reschedule' ||
+      (status === 'screening' && HAS_APPOINTMENT.includes(previousStatus) && contact.interview_date !== null);
+    const isProposedTimePast =
+      previousStatus === 'reschedule' &&
+      contact.interview_date !== null &&
+      contact.interview_date.getTime() <= Date.now();
+    if (actor && isReschedule && !isProposedTimePast && !canReschedule(contact.interview_date)) {
+      return NextResponse.json({ message: RESCHEDULE_RULE_TEXT }, { status: 400 });
+    }
+
     const reason = typeof rescheduleReason === 'string' ? rescheduleReason.trim() : '';
     if (status === 'reschedule') {
       if (!reason) {
@@ -154,6 +194,22 @@ export async function PATCH(req: NextRequest) {
     queryParams.push(trackingId);
 
     await db.query(updateSql, queryParams);
+
+    // ผู้สมัครไม่มาตามนัด: บันทึกเป็นรายงานผู้ใช้ด้วย ให้ admin เห็นในหน้ารายงาน
+    if (status === 'no_show') {
+      const dateText = contact.interview_date
+        ? contact.interview_date.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })
+        : '-';
+      await db.query(
+        `INSERT INTO report_user (user_id, company_id, report_type, description, report_date)
+         VALUES (?, ?, 'ไม่มาตามนัดสัมภาษณ์', ?, NOW())`,
+        [
+          contact.user_id,
+          contact.post.company_id,
+          `ไม่มาตามนัดสัมภาษณ์ ตำแหน่ง ${contact.post.job_position} (นัดวันที่ ${dateText})`,
+        ],
+      );
+    }
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -245,6 +301,11 @@ export async function PATCH(req: NextRequest) {
     else if (status === 'hired') {
       targetEmail = companyEmail;
       mail = offerAcceptedMail(companyMailContext);
+    }
+    else if (status === 'no_show') {
+      targetEmail = seekerEmail;
+      sendAsCompany = true;
+      mail = noShowMail(seekerMailContext);
     }
     else if ((status === 'reject' || status === 'rejected') && isSeekerOwner) {
       // ผู้สมัครปฏิเสธเอง (คำเชิญ / นัดสัมภาษณ์ / ข้อเสนองาน) → แจ้งบริษัท
