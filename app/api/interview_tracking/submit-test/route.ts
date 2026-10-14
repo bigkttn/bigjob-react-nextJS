@@ -3,11 +3,8 @@ import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { apiUrl } from "@/lib/hostURL";
 import { getSessionUser } from "@/lib/auth";
-import {
-  escapeHtml,
-  getPostContact,
-  getSeekerContact,
-} from "../trackingContext";
+import { getPostContact, getSeekerContact } from "../trackingContext";
+import { applicationMail } from "../trackingEmails";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -73,21 +70,27 @@ export async function POST(req: NextRequest) {
 
     // 3. ส่งอีเมลหา HR ของบริษัทเจ้าของตำแหน่งงาน
     const profileLink = `${apiUrl}/company/seeker-profile/${user_id}`;
+    const mail = applicationMail(
+      {
+        companyName: post.company_name,
+        jobTitle: post.job_position,
+        seekerName: seeker.fullname,
+        seekerEmail: seeker.email,
+        seekerPhone: seeker.phone,
+        seekerProfileLink: profileLink,
+        platformLink: apiUrl,
+      },
+      { withTest: true },
+    );
+
     // ส่งอีเมลไม่ผ่านไม่ควรทำให้คำขอล้ม เพราะบันทึกลงฐานข้อมูลไปแล้ว
     try {
       await transporter.sendMail({
-        from: `"BIGJOBs Application" <${process.env.EMAIL_USER}>`,
+        from: { name: "BIGJOBs", address: process.env.EMAIL_USER ?? "" },
         replyTo: seeker.email,
         to: post.company_email,
-        subject: `[BIGJOBs] มีผู้ทำแบบทดสอบและสมัครงานตำแหน่ง ${post.job_position} - ${seeker.fullname}`,
-        html: `
-          <div style="padding: 20px; font-family: Arial, sans-serif;">
-            <h2 style="color: #0d6efd;">ผู้สมัครได้ทำแบบทดสอบและส่งใบสมัครแล้ว</h2>
-            <p><strong>ตำแหน่ง:</strong> ${escapeHtml(post.job_position)}</p>
-            <p><strong>ผู้สมัคร:</strong> ${escapeHtml(seeker.fullname)}</p>
-            <a href="${profileLink}" style="background-color: #198754; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">ดูโปรไฟล์ผู้สมัคร</a>
-          </div>
-        `,
+        subject: mail.subject,
+        text: mail.body,
       });
     } catch (mailError) {
       console.error("Send email failed:", mailError);

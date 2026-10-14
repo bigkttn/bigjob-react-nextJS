@@ -156,6 +156,7 @@
   border-radius: 8px;
   object-fit: cover;
   flex-shrink: 0;
+  align-self: center; /* ให้รูปอยู่กึ่งกลางแนวตั้งของการ์ด */
   background-color: #eee;
 }
 

@@ -1,6 +1,16 @@
 "use client";
 import Swal from "sweetalert2";
 import { showAlert } from "@/lib/customAlert";
+import { RESCHEDULE_RULE_TEXT, canReschedule } from "@/lib/rescheduleRule";
+import { isInterviewOver } from "@/lib/interviewTiming";
+import { useNow } from "@/lib/useNow";
+import {
+  STATUS_COMPANY_REMOVED,
+  canRemoveTracking,
+  isRemovedBy,
+} from "@/lib/trackingRemoval";
+import TrackingCardMenu from "@/components/TrackingCardMenu";
+import BulletText from "@/components/BulletText";
 import Link from "next/link";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
@@ -294,7 +304,8 @@ export default function SeekerApplication({
           ผลการพิจารณา
         </span>
       );
-    if (s === "rejected" || s === "reject")
+    // บริษัทลบรายการแล้ว: ผู้สมัครยังเห็นเป็นไม่ผ่านพิจารณาเหมือนเดิม
+    if (s === "rejected" || s === "reject" || s === STATUS_COMPANY_REMOVED)
       return (
         <span
           className={`${styles.badge} ${styles.badgeRejected}`}
@@ -1843,23 +1854,33 @@ export default function SeekerApplication({
                   </div>
                   <div className={styles.sectionBlock}>
                     <span className={styles.sectionTitle}>รายละเอียดงาน</span>
-                    <p>{activeSelectedJob.details || "-"}</p>
+                    <div className={styles.sectionText}>
+                      <BulletText text={activeSelectedJob.details} />
+                    </div>
                   </div>
                   <div className={styles.sectionBlock}>
                     <span className={styles.sectionTitle}>คุณสมบัติ</span>
-                    <p>{activeSelectedJob.preferred_qualifications || "-"}</p>
+                    <div className={styles.sectionText}>
+                      <BulletText
+                        text={activeSelectedJob.preferred_qualifications}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className={styles.rightCol}>
                   <div className={styles.sectionBlock} style={{ marginTop: 0 }}>
                     <span className={styles.sectionTitle}>สวัสดิการ</span>
-                    <p>{activeSelectedJob.Benefits || "-"}</p>
+                    <div className={styles.sectionText}>
+                      <BulletText text={activeSelectedJob.Benefits} />
+                    </div>
                   </div>
                   <div className={styles.sectionBlock}>
                     <span className={styles.sectionTitle}>
                       ช่องทางการติดต่อ
                     </span>
-                    <p>{activeSelectedJob.contact || "-"}</p>
+                    <div className={styles.sectionText}>
+                      <BulletText text={activeSelectedJob.contact} />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -10,6 +10,7 @@ import ApplyCompany from "./apply-company";
 import { sessionCookieHeader } from "@/lib/auth";
 import { apiUrl } from "@/lib/hostURL";
 import { redirect } from "next/navigation";
+import BulletText from "@/components/BulletText";
 
 interface CustomJwtPayload extends JwtPayload {
   id: number;
@@ -37,6 +38,9 @@ interface JobPost {
   ban_until?: string;
   Benefits?: string;
   benefits?: string;
+  preferred_qualifications?: string;
+  how_to_apply?: string;
+  contact?: string;
   [key: string]: unknown;
 }
 
@@ -306,7 +310,10 @@ export default async function DetailJob({ params }: PageProps) {
                         wordBreak: "break-word",
                       }}
                     >
-                      {job.work_location || "ไม่ระบุสถานที่ทำงาน"}
+                      <BulletText
+                        text={job.work_location}
+                        fallback="ไม่ระบุสถานที่ทำงาน"
+                      />
                     </td>
                   </tr>
                   <tr>
@@ -340,7 +347,10 @@ export default async function DetailJob({ params }: PageProps) {
                           wordBreak: "break-word",
                         }}
                       >
-                        {job.job_description || "ไม่ได้ระบุรายละเอียด"}
+                        <BulletText
+                          text={job.job_description}
+                          fallback="ไม่ได้ระบุรายละเอียด"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -357,9 +367,10 @@ export default async function DetailJob({ params }: PageProps) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {typeof job.preferred_qualifications === "string"
-                    ? job.preferred_qualifications
-                    : "ไม่ได้ระบุคุณสมบัติ"}
+                  <BulletText
+                    text={job.preferred_qualifications}
+                    fallback="ไม่ได้ระบุคุณสมบัติ"
+                  />
                 </div>
               </div>
             </div>
@@ -375,10 +386,10 @@ export default async function DetailJob({ params }: PageProps) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {typeof job.Benefits === "string" ||
-                  typeof job.benefits === "string"
-                    ? String(job.Benefits || job.benefits)
-                    : "ไม่ได้ระบุสวัสดิการ"}
+                  <BulletText
+                    text={job.Benefits || job.benefits}
+                    fallback="ไม่ได้ระบุสวัสดิการ"
+                  />
                 </div>
               </section>
 
@@ -392,9 +403,10 @@ export default async function DetailJob({ params }: PageProps) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {typeof job.how_to_apply === "string"
-                    ? job.how_to_apply
-                    : "ไม่ได้ระบุวิธีการสมัคร"}
+                  <BulletText
+                    text={job.how_to_apply}
+                    fallback="ไม่ได้ระบุวิธีการสมัคร"
+                  />
                 </div>
               </section>
 
@@ -408,9 +420,10 @@ export default async function DetailJob({ params }: PageProps) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {typeof job.contact === "string"
-                    ? job.contact
-                    : "ไม่ได้ระบุข้อมูลติดต่อ"}
+                  <BulletText
+                    text={job.contact}
+                    fallback="ไม่ได้ระบุข้อมูลติดต่อ"
+                  />
                 </div>
               </section>
 

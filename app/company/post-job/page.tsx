@@ -66,6 +66,9 @@ const getQuestionError = (q: Question, questionNumber: number) => {
   return "";
 };
 
+// ช่องข้อความยาว: แต่ละบรรทัดจะแสดงเป็นหนึ่งข้อ (มีจุดนำหน้า) ในหน้ารายละเอียดงาน
+const BULLET_HINT = "กด Enter เพื่อขึ้นข้อใหม่";
+
 const requiredMark = <span style={{ color: "#dc2626" }}> *</span>;
 
 const rangeErrorStyle = {
@@ -773,10 +776,10 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="workLocation"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.workLocation}
-                    onKeyDown={blockInvalidKeys}
                     onChange={handleChange}
                     rows={3}
                   />
@@ -923,6 +926,7 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="jobDescription"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.jobDescription}
@@ -945,6 +949,7 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="qualifications"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.qualifications}
@@ -959,6 +964,7 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="benefits"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.benefits}
@@ -975,6 +981,7 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="howToApply"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.howToApply}
@@ -989,6 +996,7 @@ const PostJob = () => {
                   </label>
                   <textarea
                     name="contact"
+                    placeholder={BULLET_HINT}
                     style={inputStyle}
                     disabled={!isApproved}
                     value={formData.contact}

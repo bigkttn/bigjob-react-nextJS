@@ -10,6 +10,9 @@
 
 .backBtnWrapper {
   grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .backBtn {
@@ -108,7 +111,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-top: 65px;
 }
 
 .VerifiedConfirm {
@@ -182,6 +184,14 @@
   position: relative;
   align-items: flex-start; /* <--- ตัวนี้จะป้องกันไม่ให้รูปถูกยืดตามความสูงของข้อความ */
 }
+.jobDesc {
+  margin: 1em 0;
+}
+
+.jobDesc ul {
+  margin-top: 4px;
+}
+
 .jobCard img {
   width: 80px;
   height: 80px;

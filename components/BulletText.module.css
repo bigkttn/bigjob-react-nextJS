@@ -1,0 +1,31 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* จุดวงกลมสีดำ — ความสูงเท่าบรรทัดแรกของข้อความเพื่อให้อยู่กึ่งกลางบรรทัด */
+.dot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-top: calc(0.75em - 3.5px);
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}

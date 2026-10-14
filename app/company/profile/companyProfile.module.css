@@ -165,6 +165,14 @@
   align-items: flex-start; /* <--- ตัวนี้จะป้องกันไม่ให้รูปถูกยืดตามความสูงของข้อความ */
 }
 
+.jobDesc {
+  margin: 1em 0;
+}
+
+.jobDesc ul {
+  margin-top: 4px;
+}
+
 .jobCard img {
   width: 80px;
   height: 80px;

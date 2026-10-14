@@ -499,7 +499,8 @@
   flex-shrink: 0;
 }
 
-.sectionBlock p {
+.sectionBlock p,
+.sectionText {
   flex: 1;
   margin: 0;
   font-size: 13px;
@@ -782,7 +783,8 @@
   }
 
   .infoValue,
-  .sectionBlock p {
+  .sectionBlock p,
+  .sectionText {
     overflow-wrap: anywhere;
   }
 

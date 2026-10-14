@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import BulletText from "@/components/BulletText";
 import styles from "./userProfileCompany.module.css";
 
 import BackButton from "./backBttn";
@@ -184,13 +185,23 @@ export default function ProfileCompany() {
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
-        {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
+        {/* ── ปุ่มย้อนกลับ และ ปุ่ม Admin ── */}
+        <div className={styles.backBtnWrapper}>
+          <BackButton />
+          {isAdmin && (
+            <AdminButton
+              id={String(viewer?.id)}
+              role={viewer?.role || ""}
+              company_id={companyId}
+              banned_until={company.banned_until}
+              onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+          )}
+        </div>
 
+        {/* ฝั่งซ้าย: ข้อมูลบริษัท (อ่านอย่างเดียว) */}
         <div className={styles.leftSection}>
           <BanPopup company={company} isAdmin={isAdmin} />
-          <div style={{ width: "100px", height: "25px" }}>
-            <BackButton />
-          </div>
 
           <div className={styles.profileCard}>
             <img
@@ -255,24 +266,6 @@ export default function ProfileCompany() {
                   </div>
                 )}
               </h1>
-              {isAdmin && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "end",
-                  }}
-                >
-                  <AdminButton
-                    id={String(viewer?.id)}
-                    role={viewer?.role || ""}
-                    company_id={companyId}
-                    banned_until={company.banned_until}
-                    onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
-                  />
-                </div>
-              )}
-
               <p>{fmt(company.brief_history)}</p>
               <hr />
               <div className={styles.contactGroup}>
@@ -402,9 +395,10 @@ export default function ProfileCompany() {
                   />
                   <div>
                     <h2>{fmt(job.job_position)}</h2>
-                    <p>
-                      <strong>รายละเอียดงาน:</strong> {fmt(job.job_description)}
-                    </p>
+                    <div className={styles.jobDesc}>
+                      <strong>รายละเอียดงาน:</strong>
+                      <BulletText text={job.job_description} />
+                    </div>
                     <p>
                       <strong>เงินเดือน:</strong> {fmt(job.salary_min)} -{" "}
                       {fmt(job.salary_max)} บาท / เดือน
