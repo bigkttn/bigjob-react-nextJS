@@ -202,7 +202,7 @@ export async function PATCH(req: NextRequest) {
         : '-';
       await db.query(
         `INSERT INTO report_user (user_id, company_id, report_type, description, report_date)
-         VALUES (?, ?, 'ไม่มาตามนัดสัมภาษณ์', ?, NOW())`,
+         VALUES (?, ?, 'interview_no_show', ?, NOW())`,
         [
           contact.user_id,
           contact.post.company_id,

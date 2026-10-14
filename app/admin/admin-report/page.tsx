@@ -97,6 +97,7 @@ const SEEKER_REPORT_TYPES: Record<string, string> = {
  identity_fraud: "ข้อมูลโปรไฟล์ไม่ตรงกับความจริง / แอบอ้างตัวตน",
  job_no_show: "ตกลงรับงานแล้วแต่ไม่มาเริ่มงาน (No Show)",
  harassment_to_staff: "ใช้คำพูดไม่สุภาพ / คุกคามเจ้าหน้าที่",
+ interview_no_show: "ไม่มาตามนัดสัมภาษณ์",
  other: "อื่นๆ (ระบุในรายละเอียด)",
 };
 

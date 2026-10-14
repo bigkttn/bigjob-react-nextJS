@@ -27,6 +27,8 @@ export function getStatusAfterRemove(
   if (CLOSED_STATUSES.includes(current)) {
     return side === "seeker" ? STATUS_USER_REMOVED : STATUS_COMPANY_REMOVED;
   }
+  // ไม่มาตามนัดสัมภาษณ์: ให้บริษัทลบได้ฝั่งเดียว (ประวัติผิดนัดยังอยู่ใน report_user)
+  if (side === "company" && current === "no_show") return STATUS_COMPANY_REMOVED;
   // อีกฝั่งลบไปก่อนแล้ว: ฝั่งนี้ลบด้วย = ลบครบทั้งสองฝั่ง
   if (side === "seeker" && current === STATUS_COMPANY_REMOVED) return STATUS_ALL_REMOVED;
   if (side === "company" && current === STATUS_USER_REMOVED) return STATUS_ALL_REMOVED;
