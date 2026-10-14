@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 import db from '@/lib/db';
-import { createSession } from '@/lib/session'; // 👈 Import ฟังก์ชันสร้าง Session
+import { createSession } from '@/lib/session'; //  Import ฟังก์ชันสร้าง Session
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -50,9 +50,7 @@ export async function POST(request: Request) {
         if (role === 'company' && user.company_password) delete user.company_password;
         if (role === 'seeker' && user.password) delete user.password;
 
-        // -----------------------------------------------------
-        // 🔐 สร้าง Session สำหรับ Google Login
-        // -----------------------------------------------------
+        //  สร้าง Session สำหรับ Google Login
         const sessionPayload = {
             id: role === 'company' ? user.company_id : user.uid,
             email: role === 'company' ? user.company_email : user.email,
@@ -61,7 +59,6 @@ export async function POST(request: Request) {
 
         // เรียกใช้ฟังก์ชันที่แยกไว้ บรรทัดเดียวจบ!
         await createSession(sessionPayload);
-        // -----------------------------------------------------
 
         return NextResponse.json({
             message: 'เข้าสู่ระบบด้วย Google สำเร็จ',

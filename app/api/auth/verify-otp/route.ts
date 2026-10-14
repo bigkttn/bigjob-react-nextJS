@@ -12,13 +12,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "OTP ไม่ถูกต้อง" }, { status: 400 });
         }
 
-        // ⏰ หมดอายุ
+        //  หมดอายุ
         if (Date.now() > data.expires_at) {
             otpStore.delete(email);
             return NextResponse.json({ message: "OTP หมดอายุ" }, { status: 400 });
         }
 
-        // 🚫 กัน brute force (ลองได้ 5 ครั้ง)
+        //  กัน brute force (ลองได้ 5 ครั้ง)
         if (data.attempts >= 5) {
             otpStore.delete(email);
             return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // 🌟 ต่อเวลาให้กรอกข้อมูลต่อได้ 30 นาที
+        //  ต่อเวลาให้กรอกข้อมูลต่อได้ 30 นาที
         data.expires_at = Date.now() + 30 * 60 * 1000;
 
         return NextResponse.json({ message: "OTP ถูกต้อง" });

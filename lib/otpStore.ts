@@ -5,7 +5,7 @@ export type OtpData = {
     expires_at: number; // เวลาหมดอายุ
     attempts: number;   // จำนวนครั้งที่กรอก (เผื่อใช้กันคนเดารหัส)
 };
-// 👇 declare global
+//  declare global
 //  ประกาศตัวแปร globalForOtp เพื่อเชื่อมต่อกับระบบ Global ของ Node.js / Browser
 // เราต้องใช้ "as unknown as" เพื่อหลบเลี่ยงการตรวจ Type ของ TypeScript ในขั้นตอนนี้
 const globalForOtp = globalThis as unknown as {
@@ -16,7 +16,7 @@ const globalForOtp = globalThis as unknown as {
 export const otpStore =
     globalForOtp.otpStore ?? new Map<string, OtpData>();
 
-// 👇 กันสร้างซ้ำใน dev
+//  กันสร้างซ้ำใน dev
 if (process.env.NODE_ENV !== "production") {
     globalForOtp.otpStore = otpStore;
 }

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
         if (users.length > 0) {
             user = users[0];
-            // 🎯 แก้ไข: ดึงสิทธิ์จากคอลัมน์ role ใน DB จริง (เช่น admin, seeker) ไม่ฮาร์ดโค้ดเป็น seeker อย่างเดียว
+            //  แก้ไข: ดึงสิทธิ์จากคอลัมน์ role ใน DB จริง (เช่น admin, seeker) ไม่ฮาร์ดโค้ดเป็น seeker อย่างเดียว
             role = user.role || 'seeker';
         } else {
             // 2. ค้นหาในตาราง company
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }, { status: 401 });
         }
 
-        // 🚨 --- ตรวจสอบสถานะการแบน (Banned Check) ---
+        //  --- ตรวจสอบสถานะการแบน (Banned Check) ---
         // if (user.banned_until) {
         //     const banEndDate = new Date(user.banned_until);
         //     const currentDate = new Date();
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
             delete user.password;
         }
 
-        // 🔐 สร้าง Session ให้ตรงกับ ID ของแต่ละตาราง
+        //  สร้าง Session ให้ตรงกับ ID ของแต่ละตาราง
         const sessionPayload = {
             id: role === 'company' ? user.company_id : user.uid,
             email: role === 'company' ? user.company_email : user.email,
