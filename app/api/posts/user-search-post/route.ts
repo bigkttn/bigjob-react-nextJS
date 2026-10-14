@@ -21,6 +21,11 @@ const MAX_RESULTS = 100; // จำนวนผลลัพธ์สูงสุ�
 const VECTOR_THRESHOLD = 0.45;
 const VECTOR_WEIGHT = 1.2;
 
+// ค้นด้วยคำสำคัญไม่เจอ (ใช้ความหมายอย่างเดียว): แสดงประกาศที่คล้ายตั้งแต่ 0.55 ไม่เกิน 20 รายการ
+// ประกาศเป็นข้อความยาว เทียบกับคำค้นสั้น ๆ แล้วความคล้ายมักอยู่ราว 0.5–0.65 จึงใช้เกณฑ์ MIN_SCORE ไม่ได้
+const FALLBACK_MIN_SIMILARITY = 0.55;
+const FALLBACK_MAX_RESULTS = 20;
+
 // ================= ชนิดข้อมูล =================
 
 interface PostRow {
@@ -151,10 +156,14 @@ function keywordScore(post: PostRow, query: string, words: string[]): number {
   return score;
 }
 
-// คะแนนเพิ่มจากความคล้ายเชิงความหมาย
-function vectorScore(queryVector: number[], postVector: number[] | null): number {
+// ความคล้ายเชิงความหมายระหว่างคำค้นกับประกาศ (ประกาศที่ไม่มี embedding = 0)
+function similarityOf(queryVector: number[], postVector: number[] | null): number {
   if (postVector === null) return 0;
-  const similarity = cosineSimilarity(queryVector, postVector);
+  return cosineSimilarity(queryVector, postVector);
+}
+
+// คะแนนเพิ่มจากความคล้ายเชิงความหมาย
+function vectorScore(similarity: number): number {
   if (similarity <= VECTOR_THRESHOLD) return 0;
   return (similarity - VECTOR_THRESHOLD) * VECTOR_WEIGHT;
 }
@@ -227,7 +236,8 @@ export async function GET(request: NextRequest) {
     );
 
     // ---------- 5. ไม่เจอด้วยคำสำคัญ: ให้ความคล้ายเชิงความหมายหาแทน ----------
-    if (candidates.length === 0) {
+    const isFallback = candidates.length === 0;
+    if (isFallback) {
       candidates = await runQuery(
         `${POST_SELECT} ${toWhere([...where, "p.embedding IS NOT NULL"])}
          ORDER BY p.created_at DESC LIMIT ${MAX_CANDIDATES}`,
@@ -246,10 +256,13 @@ export async function GET(request: NextRequest) {
     const results = [];
     for (let i = 0; i < candidates.length; i++) {
       const post = candidates[i];
-      const score =
-        keywordScore(post, query, words) + vectorScore(queryVector, postVectors[i]);
+      const similarity = similarityOf(queryVector, postVectors[i]);
 
-      if (score < MIN_SCORE) continue;
+      // ค้นสำรองด้วยความหมาย: ไม่มีคะแนนคำสำคัญ จึงคัดด้วยค่าความคล้ายแทน
+      if (isFallback && similarity < FALLBACK_MIN_SIMILARITY) continue;
+
+      const score = keywordScore(post, query, words) + vectorScore(similarity);
+      if (!isFallback && score < MIN_SCORE) continue;
 
       // ส่งกลับทุกคอลัมน์ของประกาศ ยกเว้น embedding
       results.push({ ...omitEmbedding(post), matchScore: Number(score.toFixed(4)) });
@@ -258,7 +271,8 @@ export async function GET(request: NextRequest) {
     // ---------- 7. เรียงคะแนนมากไปน้อย ----------
     results.sort((a, b) => b.matchScore - a.matchScore);
 
-    return NextResponse.json({ success: true, posts: results.slice(0, MAX_RESULTS) });
+    const limit = isFallback ? FALLBACK_MAX_RESULTS : MAX_RESULTS;
+    return NextResponse.json({ success: true, posts: results.slice(0, limit) });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(

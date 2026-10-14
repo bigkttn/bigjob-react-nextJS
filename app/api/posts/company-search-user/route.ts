@@ -19,6 +19,11 @@ const MAX_RESULTS = 100; // จำนวนผลลัพธ์สูงสุ�
 const VECTOR_THRESHOLD = 0.45;
 const VECTOR_WEIGHT = 1.2;
 
+// ค้นด้วยคำสำคัญไม่เจอ (ใช้ความหมายอย่างเดียว): แสดงผู้หางานที่คล้ายตั้งแต่ 0.55 ไม่เกิน 20 คน
+// ถ้าใช้เกณฑ์ MIN_SCORE ต้องคล้ายเกิน 0.658 ซึ่งแทบไม่เกิดขึ้นจริง
+const FALLBACK_MIN_SIMILARITY = 0.55;
+const FALLBACK_MAX_RESULTS = 20;
+
 // ================= ชนิดข้อมูล =================
 
 interface SeekerRow {
@@ -137,10 +142,14 @@ function keywordScore(user: SeekerRow, query: string, words: string[]): number {
   return score;
 }
 
-// คะแนนเพิ่มจากความคล้ายเชิงความหมาย
-function vectorScore(queryVector: number[], userVector: number[] | null): number {
+// ความคล้ายเชิงความหมายระหว่างคำค้นกับผู้หางาน (คนที่ไม่มี embedding = 0)
+function similarityOf(queryVector: number[], userVector: number[] | null): number {
   if (userVector === null) return 0;
-  const similarity = cosineSimilarity(queryVector, userVector);
+  return cosineSimilarity(queryVector, userVector);
+}
+
+// คะแนนเพิ่มจากความคล้ายเชิงความหมาย
+function vectorScore(similarity: number): number {
   if (similarity <= VECTOR_THRESHOLD) return 0;
   return (similarity - VECTOR_THRESHOLD) * VECTOR_WEIGHT;
 }
@@ -229,7 +238,8 @@ export async function GET(request: NextRequest) {
 
     // ---------- 5. ไม่เจอด้วยคำสำคัญ: ให้ความคล้ายเชิงความหมายหาแทน ----------
     // ถ้าไม่เจอผู้หางานด้วยคำสำคัญ ให้ค้นหาเฉพาะตัวกรอง (province, workType, education, age) แล้วคำนวณ embedding ของผู้หางานแต่ละคน
-    if (candidates.length === 0) {
+    const isFallback = candidates.length === 0;
+    if (isFallback) {
       candidates = await runQuery(
         `SELECT ${USER_COLUMNS}, ${SEARCH_COLUMNS} ${USER_JOINS}
          WHERE ${where.join(" AND ")} AND u.embedding IS NOT NULL
@@ -254,10 +264,13 @@ export async function GET(request: NextRequest) {
     const results = [];
     for (let i = 0; i < candidates.length; i++) {
       const user = candidates[i];
-      const score =
-        keywordScore(user, query, words) + vectorScore(queryVector, userVectors[i]);  
+      const similarity = similarityOf(queryVector, userVectors[i]);
 
-      if (score < MIN_SCORE) continue;
+      // ค้นสำรองด้วยความหมาย: ไม่มีคะแนนคำสำคัญ จึงคัดด้วยค่าความคล้ายแทน
+      if (isFallback && similarity < FALLBACK_MIN_SIMILARITY) continue;
+
+      const score = keywordScore(user, query, words) + vectorScore(similarity);
+      if (!isFallback && score < MIN_SCORE) continue;
 
       // ส่งกลับเฉพาะข้อมูลที่หน้าเว็บใช้ (ไม่ส่ง embedding)
       results.push({
@@ -275,7 +288,8 @@ export async function GET(request: NextRequest) {
     // ---------- 7. เรียงคะแนนมากไปน้อย ----------
     results.sort((a, b) => b.matchScore - a.matchScore);
 
-    return NextResponse.json({ success: true, users: results.slice(0, MAX_RESULTS) });
+    const limit = isFallback ? FALLBACK_MAX_RESULTS : MAX_RESULTS;
+    return NextResponse.json({ success: true, users: results.slice(0, limit) });
   } catch (error) {
     console.error("User search error:", error);
     return NextResponse.json(
