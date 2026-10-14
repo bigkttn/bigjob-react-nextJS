@@ -173,12 +173,17 @@
   margin-top: 4px;
 }
 
+/* โลโก้ใหญ่พอดีกับความสูงของรายละเอียดงาน */
 .jobCard img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain; /* หรือใช้ 'cover' ถ้าอยากให้รูปเต็มกรอบสี่เหลี่ยมจัตุรัส */
+  width: 140px;
+  height: 140px;
+  padding: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-sizing: border-box;
+  object-fit: contain; /* แสดงโลโก้ครบทั้งรูป ไม่ถูกตัด */
   flex-shrink: 0; /* ป้องกันไม่ให้รูปถูกบีบให้เล็กลงเวลาหน้าจอแคบ */
-  align-self: flex-start; /* ให้รูปชิดขอบบน ไม่ยืดตามความสูงของกล่อง */
+  align-self: center; /* ให้รูปอยู่กึ่งกลางแนวตั้งของการ์ด ไม่ยืดตามความสูงของกล่อง */
 }
 
 .detailBtn {
@@ -388,8 +393,10 @@
   }
 
   .jobCard img {
-    width: 56px;
-    height: 56px;
+    width: 72px;
+    height: 72px;
+    padding: 4px;
+    border-radius: 8px;
   }
 
   .reviewSection {

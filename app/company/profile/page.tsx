@@ -294,23 +294,31 @@ const CompanyProfile = () => {
   /* ปุ่มแก้ไขโปรไฟล์ / บันทึก / ยกเลิก ใช้ 2 ที่:
    * ในการ์ดโปรไฟล์ (จอใหญ่) และใต้แผนที่ (มือถือ) */
   const profileActions = !editMode ? (
-    <>
-      {" "}
+    // แก้ไขโปรไฟล์ + ลืมรหัสผ่าน อยู่แถวเดียวกันตรงกลาง (จอแคบจะขึ้นบรรทัดใหม่เอง)
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: "0.6rem",
+      }}
+    >
       <button
         type="button"
         onClick={() => setEditMode(true)}
         style={{
-          display: "block",
           width: "180px",
           maxWidth: "100%",
-          margin: "0 auto",
-          padding: "8px 22px",
+          padding: "10px 18px",
           backgroundColor: "#111111",
           color: "#fff",
-          border: "none",
+          border: "1px solid #111111",
           borderRadius: "999px",
+          fontSize: "0.92rem",
           fontWeight: 600,
           cursor: "pointer",
+          boxSizing: "border-box",
         }}
       >
         แก้ไขโปรไฟล์
@@ -324,7 +332,6 @@ const CompanyProfile = () => {
           alignItems: "center",
           justifyContent: "center",
           gap: "8px",
-          marginTop: "0.6rem",
           padding: "10px 18px",
           backgroundColor: "#ffffff",
           color: "#111827",
@@ -358,7 +365,7 @@ const CompanyProfile = () => {
         </svg>
         ลืมรหัสผ่าน
       </Link>
-    </>
+    </div>
   ) : (
     <div style={{ display: "flex", gap: "0.6rem" }}>
       <button
