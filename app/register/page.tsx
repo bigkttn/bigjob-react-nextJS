@@ -8,6 +8,33 @@ import styles from "./register.module.css";
 import { PASSWORD_HINT, validatePassword } from "@/lib/passwordRules";
 import { getGoogleButtonWidth } from "@/lib/googleButton";
 
+// 📌 1. กำหนดข้อมูลกฎ 10 ข้อสำหรับแต่ละประเภทผู้ใช้
+const SEEKER_RULES = [
+  "1. ข้อมูลส่วนตัว ประวัติการศึกษา ประวัติการทำงาน ทักษะ และไฟล์เอกสาร ต้องเป็นข้อมูลจริง ห้ามปลอมแปลงเอกสารหรือแอบอ้างตัวตนผู้อื่น",
+  "2. ต้องเข้าร่วมการสัมภาษณ์งานตามวัน เวลา และรูปแบบที่ได้ยืนยันนัดหมายไว้ หากมีเหตุจำเป็นต้องเลื่อน ให้แจ้งผ่านระบบล่วงหน้า",
+  "3. การผิดนัดสัมภาษณ์โดยไม่แจ้งล่วงหน้า หากถูกรายงานผ่านระบบอาจถูกพิจารณาตักเตือนหรือระงับการใช้งาน",
+  "4. ใช้ข้อความและภาษาที่สุภาพ เหมาะสม ในการตอบกลับคำเชิญสัมภาษณ์หรือติดต่อกับบริษัท ห้ามส่งข้อความก่อกวนหรือข่มขู่",
+  "5. กรณีที่มีแบบทดสอบวัดทัศนคติหรือความเข้ากันกับองค์กร ผู้สมัครต้องทำแบบทดสอบด้วยตนเองและตอบตามความเป็นจริง",
+  "6. สิทธิ์การให้คะแนนและรีวิวจะเปิดให้เฉพาะผู้สมัครที่ผ่านการสัมภาษณ์จริงเท่านั้น โดยต้องแสดงความคิดเห็นด้วยถ้อยคำสุภาพ",
+  "7. ต้องรักษารหัสผ่านและบัญชีเข้าสู่ระบบไว้เป็นความลับ ห้ามให้บุคคลอื่นเข้าใช้งานแทนตนเอง",
+  "8. สามารถเลือกระดับการแสดงผลโปรไฟล์ (เปิด/ปิด) ได้ แต่ห้ามนำข้อมูลบริษัทไปใช้ก่อกวนหรือวัตถุประสงค์อื่นนอกเหนือจากการหางาน",
+  "9. หากพบประกาศงานที่ไม่เหมาะสม มีการเรียกเก็บเงิน หรือเข้าข่ายมิจฉาชีพ ต้องกดรายงาน (Report) ต่อแอดมินทันที",
+  "10. หากฝ่าฝืนกฎ ยินยอมให้ผู้ดูแลระบบส่งอีเมลตักเตือน ระงับชั่วคราว หรือแบนบัญชีผู้ใช้ถาวรตามความเหมาะสม",
+];
+
+const COMPANY_RULES = [
+  "1. ประกาศงานต้องมีอยู่จริง รายละเอียดตำแหน่ง ลักษณะงาน คุณสมบัติ สวัสดิการ และค่าจ้างต้องชัดเจน ไม่เป็นเท็จหรือหลอกลวง",
+  "2. ห้ามเรียกร้องหรือเก็บเงินค่าสมัคร ค่าค้ำประกันการทำงาน ค่าลงทะเบียน หรือค่าธรรมเนียมใดๆ จากผู้สมัครงานโดยเด็ดขาด",
+  "3. ต้องอัปโหลดเอกสารหนังสือรับรองการจัดตั้งบริษัทที่ถูกต้องตามกฎหมายเพื่อยื่นตรวจสอบก่อนเริ่มประกาศรับสมัครงาน",
+  "4. การประกาศงานและการคัดเลือกต้องไม่ขัดต่อกฎหมายแรงงาน และไม่มีการเลือกปฏิบัติอย่างไม่เป็นธรรม",
+  "5. ต้องระบุวัน เวลา และสถานที่/ลิงก์สัมภาษณ์อย่างถูกต้อง หากมีการเปลี่ยนแปลงต้องแจ้งผู้สมัครผ่านระบบล่วงหน้า",
+  "6. ข้อมูลเรซูเม่อและประวัติของผู้สมัคร ต้องนำไปใช้เพื่อวัตถุประสงค์ในการคัดเลือกเข้าทำงานเท่านั้น ห้ามนำไปเผยแพร่หรือขายต่อ",
+  "7. การกดรายงานผู้สมัครที่ผิดนัดสัมภาษณ์ (No-Show) ต้องเป็นข้อมูลจริง ห้ามใช้ระบบรายงานเพื่อกลั่นแกล้งผู้สมัครงาน",
+  "8. การส่งข้อความเสนอตำแหน่งงานหรือเชิญสัมภาษณ์ ต้องใช้ข้อความที่สุภาพ เป็นทางการ และให้เกียรติผู้สมัครงาน",
+  "9. การสร้างแบบทดสอบวัดทัศนคติ ต้องเกี่ยวข้องกับคุณลักษณะการทำงาน ไม่ละเมิดสิทธิส่วนบุคคล",
+  "10. หากฝ่าฝืนกฎ ถูกร้องเรียน หรือไม่ผ่านการตรวจสอบเอกสาร ยอมรับให้ผู้ดูแลระบบระงับประกาศงานหรือแบนบัญชีถาวร",
+];
+
 const Register = () => {
   const router = useRouter();
 
@@ -19,6 +46,9 @@ const Register = () => {
   const [isLoadingOtp, setIsLoadingOtp] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
+
+  // 📌 2. เพิ่ม State สำหรับเปิด/ปิด Pop-up Modal แสดงกฎ
+  const [showRulesModal, setShowRulesModal] = useState(false);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -44,14 +74,13 @@ const Register = () => {
     confirmPassword: "",
     fullname: "",
     companyName: "",
-    businessType: "", // เพิ่มรับค่าประเภทธุรกิจ
+    businessType: "",
     contactName: "",
     phone: "",
   });
 
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  // เชื่อมต่อ Google Auth และแสดงปุ่มสมัครสมาชิก
   useEffect(() => {
     const initGoogle = () => {
       const google = window.google;
@@ -76,7 +105,6 @@ const Register = () => {
       }
     };
 
-    // เช็ค script โหลดหรือยัง
     if (!window.google) {
       const script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
@@ -90,7 +118,7 @@ const Register = () => {
   }, [userType]);
 
   const handleGoogleCredentialResponse = async (response: any) => {
-    /* console.log("Google Token:", response.credential) */ let payload: any = {
+    let payload: any = {
       token: response.credential,
       userType: userType,
     };
@@ -153,7 +181,6 @@ const Register = () => {
     setIsLoadingOtp(true);
 
     try {
-      // เรียก API ไปยัง Route ที่เราสร้างไว้
       const res = await fetch("/api/auth/request-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -168,7 +195,7 @@ const Register = () => {
       if (res.ok) {
         setIsOtpSent(true);
         setCountdown(300);
-        showAlert.success("แจ้งเตือน", "" + data.message); // แสดงข้อความ "ส่ง OTP สำเร็จ"
+        showAlert.success("แจ้งเตือน", "" + data.message);
       } else {
         showAlert.error("แจ้งเตือน", "เกิดข้อผิดพลาด: " + data.message);
       }
@@ -179,7 +206,7 @@ const Register = () => {
         "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง",
       );
     } finally {
-      setIsLoadingOtp(false); // ปิดสถานะโหลดไม่ว่าจะสำเร็จหรือล้มเหลว
+      setIsLoadingOtp(false);
     }
   };
 
@@ -211,13 +238,9 @@ const Register = () => {
     }
   };
 
-  // --------------------------------------------------------
-  // อัปเดต: ฟังก์ชันสมัครสมาชิกแบบปกติ
-  // --------------------------------------------------------
   const onRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. ตรวจสอบข้อมูลเบื้องต้น (Validation)
     if (!captchaToken)
       return showAlert.info("แจ้งเตือน", "กรุณายืนยันว่าคุณไม่ใช่โปรแกรมอัตโนมัติ (CAPTCHA)");
     const passwordError = validatePassword(
@@ -228,7 +251,7 @@ const Register = () => {
     if (registerData.password !== registerData.confirmPassword)
       return showAlert.error("แจ้งเตือน", "รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
     if (!isOtpVerified)
-      return showAlert.info("แจ้งเตือน", "กรุณากดยืนยันรหัส OTP ก่อน"); // เช็ค OTP
+      return showAlert.info("แจ้งเตือน", "กรุณากดยืนยันรหัส OTP ก่อน");
 
     if (userType === "company") {
       if (!registerData.companyName || !registerData.phone) {
@@ -243,7 +266,6 @@ const Register = () => {
       }
     }
 
-    // 2. เตรียมข้อมูลส่งไป API
     const payload = {
       email: registerData.email,
       password: registerData.password,
@@ -253,19 +275,17 @@ const Register = () => {
       business_type: registerData.businessType,
       contact_name: registerData.contactName,
       mobile_phone: registerData.phone,
-      otpCode: otpCode, // 👈 เพิ่มบรรทัดนี้ เพื่อส่ง OTP ไปให้หลังบ้านเช็ค!
-      captchaToken: captchaToken, // ส่งให้หลังบ้านตรวจกับ Google
+      otpCode: otpCode,
+      captchaToken: captchaToken,
     };
 
     try {
-      // 3. ยิง API สมัครสมาชิกแบบปกติ
       const res = await fetch("/api/auth/registerB", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      // (โค้ดส่วนที่เหลือของคุณใช้งานได้ดีอยู่แล้วครับ)
       const data = await res.json();
 
       if (res.ok) {
@@ -281,7 +301,6 @@ const Register = () => {
           window.location.replace("/company/company-home");
         }
       } else {
-        // token ของ reCAPTCHA ใช้ได้ครั้งเดียว ต้องให้ติ๊กใหม่ก่อนส่งอีกรอบ
         recaptchaRef.current?.reset();
         setCaptchaToken(null);
         showAlert.error(
@@ -482,7 +501,6 @@ const Register = () => {
                   >
                     อีเมลได้รับการยืนยันแล้ว
                     สามารถกรอกข้อมูลและกดสมัครสมาชิกได้เลย
-                    (ไม่ต้องกังวลเรื่องเวลา)
                   </small>
                 )}
               </div>
@@ -604,6 +622,18 @@ const Register = () => {
               <button type="submit" className={styles.btnRegister}>
                 สมัครสมาชิก
               </button>
+
+              {/* 📌 3. เพิ่มข้อความข้อตกลงและลิงก์เปิด Modal ใต้ปุ่มสมัครสมาชิก */}
+              <p className={styles.termsNotice}>
+                การคลิกสมัครสมาชิก ถือว่าคุณยอมรับ{" "}
+                <button
+                  type="button"
+                  className={styles.termsBtn}
+                  onClick={() => setShowRulesModal(true)}
+                >
+                  เงื่อนไขและกฎการใช้งานเว็บไซต์ ({userType === "seeker" ? "ผู้หางาน" : "ผู้ประกอบการ"})
+                </button>
+              </p>
             </form>
 
             <div className={styles.divider}>
@@ -628,6 +658,43 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* 📌 4. แสดง Pop-up Modal เมื่อกดปุ่มลิงก์ */}
+      {showRulesModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowRulesModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>
+                กฎและเงื่อนไขการใช้งานเว็บไซต์ ({userType === "seeker" ? "สำหรับผู้หางาน" : "สำหรับผู้ประกอบการ"})
+              </h3>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setShowRulesModal(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <ul className={styles.rulesList}>
+                {(userType === "seeker" ? SEEKER_RULES : COMPANY_RULES).map(
+                  (rule, index) => (
+                    <li key={index}>{rule}</li>
+                  )
+                )}
+              </ul>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.acceptBtn}
+                onClick={() => setShowRulesModal(false)}
+              >
+                รับทราบและเข้าใจแล้ว
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
