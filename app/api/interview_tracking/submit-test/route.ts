@@ -42,6 +42,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "ไม่พบข้อมูลตำแหน่งงานหรือผู้สมัคร" }, { status: 404 });
     }
 
+    if (post.is_closed) {
+      return NextResponse.json({ message: "ตำแหน่งนี้ปิดรับสมัครแล้ว" }, { status: 400 });
+    }
+
     // กันสมัครซ้ำ (และกันส่งอีเมลซ้ำหาบริษัทเดิม)
     const [existing] = (await db.query(
       `SELECT tracking_id FROM interview_tracking WHERE post_id = ? AND user_id = ? LIMIT 1`,

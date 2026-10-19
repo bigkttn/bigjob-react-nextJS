@@ -35,6 +35,7 @@ interface JobPost {
   job_description?: string;
   logo_image?: string;
   status?: string;
+  application_dates?: string | null; // วันปิดรับสมัคร
   ban_until?: string;
   Benefits?: string;
   benefits?: string;
@@ -196,6 +197,19 @@ export default async function DetailJob({ params }: PageProps) {
     return { color: "#6c757d", backgroundColor: "#f8f9fa" };
   };
 
+  // API คำนวณ status จากวันปิดรับสมัคร (application_dates) ให้แล้ว: เลยวัน = "closed"
+  const isClosed = job.status?.toLowerCase() === "closed";
+  const deadlineText = job.application_dates
+    ? new Date(job.application_dates).toLocaleString("th-TH", {
+        timeZone: "Asia/Bangkok",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }) + " น."
+    : "ไม่ระบุ";
+
   return (
     <div>
       <BanPopup job={job} isAdmin={isAdmin} />
@@ -233,6 +247,7 @@ export default async function DetailJob({ params }: PageProps) {
               companyEmail={
                 companyEmail || viewer.email || "ไม่ระบุอีเมลบริษัท"
               }
+              isClosed={isClosed}
             />
           </div>
 
@@ -336,6 +351,13 @@ export default async function DetailJob({ params }: PageProps) {
                   <tr>
                     <td className={styles.label}>จำนวนที่รับ</td>
                     <td>{job.vacancy || 1} ตำแหน่ง</td>
+                  </tr>
+                  <tr>
+                    <td className={styles.label}>วันปิดรับสมัคร</td>
+                    <td style={isClosed ? { color: "#dc3545" } : undefined}>
+                      {deadlineText}
+                      {isClosed && " (ปิดรับสมัครแล้ว)"}
+                    </td>
                   </tr>
                   <tr>
                     <td className={styles.label}>รายละเอียดงาน</td>

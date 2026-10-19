@@ -9,6 +9,7 @@ export interface PostContact {
   company_name: string;
   company_email: string;
   company_phone: string | null;
+  is_closed: number | null; // 1 = เลยวันปิดรับสมัครแล้ว หรือโพสต์ถูกแบน (สมัครไม่ได้)
 }
 
 export interface SeekerContact {
@@ -42,7 +43,8 @@ interface TrackingRow {
 export async function getPostContact(postId: number): Promise<PostContact | null> {
   const [rows] = (await db.query(
     `SELECT p.post_id, p.job_position, p.company_id, c.company_name, c.company_email,
-            c.mobile_phone AS company_phone
+            c.mobile_phone AS company_phone,
+            (p.application_dates < NOW() OR p.status = 'banned') AS is_closed
      FROM posts p
      JOIN company c ON c.company_id = p.company_id
      WHERE p.post_id = ?

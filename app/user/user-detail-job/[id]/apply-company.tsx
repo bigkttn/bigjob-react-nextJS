@@ -19,7 +19,7 @@ interface ApplyCompanyProps {
   seekerEmail: string,
   companyEmail: string,
   existingPostIds?: number[];
-  
+  isClosed?: boolean; // เลยวันปิดรับสมัครแล้ว
 }
 
 export default function ApplyCompany({
@@ -30,7 +30,8 @@ export default function ApplyCompany({
    jobTitle,
    seekerEmail,
    companyEmail,
-   companyId
+   companyId,
+   isClosed = false,
   }:ApplyCompanyProps) {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -132,6 +133,11 @@ export default function ApplyCompany({
     }
   };
 
+  // สมัครแล้วแสดง "สมัครแล้ว" ก่อน ถึงโพสต์จะหมดเวลาแล้วก็ตาม
+  let buttonText = 'สมัคร';
+  if (isClosed) buttonText = 'ปิดรับสมัครแล้ว';
+  if (isReported) buttonText = 'สมัครแล้ว';
+
   return (
     <div>
       <div>
@@ -142,9 +148,9 @@ export default function ApplyCompany({
        <button
           onClick={handleApplyClick}
           className={`${styles.applyBtn} ${isReported ? styles.invitedBtn : ''}`}
-          disabled={isReported}
+          disabled={isReported || isClosed}
         >
-          {isReported ? 'สมัครแล้ว' : 'สมัคร'}
+          {buttonText}
         </button>
       </div>
 

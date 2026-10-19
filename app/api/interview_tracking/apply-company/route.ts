@@ -54,6 +54,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (post.is_closed) {
+      return NextResponse.json(
+        { message: "ตำแหน่งนี้ปิดรับสมัครแล้ว" },
+        { status: 400 },
+      );
+    }
+
     const [testCheck] = (await db.query(
       `SELECT question_id FROM question WHERE post_id = ? LIMIT 1`,
       [post_id],

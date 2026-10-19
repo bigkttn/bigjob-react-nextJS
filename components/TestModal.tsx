@@ -112,8 +112,10 @@ export default function TestModal(props: TestModalProps) {
         setShowConfirm(false);
         setIsSuccess(true);
       } else {
+        // ใช้ข้อความจาก server ถ้ามี เช่น "ตำแหน่งนี้ปิดรับสมัครแล้ว"
+        const data = await res.json().catch(() => ({}));
         setShowConfirm(false);
-        setErrorMsg("เกิดข้อผิดพลาดในการส่ง กรุณาลองใหม่อีกครั้ง");
+        setErrorMsg(data.message || "เกิดข้อผิดพลาดในการส่ง กรุณาลองใหม่อีกครั้ง");
       }
     } catch (error) {
       console.error("Error submitting test:", error);
