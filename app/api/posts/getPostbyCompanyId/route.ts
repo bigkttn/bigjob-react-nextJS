@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { cookies } from "next/headers"; //
-import jwt from "jsonwebtoken";
+import { resolveCompanyId } from "@/lib/postCompany";
 import { omitEmbeddings } from "@/lib/omitEmbedding";
 export async function GET(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("session")?.value;
-
-        if (!token) {
-            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
+        // ไม่ได้ login: ส่ง ?company_id= มาแทน
+        const company = await resolveCompanyId(request.nextUrl.searchParams.get("company_id"));
+        if (!company.ok) {
+            return NextResponse.json({ message: company.message }, { status: company.status });
         }
-
-        // const decoded: any = jwt.decode(token);
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
-        const company_id = decoded.id;
-        /* console.log(company_id) */;
+        const company_id = company.companyId;
 
         const [rows] = await db.query(
             `SELECT *,

@@ -1,23 +1,17 @@
 // app/api/posts/insertPost/route.ts (หรือไฟล์ API ของคุณ)
 import { NextResponse } from "next/server";
 import db from '@/lib/db';
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { resolveCompanyId } from "@/lib/postCompany";
 
 export async function POST(request: Request) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("session")?.value;
+        const data = await request.json();
 
-        if (!token) {
-            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 }); // เปลี่ยนสถานะเป็น 401 ให้ถูกต้องตามหลักการ
+        const company = await resolveCompanyId(data.company_id);
+        if (!company.ok) {
+            return NextResponse.json({ message: company.message }, { status: company.status });
         }
-        const decoded: any = jwt.decode(token);
-        const company_id = decoded.id;
-
-        if (decoded.role !== 'company') {
-            return NextResponse.json({ message: "ไม่มีสิทธิ์ดำเนินการนี้" }, { status: 403 });
-        }
+        const company_id = company.companyId;
 
         // 🔍 [เพิ่มส่วนนี้] ตรวจสอบสถานะการยืนยันตัวตนของบริษัทจาก Database
         const [companyRows]: any = await db.query(
@@ -38,7 +32,6 @@ export async function POST(request: Request) {
         }
 
         // ── ข้อมูลเดิมของคุณ ─────────────────────────────────
-        const data = await request.json();
         const {
             jobPosition,
             province,

@@ -40,7 +40,12 @@ const SHARED_PAGES = ["/user/user-detail-job"];
 const isPublicPage = (path: string) => PUBLIC_PAGES.includes(path);
 const isSharedPage = (path: string) =>
   SHARED_PAGES.some((p) => path.startsWith(p));
-const isPublicApi = (path: string) => PUBLIC_APIS.includes(path);
+// API ประกาศงานทั้งหมดเรียกได้โดยไม่ต้อง login (ไม่ได้ login ให้ส่ง company_id มาเอง)
+const PUBLIC_API_PREFIXES = ["/api/posts/"];
+
+const isPublicApi = (path: string) =>
+  PUBLIC_APIS.includes(path) ||
+  PUBLIC_API_PREFIXES.some((prefix) => path.startsWith(prefix));
 
 function handleApi(path: string, req: NextRequest) {
   if (isPublicApi(path)) return NextResponse.next();

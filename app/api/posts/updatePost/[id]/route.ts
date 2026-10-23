@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import db from '@/lib/db';
-import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { resolveCompanyId } from "@/lib/postCompany";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -33,20 +32,13 @@ async function updatePost(
     requireAllFields: boolean
 ) {
     try {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("session")?.value;
-
-        if (!token) {
-            return NextResponse.json({ message: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
-        }
-
-        const decoded: any = jwt.decode(token);
-        if (decoded.role !== "company") {
-            return NextResponse.json({ message: "ไม่มีสิทธิ์ดำเนินการนี้" }, { status: 403 });
-        }
-
         const { id: postId } = await params;
         const data = await request.json();
+
+        const company = await resolveCompanyId(data.company_id);
+        if (!company.ok) {
+            return NextResponse.json({ message: company.message }, { status: company.status });
+        }
 
         if (requireAllFields) {
             const missingFields = PUT_REQUIRED_FIELDS.filter((field) => isEmpty(data[field]));
@@ -122,7 +114,7 @@ async function updatePost(
             contact,
             status,
             postId,
-            decoded.id,
+            company.companyId,
         ]);
 
         if (result.affectedRows === 0) {
